@@ -414,6 +414,17 @@ export default function EditorStudio() {
     };
   }, []);
 
+  function handleViewportChange(mode: ViewportMode) {
+    if (iframeEl?.contentDocument) {
+      const doc = iframeEl.contentDocument;
+      if (doc.documentElement) {
+        doc.documentElement.setAttribute("data-vse-viewport", mode);
+      }
+      syncResponsiveStylesheet(doc);
+    }
+    setViewport(mode);
+  }
+
   // Synchronize active viewport mode with the preview iframe document element for live style isolation
   useEffect(() => {
     if (!iframeEl || !iframeEl.contentDocument) return;
@@ -429,7 +440,7 @@ export default function EditorStudio() {
       <Toolbar
         fileName={openFile?.name ?? null}
         viewport={viewport}
-        onViewportChange={setViewport}
+        onViewportChange={handleViewportChange}
         onChangeFile={handleChangeFile}
         statusMessage={statusMessage}
         historyCount={versionHistory.length}

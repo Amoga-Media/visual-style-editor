@@ -416,6 +416,7 @@ export default function TypographyGroup({
             applyLiveStyle(element, "font-size", `${val}${fontSize.unit}`, theme, undefined, viewport, structuralPath!);
           }}
           onPointerUp={() => commitFontSize(fontSize.amount, fontSize.unit)}
+          onKeyUp={() => commitFontSize(fontSize.amount, fontSize.unit)}
           className="w-full accent-indigo-500 cursor-pointer"
         />
       </div>
@@ -454,6 +455,7 @@ export default function TypographyGroup({
             applyLiveStyle(element, "line-height", `${val}${lineHeight.unit}`, theme, undefined, viewport, structuralPath!);
           }}
           onPointerUp={() => commitLineHeight(lineHeight.amount, lineHeight.unit)}
+          onKeyUp={() => commitLineHeight(lineHeight.amount, lineHeight.unit)}
           className="w-full accent-indigo-500 cursor-pointer"
         />
       </div>
@@ -492,6 +494,7 @@ export default function TypographyGroup({
             applyLiveStyle(element, "letter-spacing", `${val}${letterSpacing.unit}`, theme, undefined, viewport, structuralPath!);
           }}
           onPointerUp={() => commitLetterSpacing(letterSpacing.amount, letterSpacing.unit)}
+          onKeyUp={() => commitLetterSpacing(letterSpacing.amount, letterSpacing.unit)}
           className="w-full accent-indigo-500 cursor-pointer"
         />
       </div>

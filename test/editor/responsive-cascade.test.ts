@@ -174,4 +174,24 @@ describe("Responsive Style Engine Cascade (Desktop -> Tablet -> Mobile)", () => 
     // Live tablet rule must never match html[data-vse-viewport="desktop"]
     expect(css).not.toContain('html[data-vse-viewport="desktop"]');
   });
+
+  it("preserves Desktop inline styles on element in Tailwind mode so slider releases never reset visual styling", () => {
+    const TAILWIND_THEME: ThemeMap = {
+      mode: "v3",
+      colors: [],
+      fonts: [],
+    };
+
+    // 1. Commit font-size change on desktop in Tailwind mode
+    commitStyleChange(element, structuralPath, "font-size", "81px", TAILWIND_THEME, undefined, undefined, undefined, "desktop");
+
+    // Must preserve inline style with important
+    expect(element.style.fontSize).toBe("81px");
+
+    // Responsive registry must also record desktop value
+    const desktopInfo = getResponsivePropertyInfo(element, structuralPath, "font-size", "desktop");
+    expect(desktopInfo.value).toBe("81px");
+    expect(desktopInfo.isOverridden).toBe(false);
+  });
 });
+

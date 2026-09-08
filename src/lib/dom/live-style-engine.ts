@@ -268,10 +268,17 @@ export function commitStyleChange(
   // Desktop viewport: record in responsive registry as base desktop value
   setResponsiveStyle(element, structuralPath, property, formattedVal, "desktop", side);
 
+  // Always keep/apply desktop inline style on element with high priority so the live visual preview never resets or flashes
+  if (isStyleableElement(element)) {
+    element.style.setProperty(targetProp, formattedVal, "important");
+    if (property === "text-color" || targetProp === "color") {
+      element.style.setProperty("-webkit-text-fill-color", formattedVal, "important");
+    }
+  }
+
   // Font family: always apply directly to inline style with !important and strip conflicting generic classes
   if (property === "font-family" || targetProp === "font-family") {
     if (isStyleableElement(element)) {
-      element.style.setProperty("font-family", formattedVal, "important");
       loadFontInDocument(element.ownerDocument, cleanFontFamilyName(formattedVal));
     }
     const oldClassList = Array.from(element.classList);
@@ -293,12 +300,6 @@ export function commitStyleChange(
   }
 
   if (theme?.mode === "none") {
-    if (isStyleableElement(element)) {
-      element.style.setProperty(targetProp, formattedVal);
-      if (property === "text-color" || targetProp === "color") {
-        element.style.setProperty("-webkit-text-fill-color", formattedVal);
-      }
-    }
     onEdit?.({
       kind: "style",
       structuralPath,
@@ -318,9 +319,6 @@ export function commitStyleChange(
   const newClassList = applyClassMutation(oldClassList, property, newClass, theme, side);
 
   element.className = newClassList.join(" ");
-  if (isStyleableElement(element)) {
-    element.style.removeProperty(targetProp);
-  }
 
   onEdit?.({
     kind: "class",
