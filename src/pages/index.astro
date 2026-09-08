@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EditorStudio from '../components/editor/EditorStudio';
+---
+
+<BaseLayout title="Free Visual HTML & Tailwind CSS Editor | Zero Code & Instant Preview">
+  <main class="w-screen h-screen overflow-hidden bg-[#0b0f19]">
+    <EditorStudio client:only="react" />
+  </main>
+</BaseLayout>

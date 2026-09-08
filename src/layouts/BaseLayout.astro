@@ -1,0 +1,90 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalURL?: string;
+}
+
+const {
+  title = "Free Visual HTML & Tailwind CSS Editor | Zero Code & Instant Preview",
+  description = "A powerful, 100% free in-browser visual editor for HTML and Tailwind CSS. Drop your HTML files or templates, tweak styles visually, edit text live, and save clean code back to your disk.",
+  image = "/og-image.png",
+  canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : "https://visualstyleeditor.com",
+} = Astro.props;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Visual Style Editor",
+  "url": canonicalURL,
+  "description": description,
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "100% In-Browser AST Parsing & Splicing",
+    "Tailwind CSS v3 and v4 Detection",
+    "Real-Time 60fps Visual Style Sliders",
+    "Double-Click Inline Text Editing",
+    "File System Access API Direct Local Saving",
+    "Diff Review Modal & Version History"
+  ]
+};
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={image} />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- Theme Initializer (Prevents FOUC) -->
+    <script is:inline>
+      (function () {
+        try {
+          const saved = localStorage.getItem("vse_theme");
+          if (saved === "light") {
+            document.documentElement.classList.remove("dark");
+          } else {
+            document.documentElement.classList.add("dark");
+          }
+        } catch {}
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen bg-slate-100 dark:bg-[#090909] text-slate-900 dark:text-white antialiased selection:bg-indigo-500 selection:text-white flex flex-col transition-colors">
+    <slot />
+  </body>
+</html>
