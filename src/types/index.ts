@@ -1,4 +1,4 @@
-export type TailwindMode = "none" | "v3-cdn" | "v4-cdn";
+export type TailwindMode = "none" | "v3-cdn" | "v4-cdn" | "tailwind" | "v3";
 
 export interface ThemeColorToken {
   /** e.g. "red-500", or a bare custom token name like "clifford" */
@@ -30,7 +30,10 @@ export type EditableProperty =
   | "fill" | "stroke" | "stroke-width"
   | "aspect-ratio" | "object-fit" | "object-position"
   | "text-color" | "background-color" | "opacity" | "backdrop-blur" | "rotate" | "scale" | "gap"
-  | "text-content";
+  | "display" | "flex-direction" | "flex-wrap" | "justify-content" | "align-items" | "align-content" | "align-self"
+  | "row-gap" | "column-gap" | "flex-grow" | "flex-shrink" | "flex-basis" | "order"
+  | "grid-template-columns" | "grid-template-rows" | "grid-auto-flow" | "place-items" | "place-content" | "place-self"
+  | "text-content" | "box-shadow" | "white-space" | (string & {});
 
 export interface LocationEntry {
   structuralPath: string;
@@ -52,23 +55,25 @@ export interface AnalyzeResponse {
 }
 
 export interface ClassEditRecord {
+  id?: string;
   kind: "class";
   structuralPath: string;
   property: EditableProperty;
   oldClassList: string[];
   newClassList: string[];
-  viewport?: "desktop" | "tablet" | "mobile";
+  viewport?: "desktop" | "tablet" | "mobile" | "all";
   timestamp: string; // ISO 8601
 }
 
 export interface StyleEditRecord {
+  id?: string;
   kind: "style";
   structuralPath: string;
-  property: EditableProperty;
+  property?: EditableProperty;
   styleProperty: string;
   oldStyleValue: string;
   newStyleValue: string;
-  viewport?: "desktop" | "tablet" | "mobile";
+  viewport?: "desktop" | "tablet" | "mobile" | "all";
   timestamp: string; // ISO 8601
 }
 
@@ -82,45 +87,35 @@ export interface TextEditRecord {
 }
 
 export interface AttributeEditRecord {
+  id?: string;
   kind: "attribute";
   structuralPath: string;
   property: string; // e.g. "src", "alt", "href", "target"
   attributeName: string;
-  oldValue: string;
+  oldValue?: string;
   newValue: string;
-  timestamp: string; // ISO 8601
+  timestamp?: string; // ISO 8601
 }
 
 export interface DeleteEditRecord {
   kind: "delete";
   structuralPath: string;
   property?: string;
+  serializedHtml?: string;
+  parentPath?: string;
+  siblingIndex?: number;
   timestamp: string; // ISO 8601
 }
 
 export interface DuplicateEditRecord {
   kind: "duplicate";
   structuralPath: string;
+  duplicateId?: string;
+  duplicatePath?: string;
+  parentPath?: string;
+  siblingIndex?: number;
   property?: string;
   timestamp: string; // ISO 8601
-}
-
-export interface MoveEditRecord {
-  kind: "move";
-  structuralPath: string;
-  targetPath: string;
-  position: "before" | "after" | "inside";
-  property?: string;
-  timestamp: string;
-}
-
-export interface InsertEditRecord {
-  kind: "insert";
-  structuralPath: string;
-  position: "before" | "after" | "inside";
-  snippet: string;
-  property?: string;
-  timestamp: string;
 }
 
 export interface InsertEditRecord {
@@ -128,6 +123,10 @@ export interface InsertEditRecord {
   structuralPath: string;
   position: "inside" | "after" | "before";
   snippet: string;
+  insertedPath?: string;
+  parentPath?: string;
+  siblingIndex?: number;
+  property?: string;
   timestamp: string; // ISO 8601
 }
 
@@ -136,6 +135,14 @@ export interface MoveEditRecord {
   structuralPath: string;
   targetPath: string;
   position: "before" | "after" | "inside";
+  oldParentPath?: string;
+  oldSiblingIndex?: number;
+  newParentPath?: string;
+  newSiblingIndex?: number;
+  newPath?: string;
+  moveToken?: string;
+  elementId?: string;
+  property?: string;
   timestamp: string; // ISO 8601
 }
 
@@ -151,7 +158,7 @@ export type EditRecord =
 
 export type SaveRequestEdit =
   | { kind: "class"; structuralPath: string; newClassList: string[] }
-  | { kind: "style"; structuralPath: string; styleProperty: string; newStyleValue: string }
+  | { kind: "style"; structuralPath: string; property?: EditableProperty; styleProperty: string; newStyleValue: string; viewport?: "desktop" | "tablet" | "mobile" }
   | { kind: "text"; structuralPath: string; newText: string }
   | { kind: "attribute"; structuralPath: string; attributeName: string; newValue: string }
   | { kind: "delete"; structuralPath: string }
@@ -166,12 +173,12 @@ export interface SaveRequest {
 
 export interface SaveConflict {
   structuralPath: string;
-  reason: "not-found" | "ambiguous";
+  reason: "not-found" | "ambiguous" | "void-element" | "invalid-move-ancestor";
 }
 
 export type SaveResponse =
-  | { ok: true; html: string }
-  | { ok: false; conflicts: SaveConflict[] };
+  | { ok: true; html: string; conflicts?: SaveConflict[] }
+  | { ok: false; conflicts: SaveConflict[]; html?: string };
 
 export interface LoadedFile {
   name: string;

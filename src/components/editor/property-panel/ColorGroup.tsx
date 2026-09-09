@@ -55,7 +55,10 @@ export default function ColorGroup({
   }
 
   function handleCommit(val: string) {
+    const oldBaseline = baselineColorRef.current;
     setCurrentColor(val);
+    // Update baseline BEFORE committing so the edit record captures correct old→new
+    baselineColorRef.current = val;
     commitStyleChange(
       element!,
       structuralPath!,
@@ -63,7 +66,7 @@ export default function ColorGroup({
       val,
       theme,
       onEdit,
-      baselineColorRef.current,
+      oldBaseline,
       undefined,
       viewport
     );

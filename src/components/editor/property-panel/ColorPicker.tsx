@@ -311,14 +311,15 @@ export default function ColorPicker({
               }
             }
           }}
-          className="flex-1 bg-slate-50 dark:bg-[#111] border border-slate-300 dark:border-[#2c2c2c] focus:border-indigo-500 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-zinc-200 font-mono outline-none"
+          className="flex-1 bg-[#141414] border border-[#262626] focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 font-mono outline-none"
           placeholder="#000000 or transparent"
+          aria-label="Color string value"
         />
       </div>
 
       {/* Popover Color Picker Window (Exact Match to User Reference Mockup) */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-72 bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#2e2e32] rounded-3xl shadow-2xl z-50 p-4 space-y-4 animate-in fade-in zoom-in-95 duration-150 select-none">
+        <div className="absolute left-0 top-full mt-2 w-72 bg-[#141414] border border-[#262626] rounded-3xl shadow-2xl z-50 p-4 space-y-4 animate-in fade-in zoom-in-95 duration-150 select-none">
           {/* 1. 2D Saturation & Brightness Spectrum Box */}
           <div
             ref={spectrumRef}
@@ -345,8 +346,9 @@ export default function ColorPicker({
             {/* EyeDropper Icon Button */}
             <button
               type="button"
+              aria-label="EyeDropper pick color from screen"
               onClick={handleEyeDropper}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-[#27272a] hover:bg-slate-200 dark:hover:bg-[#323236] text-slate-600 dark:text-zinc-300 transition-colors shrink-0 cursor-pointer shadow-sm"
+              className="p-2 rounded-xl bg-[#1c1c1c] hover:bg-[#262626] text-zinc-300 transition-colors shrink-0 cursor-pointer shadow-sm border border-[#262626]"
               title="EyeDropper Pick Color from Screen"
             >
               <Pipette className="w-4 h-4" />
@@ -361,6 +363,7 @@ export default function ColorPicker({
                   max="360"
                   step="1"
                   value={hue}
+                  aria-label="Hue angle"
                   onChange={(e) => {
                     const nextHue = parseFloat(e.target.value);
                     setHue(nextHue);
@@ -378,7 +381,7 @@ export default function ColorPicker({
                   }}
                 />
                 <div
-                  className="absolute w-3.5 h-3.5 rounded-full bg-white border border-slate-400 dark:border-zinc-700 shadow pointer-events-none transform -translate-x-1/2"
+                  className="absolute w-3.5 h-3.5 rounded-full bg-white border border-zinc-700 shadow pointer-events-none transform -translate-x-1/2"
                   style={{ left: `${(hue / 360) * 100}%` }}
                 />
               </div>
@@ -399,6 +402,7 @@ export default function ColorPicker({
                   max="1"
                   step="0.01"
                   value={alpha}
+                  aria-label="Color alpha opacity"
                   onChange={(e) => {
                     const nextA = parseFloat(e.target.value);
                     setAlpha(nextA);
@@ -414,7 +418,7 @@ export default function ColorPicker({
                   }}
                 />
                 <div
-                  className="absolute w-3.5 h-3.5 rounded-full bg-white border border-slate-400 dark:border-zinc-700 shadow pointer-events-none transform -translate-x-1/2"
+                  className="absolute w-3.5 h-3.5 rounded-full bg-white border border-zinc-700 shadow pointer-events-none transform -translate-x-1/2"
                   style={{ left: `${alpha * 100}%` }}
                 />
               </div>
@@ -427,6 +431,7 @@ export default function ColorPicker({
             <div className="relative">
               <select
                 value={format}
+                aria-label="Color format"
                 onChange={(e) => {
                   const nextFmt = e.target.value as ColorFormat;
                   setFormat(nextFmt);
@@ -435,19 +440,20 @@ export default function ColorPicker({
                     setTextInput(str);
                   }
                 }}
-                className="appearance-none bg-slate-100 dark:bg-[#27272a] hover:bg-slate-200 dark:hover:bg-[#323236] border border-slate-200 dark:border-[#38383c] text-slate-800 dark:text-zinc-200 font-semibold px-2.5 py-1.5 pr-6 rounded-xl cursor-pointer outline-none transition-colors"
+                className="appearance-none bg-[#1c1c1c] hover:bg-[#262626] border border-[#262626] text-zinc-200 font-semibold px-2.5 py-1.5 pr-6 rounded-xl cursor-pointer outline-none transition-colors"
               >
                 <option value="hex">Hex</option>
                 <option value="rgb">RGB</option>
                 <option value="hsl">HSL</option>
               </select>
-              <ChevronDown className="w-3 h-3 text-slate-400 dark:text-zinc-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown className="w-3 h-3 text-zinc-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
 
             {/* Formatted Value Input Pill */}
             <input
               type="text"
               value={textInput}
+              aria-label="Formatted color value"
               onChange={(e) => setTextInput(e.target.value)}
               onBlur={() => {
                 const parsed = parseColor(textInput);
@@ -462,11 +468,11 @@ export default function ColorPicker({
                   pushRecentColor(textInput);
                 }
               }}
-              className="flex-1 bg-slate-100 dark:bg-[#27272a] border border-slate-200 dark:border-[#38383c] text-slate-800 dark:text-zinc-200 font-mono text-center py-1.5 px-2 rounded-xl outline-none focus:border-indigo-500"
+              className="flex-1 bg-[#1c1c1c] border border-[#262626] text-zinc-200 font-mono text-center py-1.5 px-2 rounded-xl outline-none focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff]"
             />
 
             {/* Alpha % Pill */}
-            <div className="w-16 bg-slate-100 dark:bg-[#27272a] border border-slate-200 dark:border-[#38383c] text-slate-800 dark:text-zinc-200 font-mono text-center py-1.5 px-2 rounded-xl">
+            <div className="w-16 bg-[#1c1c1c] border border-[#262626] text-zinc-200 font-mono text-center py-1.5 px-2 rounded-xl">
               {alphaInput}
             </div>
           </div>

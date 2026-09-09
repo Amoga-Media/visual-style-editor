@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { EditRecord, ThemeMap } from "@/types";
 import type { ViewportMode } from "./Toolbar";
 import { useChangeSetStore } from "@/store/change-set-store";
+import CollapsibleGroup from "./property-panel/CollapsibleGroup";
 import LayoutGroup from "./property-panel/LayoutGroup";
 import PositionGroup from "./property-panel/PositionGroup";
 import TypographyGroup from "./property-panel/TypographyGroup";
@@ -14,9 +15,33 @@ import EffectsGroup from "./property-panel/EffectsGroup";
 import ElementActionsGroup from "./property-panel/ElementActionsGroup";
 import SvgGroup from "./property-panel/SvgGroup";
 import AdvancedCssGroup from "./property-panel/AdvancedCssGroup";
+import ClassesGroup from "./property-panel/ClassesGroup";
 import InlineTextEditor from "./InlineTextEditor";
 import { classifyElement } from "@/lib/dom/element-classifier";
-import { MousePointerClick, Info, SlidersHorizontal, Sparkles, Monitor, Tablet, Smartphone } from "lucide-react";
+import {
+  MousePointerClick,
+  Info,
+  SlidersHorizontal,
+  Sparkles,
+  Monitor,
+  Tablet,
+  Smartphone,
+  Type,
+  Palette,
+  Maximize2,
+  LayoutGrid,
+  Square,
+  Layers,
+  Zap,
+  MapPin,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  PenTool,
+  Code2,
+  Tag,
+  SquarePen,
+  Scissors,
+} from "lucide-react";
 
 interface PropertyPanelProps {
   element: Element | null;
@@ -46,13 +71,13 @@ export default function PropertyPanel({
 
   if (!element || !structuralPath) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-8 text-center text-zinc-500 space-y-3">
-        <div className="w-12 h-12 rounded-2xl bg-[#1c1c1c] border border-[#262626] flex items-center justify-center text-zinc-400">
-          <MousePointerClick className="w-6 h-6" />
+      <div className="h-full flex flex-col items-center justify-center p-6 text-center text-slate-400 dark:text-zinc-500 space-y-3 bg-white dark:bg-[#141414] transition-colors">
+        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] flex items-center justify-center text-slate-500 dark:text-zinc-400">
+          <MousePointerClick className="w-5 h-5" />
         </div>
-        <div className="text-sm font-medium text-zinc-300">No element selected</div>
-        <div className="text-xs max-w-[200px] text-zinc-500">
-          Click any button, heading, or card in the preview to edit its styles and text.
+        <div className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300">No element selected</div>
+        <div className="text-xs max-w-[200px] text-slate-500 dark:text-zinc-400">
+          Click any element in the preview to edit its styles and text properties.
         </div>
       </div>
     );
@@ -65,12 +90,12 @@ export default function PropertyPanel({
   const showColors = showAll || visiblePanels.textColor || visiblePanels.backgroundColor;
 
   return (
-    <div key={`${structuralPath}-${viewport}-${editsCount}`} className="divide-y divide-slate-200 dark:divide-[#262626] text-slate-800 dark:text-zinc-200 bg-white dark:bg-[#141414]">
+    <div key={`${structuralPath}-${viewport}-${editsCount}`} className="text-slate-800 dark:text-zinc-200 bg-white dark:bg-[#141414] transition-colors">
       {/* Selected Element Header with Type Badge and Contextual Filter Mode */}
       <div className="p-3 bg-slate-50 dark:bg-[#090909] flex flex-col gap-2 border-b border-slate-200 dark:border-[#262626]">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-[#0099ff] border border-indigo-500/30 uppercase shrink-0">
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 uppercase shrink-0">
               &lt;{tagName}&gt;
             </span>
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider shrink-0 ${classification.badgeColor}`}>
@@ -83,37 +108,39 @@ export default function PropertyPanel({
 
           {/* View Mode Toggle: Contextual vs All Properties */}
           <button
+            type="button"
             onClick={() => setShowAll((prev) => !prev)}
-            className={`text-[10px] px-2 py-1 rounded-lg border font-medium transition-colors flex items-center gap-1 cursor-pointer select-none shrink-0 ${
+            aria-label={showAll ? "Switch to contextual properties" : "Switch to all properties"}
+            className={`text-[10px] px-2 py-0.5 rounded-full border font-medium transition-colors flex items-center gap-1 cursor-pointer select-none shrink-0 ${
               showAll
-                ? "bg-indigo-500/15 text-indigo-600 dark:text-[#0099ff] border-indigo-500/30"
-                : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 bg-slate-100 dark:bg-[#161616] border-slate-200 dark:border-[#2a2a2a] hover:border-slate-300 dark:hover:border-[#3a3a3a]"
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/30 font-semibold"
+                : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 bg-slate-100 dark:bg-[#1c1c1c] border-slate-200 dark:border-[#262626] hover:border-slate-300 dark:hover:border-[#333333]"
             }`}
             title={showAll ? "Currently showing all properties. Click for focused contextual view." : "Showing tailored properties for this element. Click to show all properties."}
           >
-            {showAll ? <SlidersHorizontal className="w-3 h-3" /> : <Sparkles className="w-3 h-3 text-indigo-500 dark:text-[#0099ff]" />}
+            {showAll ? <SlidersHorizontal className="w-3 h-3" /> : <Sparkles className="w-3 h-3 text-[#0099ff]" />}
             <span>{showAll ? "All" : "Contextual"}</span>
           </button>
         </div>
 
         {/* Viewport Styling Cascade Target Indicator */}
-        <div className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#161616] border border-slate-200 dark:border-[#262626] text-[11px]">
+        <div className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] text-[11px]">
           <span className="text-slate-500 dark:text-zinc-400 flex items-center gap-1.5 font-medium">
             {viewport === "desktop" ? (
-              <Monitor className="w-3.5 h-3.5 text-indigo-500 dark:text-[#0099ff]" />
+              <Monitor className="w-3.5 h-3.5 text-[#0099ff]" />
             ) : viewport === "tablet" ? (
-              <Tablet className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+              <Tablet className="w-3.5 h-3.5 text-amber-400" />
             ) : (
-              <Smartphone className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+              <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
             )}
             <span>Editing Target:</span>
           </span>
           <span className={`font-semibold font-mono ${
             viewport === "desktop"
-              ? "text-indigo-600 dark:text-[#0099ff]"
+              ? "text-[#0099ff]"
               : viewport === "tablet"
-              ? "text-amber-600 dark:text-amber-400"
-              : "text-emerald-600 dark:text-emerald-400"
+              ? "text-amber-400"
+              : "text-emerald-400"
           }`}>
             {viewport === "desktop" ? "Desktop (Global Base)" : viewport === "tablet" ? "Tablet Override (↓ Mobile)" : "Mobile Override (Only Mobile)"}
           </span>
@@ -121,95 +148,123 @@ export default function PropertyPanel({
       </div>
 
       {theme.mode === "none" && (
-        <div className="p-3 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-300 flex items-start gap-2">
-          <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+        <div className="p-3 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-600 dark:text-amber-300 flex items-start gap-2">
+          <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
           <span>No Tailwind CDN detected — edits will be written as clean inline styles.</span>
         </div>
       )}
 
-      {/* Quick Element Actions (Duplicate, Delete, Reorder) */}
-      <ElementActionsGroup
-        element={element}
-        structuralPath={structuralPath}
-        onDelete={() => onDelete?.(element)}
-        onDuplicate={() => onDuplicate?.(element)}
-        onMoveUp={() => onMoveUp?.(element)}
-        onMoveDown={() => onMoveDown?.(element)}
-      />
+      {/* Quick Element Actions */}
+      <CollapsibleGroup groupId="actions" title="Actions" icon={<Scissors className="w-3.5 h-3.5" />} defaultOpen={true}>
+        <ElementActionsGroup
+          element={element}
+          structuralPath={structuralPath}
+          onDelete={() => onDelete?.(element)}
+          onDuplicate={() => onDuplicate?.(element)}
+          onMoveUp={() => onMoveUp?.(element)}
+          onMoveDown={() => onMoveDown?.(element)}
+        />
+      </CollapsibleGroup>
 
-      {/* Image & Media settings (only for images or in All mode) */}
+      {/* Classes */}
+      <CollapsibleGroup groupId="classes" title="Classes" icon={<Tag className="w-3.5 h-3.5" />} defaultOpen={false}>
+        <ClassesGroup
+          element={element}
+          structuralPath={structuralPath}
+          theme={theme}
+          onEdit={onEdit}
+        />
+      </CollapsibleGroup>
+
+      {/* Image & Media */}
       {(showAll || visiblePanels.imageMedia) && (
-        <ImageGroup element={element} structuralPath={structuralPath} theme={theme} onEdit={onEdit} />
+        <CollapsibleGroup groupId="image-media" title="Image & Media" icon={<ImageIcon className="w-3.5 h-3.5" />} defaultOpen={true}>
+          <ImageGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        </CollapsibleGroup>
       )}
 
-      {/* Link & Navigation settings (only for links or in All mode) */}
+      {/* Link & Navigation */}
       {(showAll || visiblePanels.linkNav) && (
-        <LinkGroup element={element} structuralPath={structuralPath} theme={theme} onEdit={onEdit} />
+        <CollapsibleGroup groupId="link-nav" title="Link & Navigation" icon={<LinkIcon className="w-3.5 h-3.5" />} defaultOpen={true}>
+          <LinkGroup element={element} structuralPath={structuralPath} theme={theme} onEdit={onEdit} />
+        </CollapsibleGroup>
       )}
 
-      {/* Content Copy Editing (only for leaf text elements or in All mode) */}
-      {(showAll || visiblePanels.contentCopy) && (
-        <InlineTextEditor element={element} structuralPath={structuralPath} onEdit={onEdit} />
+      {/* Typography & Content */}
+      {(showAll || visiblePanels.typography || visiblePanels.contentCopy) && (
+        <CollapsibleGroup groupId="typography" title="Typography" icon={<Type className="w-3.5 h-3.5" />} defaultOpen={true}>
+          <TypographyGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        </CollapsibleGroup>
       )}
 
-      {/* Typography (prominent for text, buttons, links, inputs) */}
-      {(showAll || visiblePanels.typography) && (
-        <TypographyGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
-      )}
-
-      {/* Colors (Text Color, Background Color) */}
+      {/* Colors */}
       {showColors && (
-        <div className="p-4 space-y-3 border-b border-[#222]">
-          <div className="text-xs font-semibold uppercase tracking-wider text-gray-400">Colors</div>
-          {(showAll || visiblePanels.textColor) && (
-            <div>
-              <label className="text-xs text-gray-400 block mb-1.5">
-                {classification.category === "svg" ? "Icon / Stroke Color" : "Text Color"}
-              </label>
-              <ColorGroup element={element} structuralPath={structuralPath} theme={theme} property="text-color" viewport={viewport} onEdit={onEdit} />
-            </div>
-          )}
-          {(showAll || visiblePanels.backgroundColor) && (
-            <div className={showAll || visiblePanels.textColor ? "pt-2" : ""}>
-              <label className="text-xs text-gray-400 block mb-1.5">Background Color</label>
-              <ColorGroup element={element} structuralPath={structuralPath} theme={theme} property="background-color" viewport={viewport} onEdit={onEdit} />
-            </div>
-          )}
-        </div>
+        <CollapsibleGroup groupId="colors" title="Colors" icon={<Palette className="w-3.5 h-3.5" />} defaultOpen={true}>
+          <div className="p-4 space-y-3">
+            {(showAll || visiblePanels.textColor) && (
+              <div>
+                <label className="text-xs text-slate-600 dark:text-gray-400 block mb-1.5 font-medium">
+                  {classification.category === "svg" ? "Icon / Stroke Color" : "Text Color"}
+                </label>
+                <ColorGroup element={element} structuralPath={structuralPath} theme={theme} property="text-color" viewport={viewport} onEdit={onEdit} />
+              </div>
+            )}
+            {(showAll || visiblePanels.backgroundColor) && (
+              <div className={showAll || visiblePanels.textColor ? "pt-2" : ""}>
+                <label className="text-xs text-slate-600 dark:text-gray-400 block mb-1.5 font-medium">Background Color</label>
+                <ColorGroup element={element} structuralPath={structuralPath} theme={theme} property="background-color" viewport={viewport} onEdit={onEdit} />
+              </div>
+            )}
+          </div>
+        </CollapsibleGroup>
       )}
 
       {/* Layout & Sizing */}
       {(showAll || visiblePanels.layoutSizing) && (
-        <LayoutGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        <CollapsibleGroup groupId="layout" title="Layout & Sizing" icon={<Maximize2 className="w-3.5 h-3.5" />} defaultOpen={true}>
+          <LayoutGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        </CollapsibleGroup>
       )}
 
-      {/* Flexbox / Grid Flow (prominent for containers) */}
+      {/* Flexbox / Grid */}
       {(showAll || visiblePanels.flexGrid) && (
-        <FlexGridGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        <CollapsibleGroup groupId="flex-grid" title="Flexbox & Grid" icon={<LayoutGrid className="w-3.5 h-3.5" />} defaultOpen={true}>
+          <FlexGridGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        </CollapsibleGroup>
       )}
 
       {/* Borders & Radiuses */}
       {(showAll || visiblePanels.border) && (
-        <BorderGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        <CollapsibleGroup groupId="borders" title="Borders & Radius" icon={<Square className="w-3.5 h-3.5" />} defaultOpen={false}>
+          <BorderGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        </CollapsibleGroup>
       )}
 
-      {/* SVG Vector Styling (Fill, Stroke, Stroke Width) */}
+      {/* SVG Styling */}
       {(showAll || classification.category === "svg") && (
-        <SvgGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        <CollapsibleGroup groupId="svg" title="SVG Vector" icon={<PenTool className="w-3.5 h-3.5" />} defaultOpen={true}>
+          <SvgGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        </CollapsibleGroup>
       )}
 
       {/* Shadows & Effects */}
       {(showAll || visiblePanels.effects) && (
-        <EffectsGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        <CollapsibleGroup groupId="effects" title="Effects & Shadows" icon={<Zap className="w-3.5 h-3.5" />} defaultOpen={false}>
+          <EffectsGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        </CollapsibleGroup>
       )}
 
-      {/* Position, Pinning & Layering */}
+      {/* Position & Layering */}
       {(showAll || visiblePanels.positionLayering) && (
-        <PositionGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        <CollapsibleGroup groupId="position" title="Position & Layering" icon={<MapPin className="w-3.5 h-3.5" />} defaultOpen={false}>
+          <PositionGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+        </CollapsibleGroup>
       )}
 
-      {/* Advanced Custom CSS Inspector */}
-      <AdvancedCssGroup element={element} structuralPath={structuralPath} theme={theme} onEdit={onEdit} />
+      {/* Advanced CSS */}
+      <CollapsibleGroup groupId="advanced-css" title="Advanced CSS" icon={<Code2 className="w-3.5 h-3.5" />} defaultOpen={false}>
+        <AdvancedCssGroup element={element} structuralPath={structuralPath} theme={theme} onEdit={onEdit} />
+      </CollapsibleGroup>
     </div>
   );
 }

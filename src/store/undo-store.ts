@@ -19,16 +19,16 @@ export function findLiveElement(root: Document, path: string): Element | null {
     if (byId) return byId;
   }
 
-  // 3. Try standard querySelector
-  try {
-    const byQuery = root.querySelector(path);
-    if (byQuery) return byQuery;
-  } catch {}
-
-  // 4. Try resolveElementByStructuralPath
+  // 3. Try resolveElementByStructuralPath (matches AST structural resolution)
   try {
     const byStructural = resolveElementByStructuralPath(root, path);
     if (byStructural) return byStructural;
+  } catch {}
+
+  // 4. Try standard querySelector as fallback
+  try {
+    const byQuery = root.querySelector(path);
+    if (byQuery) return byQuery;
   } catch {}
 
   return null;
@@ -42,7 +42,11 @@ export function reconcileDom(from: EditRecord[], to: EditRecord[], iframeDocumen
     if (edit.kind === "style") return `${edit.structuralPath}::style::${edit.styleProperty || edit.property}::${edit.viewport || "desktop"}`;
     if (edit.kind === "attribute") return `${edit.structuralPath}::attribute::${edit.attributeName || edit.property}`;
     if (edit.kind === "text") return `${edit.structuralPath}::text::content`;
-    return `${edit.structuralPath}::${edit.kind}::${edit.timestamp || Math.random()}`;
+    if (edit.kind === "duplicate") return `${edit.structuralPath}::duplicate::${edit.duplicateId || edit.timestamp}`;
+    if (edit.kind === "insert") return `${edit.structuralPath}::insert::${edit.insertedPath || edit.timestamp}`;
+    if (edit.kind === "delete") return `${edit.structuralPath}::delete::${edit.timestamp}`;
+    if (edit.kind === "move") return `${edit.structuralPath}::move::${edit.targetPath}::${edit.timestamp}`;
+    return `${(edit as any).structuralPath}::${(edit as any).kind}::${(edit as any).timestamp}`;
   }
 
   const fromByKey = new Map(from.map((e) => [keyFor(e), e]));
@@ -54,8 +58,139 @@ export function reconcileDom(from: EditRecord[], to: EditRecord[], iframeDocumen
   for (const key of allKeys) {
     const target = toByKey.get(key);
     const source = fromByKey.get(key);
-    const structuralPath = (target ?? source)?.structuralPath;
+    const structuralPath = target?.structuralPath || source?.structuralPath;
     if (!structuralPath) continue;
+
+    // Handle structural mutations (delete, duplicate, insert, move)
+    if (target && !source) {
+      // Re-applying / Redoing an edit
+      if (target.kind === "delete") {
+        const delEl = findLiveElement(iframeDocument, target.structuralPath);
+        if (delEl && delEl !== iframeDocument.body) delEl.remove();
+        continue;
+      } else if (target.kind === "duplicate") {
+        const origEl = findLiveElement(iframeDocument, target.structuralPath);
+        if (origEl) {
+          const clone = origEl.cloneNode(true) as Element;
+          if (target.duplicateId) clone.id = target.duplicateId;
+          origEl.after(clone);
+        }
+        continue;
+      } else if (target.kind === "insert") {
+        const parent = findLiveElement(iframeDocument, target.structuralPath) || iframeDocument.body;
+        if (parent) {
+          const temp = iframeDocument.createElement("div");
+          temp.innerHTML = target.snippet;
+          const child = temp.firstElementChild;
+          if (child) {
+            if (target.position === "inside") {
+              parent.appendChild(child);
+            } else if (target.position === "before" && parent.parentElement) {
+              parent.parentElement.insertBefore(child, parent);
+            } else if (target.position === "after" && parent.parentElement) {
+              parent.parentElement.insertBefore(child, parent.nextSibling);
+            } else {
+              iframeDocument.body?.appendChild(child);
+            }
+          }
+        }
+        continue;
+      } else if (target.kind === "move") {
+        let moveEl: Element | null = null;
+        if (target.moveToken) {
+          moveEl = iframeDocument.querySelector(`[data-vse-move-token="${target.moveToken}"]`);
+        }
+        if (!moveEl && target.elementId) {
+          moveEl = iframeDocument.getElementById(target.elementId);
+        }
+        if (!moveEl) {
+          moveEl = findLiveElement(iframeDocument, target.structuralPath);
+        }
+        const targetParent = findLiveElement(iframeDocument, target.targetPath);
+        if (moveEl && targetParent) {
+          if (target.position === "inside") {
+            targetParent.appendChild(moveEl);
+          } else if (target.position === "before" && targetParent.parentElement) {
+            targetParent.parentElement.insertBefore(moveEl, targetParent);
+          } else if (target.position === "after" && targetParent.parentElement) {
+            targetParent.parentElement.insertBefore(moveEl, targetParent.nextSibling);
+          }
+        }
+        continue;
+      }
+    } else if (source && !target) {
+      // Undoing an edit
+      if (source.kind === "delete") {
+        if (source.serializedHtml) {
+          const parent = source.parentPath ? findLiveElement(iframeDocument, source.parentPath) : iframeDocument.body;
+          if (parent) {
+            const temp = iframeDocument.createElement("div");
+            temp.innerHTML = source.serializedHtml;
+            const restored = temp.firstElementChild;
+            if (restored) {
+              const sibling = parent.children[source.siblingIndex ?? 0];
+              if (sibling) {
+                parent.insertBefore(restored, sibling);
+              } else {
+                parent.appendChild(restored);
+              }
+            }
+          }
+        }
+        continue;
+      } else if (source.kind === "duplicate") {
+        let dupEl: Element | null = null;
+        if (source.duplicateId) {
+          dupEl = iframeDocument.getElementById(source.duplicateId);
+        }
+        if (!dupEl && source.duplicatePath) {
+          dupEl = findLiveElement(iframeDocument, source.duplicatePath);
+        }
+        if (dupEl && dupEl !== iframeDocument.body) {
+          dupEl.remove();
+        }
+        continue;
+      } else if (source.kind === "insert") {
+        const insertedEl = source.insertedPath
+          ? findLiveElement(iframeDocument, source.insertedPath)
+          : findLiveElement(iframeDocument, source.structuralPath);
+        if (insertedEl && insertedEl !== iframeDocument.body) {
+          insertedEl.remove();
+        }
+        continue;
+      } else if (source.kind === "move") {
+        let movedEl: Element | null = null;
+        if (source.moveToken) {
+          movedEl = iframeDocument.querySelector(`[data-vse-move-token="${source.moveToken}"]`);
+        }
+        if (!movedEl && source.elementId) {
+          movedEl = iframeDocument.getElementById(source.elementId);
+        }
+        if (!movedEl && source.newPath) {
+          movedEl = findLiveElement(iframeDocument, source.newPath);
+        }
+        if (!movedEl && source.newParentPath) {
+          const parent = findLiveElement(iframeDocument, source.newParentPath);
+          if (parent && source.newSiblingIndex !== undefined) {
+            movedEl = parent.children[source.newSiblingIndex] || null;
+          }
+        }
+        if (!movedEl) {
+          movedEl = findLiveElement(iframeDocument, source.structuralPath);
+        }
+
+        const oldParent = source.oldParentPath ? findLiveElement(iframeDocument, source.oldParentPath) : iframeDocument.body;
+        if (movedEl && oldParent) {
+          const sibling = oldParent.children[source.oldSiblingIndex ?? 0];
+          if (sibling && sibling !== movedEl) {
+            oldParent.insertBefore(movedEl, sibling);
+          } else {
+            oldParent.appendChild(movedEl);
+          }
+        }
+        continue;
+      }
+    }
 
     const el = findLiveElement(iframeDocument, structuralPath);
     if (!el) continue;
@@ -65,8 +200,9 @@ export function reconcileDom(from: EditRecord[], to: EditRecord[], iframeDocumen
         el.className = target.newClassList.join(" ");
       } else if (target.kind === "style") {
         const vp = target.viewport || "desktop";
+        const targetProp = target.property || target.styleProperty;
         if (vp !== "desktop") {
-          setResponsiveStyle(el, target.structuralPath, target.property, target.newStyleValue, vp);
+          setResponsiveStyle(el, target.structuralPath, targetProp, target.newStyleValue, vp);
           responsiveUpdated = true;
         } else {
           if ("style" in el) {
@@ -75,7 +211,7 @@ export function reconcileDom(from: EditRecord[], to: EditRecord[], iframeDocumen
               try { (el as HTMLElement).style.setProperty("-webkit-text-fill-color", target.newStyleValue, "important"); } catch {}
             }
           }
-          setResponsiveStyle(el, target.structuralPath, target.property, target.newStyleValue, "desktop");
+          setResponsiveStyle(el, target.structuralPath, targetProp, target.newStyleValue, "desktop");
           responsiveUpdated = true;
         }
       } else if (target.kind === "attribute") {
@@ -88,8 +224,9 @@ export function reconcileDom(from: EditRecord[], to: EditRecord[], iframeDocumen
         el.className = source.oldClassList.join(" ");
       } else if (source.kind === "style") {
         const vp = source.viewport || "desktop";
+        const sourceProp = source.property || source.styleProperty;
         if (vp !== "desktop") {
-          setResponsiveStyle(el, source.structuralPath, source.property, source.oldStyleValue || "", vp);
+          setResponsiveStyle(el, source.structuralPath, sourceProp, source.oldStyleValue || "", vp);
           responsiveUpdated = true;
         } else {
           if ("style" in el) {
@@ -105,7 +242,7 @@ export function reconcileDom(from: EditRecord[], to: EditRecord[], iframeDocumen
               }
             }
           }
-          setResponsiveStyle(el, source.structuralPath, source.property, source.oldStyleValue || "", "desktop");
+          setResponsiveStyle(el, source.structuralPath, sourceProp, source.oldStyleValue || "", "desktop");
           responsiveUpdated = true;
         }
       } else if (source.kind === "attribute") {

@@ -61,8 +61,8 @@ describe("applyEditsClientSide", () => {
     ]);
     expect(res.ok).toBe(true);
     if (res.ok) {
-      const occurrences = (res.html.match(/id="box"/g) || []).length;
-      expect(occurrences).toBe(2);
+      expect(res.html).toContain('id="box"');
+      expect(res.html).toContain('id="box-copy"');
     }
   });
 

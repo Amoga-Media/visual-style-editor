@@ -12,9 +12,22 @@ import {
   Link as LinkIcon,
   Box,
   GripVertical,
+  Search,
+  X,
 } from "lucide-react";
 import { computeStructuralPath } from "@/lib/ast/structural-path";
 import { domAdapter } from "@/lib/dom/dom-adapter";
+
+const elementKeyMap = new WeakMap<Element, string>();
+let keyCounter = 0;
+function getStableElementKey(el: Element): string {
+  let key = elementKeyMap.get(el);
+  if (!key) {
+    key = `layer-node-${++keyCounter}`;
+    elementKeyMap.set(el, key);
+  }
+  return key;
+}
 
 interface LayersTreeProps {
   iframeDocument: Document | null;
@@ -57,6 +70,17 @@ function getElementIcon(tagName: string) {
   }
 }
 
+/** Returns a short label for display: tag + textContent snippet if leaf */
+function getElementLabel(el: Element): string {
+  const tag = el.tagName.toLowerCase();
+  // For text elements, show first few chars
+  if (["p", "span", "h1", "h2", "h3", "h4", "h5", "h6", "a", "button", "label", "li"].includes(tag)) {
+    const text = el.textContent?.trim().slice(0, 24) || "";
+    if (text) return `${tag} "${text}${(el.textContent?.trim().length || 0) > 24 ? "…" : ""}"`;
+  }
+  return tag;
+}
+
 interface TreeNodeProps {
   el: Element;
   depth: number;
@@ -66,6 +90,28 @@ interface TreeNodeProps {
   onDeleteElement?: (el: Element) => void;
   onDuplicateElement?: (el: Element) => void;
   onMoveElement?: (sourceEl: Element, targetEl: Element, position: "before" | "after" | "inside") => void;
+  searchQuery?: string;
+}
+
+function matchesSearch(el: Element, query: string): boolean {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  const tag = el.tagName.toLowerCase();
+  if (tag.includes(q)) return true;
+  if (el.id && el.id.toLowerCase().includes(q)) return true;
+  if (typeof el.className === "string" && el.className.toLowerCase().includes(q)) return true;
+  const text = el.textContent?.trim().slice(0, 100).toLowerCase() || "";
+  if (text.includes(q)) return true;
+  return false;
+}
+
+function subtreeMatchesSearch(el: Element, query: string): boolean {
+  if (!query) return true;
+  if (matchesSearch(el, query)) return true;
+  for (const child of Array.from(el.children)) {
+    if (subtreeMatchesSearch(child, query)) return true;
+  }
+  return false;
 }
 
 function TreeNode({
@@ -77,6 +123,7 @@ function TreeNode({
   onDeleteElement,
   onDuplicateElement,
   onMoveElement,
+  searchQuery = "",
 }: TreeNodeProps) {
   const [expanded, setExpanded] = useState(true);
   const [dropPosition, setDropPosition] = useState<"before" | "after" | "inside" | null>(null);
@@ -84,6 +131,11 @@ function TreeNode({
   const tagName = el.tagName.toLowerCase();
 
   if (tagName === "script" || tagName === "style" || tagName === "link" || tagName === "meta") {
+    return null;
+  }
+
+  // Filter out non-matching nodes during search
+  if (searchQuery && !subtreeMatchesSearch(el, searchQuery)) {
     return null;
   }
 
@@ -154,7 +206,7 @@ function TreeNode({
     <div className="select-none relative">
       {/* Drop indicator line before */}
       {dropPosition === "before" && (
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 z-20 shadow-sm" />
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#0099ff] z-20 shadow-sm shadow-blue-500/50" />
       )}
 
       <div
@@ -170,17 +222,17 @@ function TreeNode({
         onMouseEnter={() => onHoverElement(el)}
         onMouseLeave={() => onHoverElement(null)}
         style={{ paddingLeft: `${Math.min(depth * 14 + 10, 140)}px` }}
-        className={`group flex items-center justify-between py-1.5 pr-2.5 text-xs cursor-pointer border-l-2 transition-all ${
+        className={`group flex items-center justify-between py-1.5 pr-2.5 text-xs cursor-pointer transition-all ${
           dropPosition === "inside"
-            ? "bg-blue-500/20 border-blue-400 text-white"
+            ? "bg-[#0099ff]/10 border-l-2 border-[#0099ff] text-slate-900 dark:text-white font-semibold"
             : isSelected
-            ? "bg-[#1f2937]/70 border-blue-500 text-white font-medium"
-            : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-[#181818]"
+            ? "bg-[#0099ff]/10 dark:bg-[#0099ff]/8 border-l-2 border-[#0099ff] text-white font-semibold"
+            : "border-l-2 border-transparent text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100/60 dark:hover:bg-[#1a1a1a]"
         }`}
       >
         <div className="flex items-center gap-1.5 min-w-0 truncate">
           {!isBody && (
-            <GripVertical className="w-3 h-3 text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab" />
+            <GripVertical className="w-3 h-3 text-slate-400 dark:text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab" />
           )}
 
           {hasChildren ? (
@@ -189,7 +241,7 @@ function TreeNode({
                 e.stopPropagation();
                 setExpanded((v) => !v);
               }}
-              className="p-0.5 text-zinc-500 hover:text-zinc-300 rounded cursor-pointer"
+              className="p-0.5 text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300 rounded cursor-pointer"
             >
               {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
             </button>
@@ -199,19 +251,26 @@ function TreeNode({
 
           {getElementIcon(tagName)}
 
-          <span className="font-mono text-[11px] text-zinc-200 font-medium">
+          <span className="font-mono text-[13px] text-slate-900 dark:text-zinc-100 font-semibold">
             {tagName}
           </span>
 
           {idStr && (
-            <span className="font-mono text-[10px] text-blue-400 truncate max-w-[80px]">
+            <span className="font-mono text-[12px] text-[#0099ff] font-medium truncate max-w-[100px]">
               {idStr}
             </span>
           )}
 
           {classStr && (
-            <span className="font-mono text-[10px] text-zinc-500 truncate max-w-[90px]">
+            <span className="font-mono text-[11px] text-slate-400 dark:text-zinc-400 truncate max-w-[110px]">
               {classStr}
+            </span>
+          )}
+
+          {/* Selected element gets a blue pill badge */}
+          {isSelected && (
+            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[#0099ff] text-[10px] text-white font-bold shrink-0">
+              SELECTED
             </span>
           )}
         </div>
@@ -220,26 +279,28 @@ function TreeNode({
         <div className="hidden group-hover:flex items-center gap-1 shrink-0 ml-2">
           {onDuplicateElement && !isBody && (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onDuplicateElement(el);
               }}
-              className="p-1 rounded hover:bg-[#262626] text-zinc-400 hover:text-white"
-              title="Duplicate element (Ctrl+D)"
+              className="p-1 rounded text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-200 dark:hover:bg-[#262626] transition-colors"
+              title="Duplicate layer"
             >
-              <Copy className="w-3 h-3" />
+              <Copy className="w-3.5 h-3.5" />
             </button>
           )}
           {onDeleteElement && !isBody && (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onDeleteElement(el);
               }}
-              className="p-1 rounded hover:bg-rose-950/60 text-zinc-400 hover:text-rose-400"
-              title="Delete element (Del)"
+              className="p-1 rounded text-slate-400 dark:text-zinc-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-slate-200 dark:hover:bg-[#262626] transition-colors"
+              title="Delete layer"
             >
-              <Trash2 className="w-3 h-3" />
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
@@ -247,14 +308,14 @@ function TreeNode({
 
       {/* Drop indicator line after */}
       {dropPosition === "after" && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 z-20 shadow-sm" />
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0099ff] z-20 shadow-sm shadow-blue-500/50" />
       )}
 
       {hasChildren && expanded && (
         <div className="flex flex-col">
-          {children.map((child, idx) => (
+          {children.map((child) => (
             <TreeNode
-              key={idx}
+              key={getStableElementKey(child)}
               el={child}
               depth={depth + 1}
               selectedElement={selectedElement}
@@ -263,6 +324,7 @@ function TreeNode({
               onDeleteElement={onDeleteElement}
               onDuplicateElement={onDuplicateElement}
               onMoveElement={onMoveElement}
+              searchQuery={searchQuery}
             />
           ))}
         </div>
@@ -280,6 +342,7 @@ export default function LayersTree({
   onDuplicateElement,
   onMoveElement,
 }: LayersTreeProps) {
+  const [searchQuery, setSearchQuery] = useState("");
   const body = iframeDocument?.body;
 
   if (!body) {
@@ -292,17 +355,45 @@ export default function LayersTree({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
-      <TreeNode
-        el={body}
-        depth={0}
-        selectedElement={selectedElement}
-        onSelectElement={onSelectElement}
-        onHoverElement={onHoverElement}
-        onDeleteElement={onDeleteElement}
-        onDuplicateElement={onDuplicateElement}
-        onMoveElement={onMoveElement}
-      />
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Search Input */}
+      <div className="px-3 py-2 border-b border-slate-200 dark:border-[#262626]">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search layers…"
+            className="w-full bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-lg pl-8 pr-7 py-1.5 text-[13px] text-slate-800 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 outline-none focus:border-[#0099ff]/50 transition-colors"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search query"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300 cursor-pointer"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Tree */}
+      <div className="flex-1 overflow-y-auto py-1 custom-scrollbar">
+        <TreeNode
+          el={body}
+          depth={0}
+          selectedElement={selectedElement}
+          onSelectElement={onSelectElement}
+          onHoverElement={onHoverElement}
+          onDeleteElement={onDeleteElement}
+          onDuplicateElement={onDuplicateElement}
+          onMoveElement={onMoveElement}
+          searchQuery={searchQuery}
+        />
+      </div>
     </div>
   );
 }

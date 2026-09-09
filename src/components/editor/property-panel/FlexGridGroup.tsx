@@ -54,9 +54,14 @@ export default function FlexGridGroup({
 }: FlexGridGroupProps) {
   const [display, setDisplay] = useState("block");
   const [flexDirection, setFlexDirection] = useState("row");
+  const [flexWrap, setFlexWrap] = useState("nowrap");
   const [justifyContent, setJustifyContent] = useState("start");
   const [alignItems, setAlignItems] = useState("start");
+  const [gridCols, setGridCols] = useState("1");
+  const [gridRows, setGridRows] = useState("1");
+  const [gridFlow, setGridFlow] = useState("row");
   const [gap, setGap] = useState<AxisValue>({ amount: 0, unit: "px" });
+  const [isGridMode, setIsGridMode] = useState(false);
 
   useEffect(() => {
     if (!element) return;
@@ -71,10 +76,16 @@ export default function FlexGridGroup({
       return readCurrentValue(element!, prop, theme) || "";
     }
 
-    setDisplay(getVal("display") || computed.display || "block");
+    const currentDisplay = getVal("display") || computed.display || "block";
+    setDisplay(currentDisplay);
+    setIsGridMode(currentDisplay.includes("grid"));
     setFlexDirection(getVal("flex-direction") || computed.flexDirection || "row");
+    setFlexWrap(getVal("flex-wrap") || computed.flexWrap || "nowrap");
     setJustifyContent(getVal("justify-content") || computed.justifyContent || "start");
     setAlignItems(getVal("align-items") || computed.alignItems || "start");
+    setGridCols(getVal("grid-template-columns") || computed.gridTemplateColumns || "1");
+    setGridRows(getVal("grid-template-rows") || computed.gridTemplateRows || "1");
+    setGridFlow(getVal("grid-auto-flow") || computed.gridAutoFlow || "row");
 
     const rawGap = getVal("gap") || computed.gap;
     const parsedGap = parseGapValue(rawGap);
@@ -83,145 +94,288 @@ export default function FlexGridGroup({
 
   if (!element || !structuralPath) return null;
 
+  function updateProperty(property: any, value: string, live: boolean = false) {
+    if (live) {
+      applyLiveStyle(element!, property, value, theme, undefined, viewport, structuralPath!);
+    } else {
+      applyLiveStyle(element!, property, value, theme, undefined, viewport, structuralPath!);
+      commitStyleChange(
+        element!,
+        structuralPath!,
+        property,
+        value,
+        theme,
+        onEdit,
+        undefined,
+        undefined,
+        viewport
+      );
+    }
+  }
+
   function handleDisplayChange(newDisplay: string) {
     setDisplay(newDisplay);
-    if (theme.mode !== "none" && viewport === "desktop") {
-      const oldClassList = Array.from(element!.classList);
-      const filtered = oldClassList.filter((c) => !["block", "flex", "grid", "inline-block", "hidden"].includes(c));
-      if (newDisplay !== "block") filtered.push(newDisplay);
-      element!.className = filtered.join(" ");
-
-      onEdit?.({
-        kind: "class",
-        structuralPath: structuralPath!,
-        property: "display" as any,
-        oldClassList,
-        newClassList: filtered,
-        viewport,
-        timestamp: new Date().toISOString(),
-      });
-    } else {
-      applyLiveStyle(element!, "display", newDisplay, theme, undefined, viewport, structuralPath!);
-      commitStyleChange(element!, structuralPath!, "display", newDisplay, theme, onEdit, undefined, undefined, viewport);
-    }
+    setIsGridMode(newDisplay.includes("grid"));
+    updateProperty("display", newDisplay, false);
   }
 
   function handleJustifyChange(newJustify: string) {
     setJustifyContent(newJustify);
-    if (theme.mode !== "none" && viewport === "desktop") {
-      const oldClassList = Array.from(element!.classList);
-      const filtered = oldClassList.filter((c) => !c.startsWith("justify-"));
-      filtered.push(`justify-${newJustify}`);
-      element!.className = filtered.join(" ");
-
-      onEdit?.({
-        kind: "class",
-        structuralPath: structuralPath!,
-        property: "justify-content" as any,
-        oldClassList,
-        newClassList: filtered,
-        viewport,
-        timestamp: new Date().toISOString(),
-      });
-    } else {
-      applyLiveStyle(element!, "justify-content", newJustify, theme, undefined, viewport, structuralPath!);
-      commitStyleChange(element!, structuralPath!, "justify-content", newJustify, theme, onEdit, undefined, undefined, viewport);
-    }
+    updateProperty("justify-content", newJustify, false);
   }
 
   function handleAlignChange(newAlign: string) {
     setAlignItems(newAlign);
-    if (theme.mode !== "none" && viewport === "desktop") {
-      const oldClassList = Array.from(element!.classList);
-      const filtered = oldClassList.filter((c) => !c.startsWith("items-"));
-      filtered.push(`items-${newAlign}`);
-      element!.className = filtered.join(" ");
+    updateProperty("align-items", newAlign, false);
+  }
 
-      onEdit?.({
-        kind: "class",
-        structuralPath: structuralPath!,
-        property: "align-items" as any,
-        oldClassList,
-        newClassList: filtered,
-        viewport,
-        timestamp: new Date().toISOString(),
-      });
-    } else {
-      applyLiveStyle(element!, "align-items", newAlign, theme, undefined, viewport, structuralPath!);
-      commitStyleChange(element!, structuralPath!, "align-items", newAlign, theme, onEdit, undefined, undefined, viewport);
-    }
+  function handleDirectionChange(newDir: string) {
+    setFlexDirection(newDir);
+    updateProperty("flex-direction", newDir, false);
+  }
+
+  function handleWrapChange(newWrap: string) {
+    setFlexWrap(newWrap);
+    updateProperty("flex-wrap", newWrap, false);
+  }
+
+  function handleGridColsChange(cols: string) {
+    setGridCols(cols);
+    updateProperty("grid-template-columns", cols, false);
+  }
+
+  function handleGridRowsChange(rows: string) {
+    setGridRows(rows);
+    updateProperty("grid-template-rows", rows, false);
+  }
+
+  function handleGridFlowChange(flow: string) {
+    setGridFlow(flow);
+    updateProperty("grid-auto-flow", flow, false);
   }
 
   function handleGapChange(amount: number, unitStr?: string) {
     const unit = (unitStr as Unit) || gap.unit;
     setGap({ amount, unit });
-    applyLiveStyle(element!, "gap", `${amount}${unit}`, theme, undefined, viewport, structuralPath!);
+    updateProperty("gap", `${amount}${unit}`, true);
   }
 
   function handleGapCommit(amount: number, unitStr?: string) {
     const unit = (unitStr as Unit) || gap.unit;
     setGap({ amount, unit });
-    commitStyleChange(
-      element!,
-      structuralPath!,
-      "gap",
-      `${amount}${unit}`,
-      theme,
-      onEdit,
-      undefined,
-      undefined,
-      viewport
-    );
+    updateProperty("gap", `${amount}${unit}`, false);
   }
 
-  const isFlexOrGrid = display.includes("flex") || display.includes("grid");
+  const isFlex = display === "flex" || display === "inline-flex";
+  const isGrid = display === "grid" || display === "inline-grid";
+  const isFlexOrGrid = isFlex || isGrid;
 
   return (
-    <div className="p-4 border-b border-gray-800 space-y-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-        <LayoutGrid className="w-3.5 h-3.5 text-indigo-400" />
-        <span>Layout & Flow</span>
-      </div>
-
+    <div className="p-3.5 space-y-3.5">
       {/* Display Selector */}
-      <div className="space-y-1.5">
-        <label className="text-xs text-gray-400 block">Display Mode</label>
-        <div className="grid grid-cols-4 gap-1">
-          {["block", "flex", "grid", "inline-block"].map((d) => (
+      <div className="space-y-1">
+        <label className="text-xs text-slate-500 dark:text-zinc-400 block font-medium">Display Mode</label>
+        <div className="grid grid-cols-3 gap-1">
+          {[
+            { id: "block", label: "Block" },
+            { id: "flex", label: "Flex" },
+            { id: "grid", label: "Grid" },
+            { id: "inline-block", label: "Inl-Block" },
+            { id: "inline-flex", label: "Inl-Flex" },
+            { id: "inline-grid", label: "Inl-Grid" },
+          ].map((d) => (
             <button
-              key={d}
-              onClick={() => handleDisplayChange(d)}
-              className={`py-1 text-xs rounded transition-all cursor-pointer ${
-                display === d
-                  ? "bg-indigo-600 text-white font-medium shadow-sm"
-                  : "bg-gray-900 text-gray-400 hover:text-white border border-gray-800"
+              key={d.id}
+              type="button"
+              onClick={() => handleDisplayChange(d.id)}
+              aria-label={`Display mode ${d.label}`}
+              className={`py-1 text-xs rounded-lg transition-all cursor-pointer ${
+                display === d.id
+                  ? "bg-[#0099ff] text-white font-semibold shadow-2xs"
+                  : "bg-slate-100 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#262626] hover:bg-slate-200 dark:hover:bg-[#1c1c1c]"
               }`}
             >
-              {d}
+              {d.label}
             </button>
           ))}
         </div>
       </div>
 
-      {isFlexOrGrid && (
+      {isFlex && (
         <>
-          {/* Flex Justify / Align */}
+          {/* Flex Direction & Wrap */}
+          <div className="grid grid-cols-2 gap-2">
+
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Direction</label>
+              <div className="grid grid-cols-2 gap-1">
+                {[
+                  { label: "Row", val: "row" },
+                  { label: "Col", val: "column" },
+                  { label: "Row-R", val: "row-reverse" },
+                  { label: "Col-R", val: "column-reverse" },
+                ].map((dir) => (
+                  <button
+                    key={dir.val}
+                    onClick={() => handleDirectionChange(dir.val)}
+                    type="button"
+                    aria-label={`Flex direction ${dir.label}`}
+                    className={`py-1 text-[11px] rounded transition-all cursor-pointer ${
+                      flexDirection === dir.val
+                        ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                        : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
+                    }`}
+                  >
+                    {dir.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1 font-medium">Wrap</label>
+              <div className="grid grid-cols-1 gap-1">
+                {[
+                  { label: "No Wrap", val: "nowrap" },
+                  { label: "Wrap", val: "wrap" },
+                  { label: "Wrap Reverse", val: "wrap-reverse" },
+                ].map((w) => (
+                  <button
+                    key={w.val}
+                    type="button"
+                    aria-label={`Flex wrap ${w.label}`}
+                    onClick={() => handleWrapChange(w.val)}
+                    className={`py-1 text-[11px] rounded transition-all cursor-pointer ${
+                      flexWrap === w.val
+                        ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                        : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
+                    }`}
+                  >
+                    {w.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {isGrid && (
+        <>
+          {/* Grid Columns & Rows */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Justify</label>
+              <label className="text-xs text-zinc-400 block mb-1 font-medium">Grid Columns</label>
+              <div className="grid grid-cols-4 gap-1 mb-1">
+                {["1", "2", "3", "4"].map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    aria-label={`Grid columns ${c}`}
+                    onClick={() => handleGridColsChange(c)}
+                    className={`py-1 text-xs rounded transition-all cursor-pointer ${
+                      gridCols === c || gridCols === `repeat(${c}, minmax(0, 1fr))`
+                        ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                        : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="text"
+                value={gridCols}
+                aria-label="Grid columns value"
+                onChange={(e) => handleGridColsChange(e.target.value)}
+                placeholder="cols (e.g. 3 or repeat(3, 1fr))"
+                className="w-full bg-[#141414] border border-[#262626] focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] rounded px-2 py-1 text-xs text-zinc-200"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1 font-medium">Grid Rows</label>
+              <div className="grid grid-cols-3 gap-1 mb-1">
+                {["1", "2", "3"].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    aria-label={`Grid rows ${r}`}
+                    onClick={() => handleGridRowsChange(r)}
+                    className={`py-1 text-xs rounded transition-all cursor-pointer ${
+                      gridRows === r || gridRows === `repeat(${r}, minmax(0, 1fr))`
+                        ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                        : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="text"
+                value={gridRows}
+                aria-label="Grid rows value"
+                onChange={(e) => handleGridRowsChange(e.target.value)}
+                placeholder="rows (e.g. 2 or repeat(2, 1fr))"
+                className="w-full bg-[#141414] border border-[#262626] focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] rounded px-2 py-1 text-xs text-zinc-200"
+              />
+            </div>
+          </div>
+
+          {/* Grid Flow */}
+          <div className="space-y-1.5">
+            <label className="text-xs text-zinc-400 block font-medium">Auto Flow</label>
+            <div className="grid grid-cols-4 gap-1">
+              {[
+                { label: "Row", val: "row" },
+                { label: "Col", val: "col" },
+                { label: "Row Dense", val: "row dense" },
+                { label: "Col Dense", val: "col dense" },
+              ].map((f) => (
+                <button
+                  key={f.val}
+                  type="button"
+                  aria-label={`Grid auto flow ${f.label}`}
+                  onClick={() => handleGridFlowChange(f.val)}
+                  className={`py-1 text-[11px] rounded transition-all cursor-pointer ${
+                    gridFlow === f.val
+                      ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                      : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {isFlexOrGrid && (
+        <>
+          {/* Justify / Align */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1 font-medium">Justify Content</label>
               <div className="grid grid-cols-3 gap-1">
                 {[
                   { label: "Start", val: "start" },
                   { label: "Center", val: "center" },
+                  { label: "End", val: "end" },
                   { label: "Between", val: "between" },
+                  { label: "Around", val: "around" },
+                  { label: "Evenly", val: "evenly" },
                 ].map((j) => (
                   <button
                     key={j.val}
+                    type="button"
+                    aria-label={`Justify content ${j.label}`}
                     onClick={() => handleJustifyChange(j.val)}
-                    className={`py-1 text-[11px] rounded transition-all cursor-pointer ${
+                    className={`py-1 text-[10px] rounded transition-all cursor-pointer ${
                       justifyContent.includes(j.val)
-                        ? "bg-indigo-600 text-white font-medium shadow-sm"
-                        : "bg-gray-900 text-gray-400 hover:text-white border border-gray-800"
+                        ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                        : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
                     }`}
                   >
                     {j.label}
@@ -231,20 +385,24 @@ export default function FlexGridGroup({
             </div>
 
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Align</label>
+              <label className="text-xs text-zinc-400 block mb-1 font-medium">Align Items</label>
               <div className="grid grid-cols-3 gap-1">
                 {[
                   { label: "Start", val: "start" },
                   { label: "Center", val: "center" },
                   { label: "End", val: "end" },
+                  { label: "Stretch", val: "stretch" },
+                  { label: "Baseline", val: "baseline" },
                 ].map((a) => (
                   <button
                     key={a.val}
+                    type="button"
+                    aria-label={`Align items ${a.label}`}
                     onClick={() => handleAlignChange(a.val)}
-                    className={`py-1 text-[11px] rounded transition-all cursor-pointer ${
+                    className={`py-1 text-[10px] rounded transition-all cursor-pointer ${
                       alignItems.includes(a.val)
-                        ? "bg-indigo-600 text-white font-medium shadow-sm"
-                        : "bg-gray-900 text-gray-400 hover:text-white border border-gray-800"
+                        ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                        : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
                     }`}
                   >
                     {a.label}
@@ -256,7 +414,7 @@ export default function FlexGridGroup({
 
           {/* Gap */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs text-gray-300">
+            <div className="flex items-center justify-between text-xs text-zinc-300 font-medium">
               <span>Gap Spacing</span>
               <ValueInput
                 amount={gap.amount}
@@ -271,7 +429,7 @@ export default function FlexGridGroup({
                 onChange={(amt, u) => {
                   const unit = (u as Unit) || gap.unit;
                   setGap({ amount: amt, unit });
-                  applyLiveStyle(element!, "gap", `${amt}${unit}`, theme, undefined, viewport, structuralPath!);
+                  handleGapChange(amt, unit);
                 }}
                 onCommit={(amt, u) => handleGapCommit(amt, u)}
               />
@@ -285,10 +443,10 @@ export default function FlexGridGroup({
               onChange={(e) => {
                 const val = parseFloat(e.target.value);
                 setGap({ ...gap, amount: val });
-                applyLiveStyle(element!, "gap", `${val}${gap.unit}`, theme, undefined, viewport, structuralPath!);
+                handleGapChange(val, gap.unit);
               }}
               onPointerUp={() => handleGapCommit(gap.amount, gap.unit)}
-              className="w-full accent-indigo-500 cursor-pointer"
+              className="w-full accent-[#0099ff] cursor-pointer"
             />
           </div>
         </>

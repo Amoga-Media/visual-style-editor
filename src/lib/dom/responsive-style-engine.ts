@@ -1,6 +1,7 @@
 import { computeStructuralPath } from "@/lib/ast/structural-path";
 import { domAdapter } from "@/lib/dom/dom-adapter";
 import { resolvePropertyForSide, PROPERTY_TO_CSS, isStyleableElement } from "./live-style-engine";
+import { readCurrentValue } from "./computed-style";
 import type { EditableProperty, EditRecord, ThemeMap } from "@/types";
 import type { ViewportMode } from "@/components/editor/Toolbar";
 
@@ -23,6 +24,28 @@ export function getResponsiveRegistry(): Map<string, Map<string, { desktop?: str
 }
 
 /**
+ * Resets a specific property's override for a given viewport back to "inherited" (removes the override).
+ * Useful for a "Reset to Desktop" button on tablet/mobile views.
+ */
+export function resetResponsivePropertyForViewport(
+  structuralPath: string,
+  cssProperty: string,
+  viewport: "tablet" | "mobile",
+  doc?: Document | null
+): void {
+  const pathMap = responsiveRegistry.get(structuralPath);
+  if (!pathMap) return;
+  const current = pathMap.get(cssProperty);
+  if (!current) return;
+  delete current[viewport];
+  pathMap.set(cssProperty, current);
+
+  if (doc) {
+    syncResponsiveStylesheet(doc);
+  }
+}
+
+/**
  * Returns the effective value and inheritance state for a given property and viewport.
  */
 export function getResponsivePropertyInfo(
@@ -40,14 +63,12 @@ export function getResponsivePropertyInfo(
   const pathRules = responsiveRegistry.get(structuralPath);
   const propRules = pathRules?.get(cssProp);
 
-  // Read base desktop value (checking registry first, then inline style, then computed)
   let baseDesktopValue = propRules?.desktop;
   if (!baseDesktopValue && isStyleableElement(element)) {
     baseDesktopValue = element.style.getPropertyValue(cssProp);
   }
   if (!baseDesktopValue && isStyleableElement(element)) {
-    const win = element.ownerDocument?.defaultView || window;
-    baseDesktopValue = win.getComputedStyle(element).getPropertyValue(cssProp);
+    baseDesktopValue = readCurrentValue(element, property as any, undefined, side as any);
   }
 
   if (viewport === "desktop") {
@@ -95,12 +116,27 @@ export function getResponsivePropertyInfo(
   };
 }
 
+export function hasActiveResponsiveOverrides(): boolean {
+  for (const propMap of responsiveRegistry.values()) {
+    for (const overrides of propMap.values()) {
+      if (overrides.tablet || overrides.mobile) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * Generates the full CSS string for all registered responsive overrides.
  * Scoped cleanly by data-vse-viewport inside the live editor preview, and
  * standard media queries for exported HTML.
  */
 export function generateResponsiveCssString(): string {
+  if (!hasActiveResponsiveOverrides()) {
+    return "";
+  }
+
   const liveTabletRules: string[] = [];
   const liveMobileRules: string[] = [];
   const exportTabletRules: string[] = [];

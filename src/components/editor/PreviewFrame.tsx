@@ -13,6 +13,7 @@ interface PreviewFrameProps {
   onDragOverTarget?: (info: DropTargetInfo | null) => void;
   onDropOnTarget?: (snippet: string, targetEl: Element, position: "inside" | "before" | "after") => void;
   onMoveLayerOnTarget?: (sourceEl: Element, targetEl: Element, position: "inside" | "before" | "after") => void;
+  onTextEdit?: (el: Element, oldText: string, newText: string) => void;
 }
 
 const CONTAINER_TAGS = new Set([
@@ -80,7 +81,8 @@ function attachSelectionAndDragListeners(
   onClick: (el: Element) => void,
   onDragOverTarget?: (info: DropTargetInfo | null) => void,
   onDropOnTarget?: (snippet: string, targetEl: Element, position: "inside" | "before" | "after") => void,
-  onMoveLayerOnTarget?: (sourceEl: Element, targetEl: Element, position: "inside" | "before" | "after") => void
+  onMoveLayerOnTarget?: (sourceEl: Element, targetEl: Element, position: "inside" | "before" | "after") => void,
+  onTextEdit?: (el: Element, oldText: string, newText: string) => void
 ) {
   const doc = iframe.contentDocument;
   if (!doc) return () => {};
@@ -93,6 +95,84 @@ function attachSelectionAndDragListeners(
     e.preventDefault();
     e.stopPropagation();
     onClick(e.target as Element);
+  };
+
+  const handleDblClick = (e: MouseEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    const tag = target.tagName.toLowerCase();
+    const excludedTags = new Set([
+      "button", "a", "input", "textarea", "select", "svg", "video",
+      "iframe", "img", "canvas", "audio", "body", "html", "head"
+    ]);
+    if (excludedTags.has(tag)) return;
+    if (target.isContentEditable) return;
+
+    // Check if element has interactive children
+    if (target.querySelector("button, a, input, textarea, select, video, iframe")) return;
+
+    // Only allow for leaf or simple text containers
+    if (
+      target.children.length > 0 &&
+      Array.from(target.children).some(
+        (c) => !["span", "strong", "em", "b", "i", "u", "small", "code", "mark"].includes(c.tagName.toLowerCase())
+      )
+    ) {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const originalText = target.textContent || "";
+    target.contentEditable = "true";
+    target.focus();
+
+    // Select all text
+    const selection = doc.defaultView?.getSelection();
+    if (selection) {
+      const range = doc.createRange();
+      range.selectNodeContents(target);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    let committed = false;
+
+    function finishEdit(save: boolean) {
+      if (committed || !target) return;
+      committed = true;
+      target.contentEditable = "false";
+      target.removeEventListener("keydown", onKeyDown);
+      target.removeEventListener("blur", onBlur);
+
+      const newText = target.textContent || "";
+      if (!save) {
+        target.textContent = originalText;
+        return;
+      }
+      if (newText !== originalText) {
+        onTextEdit?.(target, originalText, newText);
+      }
+    }
+
+    function onKeyDown(evt: KeyboardEvent) {
+      if (evt.key === "Enter" && !evt.shiftKey) {
+        evt.preventDefault();
+        finishEdit(true);
+      } else if (evt.key === "Escape") {
+        evt.preventDefault();
+        finishEdit(false);
+      }
+    }
+
+    function onBlur() {
+      finishEdit(true);
+    }
+
+    target.addEventListener("keydown", onKeyDown);
+    target.addEventListener("blur", onBlur);
   };
 
   const handleDragEnter = (e: DragEvent) => {
@@ -165,6 +245,7 @@ function attachSelectionAndDragListeners(
   doc.addEventListener("mouseover", handleOver, true);
   doc.addEventListener("mouseout", handleOut, true);
   doc.addEventListener("click", handleClick, true);
+  doc.addEventListener("dblclick", handleDblClick, true);
 
   doc.addEventListener("dragenter", handleDragEnter, true);
   doc.addEventListener("dragover", handleDragOver, true);
@@ -175,6 +256,7 @@ function attachSelectionAndDragListeners(
     doc.removeEventListener("mouseover", handleOver, true);
     doc.removeEventListener("mouseout", handleOut, true);
     doc.removeEventListener("click", handleClick, true);
+    doc.removeEventListener("dblclick", handleDblClick, true);
 
     doc.removeEventListener("dragenter", handleDragEnter, true);
     doc.removeEventListener("dragover", handleDragOver, true);
@@ -191,6 +273,7 @@ export default function PreviewFrame({
   onDragOverTarget,
   onDropOnTarget,
   onMoveLayerOnTarget,
+  onTextEdit,
 }: PreviewFrameProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const cleanupRef = useRef<() => void>(() => {});
@@ -214,7 +297,8 @@ export default function PreviewFrame({
       onSelectElement,
       onDragOverTarget,
       onDropOnTarget,
-      onMoveLayerOnTarget
+      onMoveLayerOnTarget,
+      onTextEdit
     );
     onIframeReady(iframe);
   }

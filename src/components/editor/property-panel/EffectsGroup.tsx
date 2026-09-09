@@ -169,24 +169,21 @@ export default function EffectsGroup({
   }
 
   return (
-    <div className="p-4 border-b border-gray-800 space-y-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-        <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-        <span>Shadows & Effects</span>
-      </div>
-
+    <div className="p-4 border-b border-[#262626] space-y-4">
       {/* Shadow Preset Pills */}
       <div className="space-y-1.5">
-        <label className="text-xs text-gray-400 block">Box Shadow</label>
+        <label className="text-[11px] text-zinc-400 block font-medium">Box Shadow</label>
         <div className="grid grid-cols-4 gap-1">
           {SHADOW_PRESETS.map((p) => (
             <button
               key={p.label}
+              type="button"
+              aria-label={`Box shadow preset ${p.label}`}
               onClick={() => handleShadowChange(p)}
               className={`py-1 text-xs rounded transition-all cursor-pointer ${
                 activeShadow === p.label
-                  ? "bg-indigo-600 text-white font-medium shadow-sm"
-                  : "bg-gray-900 text-gray-400 hover:text-white border border-gray-800"
+                  ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                  : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
               }`}
             >
               {p.label}
@@ -197,9 +194,9 @@ export default function EffectsGroup({
 
       {/* Opacity */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-gray-300">
+        <div className="flex items-center justify-between text-xs text-zinc-300 font-medium">
           <span className="flex items-center gap-1.5">
-            <SunMedium className="w-3 h-3 text-gray-400" />
+            <SunMedium className="w-3.5 h-3.5 text-zinc-400" />
             <span>Opacity</span>
           </span>
           <ValueInput
@@ -224,22 +221,24 @@ export default function EffectsGroup({
           value={opacity}
           onChange={(e) => handleOpacityChange(parseFloat(e.target.value))}
           onPointerUp={() => handleOpacityCommit(opacity)}
-          className="w-full accent-indigo-500 cursor-pointer"
+          className="w-full accent-[#0099ff] cursor-pointer"
         />
       </div>
 
       {/* Backdrop Blur (Glassmorphism) */}
       <div className="space-y-1.5">
-        <label className="text-xs text-gray-400 block">Backdrop Blur (Glassmorphism)</label>
+        <label className="text-[11px] text-zinc-400 block font-medium">Backdrop Blur (Glassmorphism)</label>
         <div className="grid grid-cols-5 gap-1">
           {BLUR_PRESETS.map((b) => (
             <button
               key={b.val}
+              type="button"
+              aria-label={`Backdrop blur ${b.label}`}
               onClick={() => handleBlurChange(b.val)}
               className={`py-1 text-[11px] rounded transition-all cursor-pointer ${
                 activeBlur === b.val
-                  ? "bg-indigo-600 text-white font-medium shadow-sm"
-                  : "bg-gray-900 text-gray-400 hover:text-white border border-gray-800"
+                  ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                  : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
               }`}
             >
               {b.label}
@@ -250,19 +249,21 @@ export default function EffectsGroup({
 
       {/* Cursor Picker */}
       <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5 text-xs text-gray-400">
-          <MousePointer className="w-3 h-3" />
+        <div className="flex items-center gap-1.5 text-xs text-zinc-300 font-medium">
+          <MousePointer className="w-3.5 h-3.5 text-zinc-400" />
           <span>Cursor Type</span>
         </div>
         <div className="grid grid-cols-3 gap-1">
           {CURSOR_PRESETS.map((c) => (
             <button
               key={c.val}
+              type="button"
+              aria-label={`Cursor type ${c.label}`}
               onClick={() => handleCursorChange(c.val)}
               className={`py-1 text-[11px] rounded transition-all cursor-pointer ${
                 activeCursor === c.val
-                  ? "bg-indigo-600 text-white font-medium shadow-sm"
-                  : "bg-gray-900 text-gray-400 hover:text-white border border-gray-800"
+                  ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                  : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
               }`}
             >
               {c.label}
@@ -273,9 +274,9 @@ export default function EffectsGroup({
 
       {/* Transform: Rotate */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-gray-300">
+        <div className="flex items-center justify-between text-xs text-zinc-300 font-medium">
           <span className="flex items-center gap-1.5">
-            <RotateCw className="w-3 h-3 text-gray-400" />
+            <RotateCw className="w-3.5 h-3.5 text-zinc-400" />
             <span>Rotate</span>
           </span>
           <ValueInput
@@ -300,15 +301,15 @@ export default function EffectsGroup({
           value={rotate}
           onChange={(e) => handleRotateChange(parseFloat(e.target.value))}
           onPointerUp={() => handleRotateCommit(rotate)}
-          className="w-full accent-indigo-500 cursor-pointer"
+          className="w-full accent-[#0099ff] cursor-pointer"
         />
       </div>
 
       {/* Transform: Scale */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-gray-300">
+        <div className="flex items-center justify-between text-xs text-zinc-300 font-medium">
           <span className="flex items-center gap-1.5">
-            <ZoomIn className="w-3 h-3 text-gray-400" />
+            <ZoomIn className="w-3.5 h-3.5 text-zinc-400" />
             <span>Scale</span>
           </span>
           <ValueInput
@@ -333,7 +334,7 @@ export default function EffectsGroup({
           value={scale}
           onChange={(e) => handleScaleChange(parseFloat(e.target.value))}
           onPointerUp={() => handleScaleCommit(scale)}
-          className="w-full accent-indigo-500 cursor-pointer"
+          className="w-full accent-[#0099ff] cursor-pointer"
         />
       </div>
     </div>

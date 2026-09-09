@@ -10,7 +10,10 @@ import type { EditRecord, SaveRequestEdit, ThemeMap, LoadedFile } from "@/types"
 import { useSelectionStore } from "@/store/selection-store";
 import { useChangeSetStore } from "@/store/change-set-store";
 import { useUndoStore } from "@/store/undo-store";
+import { useSettingsStore } from "@/store/settings-store";
 import { clearResponsiveRegistry, syncResponsiveStylesheet } from "@/lib/dom/responsive-style-engine";
+import { generateUniqueId } from "@/lib/ast/unique-id";
+import { exportAsReactComponent } from "@/lib/export/html-to-jsx";
 import Toolbar, { type ViewportMode } from "./Toolbar";
 import DropZone from "./DropZone";
 import PreviewFrame, { type DropTargetInfo } from "./PreviewFrame";
@@ -73,11 +76,91 @@ export default function EditorStudio() {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const versionIdRef = useRef(0);
 
+  // Resizable Sidebars Width State
+  const [leftSidebarWidth, setLeftSidebarWidth] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("vse_left_panel_width");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 220 && parsed <= 550) return parsed;
+      }
+    }
+    return 320;
+  });
+
+  const [rightSidebarWidth, setRightSidebarWidth] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("vse_right_panel_width");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 260 && parsed <= 600) return parsed;
+      }
+    }
+    return 320;
+  });
+
+  const isResizingLeftRef = useRef(false);
+  const isResizingRightRef = useRef(false);
+
+  function handleLeftResizeStart(e: React.MouseEvent) {
+    e.preventDefault();
+    isResizingLeftRef.current = true;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    function handleMouseMove(ev: MouseEvent) {
+      if (!isResizingLeftRef.current) return;
+      const newW = Math.max(220, Math.min(550, ev.clientX));
+      setLeftSidebarWidth(newW);
+      localStorage.setItem("vse_left_panel_width", newW.toString());
+    }
+
+    function handleMouseUp() {
+      isResizingLeftRef.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    }
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  }
+
+  function handleRightResizeStart(e: React.MouseEvent) {
+    e.preventDefault();
+    isResizingRightRef.current = true;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    function handleMouseMove(ev: MouseEvent) {
+      if (!isResizingRightRef.current) return;
+      const newW = Math.max(260, Math.min(600, window.innerWidth - ev.clientX));
+      setRightSidebarWidth(newW);
+      localStorage.setItem("vse_right_panel_width", newW.toString());
+    }
+
+    function handleMouseUp() {
+      isResizingRightRef.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    }
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  }
+
   const hover = useSelectionStore((s) => s.hover);
   const select = useSelectionStore((s) => s.select);
   const edits = useChangeSetStore((s) => s.edits);
   const recordEdit = useChangeSetStore((s) => s.recordEdit);
   const clearEdits = useChangeSetStore((s) => s.clear);
+  const uiScale = useSettingsStore((s) => s.uiScale);
+  const increaseUiScale = useSettingsStore((s) => s.increaseUiScale);
+  const decreaseUiScale = useSettingsStore((s) => s.decreaseUiScale);
+  const resetUiScale = useSettingsStore((s) => s.resetUiScale);
 
   function nextVersionId(): number {
     versionIdRef.current += 1;
@@ -146,20 +229,61 @@ export default function EditorStudio() {
     recordEdit(record);
   }
 
+  function handleBatchEdit(records: EditRecord[]) {
+    if (records.length === 0) return;
+    useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
+    for (const r of records) {
+      recordEdit(r);
+    }
+  }
+
   function handleDeleteElement(el: Element) {
     const tagName = el.tagName.toLowerCase();
     if (tagName === "body" || tagName === "html") return;
     const path = computeStructuralPath(el, domAdapter);
+    const parent = el.parentElement;
+    const parentPath = parent ? computeStructuralPath(parent, domAdapter) : undefined;
+    const siblingIndex = parent ? Array.from(parent.children).indexOf(el) : undefined;
+    const serializedHtml = (el as HTMLElement).outerHTML;
+
+    // Selection transition:
+    // 1. Next sibling if exists
+    // 2. Previous sibling if next does not exist
+    // 3. Parent element if no siblings exist (and parent !== body && parent !== html)
+    // 4. Deselected if deleting root
+    const nextSibling = el.nextElementSibling;
+    const prevSibling = el.previousElementSibling;
+    let nextTarget: Element | null = null;
+    if (nextSibling) {
+      nextTarget = nextSibling;
+    } else if (prevSibling) {
+      nextTarget = prevSibling;
+    } else if (parent && parent.tagName.toLowerCase() !== "body" && parent.tagName.toLowerCase() !== "html") {
+      nextTarget = parent;
+    }
+
     useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
     recordEdit({
       kind: "delete",
       structuralPath: path,
+      parentPath,
+      siblingIndex,
+      serializedHtml,
       timestamp: new Date().toISOString(),
     });
     el.remove();
-    setSelectedEl(null);
-    setSelectedPath(null);
-    select(null);
+
+    if (nextTarget && nextTarget.isConnected) {
+      setSelectedEl(nextTarget);
+      const nextPath = computeStructuralPath(nextTarget, domAdapter);
+      setSelectedPath(nextPath);
+      select(nextPath);
+    } else {
+      setSelectedEl(null);
+      setSelectedPath(null);
+      select(null);
+    }
+
     setStatusMessage(`Deleted <${tagName}>`);
     setTimeout(() => setStatusMessage(null), 2500);
   }
@@ -168,15 +292,40 @@ export default function EditorStudio() {
     const tagName = el.tagName.toLowerCase();
     if (tagName === "body" || tagName === "html") return;
     const path = computeStructuralPath(el, domAdapter);
+    const parent = el.parentElement;
+    const parentPath = parent ? computeStructuralPath(parent, domAdapter) : undefined;
+    const siblingIndex = parent ? Array.from(parent.children).indexOf(el) + 1 : undefined;
+
+    const doc = el.ownerDocument;
+    const existingDocIds = new Set<string>();
+    doc.querySelectorAll("[id]").forEach((node) => {
+      if (node.id) existingDocIds.add(node.id);
+    });
+
+    const clone = el.cloneNode(true) as Element;
+    if (clone.id) {
+      clone.id = generateUniqueId(clone.id, existingDocIds);
+    }
+    clone.querySelectorAll("[id]").forEach((child) => {
+      if (child.id) {
+        child.id = generateUniqueId(child.id, existingDocIds);
+      }
+    });
+
+    el.after(clone);
+    const duplicatePath = computeStructuralPath(clone, domAdapter);
+
     useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
     recordEdit({
       kind: "duplicate",
       structuralPath: path,
+      parentPath,
+      siblingIndex,
+      duplicateId: clone.id || undefined,
+      duplicatePath,
       timestamp: new Date().toISOString(),
     });
-    const clone = el.cloneNode(true) as Element;
-    if (clone.id) clone.id = `${clone.id}-copy`;
-    el.after(clone);
+
     handleSelectElement(clone);
     setStatusMessage(`Duplicated <${tagName}>`);
     setTimeout(() => setStatusMessage(null), 2500);
@@ -185,17 +334,13 @@ export default function EditorStudio() {
   function handleMoveUp(el: Element) {
     const prev = el.previousElementSibling;
     if (!prev) return;
-    useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
-    el.parentElement?.insertBefore(el, prev);
-    handleSelectElement(el);
+    handleMoveElement(el, prev, "before");
   }
 
   function handleMoveDown(el: Element) {
     const next = el.nextElementSibling;
     if (!next) return;
-    useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
-    el.parentElement?.insertBefore(next, el);
-    handleSelectElement(el);
+    handleMoveElement(el, next, "after");
   }
 
   function handleMoveElement(sourceEl: Element, targetEl: Element, position: "before" | "after" | "inside") {
@@ -206,14 +351,15 @@ export default function EditorStudio() {
     const sourcePath = computeStructuralPath(sourceEl, domAdapter);
     const targetPath = computeStructuralPath(targetEl, domAdapter);
 
-    useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
-    recordEdit({
-      kind: "move",
-      structuralPath: sourcePath,
-      targetPath: targetPath,
-      position,
-      timestamp: new Date().toISOString(),
-    });
+    const oldParent = sourceEl.parentElement;
+    const oldParentPath = oldParent ? computeStructuralPath(oldParent, domAdapter) : undefined;
+    const oldSiblingIndex = oldParent ? Array.from(oldParent.children).indexOf(sourceEl) : undefined;
+
+    let moveToken = sourceEl.getAttribute("data-vse-move-token");
+    if (!moveToken) {
+      moveToken = `move-elem-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      sourceEl.setAttribute("data-vse-move-token", moveToken);
+    }
 
     if (position === "inside") {
       targetEl.appendChild(sourceEl);
@@ -222,6 +368,27 @@ export default function EditorStudio() {
     } else {
       targetEl.parentElement?.insertBefore(sourceEl, targetEl.nextSibling);
     }
+
+    const newParent = sourceEl.parentElement;
+    const newParentPath = newParent ? computeStructuralPath(newParent, domAdapter) : undefined;
+    const newSiblingIndex = newParent ? Array.from(newParent.children).indexOf(sourceEl) : undefined;
+    const newPath = computeStructuralPath(sourceEl, domAdapter);
+
+    useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
+    recordEdit({
+      kind: "move",
+      structuralPath: sourcePath,
+      targetPath: targetPath,
+      position,
+      oldParentPath,
+      oldSiblingIndex,
+      newParentPath,
+      newSiblingIndex,
+      newPath,
+      moveToken,
+      elementId: sourceEl.id || undefined,
+      timestamp: new Date().toISOString(),
+    });
 
     handleSelectElement(sourceEl);
     setStatusMessage(`Moved <${tagName}> ${position} <${targetTag}>`);
@@ -235,32 +402,65 @@ export default function EditorStudio() {
     if (!target) return;
 
     const path = computeStructuralPath(target, domAdapter);
+    const temp = doc.createElement("div");
+    temp.innerHTML = snippet;
+    const newChild = temp.firstElementChild;
+    if (!newChild) return;
+
+    if (position === "inside") {
+      target.appendChild(newChild);
+    } else if (position === "before" && target.parentElement && target.tagName.toLowerCase() !== "body") {
+      target.parentElement.insertBefore(newChild, target);
+    } else if (position === "after" && target.parentElement && target.tagName.toLowerCase() !== "body") {
+      target.parentElement.insertBefore(newChild, target.nextSibling);
+    } else {
+      doc.body.appendChild(newChild);
+    }
+
+    const insertedPath = computeStructuralPath(newChild, domAdapter);
+    const parentEl = newChild.parentElement;
+    const parentPath = parentEl ? computeStructuralPath(parentEl, domAdapter) : undefined;
+    const siblingIndex = parentEl ? Array.from(parentEl.children).indexOf(newChild) : undefined;
+
     useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
     recordEdit({
       kind: "insert",
       structuralPath: path,
       position,
       snippet,
+      insertedPath,
+      parentPath,
+      siblingIndex,
       timestamp: new Date().toISOString(),
     });
 
-    const temp = doc.createElement("div");
-    temp.innerHTML = snippet;
-    const newChild = temp.firstElementChild;
-    if (newChild) {
-      if (position === "inside") {
-        target.appendChild(newChild);
-      } else if (position === "before" && target.parentElement && target.tagName.toLowerCase() !== "body") {
-        target.parentElement.insertBefore(newChild, target);
-      } else if (position === "after" && target.parentElement && target.tagName.toLowerCase() !== "body") {
-        target.parentElement.insertBefore(newChild, target.nextSibling);
-      } else {
-        doc.body.appendChild(newChild);
-      }
-      handleSelectElement(newChild);
-      setStatusMessage(`Added <${newChild.tagName.toLowerCase()}> into <${target.tagName.toLowerCase()}>`);
-      setTimeout(() => setStatusMessage(null), 2500);
-    }
+    handleSelectElement(newChild);
+    setStatusMessage(`Added <${newChild.tagName.toLowerCase()}> into <${target.tagName.toLowerCase()}>`);
+    setTimeout(() => setStatusMessage(null), 2500);
+  }
+
+  function handleDirectTextEdit(el: Element, oldText: string, newText: string) {
+    const path = computeStructuralPath(el, domAdapter);
+    useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
+    recordEdit({
+      kind: "text",
+      structuralPath: path,
+      property: "text-content",
+      oldText,
+      newText,
+      timestamp: new Date().toISOString(),
+    });
+    setStatusMessage("Text updated");
+    setTimeout(() => setStatusMessage(null), 2000);
+  }
+
+  function handleDiscardAll() {
+    setSelectedEl(null);
+    setSelectedPath(null);
+    select(null);
+    setLoadToken((t) => t + 1);
+    setStatusMessage("All changes discarded");
+    setTimeout(() => setStatusMessage(null), 2500);
   }
 
   function handleInsertPrimitive(snippet: string, position: "inside" | "after" | "before") {
@@ -286,6 +486,23 @@ export default function EditorStudio() {
     try {
       await navigator.clipboard.writeText(code);
       setStatusMessage("HTML copied to clipboard!");
+      setTimeout(() => setStatusMessage(null), 3000);
+    } catch {}
+  }
+
+  async function handleCopyJsx() {
+    if (!openFile) return;
+    let code = openFile.content;
+    if (edits.length > 0) {
+      const res = applyEditsClientSide(openFile.content, edits.map(toSaveRequestEdit));
+      if (res.ok) code = res.html;
+    }
+    const cleanName = openFile.name.replace(/\.html?$/i, "").replace(/[^a-zA-Z0-9]/g, "_");
+    const compName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1) || "ExportedComponent";
+    const jsxCode = exportAsReactComponent(code, { componentName: compName, typescript: true });
+    try {
+      await navigator.clipboard.writeText(jsxCode);
+      setStatusMessage("React JSX / TSX copied to clipboard!");
       setTimeout(() => setStatusMessage(null), 3000);
     } catch {}
   }
@@ -334,16 +551,22 @@ export default function EditorStudio() {
     }
   }
 
-  // Keyboard Shortcuts (Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z / Delete / Duplicate / Escape / ?)
+  // Keyboard Shortcuts (Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z / Delete / Duplicate / Escape / ? / Ctrl++ / Ctrl+-)
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const activeEl = (e.target as HTMLElement) || document.activeElement;
       const isTyping =
         activeEl?.tagName === "INPUT" ||
         activeEl?.tagName === "TEXTAREA" ||
+        activeEl?.tagName === "SELECT" ||
+        activeEl?.isContentEditable === true ||
         activeEl?.getAttribute("contenteditable") === "true";
 
       if (e.key === "Escape") {
+        if (isTyping && activeEl && "blur" in activeEl) {
+          (activeEl as HTMLElement).blur();
+          return;
+        }
         setSelectedEl(null);
         setSelectedPath(null);
         select(null);
@@ -369,7 +592,26 @@ export default function EditorStudio() {
         return;
       }
 
-      if (!isModifier) return;
+      if (isModifier && !isTyping) {
+        // UI Scaling via Ctrl + + / Ctrl + - / Ctrl + 0
+        if (e.key === "+" || e.key === "=" || e.key === "NumpadAdd") {
+          e.preventDefault();
+          increaseUiScale();
+          return;
+        }
+        if (e.key === "-" || e.key === "_" || e.key === "NumpadSubtract") {
+          e.preventDefault();
+          decreaseUiScale();
+          return;
+        }
+        if (e.key === "0" || e.key === "Numpad0") {
+          e.preventDefault();
+          resetUiScale();
+          return;
+        }
+      }
+
+      if (!isModifier || isTyping) return;
 
       const doc = iframeEl?.contentDocument ?? null;
 
@@ -399,7 +641,7 @@ export default function EditorStudio() {
       iframeDoc?.removeEventListener("keydown", handleKeyDown);
       iframeWin?.removeEventListener("keydown", handleKeyDown);
     };
-  }, [iframeEl, selectedEl]);
+  }, [iframeEl, selectedEl, increaseUiScale, decreaseUiScale, resetUiScale]);
 
   // Window drag/drop safety
   useEffect(() => {
@@ -425,18 +667,91 @@ export default function EditorStudio() {
     setViewport(mode);
   }
 
+  // Effective viewport for the property panel: in "all" mode, default to "desktop" editing
+  const [activeEditViewport, setActiveEditViewport] = useState<"desktop" | "tablet" | "mobile">("desktop");
+
+  // Canvas pan state
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const isPanningRef = useRef(false);
+  const panStartRef = useRef({ x: 0, y: 0, ox: 0, oy: 0 });
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  // The viewport the property panel should use
+  const propertyViewport = viewport === "all" ? activeEditViewport : (viewport as "desktop" | "tablet" | "mobile");
+
+  // Ctrl+Scroll Canvas Zoom handler (intercepts native browser page zoom)
+  useEffect(() => {
+    function handleWheel(e: WheelEvent) {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+        setZoom((z) => Math.min(Math.max(Number((z + delta).toFixed(2)), 0.25), 3));
+      }
+    }
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    const iframeDoc = iframeEl?.contentDocument;
+    const iframeWin = iframeEl?.contentWindow;
+    iframeDoc?.addEventListener("wheel", handleWheel, { passive: false });
+    iframeWin?.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      iframeDoc?.removeEventListener("wheel", handleWheel);
+      iframeWin?.removeEventListener("wheel", handleWheel);
+    };
+  }, [iframeEl]);
+
+  // Middle-click / Space+drag pan handler
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    function handleDown(e: PointerEvent) {
+      if (e.button === 1 || (e.button === 0 && e.target === canvas)) {
+        isPanningRef.current = true;
+        panStartRef.current = { x: e.clientX, y: e.clientY, ox: panOffset.x, oy: panOffset.y };
+        canvas!.setPointerCapture(e.pointerId);
+      }
+    }
+    function handleMove(e: PointerEvent) {
+      if (!isPanningRef.current) return;
+      const dx = e.clientX - panStartRef.current.x;
+      const dy = e.clientY - panStartRef.current.y;
+      setPanOffset({ x: panStartRef.current.ox + dx, y: panStartRef.current.oy + dy });
+    }
+    function handleUp() {
+      isPanningRef.current = false;
+    }
+    canvas.addEventListener("pointerdown", handleDown);
+    canvas.addEventListener("pointermove", handleMove);
+    canvas.addEventListener("pointerup", handleUp);
+    return () => {
+      canvas.removeEventListener("pointerdown", handleDown);
+      canvas.removeEventListener("pointermove", handleMove);
+      canvas.removeEventListener("pointerup", handleUp);
+    };
+  }, [panOffset]);
+
   // Synchronize active viewport mode with the preview iframe document element for live style isolation
   useEffect(() => {
     if (!iframeEl || !iframeEl.contentDocument) return;
     const doc = iframeEl.contentDocument;
     if (doc.documentElement) {
-      doc.documentElement.setAttribute("data-vse-viewport", viewport);
+      // In "all" mode, set viewport to "desktop" on the base iframe
+      doc.documentElement.setAttribute("data-vse-viewport", viewport === "all" ? "desktop" : viewport);
     }
     syncResponsiveStylesheet(doc);
   }, [viewport, iframeEl]);
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-slate-100 dark:bg-[#090909] text-slate-900 dark:text-white overflow-hidden font-sans transition-colors">
+    <div
+      style={{
+        zoom: uiScale,
+        width: uiScale === 1 ? "100vw" : `${(100 / uiScale).toFixed(3)}vw`,
+        height: uiScale === 1 ? "100vh" : `${(100 / uiScale).toFixed(3)}vh`,
+      }}
+      className="flex flex-col bg-slate-100 dark:bg-[#090909] text-slate-900 dark:text-white overflow-hidden font-sans transition-colors"
+    >
       <Toolbar
         fileName={openFile?.name ?? null}
         viewport={viewport}
@@ -447,12 +762,13 @@ export default function EditorStudio() {
         onToggleHistory={() => setHistoryOpen((o) => !o)}
         onOpenReview={() => setReviewOpen(true)}
         onCopyCode={handleCopyCode}
+        onCopyJsx={handleCopyJsx}
         iframeDocument={iframeEl?.contentDocument ?? null}
         leftSidebarOpen={leftSidebarOpen}
         onToggleLeftSidebar={() => setLeftSidebarOpen((o) => !o)}
         zoom={zoom}
-        onZoomIn={() => setZoom((z) => Math.min(Number((z + 0.1).toFixed(2)), 1.5))}
-        onZoomOut={() => setZoom((z) => Math.max(Number((z - 0.1).toFixed(2)), 0.5))}
+        onZoomIn={() => setZoom((z) => Math.min(Number((z + 0.1).toFixed(2)), 2))}
+        onZoomOut={() => setZoom((z) => Math.max(Number((z - 0.1).toFixed(2)), 0.25))}
         onZoomReset={() => setZoom(1)}
         onOpenShortcuts={() => setShortcutsOpen(true)}
       />
@@ -460,38 +776,47 @@ export default function EditorStudio() {
       <div className="flex flex-1 min-h-0 relative">
         {/* Left Sidebar: Layers Tree & Component Blocks */}
         {openFile && leftSidebarOpen && (
-          <aside className="w-80 border-r border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl animate-in slide-in-from-left-4 duration-200">
+          <aside
+            style={{ width: `${leftSidebarWidth}px` }}
+            className="border-r border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl animate-in slide-in-from-left-4 duration-200 relative"
+          >
             {/* Tab Header */}
-            <div className="flex items-center justify-between p-2.5 border-b border-slate-200 dark:border-[#262626] bg-slate-50 dark:bg-[#090909]">
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#141414] p-0.5 rounded-full border border-slate-200 dark:border-[#262626]">
+            <div className="flex items-center justify-between p-2 border-b border-slate-200 dark:border-[#262626] bg-slate-50 dark:bg-[#090909]">
+              <div className="flex items-center gap-0.5 bg-slate-200/70 dark:bg-[#141414] p-0.5 rounded-full border border-slate-300/60 dark:border-[#262626]">
                 <button
+                  type="button"
                   onClick={() => setLeftSidebarTab("layers")}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                  aria-label="Layers Tree tab"
+                  className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                     leftSidebarTab === "layers"
-                      ? "bg-white dark:bg-[#262626] text-slate-900 dark:text-white shadow-sm"
-                      : "text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
+                      ? "bg-white dark:bg-[#1c1c1c] text-slate-900 dark:text-white shadow-2xs"
+                      : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
                   }`}
                 >
                   <Layers className="w-3.5 h-3.5" />
                   <span>Layers</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setLeftSidebarTab("primitives")}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                  aria-label="Primitives tab"
+                  className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                     leftSidebarTab === "primitives"
-                      ? "bg-white dark:bg-[#262626] text-slate-900 dark:text-white shadow-sm"
-                      : "text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
+                      ? "bg-white dark:bg-[#1c1c1c] text-slate-900 dark:text-white shadow-2xs"
+                      : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
                   }`}
                 >
                   <PlusSquare className="w-3.5 h-3.5" />
                   <span>Primitives</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setLeftSidebarTab("templates")}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                  aria-label="Templates tab"
+                  className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                     leftSidebarTab === "templates"
-                      ? "bg-white dark:bg-[#262626] text-slate-900 dark:text-white shadow-sm"
-                      : "text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
+                      ? "bg-white dark:bg-[#1c1c1c] text-slate-900 dark:text-white shadow-2xs"
+                      : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
@@ -500,8 +825,10 @@ export default function EditorStudio() {
               </div>
 
               <button
+                type="button"
                 onClick={() => setLeftSidebarOpen(false)}
-                className="p-1.5 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-[#1c1c1c] cursor-pointer"
+                aria-label="Collapse sidebar"
+                className="p-1 rounded-full text-slate-500 hover:text-slate-800 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-slate-200 dark:hover:bg-[#1c1c1c] cursor-pointer transition-colors"
                 title="Collapse sidebar"
               >
                 <PanelLeftClose className="w-4 h-4" />
@@ -530,69 +857,150 @@ export default function EditorStudio() {
           </aside>
         )}
 
+        {/* Left Sidebar Drag Resize Handle */}
+        {openFile && leftSidebarOpen && (
+          <div
+            onMouseDown={handleLeftResizeStart}
+            className="w-1.5 hover:w-2.5 bg-transparent hover:bg-[#0099ff]/40 active:bg-[#0099ff] cursor-col-resize z-30 transition-colors group shrink-0 relative flex items-center justify-center -ml-1 select-none"
+            title="Drag to resize left panel"
+          >
+            <div className="w-0.5 h-10 bg-slate-300 dark:bg-[#333333] group-hover:bg-[#0099ff] rounded-full transition-colors" />
+          </div>
+        )}
+
         {/* Main Canvas Area + Breadcrumbs */}
         <div className="flex-1 flex flex-col min-w-0 relative">
-          <div className="flex-1 relative flex items-center justify-center canvas-dot-grid p-2 sm:p-4 overflow-auto">
+          <div
+            ref={canvasRef}
+            className="flex-1 relative flex items-center justify-center canvas-dot-grid p-2 sm:p-4 overflow-auto"
+            style={{ cursor: isPanningRef.current ? "grabbing" : undefined }}
+          >
             {openFile ? (
               <div
                 style={{
-                  transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+                  transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
                   transformOrigin: "center center",
-                  transition: "transform 0.15s ease-out",
+                  transition: isPanningRef.current ? "none" : "transform 0.15s ease-out",
                 }}
                 className="w-full h-full flex items-center justify-center"
               >
-                <div className="w-full h-full flex flex-col items-center justify-center relative">
-                  {viewport !== "desktop" && (
-                    <div className="mb-2 px-3 py-1 rounded-full bg-[#141414]/90 border border-[#262626] text-[11px] font-mono text-zinc-400 flex items-center gap-1.5 shadow-md select-none shrink-0">
-                      <span>{viewport === "tablet" ? "Tablet View" : "Mobile View"}</span>
-                      <span className="text-zinc-600">•</span>
-                      <span className="text-[#0099ff] font-semibold">
-                        {viewport === "tablet" ? "768 × 1024" : "375 × 812"}
-                      </span>
-                    </div>
-                  )}
+                {viewport === "all" ? (
+                  /* ========== Multi-Viewport: 3 Artboards Side-by-Side ========== */
+                  <div className="flex items-start gap-8 px-4">
+                    {(["desktop", "tablet", "mobile"] as const).map((vp) => {
+                      const vpWidth = vp === "desktop" ? "1200px" : vp === "tablet" ? "768px" : "375px";
+                      const vpLabel = vp === "desktop" ? "Desktop" : vp === "tablet" ? "Tablet" : "Phone";
+                      const vpDims = vp === "desktop" ? "1200 × ∞" : vp === "tablet" ? "768 × 1024" : "375 × 812";
+                      const vpColor = vp === "desktop" ? "text-[#0099ff]" : vp === "tablet" ? "text-amber-400" : "text-emerald-400";
+                      const vpBorderColor = activeEditViewport === vp ? "border-[#0099ff] ring-1 ring-[#0099ff]/30 shadow-2xl" : "border-slate-200 dark:border-[#262626]";
+                      const maxH = vp === "desktop" ? "max-h-[80vh]" : vp === "tablet" ? "max-h-[1024px]" : "max-h-[812px]";
 
-                  <div
-                    className={`bg-white relative transition-all duration-300 shadow-2xl flex flex-col ${
-                      viewport === "desktop"
-                        ? "w-full h-full"
-                        : viewport === "tablet"
-                        ? "w-[768px] h-[calc(100vh-10rem)] max-h-[1024px] rounded-2xl border-[8px] border-[#1c1c1c] shadow-black/80 overflow-hidden shrink-0"
-                        : "w-[375px] h-[calc(100vh-10rem)] max-h-[812px] rounded-[2.5rem] border-[10px] border-[#1c1c1c] shadow-black/80 overflow-hidden shrink-0"
-                    }`}
-                  >
-                    {/* Phone Notch/Speaker */}
-                    {viewport === "mobile" && (
-                      <div className="w-full bg-white flex justify-center pt-2 pb-1 z-10 shrink-0">
-                        <div className="w-24 h-4 bg-[#141414] rounded-full flex items-center justify-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-[#262626]"></div>
-                          <div className="w-10 h-1.5 rounded-full bg-[#262626]"></div>
+                      return (
+                        <div key={vp} className="flex flex-col items-center shrink-0">
+                          {/* Artboard Header */}
+                          <button
+                            type="button"
+                            onClick={() => setActiveEditViewport(vp)}
+                            aria-label={`Select ${vpLabel} viewport for editing`}
+                            className={`mb-2 px-3 py-1 rounded-full border text-[11px] font-mono flex items-center gap-1.5 shadow-2xs select-none cursor-pointer transition-all ${
+                              activeEditViewport === vp
+                                ? "bg-white dark:bg-[#1c1c1c] border-[#0099ff] text-slate-900 dark:text-white font-semibold shadow-md"
+                                : "bg-white/80 dark:bg-[#141414]/80 border-slate-200 dark:border-[#262626] text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+                            }`}
+                          >
+                            <span className={`font-semibold ${vpColor}`}>▶</span>
+                            <span>{vpLabel}</span>
+                            <span className="text-slate-400 dark:text-zinc-600">•</span>
+                            <span className={vpColor}>{vpDims}</span>
+                          </button>
+
+                          {/* Artboard Frame */}
+                          <div
+                            className={`bg-white relative shadow-2xl flex flex-col border-2 rounded-xl overflow-hidden transition-all ${vpBorderColor} ${maxH}`}
+                            style={{ width: vpWidth, height: vp === "desktop" ? "calc(100vh - 12rem)" : vp === "tablet" ? "calc(100vh - 12rem)" : "calc(100vh - 12rem)" }}
+                          >
+                            <div className="flex-1 w-full h-full relative overflow-hidden">
+                              <PreviewFrame
+                                key={`${loadToken}-${vp}`}
+                                html={openFile.content}
+                                onIframeReady={(iframe) => {
+                                  if (vp === "desktop") setIframeEl(iframe);
+                                  if (iframe?.contentDocument?.documentElement) {
+                                    iframe.contentDocument.documentElement.setAttribute("data-vse-viewport", vp);
+                                    syncResponsiveStylesheet(iframe.contentDocument);
+                                  }
+                                }}
+                                onHoverElement={handleHoverElement}
+                                onSelectElement={(el) => {
+                                  setActiveEditViewport(vp);
+                                  handleSelectElement(el);
+                                }}
+                                onDragOverTarget={setDropTargetInfo}
+                                onDropOnTarget={handleDropOnTarget}
+                                onMoveLayerOnTarget={handleMoveElement}
+                                onTextEdit={handleDirectTextEdit}
+                              />
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    )}
-
-                    <div className="flex-1 w-full h-full relative overflow-hidden">
-                      <PreviewFrame
-                        key={loadToken}
-                        html={openFile.content}
-                        onIframeReady={setIframeEl}
-                        onHoverElement={handleHoverElement}
-                        onSelectElement={handleSelectElement}
-                        onDragOverTarget={setDropTargetInfo}
-                        onDropOnTarget={handleDropOnTarget}
-                        onMoveLayerOnTarget={handleMoveElement}
-                      />
-                    </div>
-
-                    {/* Phone Home Bar */}
-                    {viewport === "mobile" && (
-                      <div className="w-full bg-white py-1 flex justify-center z-10 shrink-0">
-                        <div className="w-28 h-1 bg-black/40 rounded-full"></div>
-                      </div>
-                    )}
+                      );
+                    })}
                   </div>
-                </div>
+                ) : (
+                  /* ========== Single Viewport ========== */
+                  <div className="w-full h-full flex flex-col items-center justify-center relative">
+                    {viewport !== "desktop" && (
+                      <div className="mb-2 px-3 py-1 rounded-full bg-white/90 dark:bg-[#141414]/90 border border-slate-200 dark:border-[#262626] text-[11px] font-mono text-slate-600 dark:text-zinc-400 flex items-center gap-1.5 shadow-md select-none shrink-0">
+                        <span>{viewport === "tablet" ? "Tablet View" : "Mobile View"}</span>
+                        <span className="text-slate-400 dark:text-zinc-600">•</span>
+                        <span className="text-[#0099ff] font-semibold">
+                          {viewport === "tablet" ? "768 × 1024" : "375 × 812"}
+                        </span>
+                      </div>
+                    )}
+
+                    <div
+                      className={`bg-white relative transition-all duration-300 shadow-2xl flex flex-col ${
+                        viewport === "desktop"
+                          ? "w-full h-full"
+                          : viewport === "tablet"
+                          ? "w-[768px] h-[calc(100vh-10rem)] max-h-[1024px] rounded-2xl border-[8px] border-slate-900 dark:border-[#1c1c1c] shadow-2xl overflow-hidden shrink-0"
+                          : "w-[375px] h-[calc(100vh-10rem)] max-h-[812px] rounded-[2.5rem] border-[10px] border-slate-900 dark:border-[#1c1c1c] shadow-2xl overflow-hidden shrink-0"
+                      }`}
+                    >
+                      {/* Phone Notch/Speaker */}
+                      {viewport === "mobile" && (
+                        <div className="w-full bg-white flex justify-center pt-2 pb-1 z-10 shrink-0">
+                          <div className="w-24 h-4 bg-[#141414] rounded-full flex items-center justify-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#262626]"></div>
+                            <div className="w-10 h-1.5 rounded-full bg-[#262626]"></div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex-1 w-full h-full relative overflow-hidden">
+                        <PreviewFrame
+                          key={loadToken}
+                          html={openFile.content}
+                          onIframeReady={setIframeEl}
+                          onHoverElement={handleHoverElement}
+                          onSelectElement={handleSelectElement}
+                          onDragOverTarget={setDropTargetInfo}
+                          onDropOnTarget={handleDropOnTarget}
+                          onMoveLayerOnTarget={handleMoveElement}
+                          onTextEdit={handleDirectTextEdit}
+                        />
+                      </div>
+
+                      {/* Phone Home Bar */}
+                      {viewport === "mobile" && (
+                        <div className="w-full bg-white py-1 flex justify-center z-10 shrink-0">
+                          <div className="w-28 h-1 bg-black/40 rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <DropZone onFileLoaded={handleFileLoaded} />
@@ -618,19 +1026,37 @@ export default function EditorStudio() {
           structuralPath={selectedPath}
           theme={theme}
           zoom={zoom}
+          viewport={propertyViewport}
           onEdit={handleEdit}
+          onBatchEdit={handleBatchEdit}
+          onMoveElement={handleMoveElement}
         />
+
+        {/* Right Sidebar Drag Resize Handle */}
+        {openFile && (
+          <div
+            onMouseDown={handleRightResizeStart}
+            className="w-1.5 hover:w-2.5 bg-transparent hover:bg-[#0099ff]/40 active:bg-[#0099ff] cursor-col-resize z-30 transition-colors group shrink-0 relative flex items-center justify-center -mr-1 select-none"
+            title="Drag to resize property panel"
+          >
+            <div className="w-0.5 h-10 bg-slate-300 dark:bg-[#333333] group-hover:bg-[#0099ff] rounded-full transition-colors" />
+          </div>
+        )}
 
         {/* Right Sidebar: Property Panel */}
         {openFile && (
-          <aside className="w-80 border-l border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl">
+          <aside
+            style={{ width: `${rightSidebarWidth}px` }}
+            className="border-l border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl"
+          >
             <div className="flex-1 overflow-y-auto">
               <PropertyPanel
                 element={selectedEl}
                 structuralPath={selectedPath}
                 theme={theme}
-                viewport={viewport}
+                viewport={propertyViewport}
                 onEdit={handleEdit}
+
                 onDelete={handleDeleteElement}
                 onDuplicate={handleDuplicateElement}
                 onMoveUp={handleMoveUp}
@@ -647,6 +1073,7 @@ export default function EditorStudio() {
           iframeDocument={iframeEl?.contentDocument ?? null}
           onSave={handleSave}
           onClose={() => setReviewOpen(false)}
+          onDiscardAll={handleDiscardAll}
         />
       )}
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { EditRecord, ThemeMap } from "@/types";
+import type { EditableProperty, EditRecord, ThemeMap } from "@/types";
 import type { ViewportMode } from "../Toolbar";
 import { Move, Pin, Layers, Eye, EyeOff, Scissors } from "lucide-react";
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
@@ -95,7 +95,7 @@ export default function PositionGroup({
         const resp = getResponsivePropertyInfo(element!, structuralPath, prop, viewport);
         if (resp.value) return resp.value;
       }
-      return readCurrentValue(element!, prop, theme) || "";
+      return readCurrentValue(element!, prop as EditableProperty, theme) || "";
     }
 
     const pos = getVal("position") || computed.position || "static";
@@ -122,10 +122,55 @@ export default function PositionGroup({
 
   if (!element || !structuralPath) return null;
 
+  const win = element.ownerDocument?.defaultView || window;
+  const parentEl = element.parentElement;
+  const isParentStatic =
+    parentEl &&
+    parentEl.tagName.toLowerCase() !== "body" &&
+    parentEl.tagName.toLowerCase() !== "html" &&
+    win.getComputedStyle(parentEl).position === "static";
+
   function handlePositionChange(mode: string) {
+    if (position === "static" && mode === "absolute") {
+      // Jump-free conversion: preserve rendered offsets
+      const targetEl = element as HTMLElement;
+      const currentLeft = targetEl.offsetLeft || 0;
+      const currentTop = targetEl.offsetTop || 0;
+
+      setPosition(mode);
+      applyLiveStyle(element!, "position", mode, theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "position", mode, theme, onEdit, undefined, undefined, viewport);
+
+      setLeft({ amount: currentLeft, unit: "px" });
+      setTop({ amount: currentTop, unit: "px" });
+      applyLiveStyle(element!, "left", `${currentLeft}px`, theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "left", `${currentLeft}px`, theme, onEdit, undefined, undefined, viewport);
+      applyLiveStyle(element!, "top", `${currentTop}px`, theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "top", `${currentTop}px`, theme, onEdit, undefined, undefined, viewport);
+      return;
+    }
+
+    if (position === "static" && mode === "relative") {
+      // Relative switch: elements stay in place with 0px offsets
+      setPosition(mode);
+      applyLiveStyle(element!, "position", mode, theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "position", mode, theme, onEdit, undefined, undefined, viewport);
+      return;
+    }
+
     setPosition(mode);
     applyLiveStyle(element!, "position", mode, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "position", mode, theme, onEdit, undefined, undefined, viewport);
+  }
+
+  function handleMakeParentRelative() {
+    if (!parentEl) return;
+    (parentEl as HTMLElement).style.position = "relative";
+    if (theme.mode !== "none") {
+      parentEl.classList.add("relative");
+    }
+    // Force re-render to update warning
+    setPosition((p) => p);
   }
 
   function handleZIndexChange(val: string) {
@@ -151,33 +196,39 @@ export default function PositionGroup({
     commitStyleChange(element!, structuralPath!, property, valStr, theme, onEdit, undefined, undefined, viewport);
   }
 
-  function handlePinAll() {
-    setTop({ amount: 0, unit: "px" });
-    setRight({ amount: 0, unit: "px" });
-    setBottom({ amount: 0, unit: "px" });
-    setLeft({ amount: 0, unit: "px" });
-
-    commitStyleChange(element!, structuralPath!, "top", "0px", theme, onEdit, undefined, undefined, viewport);
-    commitStyleChange(element!, structuralPath!, "right", "0px", theme, onEdit, undefined, undefined, viewport);
-    commitStyleChange(element!, structuralPath!, "bottom", "0px", theme, onEdit, undefined, undefined, viewport);
-    commitStyleChange(element!, structuralPath!, "left", "0px", theme, onEdit, undefined, undefined, viewport);
+  function pinTo(mode: "top" | "right" | "bottom" | "left" | "horizontal" | "vertical" | "all") {
+    if (mode === "top" || mode === "vertical" || mode === "all") {
+      setTop({ amount: 0, unit: "px" });
+      applyLiveStyle(element!, "top", "0px", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "top", "0px", theme, onEdit, undefined, undefined, viewport);
+    }
+    if (mode === "right" || mode === "horizontal" || mode === "all") {
+      setRight({ amount: 0, unit: "px" });
+      applyLiveStyle(element!, "right", "0px", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "right", "0px", theme, onEdit, undefined, undefined, viewport);
+    }
+    if (mode === "bottom" || mode === "vertical" || mode === "all") {
+      setBottom({ amount: 0, unit: "px" });
+      applyLiveStyle(element!, "bottom", "0px", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "bottom", "0px", theme, onEdit, undefined, undefined, viewport);
+    }
+    if (mode === "left" || mode === "horizontal" || mode === "all") {
+      setLeft({ amount: 0, unit: "px" });
+      applyLiveStyle(element!, "left", "0px", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "left", "0px", theme, onEdit, undefined, undefined, viewport);
+    }
   }
 
   const isPositioned = position !== "static";
 
   return (
-    <div className="p-4 border-b border-slate-200 dark:border-gray-800 space-y-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-gray-400">
-        <Move className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-        <span>Position & Layering</span>
-      </div>
-
+    <div className="p-3.5 space-y-3.5">
       {/* Position Selector */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-gray-400">
+      <div className="space-y-1">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
           <span>Position Type</span>
           {position === "absolute" && (
-            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1">
+            <span className="text-[10px] text-[#0099ff] font-medium flex items-center gap-1">
               <Move className="w-3 h-3" /> Draggable on Canvas
             </span>
           )}
@@ -186,11 +237,13 @@ export default function PositionGroup({
           {POSITION_MODES.map((m) => (
             <button
               key={m.val}
+              type="button"
               onClick={() => handlePositionChange(m.val)}
-              className={`py-1 text-[11px] rounded transition-all cursor-pointer ${
+              aria-label={`Position ${m.label}`}
+              className={`py-1 text-[11px] rounded-lg transition-all cursor-pointer ${
                 position === m.val
-                  ? "bg-indigo-600 text-white font-medium shadow-sm"
-                  : "bg-slate-100 dark:bg-gray-900 text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-gray-800 hover:bg-slate-200 dark:hover:bg-gray-800"
+                  ? "bg-[#0099ff] text-white font-semibold shadow-2xs"
+                  : "bg-slate-100 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#262626] hover:bg-slate-200 dark:hover:bg-[#1c1c1c]"
               }`}
             >
               {m.label}
@@ -202,7 +255,7 @@ export default function PositionGroup({
           <button
             type="button"
             onClick={() => handlePositionChange("absolute")}
-            className="w-full mt-1.5 py-1 px-2 text-[11px] rounded-lg bg-indigo-50 dark:bg-indigo-600/15 hover:bg-indigo-100 dark:hover:bg-indigo-600/25 border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-300 font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            className="w-full mt-1.5 py-1 px-2 text-[11px] rounded-lg bg-[#0099ff]/15 hover:bg-[#0099ff]/25 border border-[#0099ff]/30 text-[#0099ff] font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <Move className="w-3 h-3" />
             <span>Make Absolute &amp; Drag on Canvas</span>
@@ -210,25 +263,113 @@ export default function PositionGroup({
         )}
       </div>
 
+      {/* Static Position Notice (BUG-027) */}
+      {!isPositioned && (
+
+        <div className="p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl space-y-2 text-xs">
+          <div className="font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+            <span>⚠️ Static elements ignore offsets</span>
+          </div>
+          <p className="text-slate-600 dark:text-gray-400 text-[11px] leading-relaxed">
+            Offsets and edge pinning require Relative, Absolute, Fixed, or Sticky positioning.
+          </p>
+          <div className="flex gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => handlePositionChange("relative")}
+              className="flex-1 py-1 px-2 text-[11px] rounded bg-white dark:bg-gray-900 border border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10 font-medium cursor-pointer"
+            >
+              Make Relative
+            </button>
+            <button
+              type="button"
+              aria-label="Make element absolute position"
+              onClick={() => handlePositionChange("absolute")}
+              className="flex-1 py-1 px-2 text-[11px] rounded bg-[#0099ff] text-white hover:bg-[#33adff] font-medium cursor-pointer"
+            >
+              Make Absolute
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Parent Positioning Context Advisory (BUG-027) */}
+      {position === "absolute" && isParentStatic && (
+        <div className="p-2.5 bg-[#0099ff]/10 border border-[#0099ff]/30 rounded-xl space-y-1.5 text-xs">
+          <div className="font-medium text-[#0099ff] text-[11px] flex items-center justify-between">
+            <span>ℹ️ Parent container is static</span>
+            <button
+              type="button"
+              aria-label="Make parent container relative position"
+              onClick={handleMakeParentRelative}
+              className="px-2 py-0.5 rounded bg-[#0099ff] text-white text-[10px] font-medium hover:bg-[#33adff] cursor-pointer"
+            >
+              Make Parent Relative
+            </button>
+          </div>
+          <p className="text-[10px] text-zinc-400">
+            Absolute offsets currently resolve against the nearest positioned ancestor. Making the parent relative binds offsets to the parent container.
+          </p>
+        </div>
+      )}
+
       {/* Insets Pinning (Top, Right, Bottom, Left) */}
       {isPositioned && (
-        <div className="p-3 bg-slate-50 dark:bg-gray-950/60 rounded-xl border border-slate-200 dark:border-gray-800 space-y-3">
+        <div className="p-3 bg-[#141414] rounded-xl border border-[#262626] space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+            <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-[#0099ff]">
               <Pin className="w-3 h-3" />
               <span>Offsets & Pinning</span>
             </div>
             <button
-              onClick={handlePinAll}
-              className="text-[10px] text-slate-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-300 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-gray-900 border border-slate-200 dark:border-gray-800 hover:border-indigo-500/30 transition-colors cursor-pointer"
+              type="button"
+              aria-label="Pin all offsets to 0px"
+              onClick={() => pinTo("all")}
+              className="text-[10px] text-zinc-400 hover:text-white px-1.5 py-0.5 rounded bg-[#1c1c1c] border border-[#262626] hover:border-[#0099ff]/30 transition-colors cursor-pointer"
             >
               Pin All (0px)
             </button>
           </div>
 
+          {/* Quick Pinning Presets */}
+          <div className="grid grid-cols-4 gap-1 text-[10px]">
+            <button
+              type="button"
+              aria-label="Pin top offset"
+              onClick={() => pinTo("top")}
+              className="py-1 px-1 rounded bg-[#1c1c1c] border border-[#262626] text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer"
+            >
+              Pin Top
+            </button>
+            <button
+              type="button"
+              aria-label="Pin bottom offset"
+              onClick={() => pinTo("bottom")}
+              className="py-1 px-1 rounded bg-[#1c1c1c] border border-[#262626] text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer"
+            >
+              Pin Bottom
+            </button>
+            <button
+              type="button"
+              aria-label="Pin horizontal offsets"
+              onClick={() => pinTo("horizontal")}
+              className="py-1 px-1 rounded bg-[#1c1c1c] border border-[#262626] text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer"
+            >
+              Horizontal
+            </button>
+            <button
+              type="button"
+              aria-label="Pin vertical offsets"
+              onClick={() => pinTo("vertical")}
+              className="py-1 px-1 rounded bg-[#1c1c1c] border border-[#262626] text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer"
+            >
+              Vertical
+            </button>
+          </div>
+
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <span className="text-[11px] text-slate-500 dark:text-gray-400">Top</span>
+              <span className="text-[11px] text-zinc-400">Top</span>
               <ValueInput
                 amount={top.amount}
                 unit={top.unit}
@@ -248,7 +389,7 @@ export default function PositionGroup({
               />
             </div>
             <div className="space-y-1">
-              <span className="text-[11px] text-slate-500 dark:text-gray-400">Right</span>
+              <span className="text-[11px] text-zinc-400">Right</span>
               <ValueInput
                 amount={right.amount}
                 unit={right.unit}
@@ -268,7 +409,7 @@ export default function PositionGroup({
               />
             </div>
             <div className="space-y-1">
-              <span className="text-[11px] text-slate-500 dark:text-gray-400">Bottom</span>
+              <span className="text-[11px] text-zinc-400">Bottom</span>
               <ValueInput
                 amount={bottom.amount}
                 unit={bottom.unit}
@@ -288,7 +429,7 @@ export default function PositionGroup({
               />
             </div>
             <div className="space-y-1">
-              <span className="text-[11px] text-slate-500 dark:text-gray-400">Left</span>
+              <span className="text-[11px] text-zinc-400">Left</span>
               <ValueInput
                 amount={left.amount}
                 unit={left.unit}
@@ -313,22 +454,24 @@ export default function PositionGroup({
 
       {/* Z-Index Stacking */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-gray-400">
-          <span className="flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5 text-slate-400 dark:text-gray-400" />
+        <div className="flex items-center justify-between text-xs text-zinc-400">
+          <span className="flex items-center gap-1.5 font-medium">
+            <Layers className="w-3.5 h-3.5 text-zinc-400" />
             <span>Z-Index Layer</span>
           </span>
-          <span className="font-mono text-indigo-600 dark:text-indigo-400">{zIndex}</span>
+          <span className="font-mono text-[#0099ff] font-semibold">{zIndex}</span>
         </div>
         <div className="grid grid-cols-6 gap-1">
           {Z_PRESETS.map((p) => (
             <button
               key={p.val}
+              type="button"
+              aria-label={`Z-Index preset ${p.label}`}
               onClick={() => handleZIndexChange(p.val)}
               className={`py-1 text-[11px] rounded transition-all cursor-pointer ${
                 zIndex === p.val
-                  ? "bg-indigo-600 text-white font-medium shadow-sm"
-                  : "bg-slate-100 dark:bg-gray-900 text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-gray-800 hover:bg-slate-200 dark:hover:bg-gray-800"
+                  ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                  : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
               }`}
             >
               {p.label}
@@ -339,16 +482,18 @@ export default function PositionGroup({
 
       {/* Overflow Clipping */}
       <div className="space-y-1.5">
-        <label className="text-xs text-slate-500 dark:text-gray-400 block">Overflow Behavior</label>
+        <label className="text-[11px] text-zinc-400 block font-medium">Overflow Behavior</label>
         <div className="grid grid-cols-4 gap-1">
           {OVERFLOW_MODES.map((o) => (
             <button
               key={o.val}
+              type="button"
+              aria-label={`Overflow behavior ${o.label}`}
               onClick={() => handleOverflowChange(o.val)}
               className={`py-1 text-[11px] rounded transition-all cursor-pointer ${
                 overflow === o.val
-                  ? "bg-indigo-600 text-white font-medium shadow-sm"
-                  : "bg-slate-100 dark:bg-gray-900 text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-gray-800 hover:bg-slate-200 dark:hover:bg-gray-800"
+                  ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                  : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
               }`}
             >
               {o.label}

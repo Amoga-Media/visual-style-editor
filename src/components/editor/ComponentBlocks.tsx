@@ -214,8 +214,8 @@ interface ComponentBlocksProps {
 
 export default function ComponentBlocks({ onInsertBlock }: ComponentBlocksProps) {
   return (
-    <div className="flex-1 overflow-y-auto p-3 space-y-3 select-none custom-scrollbar">
-      <div className="text-[10px] text-zinc-400 px-1 font-medium">
+    <div className="flex-1 overflow-y-auto p-3 space-y-3 select-none no-scrollbar bg-white dark:bg-[#141414] text-slate-800 dark:text-white transition-colors">
+      <div className="text-[10px] text-slate-500 dark:text-zinc-400 px-1 font-medium">
         Drag any block into a container, or click + to insert.
       </div>
 
@@ -237,29 +237,31 @@ export default function ComponentBlocks({ onInsertBlock }: ComponentBlocksProps)
                 (window as any).__draggedComponentSnippet = null;
                 (window as any).__draggedComponentName = null;
               }}
-              className="p-3 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-[#242424] hover:border-[#0099ff]/50 active:scale-[0.98] transition-all group cursor-grab active:cursor-grabbing flex items-center justify-between select-none"
+              className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#1c1c1c] hover:bg-slate-100 dark:hover:bg-[#262626] border border-slate-200 dark:border-[#262626] hover:border-[#0099ff]/50 active:scale-[0.98] transition-all group cursor-grab active:cursor-grabbing flex items-center justify-between select-none shadow-2xs"
               onClick={() => onInsertBlock(block.snippet)}
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-7 h-7 rounded-lg bg-[#202020] flex items-center justify-center text-zinc-300 group-hover:text-[#0099ff] group-hover:bg-[#0099ff]/10 transition-colors shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-slate-200/60 dark:bg-[#141414] flex items-center justify-center text-slate-600 dark:text-zinc-300 group-hover:text-[#0099ff] group-hover:bg-[#0099ff]/10 transition-colors shrink-0">
                   <Icon className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-zinc-200 group-hover:text-white truncate">
+                  <div className="text-xs font-semibold text-slate-800 dark:text-zinc-200 group-hover:text-slate-900 dark:group-hover:text-white truncate">
                     {block.title}
                   </div>
-                  <div className="text-[10px] text-zinc-500 leading-tight mt-0.5 line-clamp-1">
+                  <div className="text-[10px] text-slate-500 dark:text-zinc-500 leading-tight mt-0.5 line-clamp-1">
                     {block.description}
                   </div>
                 </div>
               </div>
               <button
+                type="button"
+                aria-label={`Insert ${block.title}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   onInsertBlock(block.snippet);
                 }}
-                className="w-6 h-6 rounded-lg bg-[#222] group-hover:bg-[#0099ff] flex items-center justify-center text-zinc-400 group-hover:text-white transition-all shadow-sm shrink-0 cursor-pointer ml-2"
-                title="Insert into page"
+                className="w-6 h-6 rounded-lg bg-slate-200 dark:bg-[#262626] group-hover:bg-[#0099ff] flex items-center justify-center text-slate-600 dark:text-zinc-400 group-hover:text-white transition-all shadow-xs shrink-0 cursor-pointer ml-2"
+                title={`Insert ${block.title}`}
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
@@ -270,3 +272,4 @@ export default function ComponentBlocks({ onInsertBlock }: ComponentBlocksProps)
     </div>
   );
 }
+

@@ -71,6 +71,15 @@ function isColorLike(value: string, theme?: ThemeMap): boolean {
 // whatever's actually recognized, and the suffix is simply "everything
 // after it," hyphens and all.
 const POSITION_TOKENS = new Set(["static", "fixed", "absolute", "relative", "sticky"]);
+const DISPLAY_TOKENS = new Set([
+  "block", "inline-block", "inline", "flex", "inline-flex", "grid", "inline-grid", "contents", "hidden"
+]);
+const FLEX_DIRECTION_TOKENS = new Set([
+  "flex-row", "flex-row-reverse", "flex-col", "flex-col-reverse"
+]);
+const FLEX_WRAP_TOKENS = new Set([
+  "flex-wrap", "flex-nowrap", "flex-wrap-reverse"
+]);
 
 const KNOWN_PREFIXES = [
   "border-t", "border-r", "border-b", "border-l", "border",
@@ -82,7 +91,13 @@ const KNOWN_PREFIXES = [
   "top", "right", "bottom", "left", "inset",
   "overflow-x", "overflow-y", "overflow",
   "cursor", "rotate", "scale", "z",
-  "opacity", "gap", "w", "h", "leading", "tracking", "bg", "text", "font",
+  "grid-cols", "grid-rows", "grid-flow",
+  "place-items", "place-content", "place-self",
+  "gap-x", "gap-y", "gap",
+  "justify", "items", "content", "self",
+  "grow", "shrink", "basis", "order",
+  "stroke", "fill",
+  "opacity", "w", "h", "leading", "tracking", "bg", "text", "font",
 ].sort((a, b) => b.length - a.length);
 
 function splitPrefixSuffix(className: string): { prefix: string; suffix: string } {
@@ -103,6 +118,24 @@ function splitPrefixSuffix(className: string): { prefix: string; suffix: string 
 export function classifyUtilityClass(className: string, theme: ThemeMap): Classification | null {
   if (POSITION_TOKENS.has(className)) {
     return { property: "position", suffix: className };
+  }
+  if (DISPLAY_TOKENS.has(className)) {
+    return { property: "display", suffix: className };
+  }
+  if (FLEX_DIRECTION_TOKENS.has(className)) {
+    return { property: "flex-direction", suffix: className };
+  }
+  if (FLEX_WRAP_TOKENS.has(className)) {
+    return { property: "flex-wrap", suffix: className };
+  }
+  if (className === "grow" || className === "grow-0") {
+    return { property: "flex-grow", suffix: className === "grow" ? "1" : "0" };
+  }
+  if (className === "shrink" || className === "shrink-0") {
+    return { property: "flex-shrink", suffix: className === "shrink" ? "1" : "0" };
+  }
+  if (className === "flex-1" || className === "flex-auto" || className === "flex-initial" || className === "flex-none") {
+    return { property: "flex-grow", suffix: className };
   }
 
   const bracketMatch = className.match(/^([a-z-]+)-\[(.+)\]$/);
@@ -141,6 +174,26 @@ export function classifyUtilityClass(className: string, theme: ThemeMap): Classi
   if (prefix === "mx" || prefix === "my") return { property: "margin", suffix };
   if (prefix === "opacity") return { property: "opacity", suffix };
   if (prefix === "gap") return { property: "gap", suffix };
+  if (prefix === "gap-y") return { property: "row-gap", suffix };
+  if (prefix === "gap-x") return { property: "column-gap", suffix };
+  if (prefix === "justify") return { property: "justify-content", suffix };
+  if (prefix === "items") return { property: "align-items", suffix };
+  if (prefix === "content") return { property: "align-content", suffix };
+  if (prefix === "self") return { property: "align-self", suffix };
+  if (prefix === "grow") return { property: "flex-grow", suffix };
+  if (prefix === "shrink") return { property: "flex-shrink", suffix };
+  if (prefix === "basis") return { property: "flex-basis", suffix };
+  if (prefix === "order") return { property: "order", suffix };
+  if (prefix === "grid-cols") return { property: "grid-template-columns", suffix };
+  if (prefix === "grid-rows") return { property: "grid-template-rows", suffix };
+  if (prefix === "grid-flow") return { property: "grid-auto-flow", suffix };
+  if (prefix === "place-items") return { property: "place-items", suffix };
+  if (prefix === "place-content") return { property: "place-content", suffix };
+  if (prefix === "place-self") return { property: "place-self", suffix };
+  if (prefix === "fill") return { property: "fill", suffix };
+  if (prefix === "stroke") {
+    return isLength(suffix) || /^\d+$/.test(suffix) ? { property: "stroke-width", suffix } : { property: "stroke", suffix };
+  }
   if (prefix === "leading") return { property: "line-height", suffix };
   if (prefix === "tracking") return { property: "letter-spacing", suffix };
   if (prefix === "bg") return { property: "background-color", suffix };

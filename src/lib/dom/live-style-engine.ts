@@ -76,6 +76,19 @@ export const PROPERTY_TO_CSS: Record<string, string> = {
   fill: "fill",
   stroke: "stroke",
   "stroke-width": "stroke-width",
+  "flex-wrap": "flex-wrap",
+  "align-content": "align-content",
+  "align-self": "align-self",
+  "flex-grow": "flex-grow",
+  "flex-shrink": "flex-shrink",
+  "flex-basis": "flex-basis",
+  order: "order",
+  "grid-template-columns": "grid-template-columns",
+  "grid-template-rows": "grid-template-rows",
+  "grid-auto-flow": "grid-auto-flow",
+  "place-items": "place-items",
+  "place-content": "place-content",
+  "place-self": "place-self",
 };
 
 export function resolvePropertyForSide(property: string, side?: string): string {
@@ -192,23 +205,43 @@ export function applyLiveStyle(
     } catch {}
   }
 
-  // 4. Handle Responsive Cascades
-  if (viewport !== "desktop" && (structuralPath || element.getAttribute("data-vse-path"))) {
-    const path = structuralPath || element.getAttribute("data-vse-path") || "";
+  // 3b. Adjust flex child stretching constraints when setting width
+  adjustFlexChildConstraints(element, property);
+
+  // 4. Handle Responsive Cascades — ALL viewports go through setResponsiveStyle when path is available
+  const path = structuralPath || element.getAttribute("data-vse-path") || "";
+
+  if (path) {
+    // For desktop: apply inline style immediately for 60fps feedback, then register in responsive registry
+    // For tablet/mobile: setResponsiveStyle handles CSS injection without touching the inline style
+    if (viewport === "desktop") {
+      try {
+        element.style.setProperty(cssProp, formattedVal, "important");
+      } catch {}
+    }
     setResponsiveStyle(element, path, property, formattedVal, viewport, side);
   } else {
-    // Desktop / Base Style
     try {
       element.style.setProperty(cssProp, formattedVal, "important");
-      if (structuralPath || element.getAttribute("data-vse-path")) {
-        const path = structuralPath || element.getAttribute("data-vse-path") || "";
-        setResponsiveStyle(element, path, property, formattedVal, "desktop", side);
+    } catch {}
+  }
+
+  // 4b. Sync presentation attributes for SVG elements
+  const isSvg = element.namespaceURI === "http://www.w3.org/2000/svg" || "ownerSVGElement" in element;
+  if (isSvg && (property === "stroke" || property === "fill" || property === "stroke-width")) {
+    try {
+      if (formattedVal) {
+        element.setAttribute(cssProp, formattedVal);
+      } else {
+        element.removeAttribute(cssProp);
       }
     } catch {}
   }
 
-  // 5. In Tailwind mode, also update className in real time
-  if (theme && theme.mode !== "none") {
+  // 5. In Tailwind mode, also update className in real time — ONLY for desktop viewport.
+  //    Tablet/mobile edits go exclusively through the responsive stylesheet (CSS injection)
+  //    to prevent contaminating the base desktop Tailwind classes.
+  if (theme && theme.mode !== "none" && viewport === "desktop") {
     try {
       const snap = useSettingsStore.getState().snapToDefaultScale;
       const newClass = forwardMap(property as EditableProperty, value, { snap, theme });
@@ -221,16 +254,41 @@ export function applyLiveStyle(
           theme,
           side
         );
-        element.className = newClassList.join(" ");
+        if (element.namespaceURI === "http://www.w3.org/2000/svg" || "ownerSVGElement" in element) {
+          element.setAttribute("class", newClassList.join(" "));
+        } else {
+          element.className = newClassList.join(" ");
+        }
       } else if (property === "font-family") {
         // Strip conflicting generic font-* classes so inline font-family takes priority
         const oldClassList = Array.from(element.classList);
         const newClassList = oldClassList.filter((c) => !c.startsWith("font-sans") && !c.startsWith("font-serif") && !c.startsWith("font-mono"));
         if (newClassList.length !== oldClassList.length) {
-          element.className = newClassList.join(" ");
+          if (element.namespaceURI === "http://www.w3.org/2000/svg" || "ownerSVGElement" in element) {
+            element.setAttribute("class", newClassList.join(" "));
+          } else {
+            element.className = newClassList.join(" ");
+          }
         }
       }
     } catch {}
+  }
+}
+
+
+function adjustFlexChildConstraints(element: Element, property: string) {
+  if (property === "width" && element.parentElement) {
+    const win = element.ownerDocument?.defaultView || (typeof window !== "undefined" ? window : null);
+    if (win) {
+      const parentStyle = win.getComputedStyle(element.parentElement);
+      if (parentStyle.display === "flex" || parentStyle.display === "inline-flex") {
+        const isRow = !parentStyle.flexDirection || parentStyle.flexDirection.startsWith("row");
+        if (isRow && isStyleableElement(element)) {
+          element.style.flexGrow = "0";
+          element.style.flexBasis = "auto";
+        }
+      }
+    }
   }
 }
 
@@ -249,6 +307,7 @@ export function commitStyleChange(
   viewport: ViewportMode = "desktop"
 ) {
   const { prop: targetProp, val: formattedVal } = formatCssValue(property, value, side);
+  adjustFlexChildConstraints(element, property);
 
   if (viewport !== "desktop") {
     setResponsiveStyle(element, structuralPath, property, formattedVal, viewport, side);
@@ -300,6 +359,17 @@ export function commitStyleChange(
   }
 
   if (theme?.mode === "none") {
+    if (isStyleableElement(element)) {
+      element.style.setProperty(targetProp, formattedVal);
+      if (property === "text-color" || targetProp === "color") {
+        element.style.setProperty("-webkit-text-fill-color", formattedVal);
+      }
+      if (element.namespaceURI === "http://www.w3.org/2000/svg" || "ownerSVGElement" in element) {
+        if (property === "stroke" || property === "fill" || property === "stroke-width") {
+          element.setAttribute(targetProp, formattedVal);
+        }
+      }
+    }
     onEdit?.({
       kind: "style",
       structuralPath,
@@ -315,10 +385,43 @@ export function commitStyleChange(
 
   const snap = useSettingsStore.getState().snapToDefaultScale;
   const newClass = forwardMap(property, value, { snap, theme });
+
+  // If no Tailwind class is mapped (e.g. custom/advanced CSS property), fall back to inline style
+  if (!newClass) {
+    if (isStyleableElement(element)) {
+      if (formattedVal) {
+        element.style.setProperty(targetProp, formattedVal);
+        if (property === "text-color" || targetProp === "color") {
+          element.style.setProperty("-webkit-text-fill-color", formattedVal);
+        }
+      } else {
+        element.style.removeProperty(targetProp);
+        if (property === "text-color" || targetProp === "color") {
+          element.style.removeProperty("-webkit-text-fill-color");
+        }
+      }
+    }
+    onEdit?.({
+      kind: "style",
+      structuralPath,
+      property,
+      styleProperty: targetProp,
+      oldStyleValue: baselineOldValue ?? "",
+      newStyleValue: formattedVal,
+      viewport: "desktop",
+      timestamp: new Date().toISOString(),
+    });
+    return;
+  }
+
   const oldClassList = Array.from(element.classList);
   const newClassList = applyClassMutation(oldClassList, property, newClass, theme, side);
 
-  element.className = newClassList.join(" ");
+  if (element.namespaceURI === "http://www.w3.org/2000/svg" || "ownerSVGElement" in element) {
+    element.setAttribute("class", newClassList.join(" "));
+  } else {
+    element.className = newClassList.join(" ");
+  }
 
   onEdit?.({
     kind: "class",
@@ -330,3 +433,4 @@ export function commitStyleChange(
     timestamp: new Date().toISOString(),
   });
 }
+

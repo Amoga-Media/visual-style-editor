@@ -51,10 +51,10 @@ export function parseStructuralPath(path: string): ParsedPath {
     // (path -> element) until Task 4.2's Discard-all, which does. <html> is
     // always alone at the top of the DOM, so nthOfType: 1 is correct here,
     // not a placeholder.
-    if (i === 0 && step === "html") return { tag: "html", nthOfType: 1 };
-    const match = step.match(/^([a-z0-9-]+):nth-of-type\((\d+)\)$/);
+    if (i === 0 && step.toLowerCase() === "html") return { tag: "html", nthOfType: 1 };
+    const match = step.match(/^([a-zA-Z0-9-_:]+):nth-of-type\((\d+)\)$/);
     if (!match) throw new Error(`Malformed structural path step: "${step}"`);
-    return { tag: match[1], nthOfType: Number(match[2]) };
+    return { tag: match[1].toLowerCase(), nthOfType: Number(match[2]) };
   });
   return { kind: "chain", steps };
 }

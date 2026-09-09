@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import type { EditRecord, ThemeMap } from "@/types";
 import { Link2, ExternalLink } from "lucide-react";
 
+import { computeStructuralPath } from "@/lib/ast/structural-path";
+import { domAdapter } from "@/lib/dom/dom-adapter";
+
 interface LinkGroupProps {
   element: Element | null;
   structuralPath: string | null;
@@ -30,12 +33,17 @@ export default function LinkGroup({ element, structuralPath, theme, onEdit }: Li
   if (!isLink) return null;
 
   const targetEl = element.tagName.toLowerCase() === "a" ? element : element.closest("a")!;
+  const anchorPath = computeStructuralPath(targetEl, domAdapter);
 
   function commitAttribute(name: string, value: string, oldValue: string) {
-    targetEl.setAttribute(name, value);
+    if (value) {
+      targetEl.setAttribute(name, value);
+    } else {
+      targetEl.removeAttribute(name);
+    }
     onEdit?.({
       kind: "attribute",
-      structuralPath: structuralPath!,
+      structuralPath: anchorPath,
       property: name,
       attributeName: name,
       oldValue,
@@ -57,44 +65,57 @@ export default function LinkGroup({ element, structuralPath, theme, onEdit }: Li
     const oldTarget = targetEl.getAttribute("target") || "";
     const newTarget = next ? "_blank" : "";
     commitAttribute("target", newTarget, oldTarget);
+
+    const oldRel = targetEl.getAttribute("rel") || "";
     if (next) {
-      targetEl.setAttribute("rel", "noopener noreferrer");
+      // Add noopener and noreferrer while preserving any custom rel tokens (e.g. nofollow sponsored)
+      const tokens = new Set(oldRel.split(/\s+/).filter(Boolean));
+      tokens.add("noopener");
+      tokens.add("noreferrer");
+      const newRel = Array.from(tokens).join(" ");
+      if (newRel !== oldRel) {
+        commitAttribute("rel", newRel, oldRel);
+      }
     } else {
-      targetEl.removeAttribute("rel");
+      // Remove noopener and noreferrer while preserving user-authored rel tokens
+      const remaining = oldRel
+        .split(/\s+/)
+        .filter(Boolean)
+        .filter((t) => t !== "noopener" && t !== "noreferrer");
+      const newRel = remaining.join(" ");
+      if (newRel !== oldRel) {
+        commitAttribute("rel", newRel, oldRel);
+      }
     }
   }
 
   return (
-    <div className="p-4 border-b border-gray-800 space-y-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-        <Link2 className="w-3.5 h-3.5 text-indigo-400" />
-        <span>Link & Navigation</span>
-      </div>
-
+    <div className="p-4 border-b border-[#262626] space-y-4">
       {/* Destination URL */}
       <div className="space-y-1.5">
-        <label className="text-xs text-gray-400 block">Link Destination (href)</label>
+        <label className="text-[11px] text-zinc-400 block font-medium">Link Destination (href)</label>
         <input
           type="text"
           value={href}
           onChange={(e) => setHref(e.target.value)}
           onBlur={handleHrefBlur}
           placeholder="https://... or #section"
-          className="w-full bg-gray-900 border border-gray-700/80 hover:border-gray-600 focus:border-indigo-500 rounded px-2.5 py-1 text-xs text-gray-200 outline-none"
+          className="w-full bg-[#141414] border border-[#262626] hover:border-zinc-700 focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 outline-none"
         />
       </div>
 
       {/* Target Options */}
-      <label className="flex items-center gap-2.5 text-xs text-gray-300 cursor-pointer select-none">
+      <label className="flex items-center gap-2.5 text-xs text-zinc-300 cursor-pointer select-none">
         <input
           type="checkbox"
           checked={targetBlank}
           onChange={handleTargetToggle}
-          className="rounded bg-gray-900 border-gray-700 text-indigo-600 focus:ring-indigo-500 accent-indigo-600"
+          aria-label="Open in new tab"
+          className="rounded bg-[#141414] border-[#262626] text-[#0099ff] focus:ring-[#0099ff] accent-[#0099ff]"
         />
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-1.5 font-medium">
           <span>Open in New Tab</span>
-          <ExternalLink className="w-3 h-3 text-gray-500" />
+          <ExternalLink className="w-3 h-3 text-zinc-500" />
         </span>
       </label>
     </div>

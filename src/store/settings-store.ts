@@ -5,9 +5,14 @@ export type AppTheme = "dark" | "light";
 interface SettingsState {
   snapToDefaultScale: boolean;
   appTheme: AppTheme;
+  uiScale: number;
   toggleSnap(): void;
   setAppTheme(theme: AppTheme): void;
   toggleAppTheme(): void;
+  setUiScale(scale: number): void;
+  increaseUiScale(): void;
+  decreaseUiScale(): void;
+  resetUiScale(): void;
 }
 
 function getInitialTheme(): AppTheme {
@@ -22,6 +27,7 @@ function getInitialTheme(): AppTheme {
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   snapToDefaultScale: false,
   appTheme: getInitialTheme(),
+  uiScale: 1.0,
 
   toggleSnap: () => set((s) => ({ snapToDefaultScale: !s.snapToDefaultScale })),
 
@@ -45,4 +51,19 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     } catch {}
     set({ appTheme: nextTheme });
   },
+
+  setUiScale: (scale: number) => {
+    const clamped = Math.min(Math.max(Number(scale.toFixed(2)), 0.75), 1.5);
+    set({ uiScale: clamped });
+  },
+
+  increaseUiScale: () => {
+    set((s) => ({ uiScale: Math.min(Number((s.uiScale + 0.05).toFixed(2)), 1.5) }));
+  },
+
+  decreaseUiScale: () => {
+    set((s) => ({ uiScale: Math.max(Number((s.uiScale - 0.05).toFixed(2)), 0.75) }));
+  },
+
+  resetUiScale: () => set({ uiScale: 1.0 }),
 }));

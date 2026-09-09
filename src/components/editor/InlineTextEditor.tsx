@@ -58,21 +58,25 @@ export default function InlineTextEditor({
   }
 
   return (
-    <div className="p-4 border-b border-gray-800 space-y-3">
+    <div className="pb-3.5 space-y-2 border-b border-slate-200 dark:border-[#262626]">
       <div className="flex items-center justify-between">
-        <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-          <Edit3 className="w-3.5 h-3.5 text-indigo-400" />
+        <div className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+          <Edit3 className="w-3.5 h-3.5 text-[#0099ff]" />
           <span>Content Copy</span>
         </div>
         {!isEditing ? (
           <button
+            type="button"
+            aria-label="Edit text content"
             onClick={() => setIsEditing(true)}
-            className="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium cursor-pointer"
+            className="text-[11px] text-[#0099ff] hover:text-[#33adff] font-medium cursor-pointer"
           >
             Edit Text
           </button>
         ) : (
           <button
+            type="button"
+            aria-label="Apply text content edits"
             onClick={handleCommit}
             className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium flex items-center gap-1 cursor-pointer"
           >
@@ -86,6 +90,7 @@ export default function InlineTextEditor({
         <textarea
           rows={3}
           value={text}
+          aria-label="Edit text input"
           onChange={(e) => {
             setText(e.target.value);
             if (element) element.textContent = e.target.value;
@@ -96,16 +101,16 @@ export default function InlineTextEditor({
               handleCommit();
             }
           }}
-          className="w-full bg-gray-950 border border-indigo-500 rounded-lg p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full bg-[#141414] border border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] rounded-lg p-2 text-xs text-zinc-200 focus:outline-none"
           autoFocus
         />
       ) : (
         <div
           onDoubleClick={() => setIsEditing(true)}
-          className="text-xs text-gray-300 bg-gray-900/80 border border-gray-800/80 rounded-lg p-2.5 truncate max-h-20 overflow-hidden cursor-pointer hover:border-gray-700 transition-colors"
+          className="text-xs text-zinc-300 bg-[#141414] border border-[#262626] rounded-lg p-2.5 truncate max-h-20 overflow-hidden cursor-pointer hover:border-zinc-700 transition-colors"
           title="Double click to edit"
         >
-          {text || <span className="italic text-gray-500">Empty text</span>}
+          {text || <span className="italic text-zinc-500">Empty text</span>}
         </div>
       )}
     </div>

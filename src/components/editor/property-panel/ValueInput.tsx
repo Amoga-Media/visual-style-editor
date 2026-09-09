@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { ChevronDown } from "lucide-react";
 import { convertUnit } from "@/lib/dom/unit-conversion";
 import type { EditableProperty } from "@/types";
+import type { ViewportMode } from "@/components/editor/Toolbar";
 
 interface ValueInputProps {
   amount: number;
@@ -14,14 +15,29 @@ interface ValueInputProps {
   allowedUnits?: string[];
   property?: EditableProperty | string;
   element?: Element | null;
-  viewport?: "desktop" | "tablet" | "mobile";
+  viewport?: ViewportMode;
 }
+
+const NEGATIVE_ALLOWED_PROPERTIES = new Set([
+  "margin",
+  "margin-top",
+  "margin-right",
+  "margin-bottom",
+  "margin-left",
+  "top",
+  "right",
+  "bottom",
+  "left",
+  "rotate",
+  "z-index",
+  "order",
+]);
 
 export default function ValueInput({
   amount,
   unit = "px",
-  min = 0,
-  max = 2000,
+  min,
+  max,
   step = 1,
   onChange,
   onCommit,
@@ -30,6 +46,10 @@ export default function ValueInput({
   element,
   viewport = "desktop",
 }: ValueInputProps) {
+  const isNegativeAllowed = property ? NEGATIVE_ALLOWED_PROPERTIES.has(property.toString()) : false;
+  const effectiveMin = min !== undefined ? min : (isNegativeAllowed ? -Infinity : 0);
+  const effectiveMax = max !== undefined && isFinite(max) ? max : Infinity;
+
   const [numText, setNumText] = useState(amount.toString());
   const [currentUnit, setCurrentUnit] = useState(unit);
   const [isFocused, setIsFocused] = useState(false);
@@ -61,8 +81,10 @@ export default function ValueInput({
   }, [dropdownOpen]);
 
   function parseFullText(raw: string): { amount: number; unit: string } {
-    const trimmed = raw.trim();
-    if (!trimmed) return { amount, unit: currentUnit };
+    const trimmed = raw.trim().toLowerCase();
+    if (!trimmed || trimmed === "-") return { amount, unit: currentUnit };
+    if (trimmed === "auto") return { amount: 0, unit: "auto" };
+    if (trimmed === "none") return { amount: 0, unit: "none" };
 
     const match = trimmed.match(/^([-\d.]+)\s*([a-zA-Z%]*)$/);
     if (!match) return { amount, unit: currentUnit };
@@ -76,16 +98,26 @@ export default function ValueInput({
       parsedUnit = matched || currentUnit;
     }
 
-    const clamped = Math.max(min, Math.min(max, num));
+    const clamped = Math.max(effectiveMin, Math.min(effectiveMax, num));
     return { amount: clamped, unit: parsedUnit || currentUnit };
   }
 
   function handleBlur() {
     setIsFocused(false);
     const result = parseFullText(numText);
-    setNumText(result.amount.toString());
-    setCurrentUnit(result.unit);
-    onCommit(result.amount, result.unit);
+    if (result.unit === "auto") {
+      setNumText("auto");
+      setCurrentUnit("auto");
+      onCommit(0, "auto");
+    } else if (result.unit === "none") {
+      setNumText("none");
+      setCurrentUnit("none");
+      onCommit(0, "none");
+    } else {
+      setNumText(result.amount.toString());
+      setCurrentUnit(result.unit);
+      onCommit(result.amount, result.unit);
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -97,9 +129,10 @@ export default function ValueInput({
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.preventDefault();
       const current = parseFullText(numText);
+      if (current.unit === "auto" || current.unit === "none") return;
       const delta = e.shiftKey ? step * 10 : step;
       const nextNum = e.key === "ArrowUp" ? current.amount + delta : current.amount - delta;
-      const clamped = Math.max(min, Math.min(max, nextNum));
+      const clamped = Math.max(effectiveMin, Math.min(effectiveMax, nextNum));
       const rounded = Math.round(clamped * 100) / 100;
       setNumText(rounded.toString());
       onChange?.(rounded, current.unit);
@@ -113,11 +146,30 @@ export default function ValueInput({
       return;
     }
 
+    if (newUnit.toLowerCase() === "auto") {
+      setNumText("auto");
+      setCurrentUnit("auto");
+      setDropdownOpen(false);
+      onChange?.(0, "auto");
+      onCommit(0, "auto");
+      return;
+    }
+
+    if (newUnit.toLowerCase() === "none") {
+      setNumText("none");
+      setCurrentUnit("none");
+      setDropdownOpen(false);
+      onChange?.(0, "none");
+      onCommit(0, "none");
+      return;
+    }
+
     const parsed = parseFullText(numText);
-    const converted = convertUnit(parsed.amount, currentUnit, newUnit, {
+    const fromUnit = (currentUnit === "auto" || currentUnit === "none") ? "px" : currentUnit;
+    const converted = convertUnit(parsed.amount, fromUnit, newUnit, {
       property,
       element,
-      viewport,
+      viewport: viewport === "all" ? undefined : viewport,
     });
 
     setNumText(converted.toString());
@@ -130,11 +182,11 @@ export default function ValueInput({
   const hasMultipleUnits = allowedUnits && allowedUnits.length > 1;
 
   return (
-    <div ref={containerRef} className="relative inline-flex items-center rounded-lg bg-[#111] border border-[#2a2a2a] hover:border-[#3a3a3a] focus-within:border-[#0099ff] focus-within:ring-1 focus-within:ring-[#0099ff]/40 transition-all p-0.5">
+    <div ref={containerRef} className="relative inline-flex items-center rounded-md bg-slate-100 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] hover:border-slate-300 dark:hover:border-[#333333] focus-within:border-[#0099ff] focus-within:ring-1 focus-within:ring-[#0099ff]/40 transition-all px-1 py-0.5">
       <input
         ref={inputRef}
         type="text"
-        value={isFocused ? numText : `${numText}`}
+        value={isFocused ? numText : (currentUnit === "auto" ? "auto" : currentUnit === "none" ? "none" : `${numText}`)}
         onFocus={() => setIsFocused(true)}
         onChange={(e) => {
           setNumText(e.target.value);
@@ -146,7 +198,7 @@ export default function ValueInput({
         }}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        className="w-14 bg-transparent px-1.5 py-0.5 text-xs font-mono text-zinc-100 text-right outline-none placeholder-zinc-600"
+        className="w-16 bg-transparent px-1.5 py-0.5 text-[13px] font-mono font-medium text-slate-800 dark:text-zinc-100 text-right outline-none placeholder-slate-400 dark:placeholder-zinc-600"
         title="Type number or value with unit (e.g. 100vw, 50%, 24px, 12pt)"
       />
 
@@ -154,22 +206,23 @@ export default function ValueInput({
         <button
           type="button"
           onClick={() => setDropdownOpen((o) => !o)}
-          className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-[#0099ff] hover:text-white hover:bg-[#222] transition-colors flex items-center gap-0.5 cursor-pointer select-none"
+          aria-label={`Unit selection, currently ${currentUnit}`}
+          className="px-1.5 py-0.5 rounded text-[11px] font-mono font-medium text-[#0099ff] hover:text-[#0099ff] hover:bg-slate-200 dark:hover:bg-[#1c1c1c] transition-colors flex items-center gap-0.5 cursor-pointer select-none"
           title={`Current unit: ${currentUnit}. Click to change.`}
         >
           <span>{currentUnit}</span>
-          <ChevronDown className="w-2.5 h-2.5 opacity-60" />
+          <ChevronDown className="w-3 h-3 opacity-70" />
         </button>
       ) : (
-        <span className="px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 select-none">
+        <span className="px-1.5 py-0.5 text-[11px] font-mono text-slate-400 dark:text-zinc-400 select-none">
           {currentUnit}
         </span>
       )}
 
       {/* Unit Dropdown Menu */}
       {dropdownOpen && hasMultipleUnits && (
-        <div className="absolute right-0 top-full mt-1 w-20 bg-[#161616] border border-[#2e2e2e] rounded-lg shadow-2xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-          <div className="px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-zinc-500 border-b border-[#242424] mb-1">
+        <div className="absolute right-0 top-full mt-1 w-22 bg-white dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] rounded-lg shadow-2xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+          <div className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 border-b border-slate-100 dark:border-[#262626] mb-1">
             Units
           </div>
           {allowedUnits.map((u) => (
@@ -177,10 +230,11 @@ export default function ValueInput({
               key={u}
               type="button"
               onClick={() => handleSelectUnit(u)}
-              className={`w-full text-left px-2.5 py-1 text-xs font-mono flex items-center justify-between cursor-pointer transition-colors ${
+              aria-label={`Select unit ${u}`}
+              className={`w-full text-left px-2.5 py-1 text-[12px] font-mono flex items-center justify-between cursor-pointer transition-colors ${
                 currentUnit.toLowerCase() === u.toLowerCase()
                   ? "bg-[#0099ff]/15 text-[#0099ff] font-semibold"
-                  : "text-zinc-300 hover:bg-[#222] hover:text-white"
+                  : "text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-[#262626] hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <span>{u}</span>
@@ -194,3 +248,4 @@ export default function ValueInput({
     </div>
   );
 }
+

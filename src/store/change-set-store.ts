@@ -11,12 +11,34 @@ export const useChangeSetStore = create<ChangeSetState>((set) => ({
   edits: [],
   recordEdit: (record) =>
     set((s) => {
-      const priorIndex = s.edits.findIndex(
-        (e) =>
-          e.structuralPath === record.structuralPath &&
-          e.property === record.property &&
-          (e.viewport || "desktop") === (record.viewport || "desktop")
-      );
+      // Structural operations (delete, duplicate, insert, move) are sequential actions and must never overwrite each other
+      const isIdempotent =
+        record.kind === "class" ||
+        record.kind === "style" ||
+        record.kind === "attribute" ||
+        record.kind === "text";
+
+      if (!isIdempotent) {
+        return { edits: [...s.edits, record] };
+      }
+
+      const priorIndex = s.edits.findIndex((e) => {
+        if (e.kind !== record.kind || e.structuralPath !== record.structuralPath) return false;
+        if (record.kind === "class" && e.kind === "class") {
+          return e.property === record.property && (e.viewport || "desktop") === (record.viewport || "desktop");
+        }
+        if (record.kind === "style" && e.kind === "style") {
+          return e.styleProperty === record.styleProperty && (e.viewport || "desktop") === (record.viewport || "desktop");
+        }
+        if (record.kind === "attribute" && e.kind === "attribute") {
+          return e.attributeName === record.attributeName;
+        }
+        if (record.kind === "text" && e.kind === "text") {
+          return true;
+        }
+        return false;
+      });
+
       if (priorIndex === -1) {
         return { edits: [...s.edits, record] };
       }

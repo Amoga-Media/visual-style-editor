@@ -1,4 +1,4 @@
-import type { NodeAdapter } from "@vse/shared";
+import type { NodeAdapter } from "./structural-path";
 import type { DefaultTreeAdapterMap } from "parse5";
 
 type Element = DefaultTreeAdapterMap["element"];

@@ -110,7 +110,9 @@ export function cleanFontFamilyName(raw: string): string {
   if (trimmed === "sans" || trimmed === "font-sans" || trimmed.startsWith("system-ui")) return "System Sans";
   if (trimmed === "serif" || trimmed === "font-serif" || trimmed.startsWith("Georgia")) return "System Serif";
   if (trimmed === "mono" || trimmed === "font-mono" || trimmed.startsWith("ui-monospace")) return "System Mono";
+  if (trimmed.includes("-apple-system") || trimmed.includes("BlinkMacSystemFont") || trimmed.includes("Segoe UI")) return "System Sans";
   const first = trimmed.split(",")[0].trim().replace(/^["']|["']$/g, "");
+  if (first === "-apple-system" || first === "BlinkMacSystemFont" || first === "Segoe UI") return "System Sans";
   return first || "Inter";
 }
 

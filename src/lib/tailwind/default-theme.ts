@@ -351,3 +351,9 @@ export const DEFAULT_FONT_SIZE: { name: string; px: number }[] = [
   { name: "8xl", px: 96 },
   { name: "9xl", px: 128 },
 ];
+
+export const DEFAULT_THEME_MAP = {
+  mode: "none" as const,
+  colors: DEFAULT_COLORS.map((c) => ({ name: c.name, value: c.hex })),
+  fonts: [],
+};

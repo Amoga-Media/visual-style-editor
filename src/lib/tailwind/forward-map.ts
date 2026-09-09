@@ -145,8 +145,21 @@ export function forwardMap(property: EditableProperty, value: string, options: F
       return `tracking-[${value}]`;
     case "text-align":
       return `text-${value}`;
-    case "font-weight":
-      return `font-[${value}]`;
+    case "font-weight": {
+      const namedWeights: Record<string, string> = {
+        thin: "font-thin",
+        extralight: "font-extralight",
+        light: "font-light",
+        normal: "font-normal",
+        medium: "font-medium",
+        semibold: "font-semibold",
+        bold: "font-bold",
+        extrabold: "font-extrabold",
+        black: "font-black",
+      };
+      const clean = value.toLowerCase().trim();
+      return namedWeights[clean] ?? `font-[${value}]`;
+    }
     case "font-family": {
       const foundTheme = options.theme.fonts.find((f) => f.stack === value || f.name.toLowerCase() === value.toLowerCase());
       return foundTheme ? `font-${foundTheme.name}` : value;
@@ -191,7 +204,189 @@ export function forwardMap(property: EditableProperty, value: string, options: F
       return `object-${value}`;
     case "object-position":
       return `object-${value}`;
+    case "display": {
+      const displayMap: Record<string, string> = {
+        block: "block",
+        "inline-block": "inline-block",
+        inline: "inline",
+        flex: "flex",
+        "inline-flex": "inline-flex",
+        grid: "grid",
+        "inline-grid": "inline-grid",
+        contents: "contents",
+        none: "hidden",
+        hidden: "hidden",
+      };
+      return displayMap[value.toLowerCase().trim()] ?? (value ? `[display:${value}]` : "");
+    }
+    case "flex-direction": {
+      const dirMap: Record<string, string> = {
+        row: "flex-row",
+        "row-reverse": "flex-row-reverse",
+        column: "flex-col",
+        "column-reverse": "flex-col-reverse",
+      };
+      return dirMap[value.toLowerCase().trim()] ?? (value ? `flex-[${value}]` : "");
+    }
+    case "flex-wrap": {
+      const wrapMap: Record<string, string> = {
+        nowrap: "flex-nowrap",
+        wrap: "flex-wrap",
+        "wrap-reverse": "flex-wrap-reverse",
+      };
+      return wrapMap[value.toLowerCase().trim()] ?? (value ? `flex-[${value}]` : "");
+    }
+    case "justify-content": {
+      const justifyMap: Record<string, string> = {
+        start: "justify-start",
+        "flex-start": "justify-start",
+        end: "justify-end",
+        "flex-end": "justify-end",
+        center: "justify-center",
+        between: "justify-between",
+        "space-between": "justify-between",
+        around: "justify-around",
+        "space-around": "justify-around",
+        evenly: "justify-evenly",
+        "space-evenly": "justify-evenly",
+        stretch: "justify-stretch",
+        normal: "justify-normal",
+      };
+      return justifyMap[value.toLowerCase().trim()] ?? `justify-[${value}]`;
+    }
+    case "align-items": {
+      const itemsMap: Record<string, string> = {
+        start: "items-start",
+        "flex-start": "items-start",
+        end: "items-end",
+        "flex-end": "items-end",
+        center: "items-center",
+        baseline: "items-baseline",
+        stretch: "items-stretch",
+      };
+      return itemsMap[value.toLowerCase().trim()] ?? `items-[${value}]`;
+    }
+    case "align-content": {
+      const contentMap: Record<string, string> = {
+        start: "content-start",
+        "flex-start": "content-start",
+        end: "content-end",
+        "flex-end": "content-end",
+        center: "content-center",
+        between: "content-between",
+        "space-between": "content-between",
+        around: "content-around",
+        "space-around": "content-around",
+        evenly: "content-evenly",
+        "space-evenly": "content-evenly",
+        baseline: "content-baseline",
+        stretch: "content-stretch",
+      };
+      return contentMap[value.toLowerCase().trim()] ?? `content-[${value}]`;
+    }
+    case "align-self": {
+      const selfMap: Record<string, string> = {
+        auto: "self-auto",
+        start: "self-start",
+        "flex-start": "self-start",
+        end: "self-end",
+        "flex-end": "self-end",
+        center: "self-center",
+        stretch: "self-stretch",
+        baseline: "self-baseline",
+      };
+      return selfMap[value.toLowerCase().trim()] ?? `self-[${value}]`;
+    }
+    case "row-gap":
+      return forwardLength(parseFloat(value), unitOf(value), options, "gap-y", DEFAULT_SPACING);
+    case "column-gap":
+      return forwardLength(parseFloat(value), unitOf(value), options, "gap-x", DEFAULT_SPACING);
+    case "flex-grow":
+      return value === "1" || value === "true" ? "grow" : value === "0" ? "grow-0" : `grow-[${value}]`;
+    case "flex-shrink":
+      return value === "1" || value === "true" ? "shrink" : value === "0" ? "shrink-0" : `shrink-[${value}]`;
+    case "flex-basis":
+      return value === "auto" ? "basis-auto" : `basis-[${value}]`;
+    case "order": {
+      const num = parseInt(value, 10);
+      if (!isNaN(num) && num >= 1 && num <= 12) return `order-${num}`;
+      if (value === "first" || value === "last" || value === "none") return `order-${value}`;
+      return `order-[${value}]`;
+    }
+    case "grid-template-columns": {
+      const numMatch = value.match(/^repeat\((\d+),\s*(minmax\(0,\s*1fr\)|1fr)\)$/);
+      if (numMatch) {
+        const count = parseInt(numMatch[1], 10);
+        if (count >= 1 && count <= 12) return `grid-cols-${count}`;
+      }
+      const directNum = parseInt(value, 10);
+      if (!isNaN(directNum) && String(directNum) === value.trim() && directNum >= 1 && directNum <= 12) {
+        return `grid-cols-${directNum}`;
+      }
+      if (value === "none") return "grid-cols-none";
+      return `grid-cols-[${value}]`;
+    }
+    case "grid-template-rows": {
+      const numMatch = value.match(/^repeat\((\d+),\s*(minmax\(0,\s*1fr\)|1fr)\)$/);
+      if (numMatch) {
+        const count = parseInt(numMatch[1], 10);
+        if (count >= 1 && count <= 6) return `grid-rows-${count}`;
+      }
+      const directNum = parseInt(value, 10);
+      if (!isNaN(directNum) && String(directNum) === value.trim() && directNum >= 1 && directNum <= 6) {
+        return `grid-rows-${directNum}`;
+      }
+      if (value === "none") return "grid-rows-none";
+      return `grid-rows-[${value}]`;
+    }
+    case "grid-auto-flow": {
+      const flowMap: Record<string, string> = {
+        row: "grid-flow-row",
+        column: "grid-flow-col",
+        col: "grid-flow-col",
+        dense: "grid-flow-dense",
+        "row dense": "grid-flow-row-dense",
+        "column dense": "grid-flow-col-dense",
+        "col dense": "grid-flow-col-dense",
+      };
+      return flowMap[value.toLowerCase().trim()] ?? `grid-flow-[${value}]`;
+    }
+    case "place-items": {
+      const placeMap: Record<string, string> = {
+        start: "place-items-start",
+        end: "place-items-end",
+        center: "place-items-center",
+        baseline: "place-items-baseline",
+        stretch: "place-items-stretch",
+      };
+      return placeMap[value.toLowerCase().trim()] ?? `place-items-[${value}]`;
+    }
+    case "place-content": {
+      const placeMap: Record<string, string> = {
+        center: "place-content-center",
+        start: "place-content-start",
+        end: "place-content-end",
+        between: "place-content-between",
+        around: "place-content-around",
+        evenly: "place-content-evenly",
+        baseline: "place-content-baseline",
+        stretch: "place-content-stretch",
+      };
+      return placeMap[value.toLowerCase().trim()] ?? `place-content-[${value}]`;
+    }
+    case "place-self": {
+      const placeMap: Record<string, string> = {
+        auto: "place-self-auto",
+        start: "place-self-start",
+        end: "place-self-end",
+        center: "place-self-center",
+        stretch: "place-self-stretch",
+      };
+      return placeMap[value.toLowerCase().trim()] ?? `place-self-[${value}]`;
+    }
     case "text-content":
+      return "";
+    default:
       return "";
   }
 }

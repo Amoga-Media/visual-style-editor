@@ -1,8 +1,8 @@
 # Project Task Board — Visual HTML & Tailwind Editor
 
 > **Tracking Rule:** This task board is continuously updated after every single implementation step.  
-> **Current Sprint:** Sprint 10 — Framer UI Overhaul, Layer Dragging, Basic Blocks & 4-Sided Box Controls  
-> **Overall Progress:** `[▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓]` **100% Complete (42 / 42 Tasks Done)**
+> **Current Sprint:** Sprint 11 — Complete Codebase Audit, Bug Resolution & React JSX/TSX Export  
+> **Overall Progress:** `[▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓]` **100% Complete (48 / 48 Tasks Done)**
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Status | Count | Tasks |
 | :--- | :---: | :--- |
-| 🟢 **Done** | 42 | Tasks 1.1 — 10.5 |
+| 🟢 **Done** | 48 | Tasks 1.1 — 11.6 |
 | 🟡 **In Progress** | 0 | None |
 | ⚪ **To Do** | 0 | None |
 | 🔴 **Blocked** | 0 | None |
@@ -203,4 +203,30 @@
 - [x] **Task 10.5:** [SPRINT 10] End-to-End Test Suite & Static Production Build Verification
   - *Files:* `test/ast/apply-edits.test.ts` (25 test suites, 205/205 tests passing), `npm run build`
   - *Status:* 🟢 Done
+
+---
+
+## 🛡️ Sprint 11: Complete Codebase Audit, Bug Resolution & React JSX/TSX Export
+
+*Objective: Resolve all 12 confirmed bugs from the comprehensive codebase audit with strict source preservation, deterministic collision-safe ID generation, structural undo/redo reconciliation, idempotent responsive persistence, and deliver React JSX/TSX export and canvas double-click text editing.*
+
+- [x] **Task 11.1:** [SPRINT 11] ChangeSet Store Structural Edit Deduplication & Sequencing (`BUG-001`)
+  - *Files:* `src/store/change-set-store.ts`, `test/editor/change-set-store.test.ts`
+  - *Status:* 🟢 Done
+- [x] **Task 11.2:** [SPRINT 11] Structural Undo/Redo DOM Reconciliation with Inverse Metadata (`BUG-002`)
+  - *Files:* `src/store/undo-store.ts`, `src/types/index.ts`, `test/editor/undo-store-structural.test.ts`
+  - *Status:* 🟢 Done
+- [x] **Task 11.3:** [SPRINT 11] Deterministic Collision-Safe Unique ID Generator & Subtree Remapping (`BUG-003`)
+  - *Files:* `src/lib/ast/unique-id.ts`, `src/lib/ast/apply-edits.ts`, `test/ast/duplicate-id.test.ts`
+  - *Status:* 🟢 Done
+- [x] **Task 11.4:** [SPRINT 11] Custom CSS Fallback, Link Anchor Targeting & Reversible `rel` (`BUG-004`, `BUG-005`, `BUG-011`)
+  - *Files:* `src/lib/dom/live-style-engine.ts`, `src/components/editor/property-panel/LinkGroup.tsx`, `src/lib/ast/parse5-adapter.ts`
+  - *Status:* 🟢 Done
+- [x] **Task 11.5:** [SPRINT 11] Idempotent Responsive Stylesheet Persistence & ReviewModal Polish (`BUG-006`, `BUG-007`, `BUG-008`, `BUG-010`, `BUG-012`)
+  - *Files:* `src/lib/dom/responsive-style-engine.ts`, `src/lib/ast/apply-edits.ts`, `src/components/editor/ReviewModal.tsx`, `src/lib/dom/describe-edit.ts`, `src/lib/tailwind/forward-map.ts`, `test/ast/repeated-save.test.ts`
+  - *Status:* 🟢 Done
+- [x] **Task 11.6:** [SPRINT 11] React JSX / TSX Export, Canvas Direct Text Editing & Regression Suite
+  - *Files:* `src/lib/export/html-to-jsx.ts`, `src/components/editor/Toolbar.tsx`, `src/components/editor/PreviewFrame.tsx`, `test/export/html-to-jsx.test.ts`, `test/ast/source-preservation.test.ts`
+  - *Status:* 🟢 Done
+
 

@@ -3,10 +3,23 @@ import type { EditRecord, ThemeMap } from "@/types";
 import type { ViewportMode } from "../Toolbar";
 import { readCurrentValue } from "@/lib/dom/computed-style";
 import { applyLiveStyle, commitStyleChange, isStyleableElement } from "@/lib/dom/live-style-engine";
-import { getResponsivePropertyInfo } from "@/lib/dom/responsive-style-engine";
+import { getResponsivePropertyInfo, resetResponsivePropertyForViewport, syncResponsiveStylesheet } from "@/lib/dom/responsive-style-engine";
 import { POPULAR_FONTS, loadFontInDocument, cleanFontFamilyName, getFontFamilyCssValue, type FontOption } from "@/lib/fonts/google-fonts";
 import ValueInput from "./ValueInput";
-import { Type, Italic, Underline, Strikethrough, ChevronDown, Search, Check } from "lucide-react";
+import InlineTextEditor from "../InlineTextEditor";
+import {
+  Type,
+  Italic,
+  Underline,
+  Strikethrough,
+  ChevronDown,
+  Search,
+  Check,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+} from "lucide-react";
 
 type LengthUnit = "px" | "rem" | "em" | "pt" | "vw" | "%";
 type TextAlignValue = "left" | "center" | "right" | "justify";
@@ -59,13 +72,6 @@ const FONT_WEIGHT_OPTIONS = [
   { label: "Bold (700)", value: "700" },
   { label: "Extrabold (800)", value: "800" },
   { label: "Black (900)", value: "900" },
-];
-
-const TEXT_ALIGN_OPTIONS: { label: string; value: TextAlignValue }[] = [
-  { label: "Left", value: "left" },
-  { label: "Center", value: "center" },
-  { label: "Right", value: "right" },
-  { label: "Justify", value: "justify" },
 ];
 
 const FONT_CATEGORIES = ["All", "Sans-Serif", "Serif", "Display", "Monospace", "Handwriting", "System"] as const;
@@ -213,54 +219,70 @@ export default function TypographyGroup({
       undefined,
       viewport
     );
+    baselineFontFamilyRef.current = font.cssValue;
   }
 
   function commitFontSize(amount: number, unitStr: string) {
     const unit = (unitStr as LengthUnit) || "px";
+    const val = `${amount}${unit}`;
     setFontSize({ amount, unit });
     commitStyleChange(
       element!,
       structuralPath!,
       "font-size",
-      `${amount}${unit}`,
+      val,
       theme,
       onEdit,
       baselineFontSizeRef.current,
       undefined,
       viewport
     );
+    baselineFontSizeRef.current = val;
+  }
+
+  function handleResetSizeOverride() {
+    if (viewport === "desktop" || viewport === "all" || !structuralPath) return;
+    resetResponsivePropertyForViewport(structuralPath, "font-size", viewport, element?.ownerDocument || null);
+    syncResponsiveStylesheet(element?.ownerDocument || null);
+    const updatedInfo = getResponsivePropertyInfo(element!, structuralPath, "font-size", viewport);
+    const parsed = parseLength(updatedInfo.value, 16, "px");
+    setFontSize(parsed);
   }
 
   function commitLineHeight(amount: number, unitStr: string) {
     const unit = (unitStr as LengthUnit) || "px";
+    const val = `${amount}${unit}`;
     setLineHeight({ amount, unit });
     commitStyleChange(
       element!,
       structuralPath!,
       "line-height",
-      `${amount}${unit}`,
+      val,
       theme,
       onEdit,
       baselineLineHeightRef.current,
       undefined,
       viewport
     );
+    baselineLineHeightRef.current = val;
   }
 
   function commitLetterSpacing(amount: number, unitStr: string) {
     const unit = (unitStr as LengthUnit) || "px";
+    const val = `${amount}${unit}`;
     setLetterSpacing({ amount, unit });
     commitStyleChange(
       element!,
       structuralPath!,
       "letter-spacing",
-      `${amount}${unit}`,
+      val,
       theme,
       onEdit,
       baselineLetterSpacingRef.current,
       undefined,
       viewport
     );
+    baselineLetterSpacingRef.current = val;
   }
 
   function toggleFontStyle() {
@@ -268,6 +290,14 @@ export default function TypographyGroup({
     setFontStyle(next);
     applyLiveStyle(element!, "font-style", next, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "font-style" as any, next, theme, onEdit, baselineFontStyleRef.current, undefined, viewport);
+    baselineFontStyleRef.current = next;
+  }
+
+  function handleTextAlignChange(val: TextAlignValue) {
+    setTextAlign(val);
+    applyLiveStyle(element!, "text-align", val, theme, undefined, viewport, structuralPath!);
+    commitStyleChange(element!, structuralPath!, "text-align", val, theme, onEdit, baselineTextAlignRef.current, undefined, viewport);
+    baselineTextAlignRef.current = val;
   }
 
   function handleTextTransformChange(val: TextTransformValue) {
@@ -275,6 +305,7 @@ export default function TypographyGroup({
     setTextTransform(next);
     applyLiveStyle(element!, "text-transform", next, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "text-transform" as any, next, theme, onEdit, baselineTextTransformRef.current, undefined, viewport);
+    baselineTextTransformRef.current = next;
   }
 
   function handleTextDecorationChange(val: TextDecorationValue) {
@@ -282,6 +313,7 @@ export default function TypographyGroup({
     setTextDecoration(next);
     applyLiveStyle(element!, "text-decoration", next, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "text-decoration" as any, next, theme, onEdit, baselineTextDecorationRef.current, undefined, viewport);
+    baselineTextDecorationRef.current = next;
   }
 
   const filteredFonts = POPULAR_FONTS.filter((f) => {
@@ -291,56 +323,54 @@ export default function TypographyGroup({
   });
 
   return (
-    <div className="p-4 border-b border-slate-200 dark:border-gray-800 space-y-4">
-      <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-gray-400">
-        <Type className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-        <span>Typography & Fonts</span>
-      </div>
+    <div className="p-3.5 space-y-3.5">
+      <InlineTextEditor element={element} structuralPath={structuralPath} onEdit={onEdit} />
 
       {/* Font Family Picker (Google Fonts & System) */}
-      <div ref={fontPickerRef} className="relative space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-gray-400">
+      <div ref={fontPickerRef} className="relative space-y-1">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
           <span>Font Family</span>
-          <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono">Google Fonts</span>
+          <span className="text-[10px] text-[#0099ff] font-mono">Google Fonts</span>
         </div>
 
         <button
           type="button"
           onClick={() => setFontDropdownOpen(!fontDropdownOpen)}
-          className="w-full bg-slate-50 dark:bg-[#111] hover:bg-slate-100 dark:hover:bg-[#181818] border border-slate-300 dark:border-[#2c2c2c] hover:border-slate-400 dark:hover:border-[#3c3c3c] focus:border-indigo-500 rounded-xl px-3 py-2 text-left flex items-center justify-between transition-colors cursor-pointer group shadow-sm"
+          aria-label="Select font family"
+          className="w-full bg-slate-50 dark:bg-[#141414] hover:bg-slate-100 dark:hover:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] hover:border-slate-300 dark:hover:border-[#333333] focus:border-[#0099ff] rounded-lg px-2.5 py-1.5 text-left flex items-center justify-between transition-colors cursor-pointer group shadow-2xs"
         >
-          <div className="flex items-center gap-2 truncate">
-            <span className="text-xs font-medium text-slate-800 dark:text-white truncate">{fontFamily}</span>
-          </div>
-          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 dark:text-zinc-400 transition-transform duration-150 ${fontDropdownOpen ? "rotate-180 text-indigo-500 dark:text-indigo-400" : ""}`} />
+          <span className="text-xs font-medium text-slate-800 dark:text-white truncate font-sans">
+            {fontFamily}
+          </span>
+          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 dark:text-zinc-400 transition-transform duration-150 ${fontDropdownOpen ? "rotate-180 text-[#0099ff]" : ""}`} />
         </button>
 
         {/* Font Selection Dropdown Modal */}
         {fontDropdownOpen && (
-          <div className="absolute left-0 top-full mt-1.5 w-full bg-white dark:bg-[#141414] border border-slate-200 dark:border-[#2c2c2c] rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-80 flex flex-col">
+          <div className="absolute left-0 top-full mt-1 w-full bg-white dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-80 flex flex-col">
             {/* Search Input */}
-            <div className="p-2 border-b border-slate-200 dark:border-[#242424] bg-slate-50 dark:bg-[#111] flex items-center gap-2">
+            <div className="p-2 border-b border-slate-200 dark:border-[#262626] bg-slate-50 dark:bg-[#141414] flex items-center gap-2">
               <Search className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 shrink-0 ml-1" />
               <input
                 type="text"
                 value={fontSearch}
                 onChange={(e) => setFontSearch(e.target.value)}
                 placeholder="Search Google fonts..."
-                className="w-full bg-transparent text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 outline-none"
+                className="w-full bg-transparent text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 outline-none font-sans"
                 autoFocus
               />
             </div>
 
             {/* Category Filter Pills */}
-            <div className="p-1.5 border-b border-slate-200 dark:border-[#242424] bg-slate-100 dark:bg-[#0c0c0c] flex items-center gap-1 overflow-x-auto no-scrollbar">
+            <div className="p-1 border-b border-slate-200 dark:border-[#262626] bg-slate-100 dark:bg-[#090909] flex items-center gap-1 overflow-x-auto no-scrollbar">
               {FONT_CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-2 py-0.5 text-[10px] rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+                  className={`px-2 py-0.5 text-[10px] rounded-full whitespace-nowrap transition-colors cursor-pointer font-sans ${
                     selectedCategory === cat
-                      ? "bg-indigo-600 text-white font-semibold"
+                      ? "bg-[#0099ff] text-white font-semibold"
                       : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1c1c1c]"
                   }`}
                 >
@@ -350,29 +380,29 @@ export default function TypographyGroup({
             </div>
 
             {/* Font Options List */}
-            <div className="overflow-y-auto flex-1 p-1 space-y-0.5 divide-y divide-slate-100 dark:divide-[#1e1e1e]">
+            <div className="overflow-y-auto flex-1 p-1 space-y-0.5 divide-y divide-slate-100 dark:divide-[#262626]">
               {filteredFonts.length === 0 ? (
-                <div className="p-4 text-center text-xs text-slate-400 dark:text-zinc-500">No matching fonts found</div>
+                <div className="p-4 text-center text-xs text-slate-400 dark:text-zinc-500 font-sans">No matching fonts found</div>
               ) : (
                 filteredFonts.map((font) => (
                   <button
                     key={font.name}
                     type="button"
                     onClick={() => handleSelectFont(font)}
-                    className={`w-full px-2.5 py-2 rounded-lg text-left flex items-center justify-between cursor-pointer transition-colors ${
+                    className={`w-full px-2.5 py-1.5 rounded-lg text-left flex items-center justify-between cursor-pointer transition-colors ${
                       fontFamily.toLowerCase() === font.name.toLowerCase()
-                        ? "bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-300 font-semibold"
-                        : "text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-[#1f1f1f] hover:text-slate-900 dark:hover:text-white"
+                        ? "bg-[#0099ff]/15 text-[#0099ff] font-semibold"
+                        : "text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-[#262626] hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     <div className="flex flex-col">
-                      <span className="text-xs" style={{ fontFamily: font.name }}>
+                      <span className="text-xs font-sans font-medium text-slate-800 dark:text-zinc-100">
                         {font.name}
                       </span>
                       <span className="text-[9px] text-slate-400 dark:text-zinc-500 font-mono">{font.category}</span>
                     </div>
                     {fontFamily.toLowerCase() === font.name.toLowerCase() && (
-                      <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                      <Check className="w-3.5 h-3.5 text-[#0099ff]" />
                     )}
                   </button>
                 ))
@@ -383,26 +413,52 @@ export default function TypographyGroup({
       </div>
 
       {/* Font Size */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-slate-700 dark:text-gray-300">
-          <span>Font Size</span>
-          <ValueInput
-            amount={fontSize.amount}
-            unit={fontSize.unit}
-            min={FONT_SIZE_RANGE[fontSize.unit]?.min ?? 6}
-            max={FONT_SIZE_RANGE[fontSize.unit]?.max ?? 160}
-            step={FONT_SIZE_RANGE[fontSize.unit]?.step ?? 1}
-            allowedUnits={FONT_SIZE_UNITS}
-            property="font-size"
-            element={element}
-            viewport={viewport}
-            onChange={(amt, u) => {
-              const unit = (u as LengthUnit) || fontSize.unit;
-              setFontSize({ amount: amt, unit });
-              applyLiveStyle(element, "font-size", `${amt}${unit}`, theme, undefined, viewport, structuralPath!);
-            }}
-            onCommit={commitFontSize}
-          />
+      <div className="space-y-1">
+        <div className="flex items-center justify-between text-[13px] text-slate-800 dark:text-zinc-200 font-medium">
+          <div className="flex items-center gap-1.5">
+            <span>Font Size</span>
+            {viewport !== "desktop" && (() => {
+              const resp = getResponsivePropertyInfo(element!, structuralPath!, "font-size", viewport);
+              return resp.isOverridden ? (
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono font-semibold">
+                  {viewport}
+                </span>
+              ) : (
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 dark:bg-[#262626] text-slate-500 dark:text-zinc-400 font-mono">
+                  {resp.inheritedFrom}
+                </span>
+              );
+            })()}
+          </div>
+          <div className="flex items-center gap-1.5">
+            {viewport !== "desktop" && getResponsivePropertyInfo(element!, structuralPath!, "font-size", viewport).isOverridden && (
+              <button
+                type="button"
+                onClick={handleResetSizeOverride}
+                className="text-[11px] text-[#0099ff] hover:underline cursor-pointer font-semibold"
+                title="Reset to inherited size from larger viewport"
+              >
+                Reset
+              </button>
+            )}
+            <ValueInput
+              amount={fontSize.amount}
+              unit={fontSize.unit}
+              min={FONT_SIZE_RANGE[fontSize.unit]?.min ?? 6}
+              max={FONT_SIZE_RANGE[fontSize.unit]?.max ?? 160}
+              step={FONT_SIZE_RANGE[fontSize.unit]?.step ?? 1}
+              allowedUnits={FONT_SIZE_UNITS}
+              property="font-size"
+              element={element}
+              viewport={viewport}
+              onChange={(amt, u) => {
+                const unit = (u as LengthUnit) || fontSize.unit;
+                setFontSize({ amount: amt, unit });
+                applyLiveStyle(element, "font-size", `${amt}${unit}`, theme, undefined, viewport, structuralPath!);
+              }}
+              onCommit={commitFontSize}
+            />
+          </div>
         </div>
         <input
           type="range"
@@ -422,8 +478,8 @@ export default function TypographyGroup({
       </div>
 
       {/* Line Height */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-slate-700 dark:text-gray-300">
+      <div className="space-y-1">
+        <div className="flex items-center justify-between text-[13px] text-slate-800 dark:text-zinc-200 font-medium">
           <span>Line Height</span>
           <ValueInput
             amount={lineHeight.amount}
@@ -461,8 +517,8 @@ export default function TypographyGroup({
       </div>
 
       {/* Letter Spacing */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-slate-700 dark:text-gray-300">
+      <div className="space-y-1">
+        <div className="flex items-center justify-between text-[13px] text-slate-800 dark:text-zinc-200 font-medium">
           <span>Letter Spacing</span>
           <ValueInput
             amount={letterSpacing.amount}
@@ -499,16 +555,16 @@ export default function TypographyGroup({
         />
       </div>
 
-      {/* Font Weight & Text Align */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* Weight & Alignment */}
+      <div className="grid grid-cols-2 gap-2 pt-1">
         <div>
-          <label className="text-xs text-slate-500 dark:text-gray-400 block mb-1">Weight</label>
+          <label className="text-[13px] text-slate-800 dark:text-zinc-200 block mb-1 font-medium">Font Weight</label>
           <select
             value={fontWeight}
             onChange={(e) => {
               const val = e.target.value;
               setFontWeight(val);
-              applyLiveStyle(element, "font-weight", val, theme);
+              applyLiveStyle(element, "font-weight", val, theme, undefined, viewport, structuralPath);
               commitStyleChange(
                 element,
                 structuralPath,
@@ -516,10 +572,14 @@ export default function TypographyGroup({
                 val,
                 theme,
                 onEdit,
-                baselineFontWeightRef.current
+                baselineFontWeightRef.current,
+                undefined,
+                viewport
               );
+              baselineFontWeightRef.current = val;
             }}
-            className="w-full bg-slate-50 dark:bg-[#111] border border-slate-300 dark:border-[#2c2c2c] rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-gray-200 outline-none focus:border-indigo-500"
+            aria-label="Select font weight"
+            className="w-full bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-slate-800 dark:text-zinc-200 outline-none focus:border-[#0099ff] cursor-pointer"
           >
             {FONT_WEIGHT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -528,44 +588,77 @@ export default function TypographyGroup({
         </div>
 
         <div>
-          <label className="text-xs text-slate-500 dark:text-gray-400 block mb-1">Alignment</label>
-          <select
-            value={textAlign}
-            onChange={(e) => {
-              const val = e.target.value as TextAlignValue;
-              setTextAlign(val);
-              applyLiveStyle(element, "text-align", val, theme);
-              commitStyleChange(
-                element,
-                structuralPath,
-                "text-align",
-                val,
-                theme,
-                onEdit,
-                baselineTextAlignRef.current
-              );
-            }}
-            className="w-full bg-slate-50 dark:bg-[#111] border border-slate-300 dark:border-[#2c2c2c] rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-gray-200 outline-none focus:border-indigo-500"
-          >
-            {TEXT_ALIGN_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+          <label className="text-xs text-slate-500 dark:text-zinc-400 block mb-1 font-medium">Alignment</label>
+          <div className="flex items-center bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-lg p-0.5">
+            <button
+              type="button"
+              onClick={() => handleTextAlignChange("left")}
+              aria-label="Align Left"
+              className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                textAlign === "left"
+                  ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] shadow-2xs font-semibold"
+                  : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+              }`}
+              title="Align Left"
+            >
+              <AlignLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTextAlignChange("center")}
+              aria-label="Align Center"
+              className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                textAlign === "center"
+                  ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] shadow-2xs font-semibold"
+                  : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+              }`}
+              title="Align Center"
+            >
+              <AlignCenter className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTextAlignChange("right")}
+              aria-label="Align Right"
+              className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                textAlign === "right"
+                  ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] shadow-2xs font-semibold"
+                  : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+              }`}
+              title="Align Right"
+            >
+              <AlignRight className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTextAlignChange("justify")}
+              aria-label="Align Justify"
+              className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                textAlign === "justify"
+                  ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] shadow-2xs font-semibold"
+                  : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+              }`}
+              title="Justify"
+            >
+              <AlignJustify className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Font Styles & Transforms (Italic, Uppercase, Underline, Strikethrough) */}
-      <div className="space-y-1.5 pt-1">
-        <label className="text-[11px] text-slate-500 dark:text-gray-400 block">Style & Transforms</label>
-        <div className="flex items-center gap-1.5 flex-wrap">
+      {/* Style & Transforms */}
+      <div className="space-y-1 pt-1">
+        <label className="text-xs text-slate-500 dark:text-zinc-400 block font-medium">Style & Transforms</label>
+        <div className="grid grid-cols-6 gap-1">
           {/* Italic */}
           <button
             type="button"
             onClick={toggleFontStyle}
-            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+            aria-label="Italic"
+            className={`py-1.5 rounded-lg border transition-colors cursor-pointer flex items-center justify-center ${
               fontStyle === "italic"
-                ? "bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/40"
-                : "bg-slate-50 dark:bg-[#111] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#2c2c2c]"
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/40 font-semibold"
+                : "bg-slate-50 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#262626]"
             }`}
             title="Italic"
           >
@@ -576,10 +669,11 @@ export default function TypographyGroup({
           <button
             type="button"
             onClick={() => handleTextDecorationChange("underline")}
-            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+            aria-label="Underline"
+            className={`py-1.5 rounded-lg border transition-colors cursor-pointer flex items-center justify-center ${
               textDecoration === "underline"
-                ? "bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/40"
-                : "bg-slate-50 dark:bg-[#111] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#2c2c2c]"
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/40 font-semibold"
+                : "bg-slate-50 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#262626]"
             }`}
             title="Underline"
           >
@@ -590,10 +684,11 @@ export default function TypographyGroup({
           <button
             type="button"
             onClick={() => handleTextDecorationChange("line-through")}
-            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+            aria-label="Strikethrough"
+            className={`py-1.5 rounded-lg border transition-colors cursor-pointer flex items-center justify-center ${
               textDecoration === "line-through"
-                ? "bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/40"
-                : "bg-slate-50 dark:bg-[#111] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#2c2c2c]"
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/40 font-semibold"
+                : "bg-slate-50 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#262626]"
             }`}
             title="Strikethrough"
           >
@@ -604,10 +699,11 @@ export default function TypographyGroup({
           <button
             type="button"
             onClick={() => handleTextTransformChange("uppercase")}
-            className={`px-2 py-1 text-[10px] font-mono rounded-lg border transition-colors cursor-pointer ${
+            aria-label="Uppercase"
+            className={`py-1.5 text-[11px] font-mono rounded-lg border transition-colors cursor-pointer flex items-center justify-center ${
               textTransform === "uppercase"
-                ? "bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/40 font-bold"
-                : "bg-slate-50 dark:bg-[#111] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#2c2c2c]"
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/40 font-bold"
+                : "bg-slate-50 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#262626]"
             }`}
             title="Uppercase"
           >
@@ -618,10 +714,11 @@ export default function TypographyGroup({
           <button
             type="button"
             onClick={() => handleTextTransformChange("lowercase")}
-            className={`px-2 py-1 text-[10px] font-mono rounded-lg border transition-colors cursor-pointer ${
+            aria-label="Lowercase"
+            className={`py-1.5 text-[11px] font-mono rounded-lg border transition-colors cursor-pointer flex items-center justify-center ${
               textTransform === "lowercase"
-                ? "bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/40 font-bold"
-                : "bg-slate-50 dark:bg-[#111] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#2c2c2c]"
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/40 font-bold"
+                : "bg-slate-50 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#262626]"
             }`}
             title="Lowercase"
           >
@@ -632,10 +729,11 @@ export default function TypographyGroup({
           <button
             type="button"
             onClick={() => handleTextTransformChange("capitalize")}
-            className={`px-2 py-1 text-[10px] font-mono rounded-lg border transition-colors cursor-pointer ${
+            aria-label="Capitalize"
+            className={`py-1.5 text-[11px] font-mono rounded-lg border transition-colors cursor-pointer flex items-center justify-center ${
               textTransform === "capitalize"
-                ? "bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/40 font-bold"
-                : "bg-slate-50 dark:bg-[#111] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#2c2c2c]"
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/40 font-bold"
+                : "bg-slate-50 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#262626]"
             }`}
             title="Capitalize"
           >
@@ -646,3 +744,4 @@ export default function TypographyGroup({
     </div>
   );
 }
+

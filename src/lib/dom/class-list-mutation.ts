@@ -15,6 +15,20 @@ export function applyClassMutation(
     : Array.from(target.classList);
 
   const filtered = currentClassList.filter((cls) => {
+    if (property === "width") {
+      if (cls === "w-full" || cls === "w-auto" || cls === "w-screen" || cls === "w-max" || cls === "w-min" || cls === "w-fit") {
+        return false;
+      }
+      if (cls === "flex-1" || cls === "grow" || cls === "flex-auto") {
+        return false;
+      }
+    }
+    if (property === "height") {
+      if (cls === "h-full" || cls === "h-auto" || cls === "h-screen" || cls === "h-max" || cls === "h-min" || cls === "h-fit") {
+        return false;
+      }
+    }
+
     const classification = classifyUtilityClass(cls, theme);
     if (!classification) return true;
     if (classification.property !== property) return true;

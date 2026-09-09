@@ -65,9 +65,9 @@ export function convertUnit(
   if (isNaN(amount)) return 0;
 
   const viewport = options.viewport || "desktop";
-  const baseFontSize = options.baseFontSize || 16;
-  const viewportWidth = options.referenceWidth || VIEWPORT_WIDTHS[viewport] || 1200;
-  const viewportHeight = options.referenceHeight || VIEWPORT_HEIGHTS[viewport] || 800;
+  const baseFontSize = options.baseFontSize ?? 16;
+  const viewportWidth = options.referenceWidth ?? VIEWPORT_WIDTHS[viewport] ?? 1200;
+  const viewportHeight = options.referenceHeight ?? VIEWPORT_HEIGHTS[viewport] ?? 800;
 
   const property = options.property || "";
   const isVertical = VERTICAL_PROPERTIES.has(property);
@@ -147,6 +147,10 @@ export function convertUnit(
       break;
     default:
       targetValue = pxValue;
+  }
+
+  if (!isFinite(targetValue) || isNaN(targetValue)) {
+    return 0;
   }
 
   // Round cleanly (up to 2 decimal places, no spurious floating point junk)

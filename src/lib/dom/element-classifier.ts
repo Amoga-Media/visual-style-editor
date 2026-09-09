@@ -71,6 +71,24 @@ const SVG_TAGS = new Set([
 
 const INPUT_TAGS = new Set(["input", "textarea", "select", "option"]);
 
+const CONTAINER_TAGS = new Set([
+  "div",
+  "section",
+  "main",
+  "article",
+  "aside",
+  "nav",
+  "header",
+  "footer",
+  "ul",
+  "ol",
+  "li",
+  "form",
+  "body",
+  "figure",
+  "fieldset",
+]);
+
 export function classifyElement(element: Element | null): ElementClassification {
   if (!element) {
     return {
@@ -102,9 +120,11 @@ export function classifyElement(element: Element | null): ElementClassification 
   const directText = (element.textContent || "").trim();
   const isLeafText = !hasChildElements && directText.length > 0;
 
+  let result: ElementClassification;
+
   // 1. Image & Media
   if (IMAGE_TAGS.has(tagName)) {
-    return {
+    result = {
       category: "image",
       typeLabel: tagName.toUpperCase(),
       badgeColor: "text-emerald-400 bg-emerald-500/15 border-emerald-500/30",
@@ -127,8 +147,8 @@ export function classifyElement(element: Element | null): ElementClassification 
   }
 
   // 2. SVG & Icons
-  if (SVG_TAGS.has(tagName)) {
-    return {
+  else if (SVG_TAGS.has(tagName)) {
+    result = {
       category: "svg",
       typeLabel: tagName === "svg" ? "SVG ICON" : `SVG ${tagName.toUpperCase()}`,
       badgeColor: "text-cyan-400 bg-cyan-500/15 border-cyan-500/30",
@@ -151,9 +171,8 @@ export function classifyElement(element: Element | null): ElementClassification 
   }
 
   // 3. Buttons & Action Triggers
-  const isButtonClass = classList.some((c) => /btn|button|cta/i.test(c));
-  if (tagName === "button" || role === "button" || (tagName === "a" && isButtonClass)) {
-    return {
+  else if (tagName === "button" || role === "button" || (tagName === "a" && classList.some((c) => /btn|button|cta/i.test(c)))) {
+    result = {
       category: "button",
       typeLabel: "BUTTON",
       badgeColor: "text-blue-400 bg-blue-500/15 border-blue-500/30",
@@ -176,8 +195,8 @@ export function classifyElement(element: Element | null): ElementClassification 
   }
 
   // 4. Hyperlinks
-  if (tagName === "a" || element.closest("a") !== null) {
-    return {
+  else if (tagName === "a" || element.closest("a") !== null) {
+    result = {
       category: "link",
       typeLabel: "LINK",
       badgeColor: "text-sky-400 bg-sky-500/15 border-sky-500/30",
@@ -200,8 +219,8 @@ export function classifyElement(element: Element | null): ElementClassification 
   }
 
   // 5. Form Inputs
-  if (INPUT_TAGS.has(tagName)) {
-    return {
+  else if (INPUT_TAGS.has(tagName)) {
+    result = {
       category: "input",
       typeLabel: tagName.toUpperCase(),
       badgeColor: "text-amber-400 bg-amber-500/15 border-amber-500/30",
@@ -224,7 +243,8 @@ export function classifyElement(element: Element | null): ElementClassification 
   }
 
   // 6. Text Elements (Headings, Paragraphs, Spans, Labels, etc.)
-  if (TEXT_TAGS.has(tagName) || isLeafText) {
+  // Never classify structural containers as pure leaf text
+  else if (TEXT_TAGS.has(tagName) || (isLeafText && !CONTAINER_TAGS.has(tagName))) {
     let typeLabel = "TEXT";
     if (tagName.startsWith("h") && tagName.length === 2) {
       typeLabel = `HEADING ${tagName[1]}`;
@@ -236,7 +256,7 @@ export function classifyElement(element: Element | null): ElementClassification 
       typeLabel = "LABEL";
     }
 
-    return {
+    result = {
       category: "text",
       typeLabel,
       badgeColor: "text-purple-400 bg-purple-500/15 border-purple-500/30",
@@ -259,36 +279,56 @@ export function classifyElement(element: Element | null): ElementClassification 
   }
 
   // 7. Containers & Layout Boxes (div, section, main, article, nav, header, footer, etc.)
-  let containerLabel = "CONTAINER";
-  if (tagName === "section") containerLabel = "SECTION";
-  else if (tagName === "nav") containerLabel = "NAV";
-  else if (tagName === "header") containerLabel = "HEADER";
-  else if (tagName === "footer") containerLabel = "FOOTER";
-  else if (tagName === "main") containerLabel = "MAIN";
-  else if (tagName === "article") containerLabel = "ARTICLE";
-  else if (tagName === "aside") containerLabel = "ASIDE";
-  else if (tagName === "ul" || tagName === "ol") containerLabel = "LIST";
-  else if (tagName === "li") containerLabel = "LIST ITEM";
-  else if (classList.some((c) => /card|wrapper|box|container|grid|flex/i.test(c))) containerLabel = "CARD / BOX";
+  else {
+    let containerLabel = "CONTAINER";
+    if (tagName === "section") containerLabel = "SECTION";
+    else if (tagName === "nav") containerLabel = "NAV";
+    else if (tagName === "header") containerLabel = "HEADER";
+    else if (tagName === "footer") containerLabel = "FOOTER";
+    else if (tagName === "main") containerLabel = "MAIN";
+    else if (tagName === "article") containerLabel = "ARTICLE";
+    else if (tagName === "aside") containerLabel = "ASIDE";
+    else if (tagName === "ul" || tagName === "ol") containerLabel = "LIST";
+    else if (tagName === "li") containerLabel = "LIST ITEM";
+    else if (classList.some((c) => /card|wrapper|box|container|grid|flex/i.test(c))) containerLabel = "CARD / BOX";
 
-  return {
-    category: "container",
-    typeLabel: containerLabel,
-    badgeColor: "text-zinc-400 bg-zinc-800/80 border-zinc-700",
-    isLeafText: false,
-    visiblePanels: {
-      contentCopy: !hasChildElements && directText.length > 0, // Only show if pure leaf container with direct text
-      imageMedia: false,
-      linkNav: false,
-      typography: false, // Hidden for pure layout containers in default view
-      layoutSizing: true,
-      positionLayering: true,
-      flexGrid: true, // Flex & Grid controls prominent for containers
-      border: true,
-      effects: true,
-      textColor: false,
-      backgroundColor: true,
-      actions: true,
-    },
-  };
+    result = {
+      category: "container",
+      typeLabel: containerLabel,
+      badgeColor: "text-zinc-400 bg-zinc-800/80 border-zinc-700",
+      isLeafText: false,
+      visiblePanels: {
+        contentCopy: !hasChildElements && directText.length > 0,
+        imageMedia: false,
+        linkNav: false,
+        typography: !hasChildElements && directText.length > 0,
+        layoutSizing: true,
+        positionLayering: true,
+        flexGrid: true, // Always prominent for containers
+        border: true,
+        effects: true,
+        textColor: !hasChildElements && directText.length > 0,
+        backgroundColor: true,
+        actions: true,
+      },
+    };
+  }
+
+  // Dynamic override: If an element is styled as flex or grid, always make flexGrid panel accessible
+  const inlineDisplay = (element as HTMLElement).style?.display;
+  const isFlexOrGrid =
+    classList.includes("flex") ||
+    classList.includes("inline-flex") ||
+    classList.includes("grid") ||
+    classList.includes("inline-grid") ||
+    inlineDisplay === "flex" ||
+    inlineDisplay === "grid" ||
+    inlineDisplay === "inline-flex" ||
+    inlineDisplay === "inline-grid";
+
+  if (isFlexOrGrid) {
+    result.visiblePanels.flexGrid = true;
+  }
+
+  return result;
 }

@@ -7,12 +7,13 @@ import { getResponsivePropertyInfo } from "@/lib/dom/responsive-style-engine";
 import ValueInput from "./ValueInput";
 import { ChevronDown, ChevronRight, Sliders, Lock, Unlock, Space } from "lucide-react";
 
-type Unit = "px" | "%" | "vw" | "vh" | "rem" | "em" | "pt";
+type Unit = "px" | "%" | "vw" | "vh" | "rem" | "em" | "pt" | "auto" | "none";
 
-const SIZING_ALLOWED_UNITS: Unit[] = ["px", "%", "vw", "vh", "rem", "em", "pt"];
-const SPACING_ALLOWED_UNITS: Unit[] = ["px", "%", "rem", "em", "vw", "pt"];
+const SIZING_ALLOWED_UNITS: Unit[] = ["auto", "px", "%", "vw", "vh", "rem", "em", "pt"];
+const MAX_SIZING_ALLOWED_UNITS: Unit[] = ["none", "auto", "px", "%", "vw", "vh", "rem", "em", "pt"];
+const SPACING_ALLOWED_UNITS: Unit[] = ["auto", "px", "%", "rem", "em", "vw", "pt"];
 
-const RANGE_BY_UNIT: Record<Unit, { min: number; max: number; step: number }> = {
+const RANGE_BY_UNIT: Record<string, { min: number; max: number; step: number }> = {
   px: { min: 0, max: 1920, step: 1 },
   "%": { min: 0, max: 100, step: 1 },
   vw: { min: 0, max: 100, step: 1 },
@@ -20,6 +21,8 @@ const RANGE_BY_UNIT: Record<Unit, { min: number; max: number; step: number }> = 
   rem: { min: 0, max: 64, step: 0.25 },
   em: { min: 0, max: 64, step: 0.25 },
   pt: { min: 0, max: 1200, step: 1 },
+  auto: { min: 0, max: 100, step: 1 },
+  none: { min: 0, max: 100, step: 1 },
 };
 
 interface AxisValue {
@@ -67,8 +70,12 @@ export function handleSliderCommit(
 }
 
 function parseAxisValue(raw: string, defaultUnit: Unit = "px"): AxisValue {
-  if (!raw || raw === "none" || raw === "auto") return { amount: 0, unit: defaultUnit };
-  const match = raw.match(/^([-\d.]+)\s*(px|%|vw|vh|rem|em|pt)?$/i);
+  if (!raw) return { amount: 0, unit: defaultUnit };
+  const trimmed = raw.trim().toLowerCase();
+  if (trimmed === "none") return { amount: 0, unit: "none" };
+  if (trimmed === "auto") return { amount: 0, unit: "auto" };
+
+  const match = trimmed.match(/^([-\d.]+)\s*(px|%|vw|vh|rem|em|pt|auto|none)?$/i);
   if (match) {
     const num = parseFloat(match[1]);
     const u = (match[2]?.toLowerCase() as Unit) || defaultUnit;
@@ -98,6 +105,92 @@ interface LayoutGroupProps {
   onEdit?: (record: EditRecord) => void;
 }
 
+function getParentContainerWidth(el: Element | null): number {
+  if (!el || typeof window === "undefined") return 1920;
+  const parent = el.parentElement;
+  if (parent) {
+    const rect = parent.getBoundingClientRect();
+    if (rect.width > 0) return Math.round(rect.width);
+    if (parent.clientWidth > 0) return parent.clientWidth;
+  }
+  return 1920;
+}
+
+function getParentContainerHeight(el: Element | null): number {
+  if (!el || typeof window === "undefined") return 1080;
+  const parent = el.parentElement;
+  if (parent) {
+    const rect = parent.getBoundingClientRect();
+    if (rect.height > 0) return Math.round(rect.height);
+    if (parent.clientHeight > 0) return parent.clientHeight;
+  }
+  return 1080;
+}
+
+function getMaxWidthPxConstraint(maxWidth: AxisValue, parentWidth: number): number | null {
+  if (maxWidth.unit === "none" || maxWidth.unit === "auto" || maxWidth.amount <= 0) {
+    return null;
+  }
+  if (maxWidth.unit === "px") return maxWidth.amount;
+  if (maxWidth.unit === "%") return Math.round((parentWidth * maxWidth.amount) / 100);
+  if (maxWidth.unit === "vw" && typeof window !== "undefined") return Math.round((window.innerWidth * maxWidth.amount) / 100);
+  if (maxWidth.unit === "rem" || maxWidth.unit === "em") return Math.round(maxWidth.amount * 16);
+  return null;
+}
+
+function getMaxHeightPxConstraint(maxHeight: AxisValue, parentHeight: number): number | null {
+  if (maxHeight.unit === "none" || maxHeight.unit === "auto" || maxHeight.amount <= 0) {
+    return null;
+  }
+  if (maxHeight.unit === "px") return maxHeight.amount;
+  if (maxHeight.unit === "%") return Math.round((parentHeight * maxHeight.amount) / 100);
+  if (maxHeight.unit === "vh" && typeof window !== "undefined") return Math.round((window.innerHeight * maxHeight.amount) / 100);
+  if (maxHeight.unit === "rem" || maxHeight.unit === "em") return Math.round(maxHeight.amount * 16);
+  return null;
+}
+
+function getWidthSliderMax(unit: Unit, maxWidth: AxisValue, parentWidth: number): number {
+  if (unit === "%") return 100;
+  if (unit === "vw" || unit === "vh") return 100;
+  if (unit === "rem" || unit === "em") return 64;
+  if (unit === "pt") return 1200;
+
+  const maxPx = getMaxWidthPxConstraint(maxWidth, parentWidth);
+  if (maxPx !== null && maxPx > 0) {
+    return maxPx;
+  }
+  return parentWidth > 0 ? parentWidth : 1920;
+}
+
+function getMaxWidthSliderMax(unit: Unit, parentWidth: number): number {
+  if (unit === "%") return 100;
+  if (unit === "vw" || unit === "vh") return 100;
+  if (unit === "rem" || unit === "em") return 64;
+  if (unit === "pt") return 1200;
+  return parentWidth > 0 ? parentWidth : 1920;
+}
+
+function getHeightSliderMax(unit: Unit, maxHeight: AxisValue, parentHeight: number): number {
+  if (unit === "%") return 100;
+  if (unit === "vw" || unit === "vh") return 100;
+  if (unit === "rem" || unit === "em") return 64;
+  if (unit === "pt") return 1200;
+
+  const maxPx = getMaxHeightPxConstraint(maxHeight, parentHeight);
+  if (maxPx !== null && maxPx > 0) {
+    return maxPx;
+  }
+  return parentHeight > 0 ? parentHeight : 1080;
+}
+
+function getMaxHeightSliderMax(unit: Unit, parentHeight: number): number {
+  if (unit === "%") return 100;
+  if (unit === "vw" || unit === "vh") return 100;
+  if (unit === "rem" || unit === "em") return 64;
+  if (unit === "pt") return 1200;
+  return parentHeight > 0 ? parentHeight : 1080;
+}
+
 export default function LayoutGroup({ element, structuralPath, theme, viewport = "desktop", onEdit }: LayoutGroupProps) {
   const [width, setWidth] = useState<AxisValue>({ amount: 0, unit: "px" });
   const [height, setHeight] = useState<AxisValue>({ amount: 0, unit: "px" });
@@ -105,9 +198,9 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
   const [aspectRatio, setAspectRatio] = useState<number>(1);
   const [aspectRatioCss, setAspectRatioCss] = useState<string>("auto");
   const [minWidth, setMinWidth] = useState<AxisValue>({ amount: 0, unit: "px" });
-  const [maxWidth, setMaxWidth] = useState<AxisValue>({ amount: 0, unit: "px" });
+  const [maxWidth, setMaxWidth] = useState<AxisValue>({ amount: 0, unit: "none" });
   const [minHeight, setMinHeight] = useState<AxisValue>({ amount: 0, unit: "px" });
-  const [maxHeight, setMaxHeight] = useState<AxisValue>({ amount: 0, unit: "px" });
+  const [maxHeight, setMaxHeight] = useState<AxisValue>({ amount: 0, unit: "none" });
   const [showConstraints, setShowConstraints] = useState(false);
 
   // 4-side Padding
@@ -128,6 +221,9 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
 
   const prevElementRef = useRef<Element | null>(null);
 
+  const parentW = getParentContainerWidth(element);
+  const parentH = getParentContainerHeight(element);
+
   useEffect(() => {
     if (!element) return;
     prevElementRef.current = element;
@@ -137,15 +233,26 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
 
     const rawW = getResponsivePropertyInfo(element, structuralPath || "", "width", viewport).value || readCurrentValue(element, "width", theme);
     const parsedW = parseAxisValue(rawW, "px");
-    if (parsedW.amount === 0 && computed.width) {
+    if (parsedW.amount === 0 && computed.width && parsedW.unit !== "auto" && parsedW.unit !== "none") {
       parsedW.amount = parseFloat(computed.width) || 0;
+    }
+    if (parsedW.unit === "%") {
+      parsedW.amount = Math.min(parsedW.amount, 100);
+    } else if (parsedW.unit === "px") {
+      const maxWConstraint = getMaxWidthPxConstraint(parseAxisValue(readCurrentValue(element, "max-width", theme)), parentW) || parentW;
+      if (maxWConstraint > 0 && parsedW.amount > maxWConstraint) {
+        parsedW.amount = maxWConstraint;
+      }
     }
     setWidth(parsedW);
 
     const rawH = getResponsivePropertyInfo(element, structuralPath || "", "height", viewport).value || readCurrentValue(element, "height", theme);
     const parsedH = parseAxisValue(rawH, "px");
-    if (parsedH.amount === 0 && computed.height) {
+    if (parsedH.amount === 0 && computed.height && parsedH.unit !== "auto" && parsedH.unit !== "none") {
       parsedH.amount = parseFloat(computed.height) || 0;
+    }
+    if (parsedH.unit === "%") {
+      parsedH.amount = Math.min(parsedH.amount, 100);
     }
     setHeight(parsedH);
 
@@ -160,13 +267,13 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     setMinWidth(parseAxisValue(rawMinW));
 
     const rawMaxW = getResponsivePropertyInfo(element, structuralPath || "", "max-width", viewport).value || readCurrentValue(element, "max-width", theme);
-    setMaxWidth(parseAxisValue(rawMaxW));
+    setMaxWidth(parseAxisValue(rawMaxW, "none"));
 
     const rawMinH = getResponsivePropertyInfo(element, structuralPath || "", "min-height", viewport).value || readCurrentValue(element, "min-height", theme);
     setMinHeight(parseAxisValue(rawMinH));
 
     const rawMaxH = getResponsivePropertyInfo(element, structuralPath || "", "max-height", viewport).value || readCurrentValue(element, "max-height", theme);
-    setMaxHeight(parseAxisValue(rawMaxH));
+    setMaxHeight(parseAxisValue(rawMaxH, "none"));
 
     // Padding
     const rawP = getResponsivePropertyInfo(element, structuralPath || "", "padding", viewport).value || readCurrentValue(element, "padding", theme);
@@ -189,10 +296,14 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
 
   if (!element || !structuralPath) return null;
 
-  function handleWidthLiveChange(amount: number, unitStr?: string) {
+  function handleWidthLiveChange(rawAmount: number, unitStr?: string) {
     const unit = (unitStr as Unit) || width.unit;
+    const maxBound = getWidthSliderMax(unit, maxWidth, parentW);
+    const amount = (unit === "px" || unit === "%") && maxBound > 0 ? Math.min(rawAmount, maxBound) : rawAmount;
+
     setWidth({ amount, unit });
-    applyLiveStyle(element!, "width", `${amount}${unit}`, theme, undefined, viewport, structuralPath!);
+    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    applyLiveStyle(element!, "width", val, theme, undefined, viewport, structuralPath!);
 
     if (lockAspect && aspectRatio > 0 && unit === "px") {
       const scaledH = Math.round(amount / aspectRatio);
@@ -201,10 +312,15 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     }
   }
 
-  function commitWidth(amount: number, unitStr: string) {
+  function commitWidth(rawAmount: number, unitStr: string) {
     const unit = (unitStr as Unit) || "px";
+    const maxBound = getWidthSliderMax(unit, maxWidth, parentW);
+    const amount = (unit === "px" || unit === "%") && maxBound > 0 ? Math.min(rawAmount, maxBound) : rawAmount;
+
     setWidth({ amount, unit });
-    commitStyleChange(element!, structuralPath!, "width", `${amount}${unit}`, theme, onEdit, undefined, undefined, viewport);
+    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    applyLiveStyle(element!, "width", val, theme, undefined, viewport, structuralPath!);
+    commitStyleChange(element!, structuralPath!, "width", val, theme, onEdit, undefined, undefined, viewport);
 
     if (lockAspect && aspectRatio > 0 && unit === "px") {
       const scaledH = Math.round(amount / aspectRatio);
@@ -213,10 +329,14 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     }
   }
 
-  function handleHeightLiveChange(amount: number, unitStr?: string) {
+  function handleHeightLiveChange(rawAmount: number, unitStr?: string) {
     const unit = (unitStr as Unit) || height.unit;
+    const maxBound = getHeightSliderMax(unit, maxHeight, parentH);
+    const amount = (unit === "px" || unit === "%") && maxBound > 0 ? Math.min(rawAmount, maxBound) : rawAmount;
+
     setHeight({ amount, unit });
-    applyLiveStyle(element!, "height", `${amount}${unit}`, theme, undefined, viewport, structuralPath!);
+    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    applyLiveStyle(element!, "height", val, theme, undefined, viewport, structuralPath!);
 
     if (lockAspect && aspectRatio > 0 && unit === "px") {
       const scaledW = Math.round(amount * aspectRatio);
@@ -225,10 +345,15 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     }
   }
 
-  function commitHeight(amount: number, unitStr: string) {
+  function commitHeight(rawAmount: number, unitStr: string) {
     const unit = (unitStr as Unit) || "px";
+    const maxBound = getHeightSliderMax(unit, maxHeight, parentH);
+    const amount = (unit === "px" || unit === "%") && maxBound > 0 ? Math.min(rawAmount, maxBound) : rawAmount;
+
     setHeight({ amount, unit });
-    commitStyleChange(element!, structuralPath!, "height", `${amount}${unit}`, theme, onEdit, undefined, undefined, viewport);
+    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    applyLiveStyle(element!, "height", val, theme, undefined, viewport, structuralPath!);
+    commitStyleChange(element!, structuralPath!, "height", val, theme, onEdit, undefined, undefined, viewport);
 
     if (lockAspect && aspectRatio > 0 && unit === "px") {
       const scaledW = Math.round(amount * aspectRatio);
@@ -237,39 +362,119 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     }
   }
 
-  function handleSetAspectRatioCss(val: string) {
-    setAspectRatioCss(val);
-    applyLiveStyle(element!, "aspect-ratio" as any, val, theme, undefined, viewport, structuralPath!);
-    commitStyleChange(element!, structuralPath!, "aspect-ratio" as any, val, theme, onEdit, undefined, undefined, viewport);
-  }
-
   function commitMinWidth(amount: number, unitStr: string) {
     const unit = (unitStr as Unit) || "px";
     setMinWidth({ amount, unit });
-    commitStyleChange(element!, structuralPath!, "min-width", `${amount}${unit}`, theme, onEdit, undefined, undefined, viewport);
+    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    applyLiveStyle(element!, "min-width", val, theme, undefined, viewport, structuralPath!);
+    commitStyleChange(element!, structuralPath!, "min-width", val, theme, onEdit, undefined, undefined, viewport);
   }
 
   function commitMaxWidth(amount: number, unitStr: string) {
     const unit = (unitStr as Unit) || "px";
     setMaxWidth({ amount, unit });
-    commitStyleChange(element!, structuralPath!, "max-width", `${amount}${unit}`, theme, onEdit, undefined, undefined, viewport);
+    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    applyLiveStyle(element!, "max-width", val, theme, undefined, viewport, structuralPath!);
+    commitStyleChange(element!, structuralPath!, "max-width", val, theme, onEdit, undefined, undefined, viewport);
+
+    // If new max-width limits current width in px/%, adjust width visually
+    if (unit === "px" && amount > 0 && width.unit === "px" && width.amount > amount) {
+      handleWidthLiveChange(amount, "px");
+      commitWidth(amount, "px");
+    }
   }
 
   function commitMinHeight(amount: number, unitStr: string) {
     const unit = (unitStr as Unit) || "px";
     setMinHeight({ amount, unit });
-    commitStyleChange(element!, structuralPath!, "min-height", `${amount}${unit}`, theme, onEdit, undefined, undefined, viewport);
+    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    applyLiveStyle(element!, "min-height", val, theme, undefined, viewport, structuralPath!);
+    commitStyleChange(element!, structuralPath!, "min-height", val, theme, onEdit, undefined, undefined, viewport);
   }
 
   function commitMaxHeight(amount: number, unitStr: string) {
     const unit = (unitStr as Unit) || "px";
     setMaxHeight({ amount, unit });
-    commitStyleChange(element!, structuralPath!, "max-height", `${amount}${unit}`, theme, onEdit, undefined, undefined, viewport);
+    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    applyLiveStyle(element!, "max-height", val, theme, undefined, viewport, structuralPath!);
+    commitStyleChange(element!, structuralPath!, "max-height", val, theme, onEdit, undefined, undefined, viewport);
+
+    if (unit === "px" && amount > 0 && height.unit === "px" && height.amount > amount) {
+      handleHeightLiveChange(amount, "px");
+      commitHeight(amount, "px");
+    }
+  }
+
+  function handleToggleAutoWidth() {
+    if (width.unit === "auto") {
+      const compW = element ? parseFloat(element.ownerDocument?.defaultView?.getComputedStyle(element).width || "0") : 0;
+      const fallbackW = compW > 0 ? Math.round(compW) : Math.min(parentW, 800);
+      const valObj: AxisValue = { amount: fallbackW, unit: "px" };
+      setWidth(valObj);
+      applyLiveStyle(element!, "width", `${fallbackW}px`, theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "width", `${fallbackW}px`, theme, onEdit, undefined, undefined, viewport);
+    } else {
+      setWidth({ amount: 0, unit: "auto" });
+      applyLiveStyle(element!, "width", "auto", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "width", "auto", theme, onEdit, undefined, undefined, viewport);
+
+      if (element) {
+        const tagName = element.tagName.toLowerCase();
+        if (["p", "span", "h1", "h2", "h3", "h4", "h5", "h6", "label", "a", "li", "button"].includes(tagName)) {
+          const comp = element.ownerDocument?.defaultView?.getComputedStyle(element);
+          if (comp?.whiteSpace === "nowrap") {
+            applyLiveStyle(element, "white-space", "normal", theme, undefined, viewport, structuralPath!);
+            commitStyleChange(element, structuralPath!, "white-space", "normal", theme, onEdit, undefined, undefined, viewport);
+          }
+        }
+      }
+    }
+  }
+
+  function handleToggleAutoHeight() {
+    if (height.unit === "auto") {
+      const compH = element ? parseFloat(element.ownerDocument?.defaultView?.getComputedStyle(element).height || "0") : 0;
+      const fallbackH = compH > 0 ? Math.round(compH) : 300;
+      const valObj: AxisValue = { amount: fallbackH, unit: "px" };
+      setHeight(valObj);
+      applyLiveStyle(element!, "height", `${fallbackH}px`, theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "height", `${fallbackH}px`, theme, onEdit, undefined, undefined, viewport);
+    } else {
+      setHeight({ amount: 0, unit: "auto" });
+      applyLiveStyle(element!, "height", "auto", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "height", "auto", theme, onEdit, undefined, undefined, viewport);
+    }
+  }
+
+  function handleToggleMaxWidth() {
+    if (maxWidth.unit !== "none" && maxWidth.amount > 0) {
+      setMaxWidth({ amount: 0, unit: "none" });
+      applyLiveStyle(element!, "max-width", "none", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "max-width", "none", theme, onEdit, undefined, undefined, viewport);
+    } else {
+      const defaultVal: AxisValue = { amount: Math.min(parentW, 1200), unit: "px" };
+      setMaxWidth(defaultVal);
+      applyLiveStyle(element!, "max-width", `${defaultVal.amount}px`, theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "max-width", `${defaultVal.amount}px`, theme, onEdit, undefined, undefined, viewport);
+    }
+  }
+
+  function handleToggleMaxHeight() {
+    if (maxHeight.unit !== "none" && maxHeight.amount > 0) {
+      setMaxHeight({ amount: 0, unit: "none" });
+      applyLiveStyle(element!, "max-height", "none", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "max-height", "none", theme, onEdit, undefined, undefined, viewport);
+    } else {
+      const defaultVal: AxisValue = { amount: 600, unit: "px" };
+      setMaxHeight(defaultVal);
+      applyLiveStyle(element!, "max-height", "600px", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "max-height", "600px", theme, onEdit, undefined, undefined, viewport);
+    }
   }
 
   function applyMaxWidthPreset(preset: typeof MAX_WIDTH_PRESETS[0]) {
     if (preset.val === "none") {
-      setMaxWidth({ amount: 0, unit: "px" });
+      setMaxWidth({ amount: 0, unit: "none" });
       commitStyleChange(element!, structuralPath!, "max-width", "none", theme, onEdit, undefined, undefined, viewport);
     } else {
       const parsed = parseAxisValue(preset.val);
@@ -323,84 +528,158 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
   }
 
   return (
-    <div className="p-4 border-b border-slate-200 dark:border-[#222] space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Layout & Sizing</div>
-        <div className="flex items-center gap-1.5">
+    <div className="p-3.5 space-y-3.5">
+      <div className="flex items-center justify-end gap-1.5">
+        <button
+          type="button"
+          onClick={() => {
+            const next = !lockAspect;
+            setLockAspect(next);
+            if (next && width.amount > 0 && height.amount > 0) {
+              setAspectRatio(Number((width.amount / height.amount).toFixed(4)));
+            }
+          }}
+          aria-label={lockAspect ? "Unlock aspect ratio" : "Lock aspect ratio"}
+          className={`text-[12px] flex items-center gap-1.5 px-2.5 py-1 rounded-full cursor-pointer transition-colors ${
+            lockAspect
+              ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/40 font-semibold"
+              : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-[#1c1c1c] border border-transparent"
+          }`}
+          title={lockAspect ? "Aspect Ratio Locked (Proportional scaling on)" : "Aspect Ratio Unlocked (Click to lock ratio)"}
+        >
+          {lockAspect ? <Lock className="w-3.5 h-3.5 text-[#0099ff]" /> : <Unlock className="w-3.5 h-3.5" />}
+          <span>Lock Ratio</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setShowConstraints(!showConstraints)}
+          aria-label="Toggle size constraints"
+          className={`text-[12px] flex items-center gap-1.5 px-2.5 py-1 rounded-full cursor-pointer transition-colors ${
+            showConstraints
+              ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-semibold"
+              : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-[#1c1c1c]"
+          }`}
+          title="Toggle Min/Max Size Constraints"
+        >
+          <Sliders className="w-3.5 h-3.5" />
+          <span>Constraints</span>
+        </button>
+      </div>
+
+      {/* Quick Sizing Actions Bar */}
+      <div className="space-y-1.5">
+        <label className="text-[11px] text-slate-500 dark:text-zinc-400 block font-mono uppercase tracking-wider font-semibold">Quick Sizing Actions</label>
+        <div className="grid grid-cols-4 gap-1.5">
           <button
             type="button"
-            onClick={() => {
-              const next = !lockAspect;
-              setLockAspect(next);
-              if (next && width.amount > 0 && height.amount > 0) {
-                setAspectRatio(Number((width.amount / height.amount).toFixed(4)));
-              }
-            }}
-            className={`text-[11px] flex items-center gap-1 px-2 py-0.5 rounded-lg cursor-pointer transition-colors ${
-              lockAspect
-                ? "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/40 font-medium"
-                : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-[#181818] border border-transparent"
+            onClick={handleToggleAutoWidth}
+            aria-label="Auto Width"
+            className={`py-1.5 text-[11px] font-medium rounded-lg transition-colors cursor-pointer border ${
+              width.unit === "auto"
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/30 font-semibold"
+                : "bg-slate-50 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-[#262626] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c]"
             }`}
-            title={lockAspect ? "Aspect Ratio Locked (Proportional scaling on)" : "Aspect Ratio Unlocked (Click to lock ratio)"}
+            title={width.unit === "auto" ? "Unset Auto Width" : "Set width to auto"}
           >
-            {lockAspect ? <Lock className="w-3 h-3 text-indigo-600 dark:text-indigo-400" /> : <Unlock className="w-3 h-3" />}
-            <span>Lock Ratio</span>
+            {width.unit === "auto" ? "Auto Width: On" : "Auto Width"}
           </button>
-
           <button
-            onClick={() => setShowConstraints(!showConstraints)}
-            className={`text-[11px] flex items-center gap-1 px-2 py-0.5 rounded-lg cursor-pointer transition-colors ${
-              showConstraints
-                ? "bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30 font-medium"
-                : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-[#181818]"
+            type="button"
+            onClick={handleToggleAutoHeight}
+            aria-label="Auto Height"
+            className={`py-1.5 text-[11px] font-medium rounded-lg transition-colors cursor-pointer border ${
+              height.unit === "auto"
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/30 font-semibold"
+                : "bg-slate-50 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-[#262626] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c]"
             }`}
-            title="Toggle Min/Max Size Constraints"
+            title={height.unit === "auto" ? "Unset Auto Height" : "Set height to auto"}
           >
-            <Sliders className="w-3 h-3" />
-            <span>Constraints</span>
+            {height.unit === "auto" ? "Auto Height: On" : "Auto Height"}
+          </button>
+          <button
+            type="button"
+            onClick={handleToggleMaxWidth}
+            aria-label="Max Width"
+            className={`py-1.5 text-[11px] font-medium rounded-lg transition-colors cursor-pointer border ${
+              maxWidth.unit !== "none" && maxWidth.amount > 0
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/30 font-semibold"
+                : "bg-slate-50 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-[#262626] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c]"
+            }`}
+            title={maxWidth.unit !== "none" ? "Disable Max Width" : "Enable Max Width constraint"}
+          >
+            {maxWidth.unit !== "none" && maxWidth.amount > 0 ? "Max Width: On" : "+ Max Width"}
+          </button>
+          <button
+            type="button"
+            onClick={handleToggleMaxHeight}
+            aria-label="Max Height"
+            className={`py-1.5 text-[11px] font-medium rounded-lg transition-colors cursor-pointer border ${
+              maxHeight.unit !== "none" && maxHeight.amount > 0
+                ? "bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/30 font-semibold"
+                : "bg-slate-50 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-[#262626] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c1c]"
+            }`}
+            title={maxHeight.unit !== "none" ? "Disable Max Height" : "Enable Max Height constraint"}
+          >
+            {maxHeight.unit !== "none" && maxHeight.amount > 0 ? "Max Height: On" : "+ Max Height"}
           </button>
         </div>
       </div>
 
-      {/* Aspect Ratio Presets Bar */}
-      <div className="space-y-1">
-        <label className="text-[10px] text-slate-500 dark:text-zinc-400 block font-mono uppercase">Aspect Ratio</label>
-        <div className="grid grid-cols-5 gap-1">
-          {[
-            { label: "Auto", val: "auto" },
-            { label: "1:1", val: "1 / 1" },
-            { label: "16:9", val: "16 / 9" },
-            { label: "4:3", val: "4 / 3" },
-            { label: "9:16", val: "9 / 16" },
-          ].map((ar) => (
-            <button
-              key={ar.label}
-              type="button"
-              onClick={() => handleSetAspectRatioCss(ar.val)}
-              className={`py-1 text-[10px] rounded-lg transition-colors cursor-pointer border ${
-                aspectRatioCss === ar.val
-                  ? "bg-indigo-600/15 text-indigo-600 dark:text-indigo-300 border-indigo-500/50 font-semibold"
-                  : "bg-slate-100 dark:bg-[#141414] text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-[#262626] hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1c1c1c]"
-              }`}
-            >
-              {ar.label}
-            </button>
-          ))}
+      {/* 1. Max Width (First, as requested) */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-[13px] text-slate-800 dark:text-zinc-200 font-medium">
+          <div className="flex items-center gap-1.5">
+            <span>Max Width</span>
+            {maxWidth.unit !== "none" && (
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-400 font-mono font-semibold">active</span>
+            )}
+          </div>
+          <ValueInput
+            amount={maxWidth.amount}
+            unit={maxWidth.unit}
+            step={RANGE_BY_UNIT[maxWidth.unit]?.step ?? 1}
+            allowedUnits={MAX_SIZING_ALLOWED_UNITS}
+            property="max-width"
+            element={element}
+            viewport={viewport}
+            onChange={(amt, u) => {
+              const unit = (u as Unit) || maxWidth.unit;
+              setMaxWidth({ amount: amt, unit });
+              const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amt}${unit}`;
+              applyLiveStyle(element, "max-width", val, theme, undefined, viewport, structuralPath!);
+            }}
+            onCommit={commitMaxWidth}
+          />
         </div>
+        {maxWidth.unit !== "none" && maxWidth.unit !== "auto" && (
+          <input
+            type="range"
+            min={0}
+            max={getMaxWidthSliderMax(maxWidth.unit, parentW)}
+            step={RANGE_BY_UNIT[maxWidth.unit]?.step ?? 1}
+            value={maxWidth.amount}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              setMaxWidth({ ...maxWidth, amount: val });
+              applyLiveStyle(element, "max-width", `${val}${maxWidth.unit}`, theme, undefined, viewport, structuralPath!);
+            }}
+            onPointerUp={() => commitMaxWidth(maxWidth.amount, maxWidth.unit)}
+            className="w-full accent-[#0099ff] cursor-pointer"
+          />
+        )}
       </div>
 
-      {/* Width */}
+      {/* 2. Width */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-zinc-300">
+        <div className="flex items-center justify-between text-[13px] text-slate-800 dark:text-zinc-200 font-medium">
           <div className="flex items-center gap-1.5">
             <span>Width</span>
-            {lockAspect && <Lock className="w-2.5 h-2.5 text-indigo-400" />}
+            {lockAspect && <Lock className="w-3 h-3 text-[#0099ff]" />}
           </div>
           <ValueInput
             amount={width.amount}
             unit={width.unit}
-            min={RANGE_BY_UNIT[width.unit]?.min ?? 0}
-            max={RANGE_BY_UNIT[width.unit]?.max ?? 2000}
             step={RANGE_BY_UNIT[width.unit]?.step ?? 1}
             allowedUnits={SIZING_ALLOWED_UNITS}
             property="width"
@@ -410,33 +689,77 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
             onCommit={commitWidth}
           />
         </div>
-        <input
-          type="range"
-          min={RANGE_BY_UNIT[width.unit]?.min ?? 0}
-          max={RANGE_BY_UNIT[width.unit]?.max ?? 1200}
-          step={RANGE_BY_UNIT[width.unit]?.step ?? 1}
-          value={width.amount}
-          onChange={(e) => {
-            const val = parseFloat(e.target.value);
-            handleWidthLiveChange(val, width.unit);
-          }}
-          onPointerUp={() => commitWidth(width.amount, width.unit)}
-          className="w-full accent-blue-500 cursor-pointer"
-        />
+        {width.unit !== "auto" && (
+          <input
+            type="range"
+            min={0}
+            max={getWidthSliderMax(width.unit, maxWidth, parentW)}
+            step={RANGE_BY_UNIT[width.unit]?.step ?? 1}
+            value={width.amount}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              handleWidthLiveChange(val, width.unit);
+            }}
+            onPointerUp={() => commitWidth(width.amount, width.unit)}
+            className="w-full accent-[#0099ff] cursor-pointer"
+          />
+        )}
       </div>
 
-      {/* Height */}
+      {/* 3. Max Height */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-[13px] text-slate-800 dark:text-zinc-200 font-medium">
+          <div className="flex items-center gap-1.5">
+            <span>Max Height</span>
+            {maxHeight.unit !== "none" && (
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-400 font-mono font-semibold">active</span>
+            )}
+          </div>
+          <ValueInput
+            amount={maxHeight.amount}
+            unit={maxHeight.unit}
+            step={RANGE_BY_UNIT[maxHeight.unit]?.step ?? 1}
+            allowedUnits={MAX_SIZING_ALLOWED_UNITS}
+            property="max-height"
+            element={element}
+            viewport={viewport}
+            onChange={(amt, u) => {
+              const unit = (u as Unit) || maxHeight.unit;
+              setMaxHeight({ amount: amt, unit });
+              const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amt}${unit}`;
+              applyLiveStyle(element, "max-height", val, theme, undefined, viewport, structuralPath!);
+            }}
+            onCommit={commitMaxHeight}
+          />
+        </div>
+        {maxHeight.unit !== "none" && maxHeight.unit !== "auto" && (
+          <input
+            type="range"
+            min={0}
+            max={getMaxHeightSliderMax(maxHeight.unit, parentH)}
+            step={RANGE_BY_UNIT[maxHeight.unit]?.step ?? 1}
+            value={maxHeight.amount}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              setMaxHeight({ ...maxHeight, amount: val });
+              applyLiveStyle(element, "max-height", `${val}${maxHeight.unit}`, theme, undefined, viewport, structuralPath!);
+            }}
+            onPointerUp={() => commitMaxHeight(maxHeight.amount, maxHeight.unit)}
+            className="w-full accent-[#0099ff] cursor-pointer"
+          />
+        )}
+      </div>
+
+      {/* 4. Height */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs text-zinc-300">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 font-medium">
             <span>Height</span>
-            {lockAspect && <Lock className="w-2.5 h-2.5 text-indigo-400" />}
+            {lockAspect && <Lock className="w-2.5 h-2.5 text-[#0099ff]" />}
           </div>
           <ValueInput
             amount={height.amount}
             unit={height.unit}
-            min={RANGE_BY_UNIT[height.unit]?.min ?? 0}
-            max={RANGE_BY_UNIT[height.unit]?.max ?? 2000}
             step={RANGE_BY_UNIT[height.unit]?.step ?? 1}
             allowedUnits={SIZING_ALLOWED_UNITS}
             property="height"
@@ -446,19 +769,21 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
             onCommit={commitHeight}
           />
         </div>
-        <input
-          type="range"
-          min={RANGE_BY_UNIT[height.unit]?.min ?? 0}
-          max={RANGE_BY_UNIT[height.unit]?.max ?? 1200}
-          step={RANGE_BY_UNIT[height.unit]?.step ?? 1}
-          value={height.amount}
-          onChange={(e) => {
-            const val = parseFloat(e.target.value);
-            handleHeightLiveChange(val, height.unit);
-          }}
-          onPointerUp={() => commitHeight(height.amount, height.unit)}
-          className="w-full accent-blue-500 cursor-pointer"
-        />
+        {height.unit !== "auto" && (
+          <input
+            type="range"
+            min={0}
+            max={getHeightSliderMax(height.unit, maxHeight, parentH)}
+            step={RANGE_BY_UNIT[height.unit]?.step ?? 1}
+            value={height.amount}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              handleHeightLiveChange(val, height.unit);
+            }}
+            onPointerUp={() => commitHeight(height.amount, height.unit)}
+            className="w-full accent-[#0099ff] cursor-pointer"
+          />
+        )}
       </div>
 
       {/* Constraints Drawer (Min/Max Width & Height) */}
@@ -596,8 +921,6 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
               <ValueInput
                 amount={padding.amount}
                 unit={padding.unit}
-                min={0}
-                max={256}
                 step={1}
                 allowedUnits={SPACING_ALLOWED_UNITS}
                 property="padding"
@@ -614,7 +937,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
             <input
               type="range"
               min={0}
-              max={128}
+              max={Math.max(128, Math.ceil(padding.amount * 1.25))}
               step={1}
               value={padding.amount}
               onChange={(e) => {
@@ -634,8 +957,6 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
                 <ValueInput
                   amount={padT.amount}
                   unit={padT.unit}
-                  min={0}
-                  max={256}
                   step={1}
                   allowedUnits={SPACING_ALLOWED_UNITS}
                   property="padding-top"
@@ -654,8 +975,6 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
                 <ValueInput
                   amount={padR.amount}
                   unit={padR.unit}
-                  min={0}
-                  max={256}
                   step={1}
                   allowedUnits={SPACING_ALLOWED_UNITS}
                   property="padding-right"
@@ -674,8 +993,6 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
                 <ValueInput
                   amount={padB.amount}
                   unit={padB.unit}
-                  min={0}
-                  max={256}
                   step={1}
                   allowedUnits={SPACING_ALLOWED_UNITS}
                   property="padding-bottom"
@@ -686,7 +1003,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
                     setPadB({ amount: amt, unit });
                     applyLiveStyle(element, "padding-bottom", `${amt}${unit}`, theme, "bottom", viewport, structuralPath!);
                   }}
-                  onCommit={(amt, u) => commitSideMargin("padding-bottom" as any, amt, u)}
+                  onCommit={(amt, u) => commitSidePadding("padding-bottom", amt, u)}
                 />
               </div>
               <div className="space-y-1">
@@ -694,8 +1011,6 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
                 <ValueInput
                   amount={padL.amount}
                   unit={padL.unit}
-                  min={0}
-                  max={256}
                   step={1}
                   allowedUnits={SPACING_ALLOWED_UNITS}
                   property="padding-left"
@@ -736,8 +1051,6 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
               <ValueInput
                 amount={margin.amount}
                 unit={margin.unit}
-                min={-128}
-                max={256}
                 step={1}
                 allowedUnits={SPACING_ALLOWED_UNITS}
                 property="margin"
@@ -753,8 +1066,8 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
             </div>
             <input
               type="range"
-              min={0}
-              max={128}
+              min={Math.min(-128, Math.floor(margin.amount * 1.25))}
+              max={Math.max(256, Math.ceil(margin.amount * 1.25))}
               step={1}
               value={margin.amount}
               onChange={(e) => {
@@ -774,8 +1087,6 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
                 <ValueInput
                   amount={marT.amount}
                   unit={marT.unit}
-                  min={-128}
-                  max={256}
                   step={1}
                   allowedUnits={SPACING_ALLOWED_UNITS}
                   property="margin-top"
@@ -794,8 +1105,6 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
                 <ValueInput
                   amount={marR.amount}
                   unit={marR.unit}
-                  min={-128}
-                  max={256}
                   step={1}
                   allowedUnits={SPACING_ALLOWED_UNITS}
                   property="margin-right"
@@ -814,8 +1123,6 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
                 <ValueInput
                   amount={marB.amount}
                   unit={marB.unit}
-                  min={-128}
-                  max={256}
                   step={1}
                   allowedUnits={SPACING_ALLOWED_UNITS}
                   property="margin-bottom"
@@ -834,8 +1141,6 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
                 <ValueInput
                   amount={marL.amount}
                   unit={marL.unit}
-                  min={-128}
-                  max={256}
                   step={1}
                   allowedUnits={SPACING_ALLOWED_UNITS}
                   property="margin-left"

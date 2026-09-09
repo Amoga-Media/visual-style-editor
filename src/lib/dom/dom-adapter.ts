@@ -6,9 +6,10 @@ export const domAdapter: NodeAdapter<Element> = {
   getParent: (el) => el.parentElement,
   getPrecedingSameTagCount: (el) => {
     let count = 0;
+    const targetTag = el.tagName.toLowerCase();
     let sibling = el.previousElementSibling;
     while (sibling) {
-      if (sibling.tagName === el.tagName) count++;
+      if (sibling.tagName.toLowerCase() === targetTag) count++;
       sibling = sibling.previousElementSibling;
     }
     return count;

@@ -53,6 +53,15 @@ export function setStyleProperty(styleValue: string, property: string, value: st
   const lowerTarget = property.toLowerCase();
   const existingIndex = declarations.findIndex((d) => d.property.toLowerCase() === lowerTarget);
 
+  const isValueEmpty = typeof value !== "string" || value.trim() === "";
+
+  if (isValueEmpty) {
+    if (existingIndex === -1) return styleValue;
+    const next = [...declarations];
+    next.splice(existingIndex, 1);
+    return serializeStyleAttr(next);
+  }
+
   if (existingIndex === -1) {
     return serializeStyleAttr([...declarations, { property, value }]);
   }

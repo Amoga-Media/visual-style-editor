@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Copy,
   Check,
+  Code,
   Sparkles,
   Monitor,
   Tablet,
@@ -20,9 +21,10 @@ import {
   HelpCircle,
   Sun,
   Moon,
+  LayoutPanelTop,
 } from "lucide-react";
 
-export type ViewportMode = "desktop" | "tablet" | "mobile";
+export type ViewportMode = "desktop" | "tablet" | "mobile" | "all";
 
 interface ToolbarProps {
   fileName: string | null;
@@ -34,6 +36,7 @@ interface ToolbarProps {
   onToggleHistory: () => void;
   onOpenReview: () => void;
   onCopyCode?: () => void;
+  onCopyJsx?: () => void;
   iframeDocument: Document | null;
   leftSidebarOpen?: boolean;
   onToggleLeftSidebar?: () => void;
@@ -54,6 +57,7 @@ export default function Toolbar({
   onToggleHistory,
   onOpenReview,
   onCopyCode,
+  onCopyJsx,
   iframeDocument,
   leftSidebarOpen = false,
   onToggleLeftSidebar,
@@ -71,6 +75,7 @@ export default function Toolbar({
   const past = useUndoStore((s) => s.past);
   const future = useUndoStore((s) => s.future);
   const [copied, setCopied] = useState(false);
+  const [copiedJsx, setCopiedJsx] = useState(false);
 
   function handleCopy() {
     onCopyCode?.();
@@ -78,16 +83,24 @@ export default function Toolbar({
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function handleCopyJsx() {
+    onCopyJsx?.();
+    setCopiedJsx(true);
+    setTimeout(() => setCopiedJsx(false), 2000);
+  }
+
   return (
-    <header className="h-13 bg-white dark:bg-[#090909] border-b border-slate-200 dark:border-[#262626] flex items-center justify-between px-3 sm:px-4 z-30 select-none text-slate-800 dark:text-white transition-colors">
+    <header className="h-12 bg-white dark:bg-[#090909] border-b border-slate-200 dark:border-[#262626] flex items-center justify-between px-3 sm:px-4 z-30 select-none text-slate-800 dark:text-white transition-colors">
       {/* Left: Sidebar Toggle, Brand & File info */}
       <div className="flex items-center gap-2.5 min-w-0">
         {fileName && onToggleLeftSidebar && (
           <button
+            type="button"
             onClick={onToggleLeftSidebar}
-            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+            aria-label="Toggle Layers & Library Sidebar"
+            className={`p-1.5 rounded-full border transition-all cursor-pointer ${
               leftSidebarOpen
-                ? "bg-indigo-500/15 border-indigo-500/40 text-indigo-600 dark:text-[#0099ff]"
+                ? "bg-[#0099ff]/15 border-[#0099ff]/40 text-[#0099ff]"
                 : "bg-slate-100 dark:bg-[#141414] border-slate-200 dark:border-[#262626] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1c1c1c]"
             }`}
             title="Toggle Layers & Insert Library"
@@ -97,22 +110,23 @@ export default function Toolbar({
         )}
 
         <div className="flex items-center gap-2 font-semibold text-xs tracking-tight text-slate-900 dark:text-white shrink-0">
-          <div className="w-6 h-6 rounded-md bg-indigo-600 dark:bg-[#0099ff] flex items-center justify-center text-white shadow-sm">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="w-6 h-6 rounded-full bg-[#0099ff] flex items-center justify-center text-white shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 fill-white/20" />
           </div>
-          <span className="hidden md:inline font-medium tracking-tight">
+          <span className="hidden sm:inline font-bold tracking-tight text-xs uppercase text-slate-900 dark:text-white">
             Visual Studio
           </span>
         </div>
 
         {fileName && (
-          <div className="flex items-center gap-2 pl-2 sm:pl-3 border-l border-slate-200 dark:border-[#262626] truncate">
+          <div className="flex items-center gap-2 pl-2.5 border-l border-slate-200 dark:border-[#262626] truncate">
             <span className="text-xs font-mono text-slate-700 dark:text-zinc-300 truncate max-w-[110px] sm:max-w-[180px]" title={fileName}>
               {fileName}
             </span>
             <button
+              type="button"
               onClick={onChangeFile}
-              className="text-[11px] text-slate-500 dark:text-zinc-500 hover:text-indigo-600 dark:hover:text-[#0099ff] underline underline-offset-2 shrink-0 cursor-pointer"
+              className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-[#0099ff] underline underline-offset-2 shrink-0 cursor-pointer transition-colors"
             >
               Change
             </button>
@@ -120,8 +134,8 @@ export default function Toolbar({
         )}
 
         {statusMessage && (
-          <div className="hidden xl:flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-            <CheckCircle2 className="w-3 h-3" />
+          <div className="hidden xl:flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 animate-in fade-in">
+            <CheckCircle2 className="w-3.5 h-3.5" />
             <span>{statusMessage}</span>
           </div>
         )}
@@ -133,18 +147,22 @@ export default function Toolbar({
           {/* Undo / Redo */}
           <div className="flex items-center bg-slate-100 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-full p-0.5">
             <button
+              type="button"
               onClick={() => useUndoStore.getState().undo(iframeDocument)}
               disabled={past.length === 0}
-              className="p-1.5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-25 disabled:cursor-not-allowed rounded-full hover:bg-slate-200 dark:hover:bg-[#262626] transition-colors cursor-pointer"
-              title="Undo (Ctrl+Z / Cmd+Z)"
+              aria-label="Undo action"
+              className="p-1.5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-25 disabled:cursor-not-allowed rounded-full hover:bg-white dark:hover:bg-[#1c1c1c] transition-colors cursor-pointer"
+              title="Undo (Ctrl+Z)"
             >
               <Undo className="w-3.5 h-3.5" />
             </button>
             <button
+              type="button"
               onClick={() => useUndoStore.getState().redo(iframeDocument)}
               disabled={future.length === 0}
-              className="p-1.5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-25 disabled:cursor-not-allowed rounded-full hover:bg-slate-200 dark:hover:bg-[#262626] transition-colors cursor-pointer"
-              title="Redo (Ctrl+Y / Ctrl+Shift+Z / Cmd+Shift+Z)"
+              aria-label="Redo action"
+              className="p-1.5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-25 disabled:cursor-not-allowed rounded-full hover:bg-white dark:hover:bg-[#1c1c1c] transition-colors cursor-pointer"
+              title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
             >
               <Redo className="w-3.5 h-3.5" />
             </button>
@@ -153,31 +171,57 @@ export default function Toolbar({
           {/* Viewport Modes */}
           <div className="hidden sm:flex items-center bg-slate-100 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-full p-0.5">
             <button
+              type="button"
               onClick={() => onViewportChange("desktop")}
+              aria-label="Desktop Viewport"
               className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                viewport === "desktop" ? "bg-white dark:bg-[#262626] text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+                viewport === "desktop"
+                  ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] font-semibold"
+                  : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
               }`}
-              title="Desktop View"
+              title="Desktop View (Global Base)"
             >
               <Monitor className="w-3.5 h-3.5" />
             </button>
             <button
+              type="button"
               onClick={() => onViewportChange("tablet")}
+              aria-label="Tablet Viewport"
               className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                viewport === "tablet" ? "bg-white dark:bg-[#262626] text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+                viewport === "tablet"
+                  ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] font-semibold"
+                  : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
               }`}
               title="Tablet View (768px)"
             >
               <Tablet className="w-3.5 h-3.5" />
             </button>
             <button
+              type="button"
               onClick={() => onViewportChange("mobile")}
+              aria-label="Mobile Viewport"
               className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                viewport === "mobile" ? "bg-white dark:bg-[#262626] text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+                viewport === "mobile"
+                  ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] font-semibold"
+                  : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
               }`}
               title="Mobile View (375px)"
             >
               <Smartphone className="w-3.5 h-3.5" />
+            </button>
+            <div className="w-px h-3.5 bg-slate-300 dark:bg-[#262626] mx-0.5" />
+            <button
+              type="button"
+              onClick={() => onViewportChange("all")}
+              aria-label="All Viewports Side-by-Side"
+              className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                viewport === "all"
+                  ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] font-semibold"
+                  : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+              }`}
+              title="All Screens Side-by-Side (Desktop + Tablet + Mobile)"
+            >
+              <LayoutPanelTop className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -185,23 +229,28 @@ export default function Toolbar({
           {onZoomIn && onZoomOut && (
             <div className="hidden lg:flex items-center bg-slate-100 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-full p-0.5">
               <button
+                type="button"
                 onClick={onZoomOut}
-                className="p-1.5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-full hover:bg-slate-200 dark:hover:bg-[#262626] transition-colors cursor-pointer"
-                title="Zoom Out"
+                aria-label="Zoom Out"
+                className="p-1.5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-full hover:bg-white dark:hover:bg-[#1c1c1c] transition-colors cursor-pointer"
+                title="Zoom Out (Ctrl+Scroll Down)"
               >
                 <ZoomOut className="w-3.5 h-3.5" />
               </button>
               <button
+                type="button"
                 onClick={onZoomReset}
-                className="px-1.5 text-[11px] font-mono text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                className="px-2 text-[11px] font-mono font-medium text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white cursor-pointer"
                 title="Reset Zoom to 100%"
               >
                 {Math.round(zoom * 100)}%
               </button>
               <button
+                type="button"
                 onClick={onZoomIn}
-                className="p-1.5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-full hover:bg-slate-200 dark:hover:bg-[#262626] transition-colors cursor-pointer"
-                title="Zoom In"
+                aria-label="Zoom In"
+                className="p-1.5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-full hover:bg-white dark:hover:bg-[#1c1c1c] transition-colors cursor-pointer"
+                title="Zoom In (Ctrl+Scroll Up)"
               >
                 <ZoomIn className="w-3.5 h-3.5" />
               </button>
@@ -211,47 +260,63 @@ export default function Toolbar({
       )}
 
       {/* Right: Actions & Theme Toggle */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         {/* Light / Dark Mode Toggle */}
         <button
           type="button"
           onClick={toggleAppTheme}
+          aria-label={appTheme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
           className="p-1.5 rounded-full bg-slate-100 dark:bg-[#141414] hover:bg-slate-200 dark:hover:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-slate-700 dark:text-zinc-300 transition-colors cursor-pointer"
           title={appTheme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
-          {appTheme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
+          {appTheme === "dark" ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-[#0099ff]" />}
         </button>
 
         {fileName && (
           <>
-            <label className="hidden xl:flex items-center gap-1.5 text-xs text-slate-600 dark:text-zinc-400 cursor-pointer pr-1">
+            <label className="hidden xl:flex items-center gap-1 text-[11px] text-slate-600 dark:text-zinc-400 cursor-pointer pr-1">
               <input
                 type="checkbox"
                 checked={snapToDefaultScale}
                 onChange={toggleSnap}
-                className="rounded bg-slate-100 dark:bg-[#141414] border-slate-300 dark:border-[#262626] text-indigo-600 dark:text-[#0099ff] focus:ring-indigo-500 accent-indigo-600 dark:accent-[#0099ff]"
+                className="rounded bg-slate-100 dark:bg-[#141414] border-slate-300 dark:border-[#262626] text-[#0099ff] focus:ring-[#0099ff] accent-[#0099ff]"
               />
               <span>Snap</span>
             </label>
 
             {/* Quick Copy Code */}
             <button
+              type="button"
               onClick={handleCopy}
-              className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-[#141414] hover:bg-slate-200 dark:hover:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-xs text-slate-800 dark:text-zinc-200 font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1 rounded-full bg-slate-100 dark:bg-[#141414] hover:bg-slate-200 dark:hover:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-xs text-slate-800 dark:text-zinc-200 font-medium transition-colors flex items-center gap-1 cursor-pointer"
               title="Copy HTML code to clipboard"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />}
-              <span className={copied ? "text-emerald-500" : ""}>{copied ? "Copied!" : "Copy HTML"}</span>
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />}
+              <span className={copied ? "text-emerald-400 font-semibold" : ""}>{copied ? "Copied!" : "Copy HTML"}</span>
             </button>
 
+            {onCopyJsx && (
+              <button
+                type="button"
+                onClick={handleCopyJsx}
+                className="px-3 py-1 rounded-full bg-slate-100 dark:bg-[#141414] hover:bg-slate-200 dark:hover:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-xs text-slate-800 dark:text-zinc-200 font-medium transition-colors flex items-center gap-1 cursor-pointer"
+                title="Export as React JSX / TSX Component"
+              >
+                {copiedJsx ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Code className="w-3.5 h-3.5 text-[#0099ff]" />}
+                <span className={copiedJsx ? "text-emerald-400 font-semibold" : ""}>{copiedJsx ? "Copied JSX!" : "Copy JSX"}</span>
+              </button>
+            )}
+
             <button
+              type="button"
               onClick={onToggleHistory}
-              className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-[#141414] hover:bg-slate-200 dark:hover:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-xs text-slate-800 dark:text-zinc-200 font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+              aria-label="Version history drawer"
+              className="px-3 py-1 rounded-full bg-slate-100 dark:bg-[#141414] hover:bg-slate-200 dark:hover:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-xs text-slate-800 dark:text-zinc-200 font-medium transition-colors flex items-center gap-1 cursor-pointer"
             >
               <History className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
               <span className="hidden sm:inline">History</span>
               {historyCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-[#262626] text-[10px] text-slate-700 dark:text-zinc-300">
+                <span className="px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-[#262626] text-[10px] font-bold text-slate-700 dark:text-zinc-300">
                   {historyCount}
                 </span>
               )}
@@ -259,23 +324,26 @@ export default function Toolbar({
 
             {onOpenShortcuts && (
               <button
+                type="button"
                 onClick={onOpenShortcuts}
+                aria-label="Keyboard shortcuts"
                 className="p-1.5 rounded-full bg-slate-100 dark:bg-[#141414] hover:bg-slate-200 dark:hover:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                 title="Keyboard Shortcuts (?)"
               >
-                <HelpCircle className="w-4 h-4" />
+                <HelpCircle className="w-3.5 h-3.5" />
               </button>
             )}
 
             <button
+              type="button"
               onClick={onOpenReview}
               disabled={edits.length === 0}
-              className="px-4 py-1.5 rounded-full bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-zinc-200 text-white dark:text-black font-semibold disabled:opacity-30 disabled:cursor-not-allowed text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-1 rounded-full bg-white text-black font-semibold hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed text-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-xs"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Review & Save</span>
               {edits.length > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-white dark:bg-black text-slate-900 dark:text-white text-[10px] font-bold">
+                <span className="px-1.5 py-0.2 rounded-full bg-[#0099ff] text-white text-[10px] font-bold">
                   {edits.length}
                 </span>
               )}
@@ -286,3 +354,4 @@ export default function Toolbar({
     </header>
   );
 }
+

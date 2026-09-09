@@ -102,7 +102,7 @@ export default function BorderGroup({
         const resp = getResponsivePropertyInfo(element!, structuralPath, prop, viewport, side);
         if (resp.value) return resp.value;
       }
-      return readCurrentValue(element!, prop, theme, side);
+      return readCurrentValue(element!, prop, theme, side as any);
     }
 
     const rawW = getVal("border-width");
@@ -259,23 +259,21 @@ export default function BorderGroup({
   }
 
   return (
-    <div className="p-4 border-b border-[#222] space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Border & Radius</div>
-      </div>
-
+    <div className="p-4 border-b border-[#262626] space-y-4">
       {/* Border Style Buttons */}
       <div className="space-y-1.5">
-        <label className="text-[11px] text-zinc-400 block">Border Style</label>
+        <label className="text-[11px] text-zinc-400 block font-medium">Border Style</label>
         <div className="grid grid-cols-4 gap-1">
           {BORDER_STYLES.map((s) => (
             <button
               key={s.val}
+              type="button"
+              aria-label={`Border style ${s.label}`}
               onClick={() => handleStyleChange(s.val)}
               className={`py-1 text-[11px] rounded-lg transition-all cursor-pointer ${
                 borderStyle === s.val
-                  ? "bg-white text-black font-semibold shadow-sm"
-                  : "bg-[#181818] text-zinc-400 hover:text-white border border-[#262626]"
+                  ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-medium"
+                  : "bg-[#141414] text-zinc-400 hover:text-white border border-[#262626]"
               }`}
             >
               {s.label}
@@ -286,7 +284,7 @@ export default function BorderGroup({
 
       {/* Border Color */}
       <div className="space-y-1.5">
-        <label className="text-[11px] text-zinc-400 block">Border Color</label>
+        <label className="text-[11px] text-zinc-400 block font-medium">Border Color</label>
         <ColorPicker
           value={borderColor}
           onChange={handleBorderColorChange}
@@ -298,14 +296,16 @@ export default function BorderGroup({
       {/* Border Radius (Uniform vs 4 Corners) */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs text-zinc-300">
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 font-medium">
             <Circle className="w-3 h-3 text-zinc-400" />
             <span>Border Radius</span>
           </span>
           <button
+            type="button"
+            aria-label={linkedRadius ? "Unlink corner radius" : "Link corner radius"}
             onClick={() => setLinkedRadius(!linkedRadius)}
             className={`p-1 rounded cursor-pointer transition-colors ${
-              linkedRadius ? "text-blue-400 hover:text-blue-300" : "text-zinc-500 hover:text-zinc-300"
+              linkedRadius ? "text-[#0099ff] hover:text-[#33adff]" : "text-zinc-500 hover:text-zinc-300"
             }`}
             title={linkedRadius ? "Linked (All Corners)" : "Unlinked (Individual Corners)"}
           >
@@ -347,11 +347,11 @@ export default function BorderGroup({
                 applyLiveStyle(element, "border-radius", `${val}${borderRadius.unit}`, theme, undefined, viewport, structuralPath!);
               }}
               onPointerUp={() => commitUniformRadius(borderRadius.amount, borderRadius.unit)}
-              className="w-full accent-blue-500 cursor-pointer"
+              className="w-full accent-[#0099ff] cursor-pointer"
             />
           </div>
         ) : (
-          <div className="p-3 bg-[#121212] rounded-xl border border-[#242424] space-y-2">
+          <div className="p-3 bg-[#141414] rounded-xl border border-[#262626] space-y-2">
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
                 <span className="text-[10px] text-zinc-400">Top-Left</span>
@@ -441,14 +441,16 @@ export default function BorderGroup({
       {/* Border Width (Uniform vs 4 Sides) */}
       <div className="space-y-2 pt-1">
         <div className="flex items-center justify-between text-xs text-zinc-300">
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 font-medium">
             <Square className="w-3 h-3 text-zinc-400" />
             <span>Border Width</span>
           </span>
           <button
+            type="button"
+            aria-label={linkedBorder ? "Unlink border width" : "Link border width"}
             onClick={() => setLinkedBorder(!linkedBorder)}
             className={`p-1 rounded cursor-pointer transition-colors ${
-              linkedBorder ? "text-blue-400 hover:text-blue-300" : "text-zinc-500 hover:text-zinc-300"
+              linkedBorder ? "text-[#0099ff] hover:text-[#33adff]" : "text-zinc-500 hover:text-zinc-300"
             }`}
             title={linkedBorder ? "Linked (All Sides)" : "Unlinked (Individual Sides)"}
           >
@@ -490,11 +492,11 @@ export default function BorderGroup({
                 applyLiveStyle(element, "border-width", `${val}${borderWidth.unit}`, theme, undefined, viewport, structuralPath!);
               }}
               onPointerUp={() => commitUniformWidth(borderWidth.amount, borderWidth.unit)}
-              className="w-full accent-blue-500 cursor-pointer"
+              className="w-full accent-[#0099ff] cursor-pointer"
             />
           </div>
         ) : (
-          <div className="p-3 bg-[#121212] rounded-xl border border-[#242424] space-y-2">
+          <div className="p-3 bg-[#141414] rounded-xl border border-[#262626] space-y-2">
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
                 <span className="text-[10px] text-zinc-400">Top</span>

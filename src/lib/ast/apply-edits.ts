@@ -6,15 +6,40 @@ import { applySplices, type Splice } from "./splice";
 import { elementChildren, getAttr } from "./parse5-adapter";
 import { setStyleProperty } from "./style-attr";
 import { isGoogleFont, getGoogleFontLinkTag, cleanFontFamilyName } from "@/lib/fonts/google-fonts";
+import { extractExistingIds, rewriteSubtreeIds } from "./unique-id";
+import { generateResponsiveCssString, getResponsiveRegistry } from "@/lib/dom/responsive-style-engine";
 
 type Element = DefaultTreeAdapterMap["element"];
+
+function findResponsiveStyleElement(root: Element): Element | null {
+  const queue: Element[] = [root];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (current.tagName === "style" && getAttr(current, "id") === "vse-responsive-styles") {
+      return current;
+    }
+    const children = elementChildren(current);
+    for (const child of children) {
+      queue.push(child);
+    }
+  }
+  return null;
+}
+
+export interface ApplyEditsOptions {
+  responsiveCss?: string;
+}
 
 /**
  * 100% In-Browser AST Splicing Engine.
  * Operates purely on the HTML string and edits in memory inside the user's browser.
  * Consolidates multiple edits to the same element to prevent duplicate attribute splices.
  */
-export function applyEditsClientSide(html: string, edits: SaveRequestEdit[]): SaveResponse {
+export function applyEditsClientSide(
+  html: string,
+  edits: SaveRequestEdit[],
+  options?: ApplyEditsOptions
+): SaveResponse {
   if (typeof html !== "string" || html.length === 0) {
     return { ok: false, conflicts: [{ structuralPath: "root", reason: "not-found" }] };
   }
@@ -41,17 +66,24 @@ export function applyEditsClientSide(html: string, edits: SaveRequestEdit[]): Sa
 
   for (const edit of edits) {
     if (edit.kind === "style") {
-      const current = styleEditsByPath.get(edit.structuralPath) || {};
-      current[edit.styleProperty] = edit.newStyleValue;
-      styleEditsByPath.set(edit.structuralPath, current);
+      const isResponsiveOverride = edit.viewport === "tablet" || edit.viewport === "mobile";
+      if (!isResponsiveOverride) {
+        const current = styleEditsByPath.get(edit.structuralPath) || {};
+        current[edit.styleProperty] = edit.newStyleValue;
+        styleEditsByPath.set(edit.structuralPath, current);
+      }
     } else if (edit.kind === "class") {
       classEditsByPath.set(edit.structuralPath, edit.newClassList);
     } else if (edit.kind === "text") {
       textEditsByPath.set(edit.structuralPath, edit.newText);
     } else if (edit.kind === "attribute") {
-      const current = attrEditsByPath.get(edit.structuralPath) || new Map<string, string>();
-      current.set(edit.attributeName, edit.newValue);
-      attrEditsByPath.set(edit.structuralPath, current);
+      const attrName = ((edit as any).attributeName || (edit as any).name || "").toString();
+      const attrVal = ((edit as any).newValue ?? (edit as any).value ?? "").toString();
+      if (attrName) {
+        const current = attrEditsByPath.get(edit.structuralPath) || new Map<string, string>();
+        current.set(attrName, attrVal);
+        attrEditsByPath.set(edit.structuralPath, current);
+      }
     } else {
       structuralEdits.push(edit);
     }
@@ -65,7 +97,8 @@ export function applyEditsClientSide(html: string, edits: SaveRequestEdit[]): Sa
       continue;
     }
     const classAttr = node.sourceCodeLocation?.attrs?.["class"];
-    const newClassString = newClassList.join(" ");
+    const cleanClasses = Array.from(new Set(newClassList.map((c) => c.trim()).filter(Boolean)));
+    const newClassString = cleanClasses.join(" ");
 
     if (classAttr) {
       splices.push({
@@ -129,6 +162,8 @@ export function applyEditsClientSide(html: string, edits: SaveRequestEdit[]): Sa
         endOffset: endTag.startOffset,
         replacement: newText,
       });
+    } else {
+      conflicts.push({ structuralPath, reason: "void-element" });
     }
   }
 
@@ -186,11 +221,13 @@ export function applyEditsClientSide(html: string, edits: SaveRequestEdit[]): Sa
       }
     } else if (edit.kind === "duplicate") {
       if (node.sourceCodeLocation) {
+        const existingIds = extractExistingIds(html);
         const elementSlice = html.slice(node.sourceCodeLocation.startOffset, node.sourceCodeLocation.endOffset);
+        const { rewrittenSlice } = rewriteSubtreeIds(elementSlice, existingIds);
         splices.push({
           startOffset: node.sourceCodeLocation.endOffset,
           endOffset: node.sourceCodeLocation.endOffset,
-          replacement: "\n" + elementSlice,
+          replacement: "\n" + rewrittenSlice,
         });
       }
     } else if (edit.kind === "insert") {
@@ -219,6 +256,13 @@ export function applyEditsClientSide(html: string, edits: SaveRequestEdit[]): Sa
       const targetNode = resolveStructuralPath(htmlEl, edit.targetPath);
       if (!targetNode || !targetNode.sourceCodeLocation || !node.sourceCodeLocation) {
         conflicts.push({ structuralPath: edit.targetPath, reason: "not-found" });
+        continue;
+      }
+      if (
+        targetNode.sourceCodeLocation.startOffset >= node.sourceCodeLocation.startOffset &&
+        targetNode.sourceCodeLocation.endOffset <= node.sourceCodeLocation.endOffset
+      ) {
+        conflicts.push({ structuralPath: edit.targetPath, reason: "invalid-move-ancestor" });
         continue;
       }
       const elementSlice = html.slice(node.sourceCodeLocation.startOffset, node.sourceCodeLocation.endOffset);
@@ -292,6 +336,80 @@ export function applyEditsClientSide(html: string, edits: SaveRequestEdit[]): Sa
         });
       }
     }
+  }
+
+  // Idempotent Responsive Stylesheet Persistence
+  let responsiveCss = options?.responsiveCss !== undefined ? options.responsiveCss : generateResponsiveCssString();
+  if (!responsiveCss || responsiveCss.trim().length === 0) {
+    const tabletRules: string[] = [];
+    const mobileRules: string[] = [];
+    for (const edit of edits) {
+      if (edit.kind === "style" && (edit.viewport === "tablet" || edit.viewport === "mobile")) {
+        const path = edit.structuralPath;
+        const selector = path.startsWith("#") ? path : `[data-vse-path="${path}"]`;
+        const rule = `${selector} { ${edit.styleProperty}: ${edit.newStyleValue} !important; }`;
+        if (edit.viewport === "tablet") {
+          tabletRules.push(rule);
+        } else if (edit.viewport === "mobile") {
+          mobileRules.push(rule);
+        }
+      }
+    }
+    const blocks: string[] = [];
+    if (tabletRules.length > 0) {
+      blocks.push(`@media (max-width: 768px) {\n  ${tabletRules.join("\n  ")}\n}`);
+    }
+    if (mobileRules.length > 0) {
+      blocks.push(`@media (max-width: 640px) {\n  ${mobileRules.join("\n  ")}\n}`);
+    }
+    if (blocks.length > 0) {
+      responsiveCss = blocks.join("\n\n");
+    }
+  }
+
+  const existingResponsiveStyle = findResponsiveStyleElement(htmlEl);
+  
+  if (responsiveCss && responsiveCss.trim().length > 0) {
+    const trimmedCss = responsiveCss.trim();
+    if (existingResponsiveStyle && existingResponsiveStyle.sourceCodeLocation) {
+      splices.push({
+        startOffset: existingResponsiveStyle.sourceCodeLocation.startOffset,
+        endOffset: existingResponsiveStyle.sourceCodeLocation.endOffset,
+        replacement: `<style id="vse-responsive-styles">\n${trimmedCss}\n</style>`,
+      });
+    } else {
+      const headEl = elementChildren(htmlEl).find((el) => el.tagName === "head") as Element | undefined;
+      const bodyEl = elementChildren(htmlEl).find((el) => el.tagName === "body") as Element | undefined;
+      if (headEl && headEl.sourceCodeLocation?.endTag) {
+        const insertAt = headEl.sourceCodeLocation.endTag.startOffset;
+        splices.push({
+          startOffset: insertAt,
+          endOffset: insertAt,
+          replacement: "  <style id=\"vse-responsive-styles\">\n" + trimmedCss + "\n  </style>\n",
+        });
+      } else if (bodyEl && bodyEl.sourceCodeLocation?.startTag) {
+        const insertAt = bodyEl.sourceCodeLocation.startTag.startOffset;
+        splices.push({
+          startOffset: insertAt,
+          endOffset: insertAt,
+          replacement: "<style id=\"vse-responsive-styles\">\n" + trimmedCss + "\n</style>\n",
+        });
+      } else if (htmlEl.sourceCodeLocation?.startTag) {
+        const insertAt = htmlEl.sourceCodeLocation.startTag.endOffset;
+        splices.push({
+          startOffset: insertAt,
+          endOffset: insertAt,
+          replacement: "\n<style id=\"vse-responsive-styles\">\n" + trimmedCss + "\n</style>\n",
+        });
+      }
+    }
+  } else if (existingResponsiveStyle && existingResponsiveStyle.sourceCodeLocation) {
+    // If all responsive overrides were cleared, remove the responsive stylesheet block cleanly
+    splices.push({
+      startOffset: existingResponsiveStyle.sourceCodeLocation.startOffset,
+      endOffset: existingResponsiveStyle.sourceCodeLocation.endOffset,
+      replacement: "",
+    });
   }
 
   if (conflicts.length > 0) {

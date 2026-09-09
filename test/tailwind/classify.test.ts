@@ -159,9 +159,17 @@ describe("classifyUtilityClass — position & layout constraints", () => {
   });
 });
 
+describe("classifyUtilityClass — display & flex/grid tokens", () => {
+  it("flex and grid -> display", () => {
+    expect(classifyUtilityClass("flex", emptyTheme)?.property).toBe("display");
+    expect(classifyUtilityClass("grid", emptyTheme)?.property).toBe("display");
+  });
+});
+
 describe("classifyUtilityClass — unrelated classes", () => {
   it("returns null for classes outside the editable set", () => {
-    expect(classifyUtilityClass("flex", emptyTheme)).toBeNull();
+    expect(classifyUtilityClass("sr-only", emptyTheme)).toBeNull();
     expect(classifyUtilityClass("hover:bg-red-500", emptyTheme)).toBeNull();
   });
 });
+

@@ -12,10 +12,8 @@ let revokeObjectURLSpy: ReturnType<typeof vi.fn>;
 beforeEach(() => {
   createObjectURLSpy = vi.fn().mockReturnValue("blob:mock-url");
   revokeObjectURLSpy = vi.fn();
-  // @ts-expect-error -- jsdom doesn't implement these; stubbing for the test
-  window.URL.createObjectURL = createObjectURLSpy;
-  // @ts-expect-error -- same
-  window.URL.revokeObjectURL = revokeObjectURLSpy;
+  (window.URL as any).createObjectURL = createObjectURLSpy;
+  (window.URL as any).revokeObjectURL = revokeObjectURLSpy;
 });
 
 afterEach(() => {
