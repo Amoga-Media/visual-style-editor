@@ -7,10 +7,10 @@ import { getResponsivePropertyInfo } from "@/lib/dom/responsive-style-engine";
 import ValueInput from "./ValueInput";
 import { ChevronDown, ChevronRight, Sliders, Lock, Unlock, Space } from "lucide-react";
 
-type Unit = "px" | "%" | "vw" | "vh" | "rem" | "em" | "pt" | "auto" | "none";
+type Unit = "px" | "%" | "vw" | "vh" | "rem" | "em" | "pt" | "auto" | "none" | "fit";
 
-const SIZING_ALLOWED_UNITS: Unit[] = ["auto", "px", "%", "vw", "vh", "rem", "em", "pt"];
-const MAX_SIZING_ALLOWED_UNITS: Unit[] = ["none", "auto", "px", "%", "vw", "vh", "rem", "em", "pt"];
+const SIZING_ALLOWED_UNITS: Unit[] = ["auto", "fit", "px", "%", "vw", "vh", "rem", "em", "pt"];
+const MAX_SIZING_ALLOWED_UNITS: Unit[] = ["none", "auto", "fit", "px", "%", "vw", "vh", "rem", "em", "pt"];
 const SPACING_ALLOWED_UNITS: Unit[] = ["auto", "px", "%", "rem", "em", "vw", "pt"];
 
 const RANGE_BY_UNIT: Record<string, { min: number; max: number; step: number }> = {
@@ -22,6 +22,7 @@ const RANGE_BY_UNIT: Record<string, { min: number; max: number; step: number }> 
   em: { min: 0, max: 64, step: 0.25 },
   pt: { min: 0, max: 1200, step: 1 },
   auto: { min: 0, max: 100, step: 1 },
+  fit: { min: 0, max: 100, step: 1 },
   none: { min: 0, max: 100, step: 1 },
 };
 
@@ -74,8 +75,11 @@ function parseAxisValue(raw: string, defaultUnit: Unit = "px"): AxisValue {
   const trimmed = raw.trim().toLowerCase();
   if (trimmed === "none") return { amount: 0, unit: "none" };
   if (trimmed === "auto") return { amount: 0, unit: "auto" };
+  if (trimmed === "fit" || trimmed === "fit-content" || trimmed === "w-fit" || trimmed === "h-fit" || trimmed === "max-content") {
+    return { amount: 0, unit: "fit" };
+  }
 
-  const match = trimmed.match(/^([-\d.]+)\s*(px|%|vw|vh|rem|em|pt|auto|none)?$/i);
+  const match = trimmed.match(/^([-\d.]+)\s*(px|%|vw|vh|rem|em|pt|auto|none|fit)?$/i);
   if (match) {
     const num = parseFloat(match[1]);
     const u = (match[2]?.toLowerCase() as Unit) || defaultUnit;
@@ -279,19 +283,31 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     const rawP = getResponsivePropertyInfo(element, structuralPath || "", "padding", viewport).value || readCurrentValue(element, "padding", theme);
     const parsedP = parseAxisValue(rawP);
     setPadding(parsedP);
-    setPadT(parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "padding-top", viewport).value || readCurrentValue(element, "padding-top", theme), parsedP.unit));
-    setPadR(parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "padding-right", viewport).value || readCurrentValue(element, "padding-right", theme), parsedP.unit));
-    setPadB(parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "padding-bottom", viewport).value || readCurrentValue(element, "padding-bottom", theme), parsedP.unit));
-    setPadL(parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "padding-left", viewport).value || readCurrentValue(element, "padding-left", theme), parsedP.unit));
+    const tVal = parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "padding-top", viewport).value || readCurrentValue(element, "padding-top", theme), parsedP.unit);
+    const rVal = parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "padding-right", viewport).value || readCurrentValue(element, "padding-right", theme), parsedP.unit);
+    const bVal = parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "padding-bottom", viewport).value || readCurrentValue(element, "padding-bottom", theme), parsedP.unit);
+    const lVal = parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "padding-left", viewport).value || readCurrentValue(element, "padding-left", theme), parsedP.unit);
+    setPadT(tVal);
+    setPadR(rVal);
+    setPadB(bVal);
+    setPadL(lVal);
+    const isPadUniform = tVal.amount === rVal.amount && tVal.amount === bVal.amount && tVal.amount === lVal.amount && tVal.unit === rVal.unit;
+    setLinkedPadding(isPadUniform);
 
     // Margin
     const rawM = getResponsivePropertyInfo(element, structuralPath || "", "margin", viewport).value || readCurrentValue(element, "margin", theme);
     const parsedM = parseAxisValue(rawM);
     setMargin(parsedM);
-    setMarT(parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "margin-top", viewport).value || readCurrentValue(element, "margin-top", theme), parsedM.unit));
-    setMarR(parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "margin-right", viewport).value || readCurrentValue(element, "margin-right", theme), parsedM.unit));
-    setMarB(parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "margin-bottom", viewport).value || readCurrentValue(element, "margin-bottom", theme), parsedM.unit));
-    setMarL(parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "margin-left", viewport).value || readCurrentValue(element, "margin-left", theme), parsedM.unit));
+    const mtVal = parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "margin-top", viewport).value || readCurrentValue(element, "margin-top", theme), parsedM.unit);
+    const mrVal = parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "margin-right", viewport).value || readCurrentValue(element, "margin-right", theme), parsedM.unit);
+    const mbVal = parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "margin-bottom", viewport).value || readCurrentValue(element, "margin-bottom", theme), parsedM.unit);
+    const mlVal = parseAxisValue(getResponsivePropertyInfo(element, structuralPath || "", "margin-left", viewport).value || readCurrentValue(element, "margin-left", theme), parsedM.unit);
+    setMarT(mtVal);
+    setMarR(mrVal);
+    setMarB(mbVal);
+    setMarL(mlVal);
+    const isMarUniform = mtVal.amount === mrVal.amount && mtVal.amount === mbVal.amount && mtVal.amount === mlVal.amount && mtVal.unit === mrVal.unit;
+    setLinkedMargin(isMarUniform);
   }, [element, theme, viewport, structuralPath]);
 
   if (!element || !structuralPath) return null;
@@ -302,7 +318,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     const amount = (unit === "px" || unit === "%") && maxBound > 0 ? Math.min(rawAmount, maxBound) : rawAmount;
 
     setWidth({ amount, unit });
-    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    const val = unit === "fit" ? "fit-content" : unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
     applyLiveStyle(element!, "width", val, theme, undefined, viewport, structuralPath!);
 
     if (lockAspect && aspectRatio > 0 && unit === "px") {
@@ -318,7 +334,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     const amount = (unit === "px" || unit === "%") && maxBound > 0 ? Math.min(rawAmount, maxBound) : rawAmount;
 
     setWidth({ amount, unit });
-    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    const val = unit === "fit" ? "fit-content" : unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
     applyLiveStyle(element!, "width", val, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "width", val, theme, onEdit, undefined, undefined, viewport);
 
@@ -335,7 +351,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     const amount = (unit === "px" || unit === "%") && maxBound > 0 ? Math.min(rawAmount, maxBound) : rawAmount;
 
     setHeight({ amount, unit });
-    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    const val = unit === "fit" ? "fit-content" : unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
     applyLiveStyle(element!, "height", val, theme, undefined, viewport, structuralPath!);
 
     if (lockAspect && aspectRatio > 0 && unit === "px") {
@@ -351,7 +367,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     const amount = (unit === "px" || unit === "%") && maxBound > 0 ? Math.min(rawAmount, maxBound) : rawAmount;
 
     setHeight({ amount, unit });
-    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    const val = unit === "fit" ? "fit-content" : unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
     applyLiveStyle(element!, "height", val, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "height", val, theme, onEdit, undefined, undefined, viewport);
 
@@ -365,7 +381,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
   function commitMinWidth(amount: number, unitStr: string) {
     const unit = (unitStr as Unit) || "px";
     setMinWidth({ amount, unit });
-    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    const val = unit === "fit" ? "fit-content" : unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
     applyLiveStyle(element!, "min-width", val, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "min-width", val, theme, onEdit, undefined, undefined, viewport);
   }
@@ -373,7 +389,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
   function commitMaxWidth(amount: number, unitStr: string) {
     const unit = (unitStr as Unit) || "px";
     setMaxWidth({ amount, unit });
-    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    const val = unit === "fit" ? "fit-content" : unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
     applyLiveStyle(element!, "max-width", val, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "max-width", val, theme, onEdit, undefined, undefined, viewport);
 
@@ -387,7 +403,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
   function commitMinHeight(amount: number, unitStr: string) {
     const unit = (unitStr as Unit) || "px";
     setMinHeight({ amount, unit });
-    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    const val = unit === "fit" ? "fit-content" : unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
     applyLiveStyle(element!, "min-height", val, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "min-height", val, theme, onEdit, undefined, undefined, viewport);
   }
@@ -395,7 +411,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
   function commitMaxHeight(amount: number, unitStr: string) {
     const unit = (unitStr as Unit) || "px";
     setMaxHeight({ amount, unit });
-    const val = unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
+    const val = unit === "fit" ? "fit-content" : unit === "auto" ? "auto" : unit === "none" ? "none" : `${amount}${unit}`;
     applyLiveStyle(element!, "max-height", val, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "max-height", val, theme, onEdit, undefined, undefined, viewport);
 
@@ -406,7 +422,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
   }
 
   function handleToggleAutoWidth() {
-    if (width.unit === "auto") {
+    if (width.unit === "auto" || width.unit === "fit") {
       const compW = element ? parseFloat(element.ownerDocument?.defaultView?.getComputedStyle(element).width || "0") : 0;
       const fallbackW = compW > 0 ? Math.round(compW) : Math.min(parentW, 800);
       const valObj: AxisValue = { amount: fallbackW, unit: "px" };
@@ -414,9 +430,12 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
       applyLiveStyle(element!, "width", `${fallbackW}px`, theme, undefined, viewport, structuralPath!);
       commitStyleChange(element!, structuralPath!, "width", `${fallbackW}px`, theme, onEdit, undefined, undefined, viewport);
     } else {
-      setWidth({ amount: 0, unit: "auto" });
-      applyLiveStyle(element!, "width", "auto", theme, undefined, viewport, structuralPath!);
-      commitStyleChange(element!, structuralPath!, "width", "auto", theme, onEdit, undefined, undefined, viewport);
+      const isContainer = element ? ["div", "section", "main", "article", "header", "footer", "nav", "aside", "form", "ul", "ol"].includes(element.tagName.toLowerCase()) : false;
+      const chosenUnit: Unit = isContainer ? "fit" : "auto";
+      const chosenVal = isContainer ? "fit-content" : "auto";
+      setWidth({ amount: 0, unit: chosenUnit });
+      applyLiveStyle(element!, "width", chosenVal, theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "width", chosenVal, theme, onEdit, undefined, undefined, viewport);
 
       if (element) {
         const tagName = element.tagName.toLowerCase();
@@ -432,7 +451,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
   }
 
   function handleToggleAutoHeight() {
-    if (height.unit === "auto") {
+    if (height.unit === "auto" || height.unit === "fit") {
       const compH = element ? parseFloat(element.ownerDocument?.defaultView?.getComputedStyle(element).height || "0") : 0;
       const fallbackH = compH > 0 ? Math.round(compH) : 300;
       const valObj: AxisValue = { amount: fallbackH, unit: "px" };

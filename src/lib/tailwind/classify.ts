@@ -3,26 +3,8 @@ import type { EditableProperty, ThemeMap } from "@/types";
 
 export interface Classification {
   property: EditableProperty;
-  /**
-   * Absent if this class fully/uniformly governs the property; present if it
-   * only governs one border side (border-t-4 -> "top") or one radius corner
-   * (rounded-tl-md -> "top-left"). Sides and corners share this one field
-   * (rather than a separate `corner` field) because the two are never
-   * ambiguous for a given property — border-width/-style/-color only ever
-   * produce the four side values, border-radius only ever produces the four
-   * corner values — so class-list-mutation.ts's side-scoped filter
-   * (`classification.side !== side`) works identically for both without a
-   * second code path.
-   */
   side?: "top" | "right" | "bottom" | "left" | "top-left" | "top-right" | "bottom-right" | "bottom-left";
-  /**
-   * The value portion of the class, after its prefix (and, for bracket
-   * syntax, with the brackets stripped) — e.g. "red-500" for
-   * "border-red-500", "17px" for "text-[17px]", "" for bare "border".
-   * Exposed so callers that already have a Classification (e.g. Task 2.8's
-   * `readCurrentValue`) can read the matched value back out directly,
-   * instead of re-deriving the same prefix/suffix split a second time.
-   */
+  axis?: "x" | "y";
   suffix: string;
 }
 
@@ -161,17 +143,19 @@ export function classifyUtilityClass(className: string, theme: ThemeMap): Classi
   if (prefix === "scale") return { property: "scale", suffix };
 
   if (prefix === "p") return { property: "padding", suffix };
-  if (prefix === "pt") return { property: "padding-top", suffix };
-  if (prefix === "pr") return { property: "padding-right", suffix };
-  if (prefix === "pb") return { property: "padding-bottom", suffix };
-  if (prefix === "pl") return { property: "padding-left", suffix };
-  if (prefix === "px" || prefix === "py") return { property: "padding", suffix };
+  if (prefix === "pt") return { property: "padding", side: "top", suffix };
+  if (prefix === "pr") return { property: "padding", side: "right", suffix };
+  if (prefix === "pb") return { property: "padding", side: "bottom", suffix };
+  if (prefix === "pl") return { property: "padding", side: "left", suffix };
+  if (prefix === "px") return { property: "padding", axis: "x", suffix };
+  if (prefix === "py") return { property: "padding", axis: "y", suffix };
   if (prefix === "m") return { property: "margin", suffix };
-  if (prefix === "mt") return { property: "margin-top", suffix };
-  if (prefix === "mr") return { property: "margin-right", suffix };
-  if (prefix === "mb") return { property: "margin-bottom", suffix };
-  if (prefix === "ml") return { property: "margin-left", suffix };
-  if (prefix === "mx" || prefix === "my") return { property: "margin", suffix };
+  if (prefix === "mt") return { property: "margin", side: "top", suffix };
+  if (prefix === "mr") return { property: "margin", side: "right", suffix };
+  if (prefix === "mb") return { property: "margin", side: "bottom", suffix };
+  if (prefix === "ml") return { property: "margin", side: "left", suffix };
+  if (prefix === "mx") return { property: "margin", axis: "x", suffix };
+  if (prefix === "my") return { property: "margin", axis: "y", suffix };
   if (prefix === "opacity") return { property: "opacity", suffix };
   if (prefix === "gap") return { property: "gap", suffix };
   if (prefix === "gap-y") return { property: "row-gap", suffix };

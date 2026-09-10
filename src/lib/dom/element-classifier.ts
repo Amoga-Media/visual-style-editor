@@ -55,7 +55,7 @@ const TEXT_TAGS = new Set([
   "mark",
 ]);
 
-const IMAGE_TAGS = new Set(["img", "picture", "video", "canvas", "figure"]);
+const IMAGE_TAGS = new Set(["img", "picture", "video", "iframe", "source", "audio", "canvas", "figure"]);
 
 const SVG_TAGS = new Set([
   "svg",

@@ -14,6 +14,7 @@ const SHORTCUTS = [
   { keys: ["Ctrl", "-"], macKeys: ["⌘", "-"], description: "Decrease webapp interface size" },
   { keys: ["Ctrl", "0"], macKeys: ["⌘", "0"], description: "Reset interface size to 100%" },
   { keys: ["Ctrl", "D"], macKeys: ["⌘", "D"], description: "Duplicate selected element" },
+  { keys: ["Ctrl", "G"], macKeys: ["⌘", "G"], description: "Group in Auto-Div container (flex-col)" },
   { keys: ["Delete"], macKeys: ["⌫"], description: "Delete selected element" },
   { keys: ["Escape"], macKeys: ["Esc"], description: "Deselect active element / close modals" },
   { keys: ["Double Click"], macKeys: ["Double Click"], description: "Edit text copy inline directly on canvas" },

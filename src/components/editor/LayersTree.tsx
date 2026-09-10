@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef, memo } from "react";
 import {
   ChevronRight,
   ChevronDown,
@@ -9,11 +9,36 @@ import {
   Image as ImageIcon,
   Type,
   Square,
-  Link as LinkIcon,
+  Link2,
   Box,
   GripVertical,
   Search,
   X,
+  Plus,
+  ArrowUp,
+  ArrowDown,
+  FolderPlus,
+  PanelsTopBottom,
+  Navigation,
+  Sidebar,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading,
+  Pilcrow,
+  Quote,
+  Video,
+  Volume2,
+  Table,
+  List,
+  ListOrdered,
+  Tag,
+  FormInput,
+  SquarePen,
+  MousePointerClick,
+  Shapes,
+  LayoutGrid,
+  Columns,
 } from "lucide-react";
 import { computeStructuralPath } from "@/lib/ast/structural-path";
 import { domAdapter } from "@/lib/dom/dom-adapter";
@@ -37,60 +62,99 @@ interface LayersTreeProps {
   onDeleteElement?: (el: Element) => void;
   onDuplicateElement?: (el: Element) => void;
   onMoveElement?: (sourceEl: Element, targetEl: Element, position: "before" | "after" | "inside") => void;
+  onWrapWithDiv?: (el: Element) => void;
+  onInsertChild?: (targetEl: Element, snippet: string) => void;
+  onMoveUp?: (el: Element) => void;
+  onMoveDown?: (el: Element) => void;
 }
 
-function getElementIcon(tagName: string) {
+function getElementIcon(el: Element) {
+  const tagName = el.tagName.toLowerCase();
+  const classStr = typeof el.className === "string" ? el.className.toLowerCase() : "";
+
+  // Check for flex or grid containers
+  if (classStr.includes("grid")) {
+    return <LayoutGrid className="w-3.5 h-3.5 text-emerald-400 shrink-0" />;
+  }
+  if (classStr.includes("flex") && (classStr.includes("flex-row") || !classStr.includes("flex-col"))) {
+    return <Columns className="w-3.5 h-3.5 text-cyan-400 shrink-0" />;
+  }
+
   switch (tagName) {
-    case "img":
-    case "svg":
-      return <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />;
+    // Structural / Layout (Purple/Indigo)
+    case "section":
+      return <Layers className="w-3.5 h-3.5 text-indigo-400 shrink-0" />;
+    case "header":
+    case "footer":
+      return <PanelsTopBottom className="w-3.5 h-3.5 text-purple-400 shrink-0" />;
+    case "nav":
+      return <Navigation className="w-3.5 h-3.5 text-violet-400 shrink-0" />;
+    case "aside":
+    case "sidebar":
+      return <Sidebar className="w-3.5 h-3.5 text-purple-400 shrink-0" />;
+    case "main":
+    case "article":
+      return <Layers className="w-3.5 h-3.5 text-blue-400 shrink-0" />;
+
+    // Typography (Sky/Emerald/Teal)
     case "h1":
+      return <Heading1 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />;
     case "h2":
+      return <Heading2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />;
     case "h3":
+      return <Heading3 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />;
     case "h4":
     case "h5":
     case "h6":
+      return <Heading className="w-3.5 h-3.5 text-teal-400 shrink-0" />;
     case "p":
+      return <Pilcrow className="w-3.5 h-3.5 text-sky-400 shrink-0" />;
     case "span":
-      return <Type className="w-3.5 h-3.5 text-sky-400" />;
+      return <Type className="w-3.5 h-3.5 text-sky-300 shrink-0" />;
+    case "blockquote":
+      return <Quote className="w-3.5 h-3.5 text-amber-300 shrink-0" />;
+    case "code":
+    case "pre":
+      return <Code2 className="w-3.5 h-3.5 text-rose-400 shrink-0" />;
+
+    // Media (Rose/Pink/Violet)
+    case "img":
+      return <ImageIcon className="w-3.5 h-3.5 text-rose-400 shrink-0" />;
+    case "svg":
+    case "path":
+      return <Shapes className="w-3.5 h-3.5 text-pink-400 shrink-0" />;
+    case "video":
+      return <Video className="w-3.5 h-3.5 text-violet-400 shrink-0" />;
+    case "audio":
+      return <Volume2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />;
+
+    // Interactive & Forms (Amber/Orange/Yellow)
     case "a":
-      return <LinkIcon className="w-3.5 h-3.5 text-amber-400" />;
+      return <Link2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />;
     case "button":
+      return <MousePointerClick className="w-3.5 h-3.5 text-orange-400 shrink-0" />;
     case "input":
+      return <FormInput className="w-3.5 h-3.5 text-yellow-400 shrink-0" />;
     case "textarea":
-      return <Square className="w-3.5 h-3.5 text-purple-400" />;
-    case "section":
-    case "main":
-    case "header":
-    case "footer":
-    case "nav":
-      return <Layers className="w-3.5 h-3.5 text-blue-400" />;
+      return <SquarePen className="w-3.5 h-3.5 text-yellow-400 shrink-0" />;
+    case "label":
+      return <Tag className="w-3.5 h-3.5 text-teal-400 shrink-0" />;
+
+    // Lists & Tables (Cyan/Blue)
+    case "ul":
+      return <List className="w-3.5 h-3.5 text-cyan-400 shrink-0" />;
+    case "ol":
+    case "li":
+      return <ListOrdered className="w-3.5 h-3.5 text-cyan-300 shrink-0" />;
+    case "table":
+    case "tr":
+    case "td":
+    case "th":
+      return <Table className="w-3.5 h-3.5 text-blue-400 shrink-0" />;
+
     default:
-      return <Box className="w-3.5 h-3.5 text-zinc-500" />;
+      return <Box className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 shrink-0" />;
   }
-}
-
-/** Returns a short label for display: tag + textContent snippet if leaf */
-function getElementLabel(el: Element): string {
-  const tag = el.tagName.toLowerCase();
-  // For text elements, show first few chars
-  if (["p", "span", "h1", "h2", "h3", "h4", "h5", "h6", "a", "button", "label", "li"].includes(tag)) {
-    const text = el.textContent?.trim().slice(0, 24) || "";
-    if (text) return `${tag} "${text}${(el.textContent?.trim().length || 0) > 24 ? "…" : ""}"`;
-  }
-  return tag;
-}
-
-interface TreeNodeProps {
-  el: Element;
-  depth: number;
-  selectedElement: Element | null;
-  onSelectElement: (el: Element) => void;
-  onHoverElement: (el: Element | null) => void;
-  onDeleteElement?: (el: Element) => void;
-  onDuplicateElement?: (el: Element) => void;
-  onMoveElement?: (sourceEl: Element, targetEl: Element, position: "before" | "after" | "inside") => void;
-  searchQuery?: string;
 }
 
 function matchesSearch(el: Element, query: string): boolean {
@@ -114,7 +178,23 @@ function subtreeMatchesSearch(el: Element, query: string): boolean {
   return false;
 }
 
-function TreeNode({
+interface TreeNodeProps {
+  el: Element;
+  depth: number;
+  selectedElement: Element | null;
+  onSelectElement: (el: Element) => void;
+  onHoverElement: (el: Element | null) => void;
+  onDeleteElement?: (el: Element) => void;
+  onDuplicateElement?: (el: Element) => void;
+  onMoveElement?: (sourceEl: Element, targetEl: Element, position: "before" | "after" | "inside") => void;
+  onWrapWithDiv?: (el: Element) => void;
+  onInsertChild?: (targetEl: Element, snippet: string) => void;
+  onMoveUp?: (el: Element) => void;
+  onMoveDown?: (el: Element) => void;
+  searchQuery?: string;
+}
+
+const TreeNode = memo(function TreeNode({
   el,
   depth,
   selectedElement,
@@ -123,10 +203,15 @@ function TreeNode({
   onDeleteElement,
   onDuplicateElement,
   onMoveElement,
+  onWrapWithDiv,
+  onInsertChild,
+  onMoveUp,
+  onMoveDown,
   searchQuery = "",
 }: TreeNodeProps) {
   const [expanded, setExpanded] = useState(true);
   const [dropPosition, setDropPosition] = useState<"before" | "after" | "inside" | null>(null);
+  const [showAddMenu, setShowAddMenu] = useState(false);
   const isSelected = selectedElement === el;
   const tagName = el.tagName.toLowerCase();
 
@@ -134,7 +219,6 @@ function TreeNode({
     return null;
   }
 
-  // Filter out non-matching nodes during search
   if (searchQuery && !subtreeMatchesSearch(el, searchQuery)) {
     return null;
   }
@@ -224,15 +308,15 @@ function TreeNode({
         style={{ paddingLeft: `${Math.min(depth * 14 + 10, 140)}px` }}
         className={`group flex items-center justify-between py-1.5 pr-2.5 text-xs cursor-pointer transition-all ${
           dropPosition === "inside"
-            ? "bg-[#0099ff]/10 border-l-2 border-[#0099ff] text-slate-900 dark:text-white font-semibold"
+            ? "bg-[#0099ff]/15 border-l-2 border-[#0099ff] text-slate-900 dark:text-white font-semibold"
             : isSelected
-            ? "bg-[#0099ff]/10 dark:bg-[#0099ff]/8 border-l-2 border-[#0099ff] text-white font-semibold"
-            : "border-l-2 border-transparent text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100/60 dark:hover:bg-[#1a1a1a]"
+            ? "bg-[#0099ff]/12 dark:bg-[#0099ff]/15 border-l-2 border-[#0099ff] text-slate-900 dark:text-white font-semibold shadow-xs"
+            : "border-l-2 border-transparent text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100/70 dark:hover:bg-[#1a1a1a]"
         }`}
       >
         <div className="flex items-center gap-1.5 min-w-0 truncate">
           {!isBody && (
-            <GripVertical className="w-3 h-3 text-slate-400 dark:text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab" />
+            <GripVertical className="w-3 h-3 text-slate-400 dark:text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab shrink-0" />
           )}
 
           {hasChildren ? (
@@ -241,42 +325,87 @@ function TreeNode({
                 e.stopPropagation();
                 setExpanded((v) => !v);
               }}
-              className="p-0.5 text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300 rounded cursor-pointer"
+              className="p-0.5 text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300 rounded cursor-pointer shrink-0"
             >
               {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
             </button>
           ) : (
-            <span className="w-4" />
+            <span className="w-4 shrink-0" />
           )}
 
-          {getElementIcon(tagName)}
+          {getElementIcon(el)}
 
           <span className="font-mono text-[13px] text-slate-900 dark:text-zinc-100 font-semibold">
             {tagName}
           </span>
 
           {idStr && (
-            <span className="font-mono text-[12px] text-[#0099ff] font-medium truncate max-w-[100px]">
+            <span className="font-mono text-[12px] text-[#0099ff] font-medium truncate max-w-[90px]">
               {idStr}
             </span>
           )}
 
           {classStr && (
-            <span className="font-mono text-[11px] text-slate-400 dark:text-zinc-400 truncate max-w-[110px]">
+            <span className="font-mono text-[11px] text-slate-400 dark:text-zinc-400 truncate max-w-[100px]">
               {classStr}
             </span>
           )}
 
-          {/* Selected element gets a blue pill badge */}
           {isSelected && (
-            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[#0099ff] text-[10px] text-white font-bold shrink-0">
-              SELECTED
+            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[#0099ff] text-[10px] text-white font-bold shrink-0 shadow-2xs">
+              ACTIVE
             </span>
           )}
         </div>
 
-        {/* Quick Actions on Hover */}
+        {/* Quick Actions on Hover & Selection */}
         <div className="hidden group-hover:flex items-center gap-1 shrink-0 ml-2">
+          {/* Wrap with Auto-Div (Cmd+G / Group in Container) */}
+          {onWrapWithDiv && !isBody && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onWrapWithDiv(el);
+              }}
+              className="p-1 rounded text-slate-400 dark:text-zinc-500 hover:text-[#0099ff] hover:bg-slate-200 dark:hover:bg-[#262626] transition-colors"
+              title="Wrap with Auto-Div Container (Ctrl+G)"
+            >
+              <FolderPlus className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {/* Move Up */}
+          {onMoveUp && !isBody && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveUp(el);
+              }}
+              className="p-1 rounded text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-200 dark:hover:bg-[#262626] transition-colors"
+              title="Move layer up"
+            >
+              <ArrowUp className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {/* Move Down */}
+          {onMoveDown && !isBody && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveDown(el);
+              }}
+              className="p-1 rounded text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-200 dark:hover:bg-[#262626] transition-colors"
+              title="Move layer down"
+            >
+              <ArrowDown className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {/* Duplicate */}
           {onDuplicateElement && !isBody && (
             <button
               type="button"
@@ -290,6 +419,8 @@ function TreeNode({
               <Copy className="w-3.5 h-3.5" />
             </button>
           )}
+
+          {/* Delete */}
           {onDeleteElement && !isBody && (
             <button
               type="button"
@@ -324,6 +455,10 @@ function TreeNode({
               onDeleteElement={onDeleteElement}
               onDuplicateElement={onDuplicateElement}
               onMoveElement={onMoveElement}
+              onWrapWithDiv={onWrapWithDiv}
+              onInsertChild={onInsertChild}
+              onMoveUp={onMoveUp}
+              onMoveDown={onMoveDown}
               searchQuery={searchQuery}
             />
           ))}
@@ -331,7 +466,7 @@ function TreeNode({
       )}
     </div>
   );
-}
+});
 
 export default function LayersTree({
   iframeDocument,
@@ -341,6 +476,10 @@ export default function LayersTree({
   onDeleteElement,
   onDuplicateElement,
   onMoveElement,
+  onWrapWithDiv,
+  onInsertChild,
+  onMoveUp,
+  onMoveDown,
 }: LayersTreeProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const body = iframeDocument?.body;
@@ -356,9 +495,9 @@ export default function LayersTree({
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Search Input */}
-      <div className="px-3 py-2 border-b border-slate-200 dark:border-[#262626]">
-        <div className="relative">
+      {/* Search Input & Quick Actions */}
+      <div className="px-3 py-2 border-b border-slate-200 dark:border-[#262626] flex items-center gap-2">
+        <div className="relative flex-1">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500" />
           <input
             type="text"
@@ -378,9 +517,21 @@ export default function LayersTree({
             </button>
           )}
         </div>
+
+        {/* Global Wrap with Auto-Div Button */}
+        {selectedElement && onWrapWithDiv && (
+          <button
+            type="button"
+            onClick={() => onWrapWithDiv(selectedElement)}
+            className="p-1.5 rounded-lg bg-slate-100 dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] hover:border-[#0099ff]/50 text-slate-600 dark:text-zinc-300 hover:text-[#0099ff] transition-colors cursor-pointer shrink-0"
+            title="Wrap Selected Layer in Auto-Div (Ctrl+G)"
+          >
+            <FolderPlus className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
-      {/* Tree */}
+      {/* Tree View */}
       <div className="flex-1 overflow-y-auto py-1 custom-scrollbar">
         <TreeNode
           el={body}
@@ -391,10 +542,15 @@ export default function LayersTree({
           onDeleteElement={onDeleteElement}
           onDuplicateElement={onDuplicateElement}
           onMoveElement={onMoveElement}
+          onWrapWithDiv={onWrapWithDiv}
+          onInsertChild={onInsertChild}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
           searchQuery={searchQuery}
         />
       </div>
     </div>
   );
 }
+
 

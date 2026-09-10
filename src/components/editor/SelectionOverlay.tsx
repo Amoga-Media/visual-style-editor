@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import type { EditRecord, ThemeMap } from "@/types";
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
 import type { ViewportMode } from "@/components/editor/Toolbar";
-import { Move, GripVertical, Scaling } from "lucide-react";
+import { Move, GripVertical, Scaling, ZoomIn } from "lucide-react";
 
 interface Rect {
   top: number;
@@ -99,6 +99,8 @@ export default function SelectionOverlay({
   const [isDragging, setIsDragging] = useState(false);
   const [dragCoords, setDragCoords] = useState<{ x: number; y: number } | null>(null);
   const [isResizeMode, setIsResizeMode] = useState(false);
+  const [isScaleMode, setIsScaleMode] = useState(false);
+  const [scaleValue, setScaleValue] = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDimensions, setResizeDimensions] = useState<{ width: number; height: number } | null>(null);
   const [isReordering, setIsReordering] = useState(false);
@@ -235,36 +237,44 @@ export default function SelectionOverlay({
       resizeObserver.observe(selectedElement);
     }
 
-    if (hoveredElement || selectedElement || dropTargetInfo) {
-      let isRunning = true;
-      function trackAnimation() {
-        if (!isRunning) return;
-        recompute();
-        rafIdRef.current = requestAnimationFrame(trackAnimation);
+    // Check if selected element has active running animations
+    const hasRunningAnimation = () => {
+      try {
+        if (selectedElement && typeof (selectedElement as any).getAnimations === "function") {
+          const anims = (selectedElement as any).getAnimations();
+          return anims.some((a: any) => a.playState === "running");
+        }
+      } catch {}
+      return false;
+    };
+
+    let isRunning = true;
+    let pulseFrames = 12; // 12-frame pulse on state change to smoothly track entrance/hover CSS transitions
+
+    function trackLoop() {
+      if (!isRunning) return;
+      recompute();
+      if (isDragging || isResizing || isReordering || hasRunningAnimation()) {
+        rafIdRef.current = requestAnimationFrame(trackLoop);
+      } else if (pulseFrames > 0) {
+        pulseFrames--;
+        rafIdRef.current = requestAnimationFrame(trackLoop);
       }
-      rafIdRef.current = requestAnimationFrame(trackAnimation);
-      return () => {
-        isRunning = false;
-        if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-        window.removeEventListener("scroll", recompute, true);
-        window.removeEventListener("resize", recompute);
-        contentWindow?.removeEventListener("scroll", recompute, true);
-        contentWindow?.removeEventListener("resize", recompute);
-        observer?.disconnect();
-        resizeObserver?.disconnect();
-      };
     }
 
+    rafIdRef.current = requestAnimationFrame(trackLoop);
+
     return () => {
+      isRunning = false;
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
       window.removeEventListener("scroll", recompute, true);
       window.removeEventListener("resize", recompute);
       contentWindow?.removeEventListener("scroll", recompute, true);
       contentWindow?.removeEventListener("resize", recompute);
       observer?.disconnect();
       resizeObserver?.disconnect();
-      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
-  }, [iframe, hoveredElement, selectedElement, dropTargetInfo, zoom]);
+  }, [iframe, hoveredElement, selectedElement, dropTargetInfo, zoom, isDragging, isResizing, isReordering]);
 
   // Check if selected element is positioned absolute/fixed
   const win = selectedElement?.ownerDocument?.defaultView || (typeof window !== "undefined" ? window : null);
@@ -553,14 +563,71 @@ export default function SelectionOverlay({
     const initialWidth = targetEl.offsetWidth || parseFloat(computed?.width || "0") || 100;
     const initialHeight = targetEl.offsetHeight || parseFloat(computed?.height || "0") || 100;
 
+    const startX = e.clientX;
+    const startY = e.clientY;
+
+    if (isScaleMode) {
+      const computedScale = parseFloat(computed?.scale || "1") || 1;
+      const initialDiagonal = Math.hypot(initialWidth, initialHeight) || 100;
+      let latestScale = computedScale;
+
+      setIsResizing(true);
+      setScaleValue(computedScale);
+
+      function onPointerMove(moveEvent: PointerEvent) {
+        if (!selectedElement) return;
+        const dx = (moveEvent.clientX - startX) / (zoom || 1);
+        const dy = (moveEvent.clientY - startY) / (zoom || 1);
+
+        let delta = 0;
+        if (handleId === "se" || handleId === "e" || handleId === "s") {
+          delta = (dx + dy) / 2;
+        } else if (handleId === "nw" || handleId === "w" || handleId === "n") {
+          delta = (-dx - dy) / 2;
+        } else if (handleId === "ne") {
+          delta = (dx - dy) / 2;
+        } else if (handleId === "sw") {
+          delta = (-dx + dy) / 2;
+        }
+
+        const scaleRatio = (initialDiagonal + delta * 2) / initialDiagonal;
+        const newScale = Math.max(0.1, Math.min(5.0, Number((computedScale * scaleRatio).toFixed(2))));
+        latestScale = newScale;
+        setScaleValue(newScale);
+
+        applyLiveStyle(selectedElement, "scale", newScale.toString(), theme, undefined, viewport, structuralPath || undefined);
+      }
+
+      function onPointerUp() {
+        if (selectedElement && structuralPath) {
+          commitStyleChange(selectedElement, structuralPath, "scale", latestScale.toString(), theme, onEdit, computedScale.toString(), undefined, viewport);
+        }
+        cleanup();
+      }
+
+      function cleanup() {
+        try {
+          if (handleEl.hasPointerCapture(e.pointerId)) {
+            handleEl.releasePointerCapture(e.pointerId);
+          }
+        } catch {}
+        setIsResizing(false);
+        setScaleValue(null);
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerup", onPointerUp);
+      }
+
+      window.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", onPointerUp);
+      return;
+    }
+
     const modifiesWidth = handleId.includes("e") || handleId.includes("w");
     const modifiesHeight = handleId.includes("s") || handleId.includes("n");
 
     setIsResizing(true);
     setResizeDimensions({ width: Math.round(initialWidth), height: Math.round(initialHeight) });
 
-    const startX = e.clientX;
-    const startY = e.clientY;
     let latestW = Math.round(initialWidth);
     let latestH = Math.round(initialHeight);
 
@@ -696,7 +763,11 @@ export default function SelectionOverlay({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsResizeMode((prev) => !prev);
+                  setIsResizeMode((prev) => {
+                    const next = !prev;
+                    if (!next) setIsScaleMode(false);
+                    return next;
+                  });
                 }}
                 title={isResizeMode ? "Disable visual resize handles" : "Enable visual resize handles"}
                 style={{
@@ -706,8 +777,8 @@ export default function SelectionOverlay({
                   padding: "1px 5px",
                   fontSize: "9px",
                   fontWeight: 600,
-                  backgroundColor: isResizeMode ? "#ffffff" : "rgba(255, 255, 255, 0.2)",
-                  color: isResizeMode ? (isAbsolute ? "#6366f1" : "#0099ff") : "#ffffff",
+                  backgroundColor: isResizeMode && !isScaleMode ? "#ffffff" : "rgba(255, 255, 255, 0.2)",
+                  color: isResizeMode && !isScaleMode ? (isAbsolute ? "#6366f1" : "#0099ff") : "#ffffff",
                   border: "none",
                   borderRadius: 3,
                   cursor: "pointer",
@@ -715,8 +786,65 @@ export default function SelectionOverlay({
                 }}
               >
                 <Scaling style={{ width: 10, height: 10 }} />
-                <span>{isResizeMode ? "Resize ON" : "Resize"}</span>
+                <span>{isResizeMode && !isScaleMode ? "Resize ON" : "Resize"}</span>
               </button>
+
+              {/* Proportional Scale Mode Toggle Button */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsScaleMode((prev) => {
+                    const next = !prev;
+                    if (next) setIsResizeMode(true);
+                    return next;
+                  });
+                }}
+                title={isScaleMode ? "Proportional Scale ON (Drag handles to scale proportionally)" : "Enable Proportional Scale Mode"}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "3px",
+                  padding: "1px 5px",
+                  fontSize: "9px",
+                  fontWeight: 600,
+                  backgroundColor: isScaleMode ? "#ffffff" : "rgba(255, 255, 255, 0.2)",
+                  color: isScaleMode ? (isAbsolute ? "#6366f1" : "#0099ff") : "#ffffff",
+                  border: "none",
+                  borderRadius: 3,
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <ZoomIn style={{ width: 10, height: 10 }} />
+                <span>{isScaleMode ? "Scale ON" : "Scale"}</span>
+              </button>
+            </div>
+          )}
+
+          {/* Floating Scale Tooltip during Scale Drag */}
+          {isResizing && isScaleMode && scaleValue !== null && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: -28,
+                left: "50%",
+                transform: "translateX(-50%)",
+                backgroundColor: "#18181b",
+                color: "#ffffff",
+                border: "1px solid #0099ff",
+                fontSize: "11px",
+                fontFamily: "monospace",
+                fontWeight: 600,
+                padding: "2px 8px",
+                borderRadius: "6px",
+                whiteSpace: "nowrap",
+                pointerEvents: "none",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+                zIndex: 10003,
+              }}
+            >
+              Scale: {scaleValue.toFixed(2)}× ({Math.round(scaleValue * 100)}%)
             </div>
           )}
 

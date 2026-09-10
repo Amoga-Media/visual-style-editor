@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { EditRecord, ThemeMap } from "@/types";
 import type { ViewportMode } from "./Toolbar";
-import { useChangeSetStore } from "@/store/change-set-store";
 import CollapsibleGroup from "./property-panel/CollapsibleGroup";
 import LayoutGroup from "./property-panel/LayoutGroup";
 import PositionGroup from "./property-panel/PositionGroup";
@@ -49,6 +48,7 @@ interface PropertyPanelProps {
   theme: ThemeMap;
   viewport?: ViewportMode;
   onEdit?: (record: EditRecord) => void;
+  onSelectElement?: (el: Element) => void;
   onDelete?: (el: Element) => void;
   onDuplicate?: (el: Element) => void;
   onMoveUp?: (el: Element) => void;
@@ -61,13 +61,13 @@ export default function PropertyPanel({
   theme,
   viewport = "desktop",
   onEdit,
+  onSelectElement,
   onDelete,
   onDuplicate,
   onMoveUp,
   onMoveDown,
 }: PropertyPanelProps) {
   const [showAll, setShowAll] = useState(false);
-  const editsCount = useChangeSetStore((s) => s.edits.length);
 
   if (!element || !structuralPath) {
     return (
@@ -90,7 +90,7 @@ export default function PropertyPanel({
   const showColors = showAll || visiblePanels.textColor || visiblePanels.backgroundColor;
 
   return (
-    <div key={`${structuralPath}-${viewport}-${editsCount}`} className="text-slate-800 dark:text-zinc-200 bg-white dark:bg-[#141414] transition-colors">
+    <div key={`${structuralPath}-${viewport}`} className="text-slate-800 dark:text-zinc-200 bg-white dark:bg-[#141414] transition-colors">
       {/* Selected Element Header with Type Badge and Contextual Filter Mode */}
       <div className="p-3 bg-slate-50 dark:bg-[#090909] flex flex-col gap-2 border-b border-slate-200 dark:border-[#262626]">
         <div className="flex items-center justify-between gap-2">
@@ -184,9 +184,9 @@ export default function PropertyPanel({
       )}
 
       {/* Link & Navigation */}
-      {(showAll || visiblePanels.linkNav) && (
-        <CollapsibleGroup groupId="link-nav" title="Link & Navigation" icon={<LinkIcon className="w-3.5 h-3.5" />} defaultOpen={true}>
-          <LinkGroup element={element} structuralPath={structuralPath} theme={theme} onEdit={onEdit} />
+      {(showAll || visiblePanels.linkNav || true) && (
+        <CollapsibleGroup groupId="link-nav" title="Link & Navigation" icon={<LinkIcon className="w-3.5 h-3.5" />} defaultOpen={Boolean(element.tagName.toLowerCase() === "a" || element.closest("a"))}>
+          <LinkGroup element={element} structuralPath={structuralPath} theme={theme} onEdit={onEdit} onSelectElement={onSelectElement} />
         </CollapsibleGroup>
       )}
 

@@ -55,10 +55,28 @@ function unitOf(value: string): string {
 
 export function forwardMap(property: EditableProperty, value: string, options: ForwardMapOptions): string {
   switch (property) {
-    case "width":
+    case "width": {
+      if (value === "auto") return "w-auto";
+      if (value === "fit-content" || value === "fit") return "w-fit";
+      if (value === "max-content" || value === "max") return "w-max";
+      if (value === "min-content" || value === "min") return "w-min";
+      if (options.snap !== false) {
+        if (value === "100%") return "w-full";
+        if (value === "100vw") return "w-screen";
+      }
       return forwardLength(parseFloat(value), unitOf(value), options, "w", DEFAULT_SPACING);
-    case "height":
+    }
+    case "height": {
+      if (value === "auto") return "h-auto";
+      if (value === "fit-content" || value === "fit") return "h-fit";
+      if (value === "max-content" || value === "max") return "h-max";
+      if (value === "min-content" || value === "min") return "h-min";
+      if (options.snap !== false) {
+        if (value === "100%") return "h-full";
+        if (value === "100vh") return "h-screen";
+      }
       return forwardLength(parseFloat(value), unitOf(value), options, "h", DEFAULT_SPACING);
+    }
     case "min-width": {
       const presets = ["0", "full", "min", "max", "fit"];
       if (presets.includes(value)) return `min-w-${value}`;

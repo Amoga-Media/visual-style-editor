@@ -28,6 +28,7 @@ import ComponentBlocks from "./ComponentBlocks";
 import KeyboardShortcutsModal from "./KeyboardShortcutsModal";
 import ExportStudioModal from "./ExportStudioModal";
 import DevicePresetDropdown from "./DevicePresetDropdown";
+import ErrorBoundary from "./ErrorBoundary";
 import { type DevicePreset, getDefaultPreset, getCategoryForWidth } from "@/lib/dom/device-presets";
 import { AlertTriangle, X, Layers, PlusSquare, PanelLeftClose, Sparkles } from "lucide-react";
 
@@ -44,11 +45,13 @@ export function serializeCleanDocument(doc: Document): string {
   docClone.querySelectorAll("[contenteditable]").forEach((el) => {
     el.removeAttribute("contenteditable");
   });
-  docClone.querySelectorAll("[data-vse-hovered], [data-vse-selected], [data-vse-drop-target], [data-vse-drag-over]").forEach((el) => {
+  docClone.querySelectorAll("[data-vse-hovered], [data-vse-selected], [data-vse-drop-target], [data-vse-drag-over], [data-vse-move-token], [data-vse-viewport]").forEach((el) => {
     el.removeAttribute("data-vse-hovered");
     el.removeAttribute("data-vse-selected");
     el.removeAttribute("data-vse-drop-target");
     el.removeAttribute("data-vse-drag-over");
+    el.removeAttribute("data-vse-move-token");
+    el.removeAttribute("data-vse-viewport");
   });
 
   // 3. Ensure responsive stylesheet contains clean standalone media queries
@@ -440,6 +443,34 @@ export default function EditorStudio() {
     handleMoveElement(el, next, "after");
   }
 
+  function handleWrapWithDiv(el: Element) {
+    const tagName = el.tagName.toLowerCase();
+    if (tagName === "body" || tagName === "html") return;
+    const parent = el.parentElement;
+    if (!parent) return;
+
+    const path = computeStructuralPath(el, domAdapter);
+    const doc = el.ownerDocument || document;
+    const wrapper = doc.createElement("div");
+    wrapper.className = "flex flex-col";
+
+    parent.insertBefore(wrapper, el);
+    wrapper.appendChild(el);
+
+    useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
+    recordEdit({
+      kind: "insert",
+      structuralPath: path,
+      position: "before",
+      snippet: `<div class="flex flex-col">${(el as HTMLElement).outerHTML}</div>`,
+      timestamp: new Date().toISOString(),
+    });
+
+    handleSelectElement(wrapper);
+    setStatusMessage(`Wrapped <${tagName}> in Auto-Div container (flex-col)`);
+    setTimeout(() => setStatusMessage(null), 2500);
+  }
+
   function handleMoveElement(sourceEl: Element, targetEl: Element, position: "before" | "after" | "inside") {
     const tagName = sourceEl.tagName.toLowerCase();
     const targetTag = targetEl.tagName.toLowerCase();
@@ -584,15 +615,15 @@ export default function EditorStudio() {
       return "";
     }
 
-    // 1. Prioritize pristine AST Splicing whenever edits exist
+    // 1. Prioritize pristine AST Splicing whenever edits exist and can be cleanly applied
     if (edits.length > 0) {
       const saveEdits = edits.map(toSaveRequestEdit);
       const res = applyEditsClientSide(openFile.content, saveEdits);
-      if (res.ok && res.html) {
+      if (res.ok && res.html && (!res.conflicts || res.conflicts.length === 0)) {
         return res.html;
       }
     } else {
-      // Zero edits made - return original pristine source directly (zero runtime script corruption)
+      // Zero edits made - return original pristine source directly
       return openFile.content;
     }
 
@@ -666,7 +697,7 @@ export default function EditorStudio() {
     if (edits.length > 0) {
       const saveEdits = edits.map(toSaveRequestEdit);
       const result = applyEditsClientSide(openFile.content, saveEdits);
-      if (result.ok && result.html) {
+      if (result.ok && result.html && (!result.conflicts || result.conflicts.length === 0)) {
         updatedHtml = result.html;
       }
     } else {
@@ -750,6 +781,13 @@ export default function EditorStudio() {
       if (isModifier && e.key.toLowerCase() === "d" && !isTyping && selectedEl) {
         e.preventDefault();
         handleDuplicateElement(selectedEl);
+        return;
+      }
+
+      // Group in Auto-Div container via Ctrl + G (or Cmd + G)
+      if (isModifier && e.key.toLowerCase() === "g" && !isTyping && selectedEl) {
+        e.preventDefault();
+        handleWrapWithDiv(selectedEl);
         return;
       }
 
@@ -1050,24 +1088,29 @@ export default function EditorStudio() {
             </div>
 
             {/* Tab Body */}
-            {leftSidebarTab === "layers" ? (
-              <LayersTree
-                iframeDocument={iframeEl?.contentDocument ?? null}
-                selectedElement={selectedEl}
-                onSelectElement={handleSelectElement}
-                onHoverElement={handleHoverElement}
-                onDeleteElement={handleDeleteElement}
-                onDuplicateElement={handleDuplicateElement}
-                onMoveElement={handleMoveElement}
-              />
-            ) : leftSidebarTab === "primitives" ? (
-              <BasicComponents
-                onInsert={handleInsertPrimitive}
-                selectedElement={selectedEl}
-              />
-            ) : (
-              <ComponentBlocks onInsertBlock={handleInsertBlock} />
-            )}
+            <ErrorBoundary>
+              {leftSidebarTab === "layers" ? (
+                <LayersTree
+                  iframeDocument={iframeEl?.contentDocument ?? null}
+                  selectedElement={selectedEl}
+                  onSelectElement={handleSelectElement}
+                  onHoverElement={handleHoverElement}
+                  onDeleteElement={handleDeleteElement}
+                  onDuplicateElement={handleDuplicateElement}
+                  onMoveElement={handleMoveElement}
+                  onWrapWithDiv={handleWrapWithDiv}
+                  onMoveUp={handleMoveUp}
+                  onMoveDown={handleMoveDown}
+                />
+              ) : leftSidebarTab === "primitives" ? (
+                <BasicComponents
+                  onInsert={handleInsertPrimitive}
+                  selectedElement={selectedEl}
+                />
+              ) : (
+                <ComponentBlocks onInsertBlock={handleInsertBlock} />
+              )}
+            </ErrorBoundary>
           </aside>
         )}
 
@@ -1292,18 +1335,20 @@ export default function EditorStudio() {
             className="border-l border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl"
           >
             <div className="flex-1 overflow-y-auto">
-              <PropertyPanel
-                element={selectedEl}
-                structuralPath={selectedPath}
-                theme={theme}
-                viewport={propertyViewport}
-                onEdit={handleEdit}
-
-                onDelete={handleDeleteElement}
-                onDuplicate={handleDuplicateElement}
-                onMoveUp={handleMoveUp}
-                onMoveDown={handleMoveDown}
-              />
+              <ErrorBoundary>
+                <PropertyPanel
+                  element={selectedEl}
+                  structuralPath={selectedPath}
+                  theme={theme}
+                  viewport={propertyViewport}
+                  onEdit={handleEdit}
+                  onSelectElement={handleSelectElement}
+                  onDelete={handleDeleteElement}
+                  onDuplicate={handleDuplicateElement}
+                  onMoveUp={handleMoveUp}
+                  onMoveDown={handleMoveDown}
+                />
+              </ErrorBoundary>
             </div>
           </aside>
         )}

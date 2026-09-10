@@ -196,26 +196,116 @@ export default function PositionGroup({
     commitStyleChange(element!, structuralPath!, property, valStr, theme, onEdit, undefined, undefined, viewport);
   }
 
-  function pinTo(mode: "top" | "right" | "bottom" | "left" | "horizontal" | "vertical" | "all") {
-    if (mode === "top" || mode === "vertical" || mode === "all") {
+  function pinTo(mode: string) {
+    if (!element || !structuralPath) return;
+
+    // 1. Ensure position is absolute (or sticky for sticky-top)
+    if (mode === "sticky-top") {
+      setPosition("sticky");
+      applyLiveStyle(element, "position", "sticky", theme, undefined, viewport, structuralPath);
+      commitStyleChange(element, structuralPath, "position", "sticky", theme, onEdit, undefined, undefined, viewport);
       setTop({ amount: 0, unit: "px" });
-      applyLiveStyle(element!, "top", "0px", theme, undefined, viewport, structuralPath!);
-      commitStyleChange(element!, structuralPath!, "top", "0px", theme, onEdit, undefined, undefined, viewport);
+      applyLiveStyle(element, "top", "0px", theme, undefined, viewport, structuralPath);
+      commitStyleChange(element, structuralPath, "top", "0px", theme, onEdit, undefined, undefined, viewport);
+      setZIndex("50");
+      applyLiveStyle(element, "z-index", "50", theme, undefined, viewport, structuralPath);
+      commitStyleChange(element, structuralPath, "z-index", "50", theme, onEdit, undefined, undefined, viewport);
+      return;
     }
-    if (mode === "right" || mode === "horizontal" || mode === "all") {
-      setRight({ amount: 0, unit: "px" });
-      applyLiveStyle(element!, "right", "0px", theme, undefined, viewport, structuralPath!);
-      commitStyleChange(element!, structuralPath!, "right", "0px", theme, onEdit, undefined, undefined, viewport);
+
+    if (position === "static") {
+      setPosition("absolute");
+      applyLiveStyle(element, "position", "absolute", theme, undefined, viewport, structuralPath);
+      commitStyleChange(element, structuralPath, "position", "absolute", theme, onEdit, undefined, undefined, viewport);
+
+      // Auto-promote static parent to relative so child anchors inside its container
+      if (parentEl && parentEl.tagName.toLowerCase() !== "body" && parentEl.tagName.toLowerCase() !== "html") {
+        if (win.getComputedStyle(parentEl).position === "static") {
+          (parentEl as HTMLElement).style.position = "relative";
+          if (theme.mode !== "none") parentEl.classList.add("relative");
+        }
+      }
     }
-    if (mode === "bottom" || mode === "vertical" || mode === "all") {
-      setBottom({ amount: 0, unit: "px" });
-      applyLiveStyle(element!, "bottom", "0px", theme, undefined, viewport, structuralPath!);
-      commitStyleChange(element!, structuralPath!, "bottom", "0px", theme, onEdit, undefined, undefined, viewport);
-    }
-    if (mode === "left" || mode === "horizontal" || mode === "all") {
-      setLeft({ amount: 0, unit: "px" });
-      applyLiveStyle(element!, "left", "0px", theme, undefined, viewport, structuralPath!);
-      commitStyleChange(element!, structuralPath!, "left", "0px", theme, onEdit, undefined, undefined, viewport);
+
+    // 2. Helper to set insets & clear conflicting offsets
+    const applyInsets = (insets: { top?: string; right?: string; bottom?: string; left?: string; transform?: string; width?: string; height?: string }) => {
+      if (insets.top !== undefined) {
+        setTop(parseInsetValue(insets.top));
+        applyLiveStyle(element, "top", insets.top, theme, undefined, viewport, structuralPath);
+        commitStyleChange(element, structuralPath, "top", insets.top, theme, onEdit, undefined, undefined, viewport);
+      }
+      if (insets.right !== undefined) {
+        setRight(parseInsetValue(insets.right));
+        applyLiveStyle(element, "right", insets.right, theme, undefined, viewport, structuralPath);
+        commitStyleChange(element, structuralPath, "right", insets.right, theme, onEdit, undefined, undefined, viewport);
+      }
+      if (insets.bottom !== undefined) {
+        setBottom(parseInsetValue(insets.bottom));
+        applyLiveStyle(element, "bottom", insets.bottom, theme, undefined, viewport, structuralPath);
+        commitStyleChange(element, structuralPath, "bottom", insets.bottom, theme, onEdit, undefined, undefined, viewport);
+      }
+      if (insets.left !== undefined) {
+        setLeft(parseInsetValue(insets.left));
+        applyLiveStyle(element, "left", insets.left, theme, undefined, viewport, structuralPath);
+        commitStyleChange(element, structuralPath, "left", insets.left, theme, onEdit, undefined, undefined, viewport);
+      }
+      if (insets.transform !== undefined) {
+        (element as HTMLElement).style.transform = insets.transform;
+      }
+      if (insets.width !== undefined) {
+        applyLiveStyle(element, "width", insets.width, theme, undefined, viewport, structuralPath);
+        commitStyleChange(element, structuralPath, "width", insets.width, theme, onEdit, undefined, undefined, viewport);
+      }
+      if (insets.height !== undefined) {
+        applyLiveStyle(element, "height", insets.height, theme, undefined, viewport, structuralPath);
+        commitStyleChange(element, structuralPath, "height", insets.height, theme, onEdit, undefined, undefined, viewport);
+      }
+    };
+
+    switch (mode) {
+      case "top-left":
+        applyInsets({ top: "0px", left: "0px", right: "auto", bottom: "auto", transform: "" });
+        break;
+      case "top-center":
+      case "top":
+        applyInsets({ top: "0px", left: "50%", right: "auto", bottom: "auto", transform: "translateX(-50%)" });
+        break;
+      case "top-right":
+        applyInsets({ top: "0px", right: "0px", left: "auto", bottom: "auto", transform: "" });
+        break;
+      case "center-left":
+      case "left":
+        applyInsets({ top: "50%", left: "0px", right: "auto", bottom: "auto", transform: "translateY(-50%)" });
+        break;
+      case "center":
+      case "middle":
+        applyInsets({ top: "50%", left: "50%", right: "auto", bottom: "auto", transform: "translate(-50%, -50%)" });
+        break;
+      case "center-right":
+      case "right":
+        applyInsets({ top: "50%", right: "0px", left: "auto", bottom: "auto", transform: "translateY(-50%)" });
+        break;
+      case "bottom-left":
+        applyInsets({ bottom: "0px", left: "0px", top: "auto", right: "auto", transform: "" });
+        break;
+      case "bottom-center":
+      case "bottom":
+        applyInsets({ bottom: "0px", left: "50%", top: "auto", right: "auto", transform: "translateX(-50%)" });
+        break;
+      case "bottom-right":
+        applyInsets({ bottom: "0px", right: "0px", top: "auto", left: "auto", transform: "" });
+        break;
+      case "stretch-h":
+        applyInsets({ left: "0px", right: "0px", width: "auto", transform: "" });
+        break;
+      case "stretch-v":
+        applyInsets({ top: "0px", bottom: "0px", height: "auto", transform: "" });
+        break;
+      case "all":
+      case "fill":
+      case "stretch-all":
+        applyInsets({ top: "0px", right: "0px", bottom: "0px", left: "0px", width: "100%", height: "100%", transform: "" });
+        break;
     }
   }
 
@@ -263,36 +353,6 @@ export default function PositionGroup({
         )}
       </div>
 
-      {/* Static Position Notice (BUG-027) */}
-      {!isPositioned && (
-
-        <div className="p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl space-y-2 text-xs">
-          <div className="font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
-            <span>⚠️ Static elements ignore offsets</span>
-          </div>
-          <p className="text-slate-600 dark:text-gray-400 text-[11px] leading-relaxed">
-            Offsets and edge pinning require Relative, Absolute, Fixed, or Sticky positioning.
-          </p>
-          <div className="flex gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => handlePositionChange("relative")}
-              className="flex-1 py-1 px-2 text-[11px] rounded bg-white dark:bg-gray-900 border border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10 font-medium cursor-pointer"
-            >
-              Make Relative
-            </button>
-            <button
-              type="button"
-              aria-label="Make element absolute position"
-              onClick={() => handlePositionChange("absolute")}
-              className="flex-1 py-1 px-2 text-[11px] rounded bg-[#0099ff] text-white hover:bg-[#33adff] font-medium cursor-pointer"
-            >
-              Make Absolute
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Parent Positioning Context Advisory (BUG-027) */}
       {position === "absolute" && isParentStatic && (
         <div className="p-2.5 bg-[#0099ff]/10 border border-[#0099ff]/30 rounded-xl space-y-1.5 text-xs">
@@ -313,57 +373,79 @@ export default function PositionGroup({
         </div>
       )}
 
-      {/* Insets Pinning (Top, Right, Bottom, Left) */}
-      {isPositioned && (
-        <div className="p-3 bg-[#141414] rounded-xl border border-[#262626] space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-[#0099ff]">
-              <Pin className="w-3 h-3" />
-              <span>Offsets & Pinning</span>
+      {/* Framer-Style Pinning & Constraints Matrix */}
+      <div className="p-3 bg-slate-50 dark:bg-[#141414] rounded-xl border border-slate-200 dark:border-[#262626] space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-[#0099ff]">
+            <Pin className="w-3 h-3" />
+            <span>Pinning &amp; Constraints (Framer)</span>
+          </div>
+          <button
+            type="button"
+            aria-label="Pin all offsets to 0px"
+            onClick={() => pinTo("all")}
+            className="text-[10px] text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] hover:border-[#0099ff]/30 transition-colors cursor-pointer"
+          >
+            Fill All (0px)
+          </button>
+        </div>
+
+          {/* 3x3 Pinning Matrix Grid */}
+          <div className="space-y-1">
+            <label className="text-[10px] text-slate-500 dark:text-zinc-400 block font-medium">Pin Anchor Position</label>
+            <div className="grid grid-cols-3 gap-1 max-w-[200px] mx-auto p-1.5 bg-slate-100 dark:bg-[#0c0c0c] rounded-lg border border-slate-200 dark:border-[#222222]">
+              {[
+                { id: "top-left", label: "↖ Top-L" },
+                { id: "top-center", label: "↑ Top-C" },
+                { id: "top-right", label: "↗ Top-R" },
+                { id: "center-left", label: "← Left" },
+                { id: "all", label: "✦ Fill" },
+                { id: "center-right", label: "→ Right" },
+                { id: "bottom-left", label: "↙ Bot-L" },
+                { id: "bottom-center", label: "↓ Bot-C" },
+                { id: "bottom-right", label: "↘ Bot-R" },
+              ].map((pin) => (
+                <button
+                  key={pin.id}
+                  type="button"
+                  onClick={() => pinTo(pin.id)}
+                  className="py-1 px-1 text-[9px] font-mono rounded bg-white dark:bg-[#1a1a1a] hover:bg-[#0099ff]/15 hover:text-[#0099ff] text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-[#2a2a2a] transition-colors cursor-pointer text-center font-medium"
+                >
+                  {pin.label}
+                </button>
+              ))}
             </div>
-            <button
-              type="button"
-              aria-label="Pin all offsets to 0px"
-              onClick={() => pinTo("all")}
-              className="text-[10px] text-zinc-400 hover:text-white px-1.5 py-0.5 rounded bg-[#1c1c1c] border border-[#262626] hover:border-[#0099ff]/30 transition-colors cursor-pointer"
-            >
-              Pin All (0px)
-            </button>
           </div>
 
-          {/* Quick Pinning Presets */}
-          <div className="grid grid-cols-4 gap-1 text-[10px]">
+          {/* Quick Stretch & Sticky Presets */}
+          <div className="grid grid-cols-3 gap-1 text-[10px]">
             <button
               type="button"
-              aria-label="Pin top offset"
-              onClick={() => pinTo("top")}
-              className="py-1 px-1 rounded bg-[#1c1c1c] border border-[#262626] text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer"
+              aria-label="Stretch horizontal"
+              onClick={() => pinTo("stretch-h")}
+              className="py-1 px-1 rounded bg-slate-100 dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-slate-600 dark:text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer text-center"
             >
-              Pin Top
+              ↔ Stretch H
             </button>
             <button
               type="button"
-              aria-label="Pin bottom offset"
-              onClick={() => pinTo("bottom")}
-              className="py-1 px-1 rounded bg-[#1c1c1c] border border-[#262626] text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer"
+              aria-label="Stretch vertical"
+              onClick={() => pinTo("stretch-v")}
+              className="py-1 px-1 rounded bg-slate-100 dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-slate-600 dark:text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer text-center"
             >
-              Pin Bottom
+              ↕ Stretch V
             </button>
             <button
               type="button"
-              aria-label="Pin horizontal offsets"
-              onClick={() => pinTo("horizontal")}
-              className="py-1 px-1 rounded bg-[#1c1c1c] border border-[#262626] text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer"
+              aria-label="Sticky top header"
+              onClick={() => {
+                handlePositionChange("sticky");
+                pinTo("top");
+                handleZIndexChange("50");
+              }}
+              className="py-1 px-1 rounded bg-slate-100 dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-slate-600 dark:text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer text-center"
             >
-              Horizontal
-            </button>
-            <button
-              type="button"
-              aria-label="Pin vertical offsets"
-              onClick={() => pinTo("vertical")}
-              className="py-1 px-1 rounded bg-[#1c1c1c] border border-[#262626] text-zinc-400 hover:text-[#0099ff] font-medium cursor-pointer"
-            >
-              Vertical
+              📌 Sticky Top
             </button>
           </div>
 
@@ -450,7 +532,6 @@ export default function PositionGroup({
             </div>
           </div>
         </div>
-      )}
 
       {/* Z-Index Stacking */}
       <div className="space-y-1.5">

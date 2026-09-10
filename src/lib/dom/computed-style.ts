@@ -103,31 +103,64 @@ export function readCurrentValue(
     side = arg4 as Side | undefined;
   }
 
+  // Derive side from property name if not explicitly passed
+  if (!side) {
+    if (property === "padding-top" || property === "margin-top" || property === "border-top-width") side = "top";
+    else if (property === "padding-right" || property === "margin-right" || property === "border-right-width") side = "right";
+    else if (property === "padding-bottom" || property === "margin-bottom" || property === "border-bottom-width") side = "bottom";
+    else if (property === "padding-left" || property === "margin-left" || property === "border-left-width") side = "left";
+  }
+
+  const baseProperty: EditableProperty =
+    property.startsWith("padding-") ? "padding" :
+    property.startsWith("margin-") ? "margin" :
+    property;
+
   // 1. Check explicit inline styles on the HTML element first (highest specificity)
   if (isStyleableElement(el)) {
     const cssProp = property === "text-color" ? "color" : property;
     const inline = el.style.getPropertyValue(cssProp);
     if (inline) return inline;
+
+    if (baseProperty === "padding" && side) {
+      const sideInline = el.style.getPropertyValue(`padding-${side}`);
+      if (sideInline) return sideInline;
+    }
+    if (baseProperty === "margin" && side) {
+      const sideInline = el.style.getPropertyValue(`margin-${side}`);
+      if (sideInline) return sideInline;
+    }
   }
 
   // 2. Check Tailwind utility classes if present
   let unscopedCandidate: string | undefined;
+  let axisCandidate: string | undefined;
 
   for (const cls of classList) {
     const c = classifyUtilityClass(cls, theme);
-    if (!c || c.property !== property) continue;
+    if (!c) continue;
+    if (c.property !== baseProperty && c.property !== property) continue;
+
     if (side) {
       if (c.side === side) {
-        return resolveScaleSuffix(property, c.suffix, theme);
+        return resolveScaleSuffix(baseProperty, c.suffix, theme);
       }
-      if (!c.side && unscopedCandidate === undefined) {
-        unscopedCandidate = resolveScaleSuffix(property, c.suffix, theme);
+      if (c.axis === "x" && (side === "left" || side === "right")) {
+        axisCandidate = resolveScaleSuffix(baseProperty, c.suffix, theme);
+      } else if (c.axis === "y" && (side === "top" || side === "bottom")) {
+        axisCandidate = resolveScaleSuffix(baseProperty, c.suffix, theme);
+      } else if (!c.side && !c.axis && unscopedCandidate === undefined) {
+        unscopedCandidate = resolveScaleSuffix(baseProperty, c.suffix, theme);
       }
     } else {
-      if (c.side === undefined) {
-        return resolveScaleSuffix(property, c.suffix, theme);
+      if (c.side === undefined && c.axis === undefined) {
+        return resolveScaleSuffix(baseProperty, c.suffix, theme);
       }
     }
+  }
+
+  if (axisCandidate !== undefined) {
+    return axisCandidate;
   }
 
   if (unscopedCandidate !== undefined) {
@@ -173,26 +206,40 @@ export function readCurrentValue(
       return (computed as any).rotate || "0deg";
     case "scale":
       return (computed as any).scale || "1";
-    case "padding":
-      return computed.padding || computed.paddingTop;
+    case "padding": {
+      if (computed.padding) return computed.padding;
+      const topP = computed.paddingTop || "0px";
+      const rightP = computed.paddingRight || "0px";
+      const botP = computed.paddingBottom || "0px";
+      const leftP = computed.paddingLeft || "0px";
+      if (topP === rightP && topP === botP && topP === leftP) return topP;
+      return `${topP} ${rightP} ${botP} ${leftP}`;
+    }
     case "padding-top":
-      return computed.paddingTop;
+      return computed.paddingTop || "0px";
     case "padding-right":
-      return computed.paddingRight;
+      return computed.paddingRight || "0px";
     case "padding-bottom":
-      return computed.paddingBottom;
+      return computed.paddingBottom || "0px";
     case "padding-left":
-      return computed.paddingLeft;
-    case "margin":
-      return computed.margin || computed.marginTop;
+      return computed.paddingLeft || "0px";
+    case "margin": {
+      if (computed.margin) return computed.margin;
+      const topM = computed.marginTop || "0px";
+      const rightM = computed.marginRight || "0px";
+      const botM = computed.marginBottom || "0px";
+      const leftM = computed.marginLeft || "0px";
+      if (topM === rightM && topM === botM && topM === leftM) return topM;
+      return `${topM} ${rightM} ${botM} ${leftM}`;
+    }
     case "margin-top":
-      return computed.marginTop;
+      return computed.marginTop || "0px";
     case "margin-right":
-      return computed.marginRight;
+      return computed.marginRight || "0px";
     case "margin-bottom":
-      return computed.marginBottom;
+      return computed.marginBottom || "0px";
     case "margin-left":
-      return computed.marginLeft;
+      return computed.marginLeft || "0px";
     case "font-size":
       return computed.fontSize;
     case "font-weight":
