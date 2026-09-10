@@ -1,5 +1,5 @@
 import { classifyUtilityClass } from "../tailwind/classify";
-import { DEFAULT_SPACING, DEFAULT_FONT_SIZE } from "../tailwind/default-theme";
+import { DEFAULT_SPACING, DEFAULT_FONT_SIZE, DEFAULT_COLORS } from "../tailwind/default-theme";
 import type { EditableProperty, ThemeMap } from "@/types";
 
 type Side = "top" | "right" | "bottom" | "left" | "top-left" | "top-right" | "bottom-right" | "bottom-left";
@@ -105,7 +105,8 @@ export function readCurrentValue(
 
   // 1. Check explicit inline styles on the HTML element first (highest specificity)
   if (isStyleableElement(el)) {
-    const inline = el.style.getPropertyValue(property);
+    const cssProp = property === "text-color" ? "color" : property;
+    const inline = el.style.getPropertyValue(cssProp);
     if (inline) return inline;
   }
 

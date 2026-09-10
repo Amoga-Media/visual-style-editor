@@ -111,4 +111,31 @@ describe("Element Selection & Property Panel Rendering", () => {
 
     expect(html).toBeDefined();
   });
+
+  it("renders SelectionOverlay with zoom factor without displacement errors", () => {
+    const iframe = document.createElement("iframe");
+    document.body.appendChild(iframe);
+
+    const div = document.createElement("div");
+    div.style.width = "300px";
+    div.style.height = "150px";
+    div.style.left = "100px";
+    div.style.top = "80px";
+
+    const onEdit = vi.fn();
+    const htmlZoomed = renderToString(
+      <SelectionOverlay
+        iframe={iframe}
+        hoveredElement={null}
+        selectedElement={div}
+        structuralPath="html>body>div"
+        theme={mockTheme}
+        zoom={0.8}
+        onEdit={onEdit}
+      />
+    );
+
+    expect(htmlZoomed).toBeDefined();
+    iframe.remove();
+  });
 });

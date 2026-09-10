@@ -166,13 +166,13 @@ export function generateResponsiveCssString(): string {
     if (tabletDecls.length > 0) {
       // Live Editor Tablet & Mobile inheritance
       liveTabletRules.push(`html[data-vse-viewport="tablet"] ${selector},\nhtml[data-vse-viewport="mobile"] ${selector} {\n${tabletDecls.join("\n")}\n}`);
-      exportTabletRules.push(`html:not([data-vse-viewport]) ${selector} {\n${tabletDecls.join("\n")}\n}`);
+      exportTabletRules.push(`${selector} {\n${tabletDecls.join("\n")}\n}`);
     }
 
     if (mobileDecls.length > 0) {
       // Live Editor Mobile override
       liveMobileRules.push(`html[data-vse-viewport="mobile"] ${selector} {\n${mobileDecls.join("\n")}\n}`);
-      exportMobileRules.push(`html:not([data-vse-viewport]) ${selector} {\n${mobileDecls.join("\n")}\n}`);
+      exportMobileRules.push(`${selector} {\n${mobileDecls.join("\n")}\n}`);
     }
   }
 

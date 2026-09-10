@@ -41,19 +41,15 @@ export type ParsedPath = { kind: "id"; id: string } | { kind: "chain"; steps: Pa
 export function parseStructuralPath(path: string): ParsedPath {
   if (path.startsWith("#")) return { kind: "id", id: path.slice(1) };
   const steps = path.split(">").map((step, i) => {
-    // computeStructuralPath always emits the chain's first step as the bare
-    // tag name "html" (no ":nth-of-type(...)" — see the `if (tag === "html")`
-    // branch above, which unshifts "html" and breaks before ever computing
-    // an index for it). Every OTHER step always carries one. This was a
-    // straight round-trip bug: the regex below rejected that first step
-    // unconditionally, so parseStructuralPath threw on every chain path,
-    // full stop — never fixed because nothing needed the reverse direction
-    // (path -> element) until Task 4.2's Discard-all, which does. <html> is
-    // always alone at the top of the DOM, so nthOfType: 1 is correct here,
-    // not a placeholder.
     if (i === 0 && step.toLowerCase() === "html") return { tag: "html", nthOfType: 1 };
+    if (step.toLowerCase() === "body") return { tag: "body", nthOfType: 1 };
     const match = step.match(/^([a-zA-Z0-9-_:]+):nth-of-type\((\d+)\)$/);
-    if (!match) throw new Error(`Malformed structural path step: "${step}"`);
+    if (!match) {
+      if (/^[a-zA-Z0-9-_:]+$/.test(step)) {
+        return { tag: step.toLowerCase(), nthOfType: 1 };
+      }
+      throw new Error(`Malformed structural path step: "${step}"`);
+    }
     return { tag: match[1].toLowerCase(), nthOfType: Number(match[2]) };
   });
   return { kind: "chain", steps };

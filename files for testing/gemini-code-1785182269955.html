@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Social Media Co-Pilot — World's First AI-Powered Social Media Co-Pilot</title>
+<meta name="description" content="Social media AI that edits, creates, and manages all in one place. 10x growth, automated.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ---------------------------------------------------------
+     Tokens
+  --------------------------------------------------------- */
+  :root{
+    --bg: #F0F4F8; /* Slightly deeper tone to make glass pop */
+    --ink: #0A0A10;
+    --accent: #6C48FF;
+    --accent-dark: #5934E8;
+    --muted: #4B5563;
+    --muted-2: #9AA3AF;
+    --card: rgba(255, 255, 255, 0.75); /* Glassmorphism base */
+    --card-border: rgba(255, 255, 255, 1);
+    --line: #E7E9EF;
+
+    --shadow-sm: 0 8px 20px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 20px 40px rgba(15, 23, 42, 0.08);
+    --shadow-accent: 0 14px 28px rgba(108, 72, 255, 0.32);
+
+    --r-sm: 10px;
+    --r-md: 16px;
+    --r-lg: 24px;
+
+    --dot: rgba(108, 72, 255, 0.15); /* Tinted dots */
+    --ray: rgba(15, 23, 42, 0.08);
+
+    --floater-scale: 1;
+  }
+
+  *, *::before, *::after{ box-sizing: border-box; }
+  html, body{ height: 100%; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    background: radial-gradient(circle at 50% -20%, #E3E8FF, var(--bg) 60%);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img, svg{ display:block; max-width:100%; }
+  button{ font: inherit; }
+
+  .sr-only{
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  a, button{
+    -webkit-tap-highlight-color: transparent;
+  }
+  a:focus-visible, button:focus-visible{
+    outline: 2px solid var(--accent-dark);
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
+
+  /* ---------------------------------------------------------
+     Hero shell
+  --------------------------------------------------------- */
+  .hero{
+    position: relative;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: clamp(96px, 14vw, 150px) clamp(20px, 6vw, 72px) clamp(48px, 8vw, 96px);
+    isolation: isolate;
+  }
+
+  .bg-layer{ position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+  .bg-dots{
+    position: absolute; inset: 0;
+    background-image: radial-gradient(var(--dot) 1.5px, transparent 1.5px);
+    background-size: 32px 32px;
+    opacity: 0.7;
+  }
+
+  .bg-rays{
+    position: absolute;
+    top: 0; left: 50%;
+    width: min(1200px, 160vw);
+    height: 70%;
+    transform: translateX(-50%);
+  }
+  .bg-rays line{
+    stroke: var(--ray);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 8;
+    stroke-linecap: round;
+  }
+
+  /* ---------------------------------------------------------
+     Glassmorphism Utility
+  --------------------------------------------------------- */
+  .glass {
+    background: var(--card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--card-border);
+  }
+
+  /* ---------------------------------------------------------
+     Floating product cards
+  --------------------------------------------------------- */
+  .floaters{
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    transform: scale(var(--floater-scale));
+    transform-origin: center;
+  }
+
+  .floater{ position: absolute; }
+  .floater--top-left{ top: 8%; left: 5%; }
+  .floater--top-right{ top: 8%; right: 5%; }
+  .floater--mid-left{ top: 35%; left: 3%; }
+  .floater--mid-right{ top: 35%; right: 3%; }
+  .floater--bottom-left{ bottom: 5%; left: 2%; width: 300px; height: 360px; }
+  .floater--bottom-right{ bottom: 5%; right: 2%; width: 300px; height: 360px; }
+
+  /* mini cards (4 corners) */
+  .mini-stack{ position: relative; }
+  .mini-card{
+    width: 156px;
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-sm);
+    padding: 16px;
+    transform: rotate(var(--tilt, -5deg));
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .mini-card__label{ margin: 0 0 12px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:.75rem; color: var(--ink); }
+  .mini-card__lines{ display:flex; flex-direction:column; gap:8px; }
+  .bar{ height: 6px; border-radius: 4px; background: var(--line); }
+  .bar--sm{ width: 55%; }
+  .bar--lg{ width: 100%; }
+
+  .thumb{
+    position: absolute;
+    width: 64px; height: 64px;
+    border-radius: 16px;
+    border: 3px solid #fff;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+  .thumb--shorts{ right: -20px; bottom: -20px; background: linear-gradient(135deg,#FF6B6B,#FFD93D); }
+  .thumb--templates{ left: -20px; bottom: -20px; background: linear-gradient(135deg,#8B5CF6,#EC4899); }
+  .thumb--captions{ right: -16px; top: -16px; width: 50px; height: 76px; border-radius: 14px; background: linear-gradient(165deg,#06B6D4,#3B82F6); }
+  .thumb--video-a{ left: -14px; top: -14px; width: 44px; height: 44px; background: linear-gradient(135deg,#F59E0B,#EF4444); }
+  .thumb--video-b{ left: 20px; top: 26px; width: 44px; height: 44px; background: linear-gradient(135deg,#10B981,#06B6D4); }
+
+  .thumb-icon{
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* bottom-left cluster: video mock + captions panel */
+  .video-mock{
+    position: absolute;
+    top: 0; left: 0;
+    width: 220px;
+    background: #111119; /* Dark contrast */
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-md);
+    padding: 14px;
+    transform: rotate(-7deg);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .video-mock__frame{
+    position: relative;
+    height: 200px;
+    border-radius: var(--r-md);
+    background:
+      radial-gradient(120% 90% at 30% 15%, rgba(255,255,255,.16), transparent 60%),
+      linear-gradient(200deg,#3B2F63,#191225 70%);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 14px;
+  }
+  .video-mock__badge{
+    color: #fff;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    line-height: 1.15;
+    text-transform: uppercase;
+  }
+  .video-mock__badge em{ font-style: normal; color: #A8FF60; }
+  .video-mock__play{
+    position: absolute; top: 14px; left: 14px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .video-mock__toolbar{
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 12px;
+  }
+  .pill{
+    font-family:'Inter',sans-serif;
+    font-size: .7rem; font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .pill--ghost{ background: #23232E; color: #C9CBD6; }
+  .pill--accent{ background: var(--accent); color: #fff; }
+  .icon-chip{
+    width: 30px; height: 30px;
+    border-radius: 10px;
+    background: #23232E;
+    display: flex; align-items: center; justify-content: center;
+    flex: none;
+  }
+
+  .captions-card{
+    position: absolute;
+    right: -24px; bottom: -12px;
+    width: 250px;
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-md);
+    padding: 16px 18px 20px;
+    transform: rotate(4deg);
+  }
+  .captions-card__head{
+    display: flex; align-items: center; justify-content: space-between;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight: 700; font-size: .8rem;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .caption-row{ padding: 10px 0; border-top: 1px solid rgba(0,0,0,0.06); }
+  .caption-row:first-of-type{ border-top: none; }
+  .caption-row__meta{
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
+  }
+  .timestamp{ font-size: .65rem; color: var(--muted-2); font-variant-numeric: tabular-nums; font-weight: 600; }
+  .caption-row__text{ margin: 8px 0 0; font-size: .75rem; color: var(--ink); line-height: 1.4; font-weight: 500;}
+  .icon-btn{ color: var(--muted-2); flex: none; }
+
+  /* bottom-right cluster: preview card + calendar card */
+  .preview-card{
+    position: absolute;
+    top: 0; right: 0;
+    width: 230px;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-md);
+    padding: 14px;
+    transform: rotate(6deg);
+  }
+  .preview-card__media{
+    position: relative;
+    height: 160px;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background:
+      linear-gradient(0deg, rgba(10,15,30,.55), rgba(10,15,30,0) 55%),
+      linear-gradient(200deg,#4C6EF5 0%, #6C48FF 45%, #2E3A6B 100%);
+  }
+  .preview-card__play{
+    position: absolute; left: 12px; bottom: 12px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,.95);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+  .preview-card__fields{ margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .field{ display: flex; align-items: center; gap: 10px; }
+  .field__dot{
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.1);
+    flex: none;
+  }
+  .field__label{ font-size: .75rem; color: var(--ink); font-weight: 700; width: 68px; flex: none; }
+  .field__bar{ height: 6px; border-radius: 4px; background: rgba(0,0,0,0.06); flex: 1; }
+
+  .calendar-card{
+    position: absolute;
+    left: -28px; bottom: -20px;
+    width: 184px;
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-md);
+    padding: 14px 16px 16px;
+    transform: rotate(-6deg);
+  }
+  .calendar-card__head{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight: 800; font-size: .75rem;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .calendar-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .calendar-grid span{
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+  }
+  .calendar-grid span::after{
+    content: attr(data-n);
+    position: absolute; left: 6px; bottom: 4px;
+    font-size: .55rem; font-weight: 700; color: #fff;
+    opacity: .95;
+  }
+  .calendar-grid span:nth-child(1){ background: linear-gradient(135deg,#FDBA74,#F97316); }
+  .calendar-grid span:nth-child(2){ background: linear-gradient(135deg,#93C5FD,#6C48FF); }
+  .calendar-grid span:nth-child(3){ background: linear-gradient(135deg,#6EE7B7,#0EA5A5); }
+  .calendar-grid span:nth-child(4){ background: linear-gradient(135deg,#FDA4AF,#EC4899); }
+  .calendar-grid span:nth-child(5){ background: linear-gradient(135deg,#C4B5FD,#7C3AED); }
+  .calendar-grid span:nth-child(6){ background: linear-gradient(135deg,#FDE68A,#F59E0B); }
+
+  /* ---------------------------------------------------------
+     Main content column
+  --------------------------------------------------------- */
+  .content{
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .logo-badge{
+    width: 72px; height: 72px;
+    border-radius: 22px;
+    box-shadow: var(--shadow-sm);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: clamp(24px, 4vw, 36px);
+  }
+
+  .headline{
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.4rem, 1.5rem + 4.8vw, 4.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .headline .line{ display: block; }
+  .headline .line-2{ 
+    background: linear-gradient(90deg, var(--accent) 0%, #B430FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subhead{
+    margin: clamp(18px, 3vw, 24px) 0 0;
+    color: var(--muted);
+    font-size: clamp(1rem, .9rem + .5vw, 1.15rem);
+    line-height: 1.7;
+    max-width: 36em;
+  }
+
+  .trust-row{
+    margin-top: clamp(26px, 4vw, 36px);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .avatars{ display: flex; }
+  .avatar{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 3px solid var(--bg);
+    margin-left: -12px;
+    flex: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  .avatar:first-child{ margin-left: 0; }
+  .avatar:nth-child(1){ background: linear-gradient(135deg,#FDA4AF,#F43F5E); }
+  .avatar:nth-child(2){ background: linear-gradient(135deg,#FDE68A,#F59E0B); }
+  .avatar:nth-child(3){ background: linear-gradient(135deg,#93C5FD,#3B82F6); }
+  .avatar:nth-child(4){ background: linear-gradient(135deg,#6EE7B7,#10B981); }
+  .avatar:nth-child(5){ background: linear-gradient(135deg,#C4B5FD,#8B5CF6); }
+  .trust-text{ font-size: .9rem; color: var(--muted); }
+  .trust-text strong{ color: var(--ink); font-weight: 700; }
+
+  /* Animated CTA */
+  .cta{
+    position: relative;
+    overflow: hidden;
+    margin-top: clamp(26px, 4vw, 36px);
+    border: none;
+    cursor: pointer;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 18px 40px;
+    border-radius: 999px;
+    box-shadow: var(--shadow-accent);
+    transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+  }
+  .cta::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: skewX(-20deg);
+    animation: shine 3.5s infinite ease-in-out;
+  }
+  @keyframes shine {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
+  }
+  .cta:hover{
+    transform: translateY(-4px);
+    box-shadow: 0 24px 40px rgba(108, 72, 255, 0.45);
+    background: var(--accent-dark);
+  }
+  .cta:active{ transform: translateY(-1px); }
+
+  .cta-note{
+    margin: 16px 0 0;
+    font-size: .85rem;
+    color: var(--muted-2);
+    font-weight: 500;
+  }
+
+  .platform-row{
+    margin-top: clamp(36px, 5vw, 54px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(14px, 2vw, 20px);
+    flex-wrap: wrap;
+  }
+  .platform-icon{
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .3s ease;
+  }
+  .platform-icon:hover{ transform: translateY(-6px) scale(1.05); box-shadow: var(--shadow-md); }
+  .platform-icon:nth-child(odd){ transform: translateY(10px); }
+  .platform-icon:nth-child(odd):hover{ transform: translateY(2px) scale(1.05); }
+  .platform-icon:nth-child(even){ transform: translateY(-8px); }
+  .platform-icon:nth-child(even):hover{ transform: translateY(-14px) scale(1.05); }
+
+  /* ---------------------------------------------------------
+     Responsive
+  --------------------------------------------------------- */
+  @media (max-width: 1279px) and (min-width: 1024px){
+    :root{ --floater-scale: 0.85; }
+  }
+
+  @media (max-width: 1023px){
+    .floaters{ display: none; }
+    .hero{ padding-top: clamp(72px, 12vw, 110px); }
+  }
+
+  @media (max-width: 520px){
+    .avatar{ width: 32px; height: 32px; }
+    .platform-icon{ width: 48px; height: 48px; border-radius: 14px; }
+    .platform-icon:nth-child(odd),
+    .platform-icon:nth-child(even){ transform: translateY(0); }
+    .platform-icon:hover{ transform: translateY(-4px) scale(1.02); }
+    .trust-row{ flex-direction: column; gap: 10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+</style>
+  <style id="vse-responsive-styles">
+/* Visual Style Editor Responsive Cascades */
+/* Tablet Viewport Rules */
+html[data-vse-viewport="tablet"] [data-vse-path="html>body:nth-of-type(1)>main:nth-of-type(1)>section:nth-of-type(1)>h1:nth-of-type(1)>span:nth-of-type(2)"],
+html[data-vse-viewport="mobile"] [data-vse-path="html>body:nth-of-type(1)>main:nth-of-type(1)>section:nth-of-type(1)>h1:nth-of-type(1)>span:nth-of-type(2)"] {
+  font-size: 64px !important;
+}
+
+/* Mobile Viewport Rules */
+html[data-vse-viewport="mobile"] [data-vse-path="html>body:nth-of-type(1)>main:nth-of-type(1)>section:nth-of-type(1)>h1:nth-of-type(1)>span:nth-of-type(2)"] {
+  font-size: 21px !important;
+}
+
+@media (max-width: 1024px) {
+  html:not([data-vse-viewport]) [data-vse-path="html>body:nth-of-type(1)>main:nth-of-type(1)>section:nth-of-type(1)>h1:nth-of-type(1)>span:nth-of-type(2)"] {
+    font-size: 64px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  html:not([data-vse-viewport]) [data-vse-path="html>body:nth-of-type(1)>main:nth-of-type(1)>section:nth-of-type(1)>h1:nth-of-type(1)>span:nth-of-type(2)"] {
+    font-size: 21px !important;
+  }
+}
+  </style>
+</head>
+<body>
+
+<main class="hero">
+
+  <div class="bg-layer" aria-hidden="true">
+    <div class="bg-dots"></div>
+    <svg class="bg-rays" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMin meet">
+      <g>
+        <line x1="500" y1="0" x2="80"  y2="600"/>
+        <line x1="500" y1="0" x2="270" y2="600"/>
+        <line x1="500" y1="0" x2="500" y2="600"/>
+        <line x1="500" y1="0" x2="730" y2="600"/>
+        <line x1="500" y1="0" x2="920" y2="600"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="floaters" aria-hidden="true">
+    <!-- Parallax Wrapper applied via JS -->
+    <div class="parallax-group w-full h-full">
+      
+      <!-- top-left: AI Shorts -->
+      <div class="floater floater--top-left" data-speed="0.03">
+        <div class="mini-stack">
+          <div class="mini-card glass" style="--tilt:-6deg">
+            <p class="mini-card__label">AI Shorts</p>
+            <div class="mini-card__lines">
+              <span class="bar bar--lg"></span>
+              <span class="bar bar--sm"></span>
+            </div>
+          </div>
+          <div class="thumb thumb--shorts">
+            <span class="thumb-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M8 5v14l11-7z" fill="#fff"/></svg>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- top-right: AI Templates -->
+      <div class="floater floater--top-right" data-speed="0.02">
+        <div class="mini-stack">
+          <div class="mini-card glass" style="--tilt:5deg">
+            <p class="mini-card__label">AI Templates</p>
+            <div class="mini-card__lines">
+              <span class="bar bar--lg"></span>
+              <span class="bar bar--sm"></span>
+            </div>
+          </div>
+          <div class="thumb thumb--templates"></div>
+        </div>
+      </div>
+
+      <!-- mid-left: AI Captions -->
+      <div class="floater floater--mid-left" data-speed="0.04">
+        <div class="mini-stack">
+          <div class="mini-card glass" style="--tilt:-4deg">
+            <p class="mini-card__label">AI Captions</p>
+            <div class="mini-card__lines">
+              <span class="bar bar--lg"></span>
+              <span class="bar bar--sm"></span>
+            </div>
+          </div>
+          <div class="thumb thumb--captions"></div>
+        </div>
+      </div>
+
+      <!-- mid-right: AI Video Tools -->
+      <div class="floater floater--mid-right" data-speed="0.03">
+        <div class="mini-stack">
+          <div class="mini-card glass" style="--tilt:5deg">
+            <p class="mini-card__label">AI Video Tools</p>
+            <div class="mini-card__lines">
+              <span class="bar bar--lg"></span>
+              <span class="bar bar--sm"></span>
+            </div>
+          </div>
+          <div class="thumb thumb--video-a"></div>
+          <div class="thumb thumb--video-b"></div>
+        </div>
+      </div>
+
+      <!-- bottom-left cluster: clip editor + captions panel -->
+      <div class="floater floater--bottom-left" data-speed="0.015">
+        <div class="video-mock">
+          <div class="video-mock__frame">
+            <span class="video-mock__play">
+              <svg viewBox="0 0 24 24" width="14" height="14"><path d="M8 5v14l11-7z" fill="#fff"/></svg>
+            </span>
+            <p class="video-mock__badge">Get viral<br><em>clips</em></p>
+          </div>
+          <div class="video-mock__toolbar">
+            <span class="icon-chip">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 7h16M4 12h10M4 17h13" stroke="#C9CBD6" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </span>
+            <span class="pill pill--ghost">Save draft</span>
+            <span class="pill pill--accent">Download</span>
+          </div>
+        </div>
+
+        <div class="captions-card glass">
+          <p class="captions-card__head">
+            Captions
+            <span class="icon-btn">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 6h16M9 6V4h6v2M6 6l1 14h10l1-14" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </p>
+          <div class="caption-row">
+            <div class="caption-row__meta">
+              <span class="timestamp">00:00:07:000 – 00:00:12:000</span>
+              <span class="icon-btn">
+                <svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 6h16M9 6V4h6v2M6 6l1 14h10l1-14" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+            <p class="caption-row__text">To begin with, though, just make sure that</p>
+          </div>
+          <div class="caption-row">
+            <div class="caption-row__meta">
+              <span class="timestamp">00:00:12:000 – 00:00:32:000</span>
+              <span class="icon-btn">
+                <svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 6h16M9 6V4h6v2M6 6l1 14h10l1-14" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+            <span class="bar bar--lg" style="margin-top:8px"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- bottom-right cluster: preview + content calendar -->
+      <div class="floater floater--bottom-right" data-speed="0.02">
+        <div class="preview-card glass">
+          <div class="preview-card__media">
+            <span class="preview-card__play">
+              <svg viewBox="0 0 24 24" width="14" height="14"><path d="M8 5v14l11-7z" fill="#6C48FF"/></svg>
+            </span>
+          </div>
+          <div class="preview-card__fields">
+            <div class="field">
+              <span class="field__dot"></span>
+              <span class="field__label">Caption</span>
+              <span class="field__bar"></span>
+            </div>
+            <div class="field">
+              <span class="field__dot"></span>
+              <span class="field__label">Description</span>
+              <span class="field__bar"></span>
+            </div>
+            <div class="field">
+              <span class="field__dot"></span>
+              <span class="field__label">Hooks</span>
+              <span class="field__bar"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="calendar-card glass">
+          <p class="calendar-card__head">July 2026</p>
+          <div class="calendar-grid">
+            <span data-n="24"></span>
+            <span data-n="25"></span>
+            <span data-n="26"></span>
+            <span data-n="27"></span>
+            <span data-n="28"></span>
+            <span data-n="29"></span>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="logo-badge glass">
+      <svg viewBox="0 0 40 40" width="30" height="30">
+        <path d="M21 6a13 13 0 1 0 8.6 22.9c1.3 1.2 2.6 2.2 4 3" stroke="#0A0A10" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        <circle cx="31" cy="30.5" r="3" fill="#0A0A10"/>
+      </svg>
+    </div>
+
+    <h1 class="headline">
+      <span class="line line-1">World's First AI-Powered</span>
+      <span style="font-size: 21px;" class="line line-2">Social Media Co-Pilot</span>
+    </h1>
+
+    <p class="subhead">
+      Social media AI that edits, creates, and manages all in one place.<br>
+      <strong>10x growth. Automated.</strong>
+    </p>
+
+    <div class="trust-row">
+      <div class="avatars" aria-hidden="true">
+        <span class="avatar"></span>
+        
+<span class="avatar"></span>
+        
+<span class="avatar"></span>
+<span class="avatar"></span>
+<span class="avatar"></span>
+        "></span>
+      </div>
+      <p class="trust-text"><strong>4M+</strong> trusted users</p>
+    </div>
+
+    <button type="button" class="cta" aria-label="Get Started for Free">Get Started for Free</button>
+    <p class="cta-note">No credit card required.</p>
+
+    <footer class="platform-row" aria-label="Supported Platforms">
+      <span class="sr-only">Works with YouTube, TikTok, Instagram, LinkedIn, and X</span>
+
+      <span class="platform-icon glass" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <rect x="1" y="4" width="22" height="16" rx="6" fill="#FF0000"/>
+          <path d="M10 8.5L16 12L10 15.5V8.5Z" fill="#fff"/>
+        </svg>
+      </span>
+
+      <span class="platform-icon glass" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <path d="M13.4 3h2.7c.2 1.7 1.5 3.1 3.2 3.4v2.7c-1.5 0-2.9-.5-4-1.3v6.3a5.1 5.1 0 1 1-4.4-5v2.8a2.3 2.3 0 1 0 2 2.3V3z" fill="#111"/>
+        </svg>
+      </span>
+
+      <span class="platform-icon glass" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <defs>
+            <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0" stop-color="#FED576"/>
+              <stop offset=".4" stop-color="#F47133"/>
+              <stop offset=".7" stop-color="#BC3081"/>
+              <stop offset="1" stop-color="#4E60D3"/>
+            </linearGradient>
+          </defs>
+          <rect x="1" y="1" width="22" height="22" rx="7" fill="url(#igGrad)"/>
+          <circle cx="12" cy="12" r="5" fill="none" stroke="#fff" stroke-width="2"/>
+          <circle cx="17.4" cy="6.6" r="1.2" fill="#fff"/>
+        </svg>
+      </span>
+
+      <span class="platform-icon glass" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <rect width="24" height="24" rx="6" fill="#0A66C2"/>
+          <path d="M7 9.5H9.6V18H7zM8.3 8.4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM11.2 9.5h2.5v1.1c.5-.7 1.3-1.3 2.6-1.3 2.7 0 3.2 1.8 3.2 4.1V18h-2.6v-3.9c0-.9-.1-2.1-1.3-2.1-1.3 0-1.5 1-1.5 2.1V18h-2.6z" fill="#fff"/>
+        </svg>
+      </span>
+
+      <span class="platform-icon glass" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <rect width="24" height="24" rx="6" fill="#111"/>
+          <path d="M6 6l12 12M18 6L6 18" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </footer>
+
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (typeof gsap === 'undefined') return;
+
+  if (!reduceMotion){
+    // Staggered Entrance Animation
+    var tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+    tl.from('.logo-badge', { y: -20, autoAlpha: 0, duration: 0.8 })
+      .from('.headline .line', { y: 30, autoAlpha: 0, duration: 0.9, stagger: 0.15 }, '-=0.5')
+      .from('.subhead', { y: 20, autoAlpha: 0, duration: 0.8 }, '-=0.6')
+      .from('.trust-row', { y: 15, autoAlpha: 0, duration: 0.7 }, '-=0.5')
+      .from('.cta', { y: 15, autoAlpha: 0, scale: 0.9, duration: 0.7 }, '-=0.5')
+      .from('.cta-note', { autoAlpha: 0, duration: 0.5 }, '-=0.4')
+      .from('.platform-icon', { y: 25, autoAlpha: 0, duration: 0.6, stagger: 0.08, ease: "back.out(1.7)" }, '-=0.4');
+
+    var mm = gsap.matchMedia();
+    mm.add('(min-width: 1024px)', function(){
+      // Floating Entrance
+      gsap.from('.floater', {
+        autoAlpha: 0,
+        scale: 0.85,
+        y: 40,
+        duration: 1.2,
+        ease: 'power3.out',
+        stagger: 0.15,
+        delay: 0.2
+      });
+
+      // Hover/Float Yoyo Effect
+      var floaters = gsap.utils.toArray('.floater');
+      floaters.forEach(function(el, i){
+        gsap.to(el, {
+          y: '+=15',
+          duration: 3 + (i % 3) * 0.5,
+          ease: 'sine.inOut',
+          yoyo: true,
+          repeat: -1,
+          delay: i * 0.2
+        });
+      });
+      
+      // Dynamic Parallax on Mouse Move
+      document.addEventListener("mousemove", (e) => {
+        const x = (window.innerWidth / 2 - e.pageX);
+        const y = (window.innerHeight / 2 - e.pageY);
+        
+        floaters.forEach((floater) => {
+          const speed = floater.getAttribute('data-speed');
+          gsap.to(floater, {
+            x: x * speed,
+            y: y * speed,
+            duration: 1,
+            ease: 'power1.out'
+          });
+        });
+      });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -158,7 +158,7 @@ export type EditRecord =
 
 export type SaveRequestEdit =
   | { kind: "class"; structuralPath: string; newClassList: string[] }
-  | { kind: "style"; structuralPath: string; property?: EditableProperty; styleProperty: string; newStyleValue: string; viewport?: "desktop" | "tablet" | "mobile" }
+  | { kind: "style"; structuralPath: string; property?: EditableProperty; styleProperty: string; newStyleValue: string; viewport?: "desktop" | "tablet" | "mobile" | "all" }
   | { kind: "text"; structuralPath: string; newText: string }
   | { kind: "attribute"; structuralPath: string; attributeName: string; newValue: string }
   | { kind: "delete"; structuralPath: string }

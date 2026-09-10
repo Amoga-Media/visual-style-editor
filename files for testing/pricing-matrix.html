@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style id="vse-responsive-styles">
+/* Visual Style Editor Responsive Cascades */
+/* Tablet Viewport Rules */
+html[data-vse-viewport="tablet"] [data-vse-path="html>body:nth-of-type(1)>div:nth-of-type(1)>div:nth-of-type(1)>div:nth-of-type(1)>span:nth-of-type(1)"],
+html[data-vse-viewport="mobile"] [data-vse-path="html>body:nth-of-type(1)>div:nth-of-type(1)>div:nth-of-type(1)>div:nth-of-type(1)>span:nth-of-type(1)"] {
+  font-size: 42px !important;
+}
+
+/* Mobile Viewport Rules */
+html[data-vse-viewport="mobile"] [data-vse-path="html>body:nth-of-type(1)>div:nth-of-type(1)>div:nth-of-type(1)>div:nth-of-type(1)>span:nth-of-type(1)"] {
+  font-size: 18px !important;
+}
+
+@media (max-width: 1024px) {
+  html:not([data-vse-viewport]) [data-vse-path="html>body:nth-of-type(1)>div:nth-of-type(1)>div:nth-of-type(1)>div:nth-of-type(1)>span:nth-of-type(1)"] {
+    font-size: 42px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  html:not([data-vse-viewport]) [data-vse-path="html>body:nth-of-type(1)>div:nth-of-type(1)>div:nth-of-type(1)>div:nth-of-type(1)>span:nth-of-type(1)"] {
+    font-size: 18px !important;
+  }
+}
+  </style>
+</head>
+<body class="bg-gray-950 text-white min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div id="starter-card" class="bg-gray-900 border border-gray-800 rounded-2xl p-8 space-y-6">
+      <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Starter</span>
+      <div>
+        <span style="font-size: 18px;" class="font-extrabold text-white text-[66px]">$0</span>
+        <span class="text-gray-400 text-sm"> / forever</span>
+      </div>
+      <ul class="space-y-3 text-sm text-gray-300">
+        <li>✓ 100% In-Browser AST Engine</li>
+        <li>✓ Direct Local File Sync</li>
+        <li>✓ Export Clean Tailwind HTML</li>
+      </ul>
+      <button class="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-semibold transition-colors">
+        Start Free
+      </button>
+    </div>
+    <div id="pro-card" class="bg-gray-900 border-2 border-indigo-500 rounded-2xl p-8 space-y-6 shadow-2xl relative">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider">Pro Edition</span>
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Most Popular</span>
+      </div>
+      <div>
+        <span class="text-4xl font-extrabold text-white">$29</span>
+        <span class="text-gray-400 text-sm"> / month</span>
+      </div>
+      <ul class="space-y-3 text-sm text-gray-300">
+        <li>✓ Everything in Starter</li>
+        <li>✓ Priority Support & Updates</li>
+        <li>✓ Unlimited Custom Presets</li>
+      </ul>
+      <button class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-colors">
+        Upgrade Now
+      </button>
+    </div>
+  </div>
+</body>
+</html>

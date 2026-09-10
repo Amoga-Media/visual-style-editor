@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Besty's | Premium Craft Burgers</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#050505',
+                        accent: '#E63946',
+                        accentYellow: '#FFC933',
+                        surface: '#121212',
+                        surface2: '#1A1A1A',
+                    },
+                    fontFamily: {
+                        sans: ['Satoshi', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Typography: Satoshi carries the whole voice (display + body); JetBrains Mono is reserved for the "order ticket" motif only -->
+    <link rel="preconnect" href="https://api.fontshare.com">
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root{
+            --ink:#050505;
+            --surface:#121212;
+            --surface-2:#1A1A1A;
+            --line: rgba(255,255,255,0.10);
+            --accent:#E63946;
+            --accent-2:#FFC933;
+            --tone: var(--ink); /* used by .torn-edge to punch holes matching whatever bg it sits on */
+        }
+
+        body {
+            font-family: 'Satoshi', sans-serif;
+            background-color: var(--ink);
+            color: #EDEDED;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Satoshi', sans-serif;
+        }
+        .font-ticket{ font-family:'JetBrains Mono', monospace; letter-spacing:-0.01em; }
+
+        /* ---------- Ticket / receipt motif: replaces decorative glassmorphism everywhere ---------- */
+        .ticket-card {
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            transition: transform .4s cubic-bezier(.25,1,.5,1), border-color .4s cubic-bezier(.25,1,.5,1), box-shadow .4s cubic-bezier(.25,1,.5,1);
+        }
+        .ticket-card:hover {
+            transform: translate(-4px, -4px);
+            border-color: var(--accent);
+            box-shadow: 5px 5px 0 0 var(--accent);
+        }
+        @media (max-width: 767px){
+            .ticket-card:hover{ transform:none; box-shadow:none; border-color: var(--line); }
+        }
+        /* .tilt-card owns `transform` via GSAP (rotationX/Y quickTo) — let the CSS hover only affect color/shadow */
+        .tilt-card.ticket-card:hover{ transform:none; }
+        .tilt-card{ transform-style: preserve-3d; }
+
+        /* Perforated "torn from the roll" edge — the one signature device, reused deliberately */
+        .torn-edge{ position:relative; }
+        .torn-edge::before{
+            content:'';
+            position:absolute; top:-1px; left:0; right:0; height:13px;
+            background-image: radial-gradient(circle at 8px 6px, var(--tone) 4.5px, transparent 4.7px);
+            background-size:16px 13px; background-repeat:repeat-x;
+            transform: translateY(-50%);
+        }
+
+        .menu-item:hover { transform: translateX(10px) translateY(0); }
+        .menu-row{ border-bottom:1px dashed var(--line); transition: padding-left .35s cubic-bezier(.25,1,.5,1), border-color .35s; }
+        .menu-row:last-child{ border-bottom:none; }
+        .menu-row:hover{ padding-left: .85rem; border-color: rgba(230,57,70,0.4); }
+
+        /* Desktop menu-list accordion: summary row (name/price) always visible, description
+           collapses via CSS grid-rows (no JS height math, respects prefers-reduced-motion
+           automatically through the global transition-duration override above). */
+        .accordion-trigger{ background:transparent; border:0; font:inherit; color:inherit; -webkit-tap-highlight-color:transparent; }
+        .accordion-panel{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .45s cubic-bezier(.25,1,.5,1); }
+        .accordion-panel > .accordion-panel-inner{ overflow:hidden; min-height:0; }
+        .accordion-item.is-open .accordion-panel{ grid-template-rows:1fr; }
+        .accordion-chevron{ transition:transform .35s cubic-bezier(.25,1,.5,1), color .3s; }
+        .accordion-item.is-open .accordion-chevron{ transform:rotate(180deg); }
+
+        /* Our Story: scroll-scrubbed word reveal — each word dims until the scroll position reaches it */
+        .story-scrub-text .word{ display:inline-block; opacity:0.16; }
+
+        /* Testimonial carousel: native scroll-snap track, scrollbar hidden (arrow buttons + touch-swipe drive it) */
+        .testimonial-track{ scrollbar-width:none; -ms-overflow-style:none; }
+        .testimonial-track::-webkit-scrollbar{ display:none; }
+
+        /* Cinematic Image Masking */
+        .cinematic-img {
+            mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+        }
+
+        /* Grain texture — replaces blur/glass as the "premium atmosphere" material over photography */
+        .grain{ position:absolute; inset:0; pointer-events:none; opacity:.15; mix-blend-mode:overlay;
+            background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+            background-size:180px 180px;
+        }
+
+        /* Stamp badge */
+        .stamp{
+            display:inline-flex; align-items:center; gap:.4rem;
+            border:1.5px solid currentColor; border-radius:9999px;
+            padding:.45rem 1rem; transform:rotate(-7deg);
+        }
+
+        /* Hype ticker marquee */
+        .marquee{ overflow:hidden; }
+        .marquee__track{ display:flex; width:max-content; animation: marquee 26s linear infinite; }
+        .marquee--slow .marquee__track{ animation-duration: 55s; }
+        .marquee:hover .marquee__track{ animation-play-state: paused; }
+        @keyframes marquee{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+        /* Hero line-reveal mask */
+        .line-mask{ display:block; overflow:hidden; }
+        .line-inner{ display:block; will-change:transform; }
+
+        /* Scroll progress */
+        #scroll-progress{ transform-origin:left; transform:scaleX(0); }
+
+        /* Cursor ring — accompanies, never replaces, the native cursor */
+        #cursor-ring{
+            width:34px; height:34px; border:1.5px solid var(--accent); border-radius:9999px;
+            position:fixed; top:0; left:0; pointer-events:none; z-index:80;
+            transform:translate(-50%,-50%) scale(1); opacity:0; transition:opacity .3s, background-color .3s;
+            mix-blend-mode:difference;
+        }
+        .cursor-active #cursor-ring{ opacity:1; }
+        .cursor-hover #cursor-ring{ background-color:var(--accent); }
+
+        .stat-num{ font-variant-numeric: tabular-nums; }
+
+        /* Nav — the one legitimate functional use of backdrop-blur (legibility over scrolling content, not decoration) */
+        #navbar.nav-scrolled{
+            background:rgba(5,5,5,0.82);
+            backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+            border-bottom-color:var(--line);
+        }
+        #navbar.nav-scrolled::after{
+            content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:var(--accent);
+        }
+
+        /* Mobile Menu - hidden by default, GSAP animates it open/closed via opacity+visibility */
+        #mobile-menu { opacity: 0; visibility: hidden; }
+        .hamburger-line { transform-origin: center; }
+
+        /* Desktop-only clipped-height parallax treatment for reviews */
+        @media (min-width: 1024px) {
+            .fade-mask-y-lg {
+                mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+                -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--ink); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        /* Visible keyboard focus */
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
+        /* Respect OS-level reduced motion preference for CSS transitions/animations */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .marquee__track{ animation: none !important; }
+            #cursor-ring{ display:none !important; }
+        }
+        @media (hover: none), (pointer: coarse) {
+            #cursor-ring{ display:none !important; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-accent selection:text-white">
+
+    <div id="scroll-progress" class="fixed top-0 left-0 h-[3px] w-full bg-accent z-[70]"></div>
+    <div id="cursor-ring" aria-hidden="true"></div>
+
+    <!-- Navigation -->
+    <nav id="navbar" aria-label="Primary" class="fixed w-full z-50 transition-all duration-300 py-4 px-5 sm:px-8 border-b border-transparent">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" class="font-display font-black text-2xl sm:text-3xl tracking-wide text-white shrink-0">
+                BESTY'S<span class="text-accent">.</span>
+            </a>
+            <ul class="hidden lg:flex gap-8 font-medium text-sm tracking-widest uppercase text-gray-400">
+                <li><a href="#menu" class="relative hover:text-white transition-colors duration-300 py-1 after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full">Menu</a></li>
+                <li><a href="#combos" class="relative hover:text-white transition-colors duration-300 py-1 after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full">Combos</a></li>
+                <li><a href="#drinks" class="relative hover:text-white transition-colors duration-300 py-1 after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full">Drinks</a></li>
+                <li><a href="#reviews" class="relative hover:text-white transition-colors duration-300 py-1 after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full">Reviews</a></li>
+            </ul>
+            <a href="https://www.zomato.com/pune/bestys-burgers-kondhwa" target="_blank" class="magnetic hidden lg:inline-flex items-center justify-center px-6 py-3 text-sm font-bold tracking-widest uppercase bg-accent text-white rounded-full hover:bg-white hover:text-primary transition-colors duration-300">
+                Order Now
+            </a>
+
+            <!-- Mobile / Tablet controls: just the hamburger -->
+            <div class="flex items-center lg:hidden">
+                <button id="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" class="relative w-11 h-11 shrink-0 flex flex-col items-center justify-center gap-[5px]">
+                    <span class="hamburger-line block w-6 h-0.5 bg-white rounded-full"></span>
+                    <span class="hamburger-line block w-6 h-0.5 bg-white rounded-full"></span>
+                    <span class="hamburger-line block w-6 h-0.5 bg-white rounded-full"></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <nav id="mobile-menu" aria-label="Mobile" aria-hidden="true" class="fixed inset-0 z-40 lg:hidden">
+        <div class="absolute inset-0 bg-primary"></div>
+        <div class="grain"></div>
+        <div class="relative h-full flex flex-col items-center justify-center gap-6 px-8">
+            <a href="#menu" class="mobile-nav-link font-display font-black text-4xl uppercase text-white hover:text-accent transition-colors">Menu</a>
+            <a href="#combos" class="mobile-nav-link font-display font-black text-4xl uppercase text-white hover:text-accent transition-colors">Combos</a>
+            <a href="#drinks" class="mobile-nav-link font-display font-black text-4xl uppercase text-white hover:text-accent transition-colors">Drinks</a>
+            <a href="#reviews" class="mobile-nav-link font-display font-black text-4xl uppercase text-white hover:text-accent transition-colors">Reviews</a>
+            <a href="https://www.zomato.com/pune/bestys-burgers-kondhwa" target="_blank" class="mobile-nav-link mt-4 inline-flex items-center gap-3 px-8 py-4 bg-accent text-white font-display font-bold text-lg rounded-full hover:bg-white hover:text-primary transition-all duration-300">
+                Order Now <i class="fa-solid fa-bag-shopping"></i>
+            </a>
+            <a href="https://search.google.com/local/writereview?placeid=ChIJOWdyHEbrwjsR6BG-rfvGarI" target="_blank" class="mobile-nav-link mt-2 inline-flex items-center gap-2 text-sm font-bold tracking-widest uppercase text-gray-400 hover:text-accentYellow transition-colors">
+                <i class="fa-brands fa-google"></i> Leave a Review
+            </a>
+        </div>
+    </nav>
+
+    <!-- ============ HERO — MOBILE ONLY (< 768px): full-bleed image, bottom-aligned text ============ -->
+    <section class="hero-variant relative min-h-screen flex items-end pb-16 pt-32 overflow-hidden md:hidden">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-t from-primary via-primary/55 to-primary/15 z-10"></div>
+            <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=2000&auto=format&fit=crop"
+                 alt="A stacked double smash burger, cheese dripping over the crust, dead center of frame"
+                 class="w-full h-full object-cover opacity-70 hero-img parallax-bg" />
+            <div class="grain z-10"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 relative z-20 w-full">
+            <span class="stamp text-accentYellow font-ticket text-xs uppercase tracking-widest mb-5 hero-anim">
+                <i class="fa-solid fa-fire"></i> Drops Daily
+            </span>
+            <h1 class="font-display font-black text-4xl leading-[1.05] mb-4 uppercase">
+                <span class="line-mask"><span class="line-inner">Don't Just Eat.</span></span>
+                <span class="line-mask"><span class="line-inner text-accent">Join The Hype.</span></span>
+            </h1>
+            <p class="text-sm text-gray-400 mb-7 hero-anim max-w-sm font-light leading-relaxed">
+                Home of the legendary Double Smash. We don't just make burgers; we craft obsessions.
+            </p>
+            <div class="flex flex-wrap gap-3 hero-anim">
+                <a href="https://www.zomato.com/pune/bestys-burgers-kondhwa" target="_blank" class="magnetic px-6 py-3 bg-white text-primary font-display font-bold text-sm rounded-full hover:bg-accent hover:text-white transition-colors duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+                    Secure The Bag
+                </a>
+                <a href="#menu" class="magnetic px-6 py-3 border border-white/25 text-white font-display font-bold text-sm rounded-full hover:border-white transition-colors duration-300">
+                    See The Menu
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ HERO — TABLET ONLY (768–1023px): stacked panel, image on top ============ -->
+    <section class="hero-variant relative pt-32 pb-16 hidden md:flex lg:hidden flex-col overflow-hidden">
+        <div class="max-w-4xl mx-auto px-8 w-full relative z-20 text-center mb-8">
+            <span class="stamp text-accentYellow font-ticket text-xs uppercase tracking-widest mb-5 hero-anim inline-flex">
+                <i class="fa-solid fa-fire"></i> Drops Daily &middot; No Reservations
+            </span>
+            <h1 class="font-display font-black text-6xl leading-[1.05] mb-5 uppercase">
+                <span class="line-mask"><span class="line-inner">Don't Just Eat.</span></span>
+                <span class="line-mask"><span class="line-inner text-accent">Join The Hype.</span></span>
+            </h1>
+            <p class="text-base text-gray-400 mb-2 hero-anim max-w-lg mx-auto font-light leading-relaxed">
+                Home of the legendary Double Smash and the crunchiest Korean Chicken. Get in line before we sell out.
+            </p>
+        </div>
+        <div class="relative mx-8 h-[380px] rounded-3xl overflow-hidden border border-white/10 hero-anim">
+            <div class="absolute inset-0 bg-gradient-to-t from-primary/70 via-transparent to-transparent z-10"></div>
+            <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=2000&auto=format&fit=crop"
+                 alt="A stacked double smash burger, cheese dripping over the crust, dead center of frame"
+                 class="w-full h-full object-cover hero-img parallax-bg" />
+            <div class="grain z-10"></div>
+            <div class="absolute bottom-6 left-6 z-20 flex gap-3">
+                <a href="https://www.zomato.com/pune/bestys-burgers-kondhwa" target="_blank" class="magnetic px-7 py-3.5 bg-white text-primary font-display font-bold text-base rounded-full hover:bg-accent hover:text-white transition-colors duration-300 shadow-[0_0_20px_rgba(255,255,255,0.25)]">
+                    Secure The Bag
+                </a>
+                <a href="#menu" class="magnetic px-7 py-3.5 border border-white/40 bg-primary/40 backdrop-blur-sm text-white font-display font-bold text-base rounded-full hover:border-white transition-colors duration-300">
+                    See The Menu
+                </a>
+            </div>
+            <span class="hidden sm:flex absolute top-5 right-6 z-20 font-ticket text-[11px] text-white/70 flex-col items-end gap-0.5">
+                <span>NO. 001 &middot; KONDHWA</span>
+                <span>OPEN &middot; 12:00 &ndash; 23:30</span>
+            </span>
+        </div>
+    </section>
+
+    <!-- ============ HERO — DESKTOP ONLY (1024px+): editorial split ============ -->
+    <section class="hero-variant relative min-h-screen items-center hidden lg:flex overflow-hidden pt-24">
+        <div class="max-w-7xl mx-auto px-8 relative z-20 w-full grid grid-cols-12 gap-16 items-center">
+            <div class="col-span-7">
+                <span class="stamp text-accentYellow font-ticket text-xs uppercase tracking-widest mb-6 hero-anim">
+                    <i class="fa-solid fa-fire"></i> Drops Daily &middot; No Reservations
+                </span>
+                <h1 class="font-display font-black text-6xl xl:text-7xl leading-[1.05] mb-6 uppercase">
+                    <span class="line-mask"><span class="line-inner">Don't Just Eat.</span></span>
+                    <span class="line-mask"><span class="line-inner text-accent">Join The Hype.</span></span>
+                </h1>
+                <p class="text-xl text-gray-400 mb-10 hero-anim max-w-md font-light leading-relaxed">
+                    Home of the legendary Double Smash and the crunchiest Korean Chicken. We don't just make burgers; we craft obsessions. Get in line before we sell out.
+                </p>
+                <div class="flex flex-wrap gap-4 hero-anim">
+                    <a href="https://www.zomato.com/pune/bestys-burgers-kondhwa" target="_blank" class="magnetic px-8 py-4 bg-white text-primary font-display font-bold text-lg rounded-full hover:bg-accent hover:text-white transition-colors duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+                        Secure The Bag
+                    </a>
+                    <a href="#menu" class="magnetic px-8 py-4 border border-white/25 text-white font-display font-bold text-lg rounded-full hover:border-white transition-colors duration-300">
+                        See The Menu
+                    </a>
+                </div>
+            </div>
+            <div class="col-span-5 relative h-[75vh] rounded-3xl overflow-hidden border border-white/10 hero-anim">
+                <div class="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent z-10"></div>
+                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=2000&auto=format&fit=crop"
+                     alt="A stacked double smash burger, cheese dripping over the crust, dead center of frame"
+                     class="w-full h-full object-cover hero-img parallax-bg" />
+                <div class="grain z-10"></div>
+                <!-- Floating order-ticket detail card -->
+                <div class="ticket-card torn-edge absolute -left-10 bottom-10 z-20 rounded-2xl px-6 py-5 w-56" style="--tone:var(--surface)">
+                    <span class="font-ticket text-[11px] text-gray-500 uppercase tracking-widest block mb-1">No. 001 &middot; Kondhwa</span>
+                    <span class="font-display font-bold text-white text-lg block mb-2">The Double Smash</span>
+                    <span class="font-ticket text-xs text-gray-500">OPEN &middot; 12:00 &ndash; 23:30</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hype Ticker -->
+    <div class="marquee bg-accent py-3 border-y border-black/20 relative z-30" aria-hidden="true">
+        <div class="marquee__track font-ticket font-bold uppercase text-primary text-sm sm:text-base tracking-wide">
+            <span class="flex items-center gap-6 pr-6">
+                <span>Double Smash &#9670;</span><span>Korean Chicken &#9670;</span><span>Naked Burger &#9670;</span><span>Kondhwa, Pune &#9670;</span><span>Since Day One &#9670;</span><span>No Gimmicks &#9670;</span>
+            </span>
+            <span class="flex items-center gap-6 pr-6">
+                <span>Double Smash &#9670;</span><span>Korean Chicken &#9670;</span><span>Naked Burger &#9670;</span><span>Kondhwa, Pune &#9670;</span><span>Since Day One &#9670;</span><span>No Gimmicks &#9670;</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Manifesto Section -->
+    <section class="relative py-24 sm:py-28 md:py-40 overflow-hidden border-b border-white/5 bg-surface">
+        <div class="relative z-20 max-w-5xl mx-auto px-6 sm:px-8 text-center">
+            <div class="overflow-hidden mb-4 sm:mb-6">
+                <h2 class="font-display font-black text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white uppercase tracking-tight gs-reveal">We Don't Do Boring.</h2>
+            </div>
+            <p class="text-sm sm:text-base md:text-2xl text-gray-400 font-light leading-relaxed max-w-2xl mx-auto gs-reveal">
+                You're not here for a basic meal. You're here for unapologetic flavors, dripping cheese, and the kind of crunch that wakes up the neighbors.
+            </p>
+        </div>
+        <span class="stamp absolute bottom-8 right-6 sm:right-10 text-gray-600 font-ticket text-[10px] uppercase tracking-widest gs-reveal hidden sm:inline-flex">
+            <i class="fa-solid fa-certificate"></i> 100% Smashed, Zero Shortcuts
+        </span>
+    </section>
+
+    <!-- Promo Banner (Naked Burger) -->
+    <section class="relative py-24 sm:py-28 md:py-40 overflow-hidden" id="naked-burger">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-primary/75 z-10"></div>
+            <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=2500&auto=format&fit=crop" class="w-full h-full object-cover parallax-bg" alt="Fresh lettuce, gherkins, and onion laid out for the Naked Burger" />
+            <div class="grain z-10"></div>
+        </div>
+        <div class="relative z-20 max-w-2xl mx-auto px-6 sm:px-8">
+            <div class="ticket-card torn-edge rounded-2xl p-6 sm:p-8 md:p-12 text-center gs-reveal" style="--tone:var(--ink)">
+                <span class="stamp text-accent font-ticket text-xs uppercase tracking-widest mb-5">
+                    <i class="fa-solid fa-leaf"></i> Off-Menu Favorite
+                </span>
+                <h2 class="font-display font-black text-3xl sm:text-4xl md:text-6xl text-white mb-3 sm:mb-4 tracking-tight">THE NAKED BURGER</h2>
+                <p class="text-sm sm:text-base md:text-xl text-gray-400 mb-8 sm:mb-10">All the hype, zero guilt. Your favorite patty served on fresh crisp lettuce with gherkins &amp; onion.</p>
+
+                <div class="font-ticket text-sm divide-y divide-white/10 border-y border-white/10 mb-10 text-left max-w-xs mx-auto">
+                    <div class="flex justify-between py-2.5"><span class="text-gray-500">CALORIES</span><span class="text-white">250</span></div>
+                    <div class="flex justify-between py-2.5"><span class="text-gray-500">PROTEIN</span><span class="text-white">28g</span></div>
+                    <div class="flex justify-between py-2.5"><span class="text-gray-500">CARBS</span><span class="text-white">4g</span></div>
+                    <div class="flex justify-between py-2.5"><span class="text-accent">CONTAINS</span><span class="text-accent">Dairy, Beef</span></div>
+                </div>
+
+                <a href="https://www.zomato.com/pune/bestys-burgers-kondhwa" target="_blank" class="magnetic inline-block px-8 py-4 bg-accentYellow text-primary font-display font-bold text-lg rounded-full hover:bg-white transition-colors duration-300">Try It Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Buff Burgers Menu -->
+    <section id="menu" class="py-20 sm:py-24 md:py-32 relative z-10 bg-primary menu-section">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="mb-8 lg:mb-12 flex items-end justify-between gap-4 gs-reveal">
+                <div>
+                    <h2 class="font-display font-black text-2xl sm:text-3xl md:text-5xl mb-3 sm:mb-4 text-white uppercase">Buff Burgers</h2>
+                    <p class="text-gray-400 text-sm sm:text-base md:text-lg max-w-md">The foundation of the hype. 100% premium buff patties, smashed to perfection.</p>
+                </div>
+                <span class="hidden md:inline-flex font-ticket text-xs text-gray-600 uppercase tracking-widest whitespace-nowrap">Sec. 01</span>
+            </div>
+
+            <!-- Mobile / Tablet: Simple Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 lg:hidden stagger-grid">
+                <div class="ticket-card rounded-2xl overflow-hidden">
+                    <div class="h-48 sm:h-56 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1594212202875-86221f008892?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Cheese Burger, single buff patty with melted American cheese and house pickles" />
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start gap-3 mb-1">
+                            <h3 class="font-display font-bold text-lg sm:text-xl text-white">Cheese Burger</h3>
+                            <span class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0">₹250</span>
+                        </div>
+                        <p class="text-accent text-xs sm:text-sm font-bold mb-2">The Classic Setup</p>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-3">A single juicy buff patty smashed thin, topped with melted American cheese, house pickles, ketchup, and mustard.</p>
+                        <span class="inline-block px-2 py-1 text-xs rounded bg-white/5 text-gray-400 font-ticket">480 Cal</span>
+                    </div>
+                </div>
+                <div class="ticket-card rounded-2xl overflow-hidden">
+                    <div class="h-48 sm:h-56 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Double Smash burger with two lacy-edged patties and caramelized onions" />
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start gap-3 mb-1">
+                            <h3 class="font-display font-bold text-lg sm:text-xl text-white">Double Smash</h3>
+                            <span class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0">₹300</span>
+                        </div>
+                        <p class="text-accent text-xs sm:text-sm font-bold mb-2">Double Patty, Double Crust</p>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-3">Two lacy-edged smashed buff patties layered with double American cheese, caramelized onions, and signature sauce.</p>
+                        <span class="inline-block px-2 py-1 text-xs rounded bg-white/5 text-gray-400 font-ticket">720 Cal</span>
+                    </div>
+                </div>
+                <div class="ticket-card rounded-2xl overflow-hidden">
+                    <div class="h-48 sm:h-56 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1553979459-d2229ba7433b?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Triple Smash burger, three patties with triple cheese and crispy bacon bits" />
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start gap-3 mb-1">
+                            <h3 class="font-display font-bold text-lg sm:text-xl text-white">Triple Smash</h3>
+                            <span class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0">₹350</span>
+                        </div>
+                        <p class="text-accent text-xs sm:text-sm font-bold mb-2">For The Monsters</p>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-3">Three epic smashed patties, triple cheese, jalapeños, crispy bacon bits, and smothered in BBQ sauce.</p>
+                        <span class="inline-block px-2 py-1 text-xs rounded bg-white/5 text-gray-400 font-ticket">950 Cal</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop: Order-ticket list (hover swaps the showcase image) + Sticky Image -->
+            <div class="hidden lg:flex gap-16 items-start gs-reveal">
+                <div class="w-1/2 ticket-card torn-edge rounded-2xl px-8" style="--tone:var(--ink)">
+                    <div class="menu-item group menu-row accordion-item is-open cursor-pointer" data-img="https://images.unsplash.com/photo-1594212202875-86221f008892?q=80&w=1500&auto=format&fit=crop">
+                        <button type="button" class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left" aria-expanded="true" aria-controls="buff-panel-1" id="buff-trigger-1">
+                            <span class="min-w-0">
+                                <h3 class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors">Cheese Burger</h3>
+                                <p class="text-accent text-sm font-bold">The Classic Setup</p>
+                            </span>
+                            <span class="flex items-center gap-4 shrink-0">
+                                <span class="font-ticket font-bold text-2xl text-gray-300">₹250</span>
+                                <i class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                        <div class="accordion-panel" id="buff-panel-1" role="region" aria-labelledby="buff-trigger-1">
+                            <div class="accordion-panel-inner"><div class="pb-6">
+                                <p class="text-gray-300 text-base leading-relaxed mb-2">A single juicy buff patty smashed thin, topped with melted American cheese, house pickles, ketchup, and mustard.</p>
+                                <span class="font-ticket text-sm text-gray-400">480 CAL</span>
+                            </div></div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item group menu-row accordion-item cursor-pointer" data-img="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?q=80&w=1500&auto=format&fit=crop">
+                        <button type="button" class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left" aria-expanded="false" aria-controls="buff-panel-2" id="buff-trigger-2">
+                            <span class="min-w-0">
+                                <h3 class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors">Double Smash</h3>
+                                <p class="text-accent text-sm font-bold">Double Patty, Double Crust</p>
+                            </span>
+                            <span class="flex items-center gap-4 shrink-0">
+                                <span class="font-ticket font-bold text-2xl text-gray-300">₹300</span>
+                                <i class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                        <div class="accordion-panel" id="buff-panel-2" role="region" aria-labelledby="buff-trigger-2">
+                            <div class="accordion-panel-inner"><div class="pb-6">
+                                <p class="text-gray-300 text-base leading-relaxed mb-2">Two lacy-edged smashed buff patties layered with double American cheese, caramelized onions, and signature sauce.</p>
+                                <span class="font-ticket text-sm text-gray-400">720 CAL</span>
+                            </div></div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item group menu-row accordion-item cursor-pointer" data-img="https://images.unsplash.com/photo-1553979459-d2229ba7433b?q=80&w=1500&auto=format&fit=crop">
+                        <button type="button" class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left" aria-expanded="false" aria-controls="buff-panel-3" id="buff-trigger-3">
+                            <span class="min-w-0">
+                                <h3 class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors">Triple Smash</h3>
+                                <p class="text-accent text-sm font-bold">For The Monsters</p>
+                            </span>
+                            <span class="flex items-center gap-4 shrink-0">
+                                <span class="font-ticket font-bold text-2xl text-gray-300">₹350</span>
+                                <i class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                        <div class="accordion-panel" id="buff-panel-3" role="region" aria-labelledby="buff-trigger-3">
+                            <div class="accordion-panel-inner"><div class="pb-6">
+                                <p class="text-gray-300 text-base leading-relaxed mb-2">Three epic smashed patties, triple cheese, jalapeños, crispy bacon bits, and smothered in BBQ sauce.</p>
+                                <span class="font-ticket text-sm text-gray-400">950 CAL</span>
+                            </div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-1/2 sticky top-32 h-[650px] rounded-3xl overflow-hidden border border-white/10">
+                    <img src="https://images.unsplash.com/photo-1594212202875-86221f008892?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover showcase-img transition-transform duration-700 hover:scale-105 cinematic-img" alt="Buff Burgers showcase" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chicken Burgers Menu -->
+    <section class="py-20 sm:py-24 md:py-32 relative z-10 bg-surface border-t border-white/5 menu-section">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="mb-8 lg:mb-12 flex items-end justify-between gap-4 gs-reveal">
+                <div>
+                    <h2 class="font-display font-black text-2xl sm:text-3xl md:text-5xl mb-3 sm:mb-4 text-white uppercase">Chicken Burgers</h2>
+                    <p class="text-gray-400 text-sm sm:text-base md:text-lg max-w-md">Crispy on the outside, insanely juicy on the inside. Hand-breaded daily.</p>
+                </div>
+                <span class="hidden md:inline-flex font-ticket text-xs text-gray-600 uppercase tracking-widest whitespace-nowrap">Sec. 02</span>
+            </div>
+
+            <!-- Mobile / Tablet: Simple Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 lg:hidden stagger-grid">
+                <div class="ticket-card rounded-2xl overflow-hidden">
+                    <div class="h-48 sm:h-56 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1625860533038-f9e4eb5f7a0b?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Crunchy Chicken burger with buttermilk marinated fried chicken breast" />
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start gap-3 mb-1">
+                            <h3 class="font-display font-bold text-lg sm:text-xl text-white">Crunchy Chicken</h3>
+                            <span class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0">₹300</span>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed mt-2">Buttermilk marinated fried chicken breast, crisp lettuce, mayo, and pickles.</p>
+                    </div>
+                </div>
+                <div class="ticket-card rounded-2xl overflow-hidden">
+                    <div class="h-48 sm:h-56 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1615719413546-198b25453f85?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Peri Peri Chicken burger topped with spicy mayo and jalapeños" />
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start gap-3 mb-1">
+                            <h3 class="font-display font-bold text-lg sm:text-xl text-white">Peri Peri Chicken</h3>
+                            <span class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0">₹350</span>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed mt-2">Crunchy chicken dusted heavily in our house peri-peri seasoning, topped with spicy mayo and jalapeños.</p>
+                    </div>
+                </div>
+                <div class="ticket-card rounded-2xl overflow-hidden">
+                    <div class="h-48 sm:h-56 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1596613292419-75beba307bb2?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Korean Chicken burger with sticky Gochujang glaze and Asian slaw" />
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start gap-3 mb-1">
+                            <h3 class="font-display font-bold text-lg sm:text-xl text-white">Korean Chicken</h3>
+                            <span class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0">₹350</span>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed mt-2">Fried chicken dunked in a sticky Gochujang glaze, topped with Asian slaw and toasted sesame seeds.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop: Order-ticket list + Sticky Image, image on the left this time for rhythm -->
+            <div class="hidden lg:flex flex-row-reverse gap-16 items-start gs-reveal">
+                <div class="w-1/2 ticket-card torn-edge rounded-2xl px-8" style="--tone:var(--surface)">
+                    <div class="menu-item group menu-row accordion-item is-open cursor-pointer" data-img="https://images.unsplash.com/photo-1625860533038-f9e4eb5f7a0b?q=80&w=1500&auto=format&fit=crop">
+                        <button type="button" class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left" aria-expanded="true" aria-controls="chicken-panel-1" id="chicken-trigger-1">
+                            <span class="min-w-0"><h3 class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors">Crunchy Chicken</h3></span>
+                            <span class="flex items-center gap-4 shrink-0">
+                                <span class="font-ticket font-bold text-2xl text-gray-300">₹300</span>
+                                <i class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                        <div class="accordion-panel" id="chicken-panel-1" role="region" aria-labelledby="chicken-trigger-1">
+                            <div class="accordion-panel-inner"><div class="pb-6">
+                                <p class="text-gray-300 text-base leading-relaxed">Buttermilk marinated fried chicken breast, crisp lettuce, mayo, and pickles.</p>
+                            </div></div>
+                        </div>
+                    </div>
+                    <div class="menu-item group menu-row accordion-item cursor-pointer" data-img="https://images.unsplash.com/photo-1615719413546-198b25453f85?q=80&w=1500&auto=format&fit=crop">
+                        <button type="button" class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left" aria-expanded="false" aria-controls="chicken-panel-2" id="chicken-trigger-2">
+                            <span class="min-w-0"><h3 class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors">Peri Peri Chicken</h3></span>
+                            <span class="flex items-center gap-4 shrink-0">
+                                <span class="font-ticket font-bold text-2xl text-gray-300">₹350</span>
+                                <i class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                        <div class="accordion-panel" id="chicken-panel-2" role="region" aria-labelledby="chicken-trigger-2">
+                            <div class="accordion-panel-inner"><div class="pb-6">
+                                <p class="text-gray-300 text-base leading-relaxed">Crunchy chicken dusted heavily in our house peri-peri seasoning, topped with spicy mayo and jalapeños.</p>
+                            </div></div>
+                        </div>
+                    </div>
+                    <div class="menu-item group menu-row accordion-item cursor-pointer" data-img="https://images.unsplash.com/photo-1596613292419-75beba307bb2?q=80&w=1500&auto=format&fit=crop">
+                        <button type="button" class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left" aria-expanded="false" aria-controls="chicken-panel-3" id="chicken-trigger-3">
+                            <span class="min-w-0"><h3 class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors">Korean Chicken</h3></span>
+                            <span class="flex items-center gap-4 shrink-0">
+                                <span class="font-ticket font-bold text-2xl text-gray-300">₹350</span>
+                                <i class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                        <div class="accordion-panel" id="chicken-panel-3" role="region" aria-labelledby="chicken-trigger-3">
+                            <div class="accordion-panel-inner"><div class="pb-6">
+                                <p class="text-gray-300 text-base leading-relaxed">Fried chicken dunked in a sticky Gochujang glaze, topped with Asian slaw and toasted sesame seeds.</p>
+                            </div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-1/2 sticky top-32 h-[550px] rounded-3xl overflow-hidden border border-white/10">
+                    <img src="https://images.unsplash.com/photo-1625860533038-f9e4eb5f7a0b?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover showcase-img transition-transform duration-700 hover:scale-105 cinematic-img" alt="Chicken Burgers showcase" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wings & Popcorn (Bento layout — one featured tile, not a repeated card grid) -->
+    <section class="py-20 sm:py-24 md:py-32 bg-primary">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="text-center mb-12 sm:mb-16 gs-reveal">
+                <h2 class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-white uppercase mb-4">Wings &amp; Popcorn</h2>
+                <p class="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">Messy, saucy, bite-sized hype. The mandatory sidekicks to your burger.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 stagger-grid">
+                <!-- Featured: Peri Popcorn -->
+                <div class="md:col-span-3 ticket-card torn-edge rounded-2xl p-7 sm:p-9 flex flex-col sm:flex-row sm:items-center justify-between gap-6" style="--tone:var(--ink); background:linear-gradient(135deg, rgba(255,201,51,0.10), var(--surface-2) 55%);">
+                    <div class="flex items-start gap-4">
+                        <span class="stamp text-accentYellow shrink-0 mt-1"><i class="fa-solid fa-fire"></i></span>
+                        <div>
+                            <span class="font-ticket text-xs uppercase tracking-widest text-accentYellow">Most Ordered</span>
+                            <h4 class="font-display font-bold text-2xl sm:text-3xl text-white mt-1 mb-2">Peri Popcorn</h4>
+                            <p class="text-gray-400 text-sm sm:text-base max-w-sm">Crispy bite-sized chicken chunks tossed in Peri Peri, straight out the fryer.</p>
+                        </div>
+                    </div>
+                    <div class="font-ticket font-bold text-4xl sm:text-5xl text-white shrink-0 sm:text-right">₹150</div>
+                </div>
+
+                <!-- Wings -->
+                <div class="ticket-card rounded-2xl p-6 flex flex-col justify-between group h-full">
+                    <div>
+                        <h4 class="font-display font-bold text-xl text-white group-hover:text-accent transition-colors mb-2">Peri Peri Wings</h4>
+                        <p class="text-gray-400 text-sm mb-4">Crispy fried wings tossed in our explosive peri-peri dry rub.</p>
+                    </div>
+                    <div class="font-ticket font-bold text-xl text-gray-300">₹200</div>
+                </div>
+                <div class="ticket-card rounded-2xl p-6 flex flex-col justify-between group h-full">
+                    <div>
+                        <h4 class="font-display font-bold text-xl text-white group-hover:text-accent transition-colors mb-2">BBQ Wings</h4>
+                        <p class="text-gray-400 text-sm mb-4">Smoky, sweet, and sticky classic BBQ glaze.</p>
+                    </div>
+                    <div class="font-ticket font-bold text-xl text-gray-300">₹200</div>
+                </div>
+                <div class="ticket-card rounded-2xl p-6 flex flex-col justify-between group h-full">
+                    <div>
+                        <h4 class="font-display font-bold text-xl text-white group-hover:text-accent transition-colors mb-2">Spicy Wings</h4>
+                        <p class="text-gray-400 text-sm mb-4">Drenched in house-made buffalo hot sauce with ranch.</p>
+                    </div>
+                    <div class="font-ticket font-bold text-xl text-gray-300">₹250</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fries & Loaded Menu -->
+    <section class="py-20 sm:py-24 md:py-32 bg-surface border-t border-white/5 menu-section">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="mb-8 lg:mb-12 flex items-end justify-between gap-4 gs-reveal">
+                <div>
+                    <h2 class="font-display font-black text-2xl sm:text-3xl md:text-5xl mb-3 sm:mb-4 text-white uppercase">Fries &amp; Loaded</h2>
+                    <p class="text-gray-400 text-sm sm:text-base md:text-lg max-w-md">Because plain fries are just the beginning. Get them dirty.</p>
+                </div>
+                <span class="hidden md:inline-flex font-ticket text-xs text-gray-600 uppercase tracking-widest whitespace-nowrap">Sec. 03</span>
+            </div>
+
+            <!-- Mobile / Tablet: Simple Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 lg:hidden stagger-grid">
+                <div class="ticket-card rounded-2xl overflow-hidden">
+                    <div class="h-48 sm:h-56 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1576107232684-1279f390859f?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Salted and peri-peri double-fried shoestring fries" />
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start gap-3 mb-1">
+                            <h3 class="font-display font-bold text-lg sm:text-xl text-white">Salted / Peri Fries</h3>
+                            <span class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0">₹150</span>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed">Double-fried crispy shoestring potatoes.</p>
+                    </div>
+                </div>
+                <div class="ticket-card rounded-2xl overflow-hidden">
+                    <div class="h-48 sm:h-56 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1585553616435-2dc0a54e271d?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Crunchy Loaded fries topped with fried chicken and liquid cheese" />
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start gap-3 mb-1">
+                            <h3 class="font-display font-bold text-lg sm:text-xl text-white">Crunchy Loaded</h3>
+                            <span class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0">₹300</span>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed">Mountain of fries topped with crunchy chicken, liquid cheese, jalapeños, and ranch.</p>
+                    </div>
+                </div>
+                <div class="ticket-card rounded-2xl overflow-hidden">
+                    <div class="h-48 sm:h-56 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Buff chopped cheese fries with caramelized onions and American cheese" />
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start gap-3 mb-1">
+                            <h3 class="font-display font-bold text-lg sm:text-xl text-white">Buff Chopped Cheese</h3>
+                            <span class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0">₹300</span>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed">Fries smothered in chopped seasoned buff patty, caramelized onions, dripping with American cheese.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop: Order-ticket accordion list (hover swaps the showcase image) + Sticky Image -->
+            <div class="hidden lg:flex gap-16 items-start gs-reveal">
+                <div class="w-1/2 ticket-card torn-edge rounded-2xl px-8" style="--tone:var(--surface)">
+                    <div class="menu-item group menu-row accordion-item is-open cursor-pointer" data-img="https://images.unsplash.com/photo-1576107232684-1279f390859f?q=80&w=1500&auto=format&fit=crop">
+                        <button type="button" class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left" aria-expanded="true" aria-controls="fries-panel-1" id="fries-trigger-1">
+                            <span class="min-w-0"><h3 class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors">Salted / Peri Fries</h3></span>
+                            <span class="flex items-center gap-4 shrink-0">
+                                <span class="font-ticket font-bold text-2xl text-gray-300">₹150</span>
+                                <i class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                        <div class="accordion-panel" id="fries-panel-1" role="region" aria-labelledby="fries-trigger-1">
+                            <div class="accordion-panel-inner"><div class="pb-6">
+                                <p class="text-gray-300 text-base leading-relaxed">Double-fried crispy shoestring potatoes.</p>
+                            </div></div>
+                        </div>
+                    </div>
+                    <div class="menu-item group menu-row accordion-item cursor-pointer" data-img="https://images.unsplash.com/photo-1585553616435-2dc0a54e271d?q=80&w=1500&auto=format&fit=crop">
+                        <button type="button" class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left" aria-expanded="false" aria-controls="fries-panel-2" id="fries-trigger-2">
+                            <span class="min-w-0"><h3 class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors">Crunchy Loaded</h3></span>
+                            <span class="flex items-center gap-4 shrink-0">
+                                <span class="font-ticket font-bold text-2xl text-gray-300">₹300</span>
+                                <i class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                        <div class="accordion-panel" id="fries-panel-2" role="region" aria-labelledby="fries-trigger-2">
+                            <div class="accordion-panel-inner"><div class="pb-6">
+                                <p class="text-gray-300 text-base leading-relaxed">Mountain of fries topped with crunchy chicken, liquid cheese, jalapeños, and ranch.</p>
+                            </div></div>
+                        </div>
+                    </div>
+                    <div class="menu-item group menu-row accordion-item cursor-pointer" data-img="https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?q=80&w=1500&auto=format&fit=crop">
+                        <button type="button" class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left" aria-expanded="false" aria-controls="fries-panel-3" id="fries-trigger-3">
+                            <span class="min-w-0"><h3 class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors">Buff Chopped Cheese</h3></span>
+                            <span class="flex items-center gap-4 shrink-0">
+                                <span class="font-ticket font-bold text-2xl text-gray-300">₹300</span>
+                                <i class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                        <div class="accordion-panel" id="fries-panel-3" role="region" aria-labelledby="fries-trigger-3">
+                            <div class="accordion-panel-inner"><div class="pb-6">
+                                <p class="text-gray-300 text-base leading-relaxed">Fries smothered in chopped seasoned buff patty, caramelized onions, dripping with American cheese.</p>
+                            </div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-1/2 sticky top-32 h-[500px] rounded-3xl overflow-hidden border border-white/10">
+                    <img src="https://images.unsplash.com/photo-1576107232684-1279f390859f?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover showcase-img transition-transform duration-700 hover:scale-105 cinematic-img" alt="Loaded Fries showcase" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Combos Section -->
+    <section id="combos" class="py-20 sm:py-24 md:py-32 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary via-surface to-primary z-0"></div>
+        <div class="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 text-center">
+            <h2 class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-accentYellow uppercase mb-4 gs-reveal">The Ultimate Combos</h2>
+            <p class="text-gray-300 text-base sm:text-lg mb-12 sm:mb-16 gs-reveal">Don't think. Just order the box. Maximum value, maximum hype.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 stagger-grid text-left items-stretch">
+                <div class="tilt-card ticket-card torn-edge rounded-2xl p-8 relative sm:col-span-2 lg:col-span-1 lg:-translate-y-3" style="--tone:var(--ink); background:linear-gradient(160deg, rgba(255,201,51,0.14), var(--surface-2) 60%); border-color:rgba(255,201,51,0.35);">
+                    <span class="stamp absolute -top-4 right-6 bg-accentYellow text-primary text-[11px] font-ticket font-bold uppercase tracking-wide border-accentYellow">Most Hyped</span>
+                    <h3 class="font-display font-bold text-2xl text-white mb-2">Besty's Share Box</h3>
+                    <p class="text-accentYellow text-sm font-bold mb-4">Fries, Wings, Popcorn</p>
+                    <p class="text-gray-400 text-sm mb-8">The ultimate squad meal. Salted fries, 6 peri peri wings, and a large portion of BBQ popcorn chicken.</p>
+                    <div class="font-ticket font-bold text-3xl text-white">₹600</div>
+                </div>
+                <div class="tilt-card ticket-card torn-edge rounded-2xl p-8" style="--tone:var(--ink)">
+                    <h3 class="font-display font-bold text-2xl text-white mb-2">Classic Combo</h3>
+                    <p class="text-gray-300 text-sm font-bold mb-4">Burger + Fries + Tea</p>
+                    <p class="text-gray-400 text-sm mb-8">Your choice of our flagship burgers, accompanied by regular fries and a refreshing iced tea.</p>
+                    <div class="font-ticket font-bold text-3xl text-white">₹500</div>
+                </div>
+                <div class="tilt-card ticket-card torn-edge rounded-2xl p-8" style="--tone:var(--ink); background:linear-gradient(160deg, rgba(230,57,70,0.14), var(--surface-2) 60%); border-color:rgba(230,57,70,0.35);">
+                    <h3 class="font-display font-bold text-2xl text-white mb-2">Wings &amp; Burger</h3>
+                    <p class="text-accent text-sm font-bold mb-4">Burger + 4 Wings + Fries + Tea</p>
+                    <p class="text-gray-400 text-sm mb-8">When you literally want everything. Any single patty burger, 4 wings, fries, and a drink.</p>
+                    <div class="font-ticket font-bold text-3xl text-white">₹600</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Drinks & Addons -->
+    <section id="drinks" class="py-20 sm:py-24 md:py-32 bg-primary">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="flex flex-col md:flex-row gap-10 lg:gap-16 items-center">
+                <!-- Drinks list -->
+                <div class="w-full md:w-1/2 gs-reveal">
+                    <h2 class="font-display font-black text-3xl sm:text-4xl md:text-5xl mb-4 text-white uppercase">Iced Teas</h2>
+                    <p class="text-gray-400 mb-8 text-base sm:text-lg">Wash down the heat. Ice cold, perfectly brewed.</p>
+                    <div class="font-ticket border-y border-white/10 divide-y divide-white/10 mb-12">
+                        <div class="flex justify-between items-center py-4">
+                            <div>
+                                <h4 class="font-display font-bold text-xl text-white">Peach Ice Tea</h4>
+                                <p class="text-gray-500 text-sm font-sans">Sweet, fruity, served over crushed ice.</p>
+                            </div>
+                            <span class="font-bold text-xl text-gray-300">₹80</span>
+                        </div>
+                        <div class="flex justify-between items-center py-4">
+                            <div>
+                                <h4 class="font-display font-bold text-xl text-white">Lemon Ice Tea</h4>
+                                <p class="text-gray-500 text-sm font-sans">Classic citrus kick. Tart and refreshing.</p>
+                            </div>
+                            <span class="font-bold text-xl text-gray-300">₹80</span>
+                        </div>
+                    </div>
+
+                    <h2 class="font-display font-black text-3xl mb-4 text-white uppercase">Pimp Your Burger</h2>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-5 py-2 rounded-full border border-white/20 text-sm font-bold font-ticket bg-surface2 hover:bg-white hover:text-primary transition-colors">Smash Patty (₹100)</span>
+                        <span class="px-5 py-2 rounded-full border border-white/20 text-sm font-bold font-ticket bg-surface2 hover:bg-white hover:text-primary transition-colors">Juicy Patty (₹150)</span>
+                        <span class="px-5 py-2 rounded-full border border-white/20 text-sm font-bold font-ticket bg-surface2 hover:bg-white hover:text-primary transition-colors">Fried Egg (₹30)</span>
+                        <span class="px-5 py-2 rounded-full border border-accent text-accent text-sm font-bold font-ticket bg-accent/10 hover:bg-accent hover:text-white transition-colors">Extra Cheese (₹30)</span>
+                    </div>
+                </div>
+                <!-- Drinks Image -->
+                <div class="w-full md:w-1/2 h-72 sm:h-96 md:h-[420px] lg:h-[500px] rounded-3xl overflow-hidden border border-white/10 gs-reveal">
+                    <img src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover cinematic-img" alt="Iced tea served over crushed ice" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section: desktop 3-col parallax, mobile hype-ticker marquee of the same 9 quotes -->
+    <section id="reviews" class="py-20 sm:py-24 md:py-32 bg-surface border-y border-white/5 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8 mb-12 sm:mb-16 text-center gs-reveal">
+            <span class="font-ticket text-xs text-accent uppercase tracking-widest mb-4 inline-block">Real Talk</span>
+            <h2 class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-white uppercase">The Word On The Street</h2>
+        </div>
+
+        <div class="relative gs-reveal">
+            <div class="testimonial-track flex gap-5 sm:gap-6 overflow-x-auto snap-x snap-mandatory scroll-px-6 sm:scroll-px-8 px-6 sm:px-8 pb-4" id="testimonial-track">
+                <div class="testimonial-card shrink-0 snap-start w-[82%] sm:w-[46%] lg:w-[30%] ticket-card torn-edge rounded-2xl p-6 sm:p-7" style="--tone:var(--surface)">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="https://images.unsplash.com/photo-1607346256330-dee7af15f7c5?q=80&w=200&auto=format&fit=crop&fm=jpg" class="w-12 h-12 rounded-full object-cover border border-white/10" alt="Rahul M." loading="lazy" />
+                        <div>
+                            <p class="font-display font-bold text-white text-sm">Rahul M.</p>
+                            <div class="text-accentYellow text-[10px]"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">"Bro. The Double Smash changed my life. I dream about that crust. Literally insane."</p>
+                </div>
+                <div class="testimonial-card shrink-0 snap-start w-[82%] sm:w-[46%] lg:w-[30%] ticket-card torn-edge rounded-2xl p-6 sm:p-7" style="--tone:var(--surface)">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="https://images.unsplash.com/photo-1536766768598-e09213fdcf22?q=80&w=200&auto=format&fit=crop&fm=jpg" class="w-12 h-12 rounded-full object-cover border border-white/10" alt="Sarah T." loading="lazy" />
+                        <div>
+                            <p class="font-display font-bold text-white text-sm">Sarah T.</p>
+                            <div class="text-accentYellow text-[10px]"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">"Best burger in the city, period. The vibes are immaculate and the food is next level."</p>
+                </div>
+                <div class="testimonial-card shrink-0 snap-start w-[82%] sm:w-[46%] lg:w-[30%] ticket-card torn-edge rounded-2xl p-6 sm:p-7" style="--tone:var(--surface)">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="https://images.unsplash.com/photo-1535270732370-dd3188bab1da?q=80&w=200&auto=format&fit=crop&fm=jpg" class="w-12 h-12 rounded-full object-cover border border-white/10" alt="Rajat P." loading="lazy" />
+                        <div>
+                            <p class="font-display font-bold text-white text-sm">Rajat P.</p>
+                            <div class="text-accentYellow text-[10px]"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">"I can't stop thinking about the peri peri dust. I want to put it on absolutely everything."</p>
+                </div>
+                <div class="testimonial-card shrink-0 snap-start w-[82%] sm:w-[46%] lg:w-[30%] ticket-card torn-edge rounded-2xl p-6 sm:p-7" style="--tone:var(--surface)">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="https://images.unsplash.com/photo-1619890632764-87d5fc97840a?q=80&w=200&auto=format&fit=crop&fm=jpg" class="w-12 h-12 rounded-full object-cover border border-white/10" alt="Amit K." loading="lazy" />
+                        <div>
+                            <p class="font-display font-bold text-white text-sm">Amit K.</p>
+                            <div class="text-accentYellow text-[10px]"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">"I drove 45 minutes for the Korean Chicken burger. I'd do it again right now."</p>
+                </div>
+                <div class="testimonial-card shrink-0 snap-start w-[82%] sm:w-[46%] lg:w-[30%] ticket-card torn-edge rounded-2xl p-6 sm:p-7" style="--tone:var(--surface)">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="https://images.unsplash.com/photo-1584367034980-8ba72c175f4f?q=80&w=200&auto=format&fit=crop&fm=jpg" class="w-12 h-12 rounded-full object-cover border border-white/10" alt="Priya S." loading="lazy" />
+                        <div>
+                            <p class="font-display font-bold text-white text-sm">Priya S.</p>
+                            <div class="text-accentYellow text-[10px]"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">"Messy, loud, and absolutely perfect. Bring extra napkins!"</p>
+                </div>
+                <div class="testimonial-card shrink-0 snap-start w-[82%] sm:w-[46%] lg:w-[30%] ticket-card torn-edge rounded-2xl p-6 sm:p-7" style="--tone:var(--surface)">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="https://images.unsplash.com/photo-1665034868573-5b63c589b70c?q=80&w=200&auto=format&fit=crop&fm=jpg" class="w-12 h-12 rounded-full object-cover border border-white/10" alt="Rohan M." loading="lazy" />
+                        <div>
+                            <p class="font-display font-bold text-white text-sm">Rohan M.</p>
+                            <div class="text-accentYellow text-[10px]"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">"Honestly, best meal I've had in a long time. Will be coming back tomorrow for sure."</p>
+                </div>
+                <div class="testimonial-card shrink-0 snap-start w-[82%] sm:w-[46%] lg:w-[30%] ticket-card torn-edge rounded-2xl p-6 sm:p-7" style="--tone:var(--surface)">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="https://images.unsplash.com/photo-1616305798947-6cb245a84e18?q=80&w=200&auto=format&fit=crop&fm=jpg" class="w-12 h-12 rounded-full object-cover border border-white/10" alt="Karan V." loading="lazy" />
+                        <div>
+                            <p class="font-display font-bold text-white text-sm">Karan V.</p>
+                            <div class="text-accentYellow text-[10px]"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">"Those Peri Peri fries hit different. Can't wait to come back with the whole squad."</p>
+                </div>
+                <div class="testimonial-card shrink-0 snap-start w-[82%] sm:w-[46%] lg:w-[30%] ticket-card torn-edge rounded-2xl p-6 sm:p-7" style="--tone:var(--surface)">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="https://images.unsplash.com/photo-1654436200209-de489ed205df?q=80&w=200&auto=format&fit=crop&fm=jpg" class="w-12 h-12 rounded-full object-cover border border-white/10" alt="Anjali D." loading="lazy" />
+                        <div>
+                            <p class="font-display font-bold text-white text-sm">Anjali D.</p>
+                            <div class="text-accentYellow text-[10px]"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">"Finally, a place that gets it. Proper smashed patties. No gimmicks, just flavor."</p>
+                </div>
+            </div>
+            <button id="testimonial-prev" type="button" aria-label="Previous testimonials" class="hidden sm:flex absolute left-2 lg:left-4 top-[45%] -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-primary/85 backdrop-blur border border-white/15 items-center justify-center text-white hover:bg-accent hover:border-accent transition-colors duration-300">
+                <i class="fa-solid fa-chevron-left text-sm" aria-hidden="true"></i>
+            </button>
+            <button id="testimonial-next" type="button" aria-label="Next testimonials" class="hidden sm:flex absolute right-2 lg:right-4 top-[45%] -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-primary/85 backdrop-blur border border-white/15 items-center justify-center text-white hover:bg-accent hover:border-accent transition-colors duration-300">
+                <i class="fa-solid fa-chevron-right text-sm" aria-hidden="true"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- Our Story -->
+    <section class="py-20 sm:py-24 md:py-32 bg-primary border-t border-white/5 relative overflow-hidden" id="our-story">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="flex flex-col lg:flex-row gap-10 lg:gap-20 items-center">
+                <div class="w-full lg:w-1/2 gs-reveal">
+                    <span class="font-ticket text-xs text-accent uppercase tracking-widest mb-4 sm:mb-5 inline-block">Our Story</span>
+                    <h2 class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-white uppercase tracking-tight mb-6 sm:mb-8 leading-[1.05]">Started With One Smash.<br>Never Looked Back.</h2>
+                    <p class="story-scrub-text font-display font-medium text-lg sm:text-xl md:text-2xl leading-snug text-white">Besty's didn't open with a business plan — it opened with a griddle, a stubborn refusal to serve a soft crust, and a bet that Kondhwa deserved a burger worth queuing for. Since [YEAR], what started as a one-man obsession with getting the smash right has turned into a neighborhood staple, built one patty, one late night, one sold-out weekend at a time. We're still doing it exactly the way we did on day one: fresh, loud, and completely unwilling to cut a corner.</p>
+                </div>
+                <div class="w-full lg:w-1/2 h-72 sm:h-96 md:h-[420px] lg:h-[560px] rounded-3xl overflow-hidden border border-white/10 gs-reveal">
+                    <img src="https://images.unsplash.com/photo-1685161456730-200201620fae?q=80&w=1500&auto=format&fit=crop" class="w-full h-full object-cover cinematic-img" alt="Patties smashing and searing on the flat-top grill" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Values -->
+    <section class="py-20 sm:py-24 md:py-32 bg-surface border-t border-white/5" id="our-values">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="max-w-2xl mb-12 lg:mb-16 gs-reveal">
+                <span class="font-ticket text-xs text-accent uppercase tracking-widest mb-4 sm:mb-5 inline-block">What We Stand For</span>
+                <h2 class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-white uppercase tracking-tight">Our Values</h2>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/10 border border-white/10 rounded-2xl overflow-hidden stagger-grid">
+                <div class="tilt-card bg-surface p-8 sm:p-10">
+                    <i class="fa-solid fa-fire text-accent text-2xl sm:text-3xl mb-5" aria-hidden="true"></i>
+                    <h3 class="font-display font-bold text-xl sm:text-2xl text-white mb-3">No Gimmicks</h3>
+                    <p class="text-gray-400 leading-relaxed">Real ingredients, honestly cooked. No freezer-to-fryer shortcuts, no flavor tricks — just meat, fire, and technique.</p>
+                </div>
+                <div class="tilt-card bg-surface p-8 sm:p-10">
+                    <i class="fa-solid fa-clock text-accent text-2xl sm:text-3xl mb-5" aria-hidden="true"></i>
+                    <h3 class="font-display font-bold text-xl sm:text-2xl text-white mb-3">Smashed Fresh, Daily</h3>
+                    <p class="text-gray-400 leading-relaxed">Patties are smashed to order, never pre-formed or frozen. If it's not fresh off the griddle, it's not going out.</p>
+                </div>
+                <div class="tilt-card bg-surface p-8 sm:p-10">
+                    <i class="fa-solid fa-location-dot text-accent text-2xl sm:text-3xl mb-5" aria-hidden="true"></i>
+                    <h3 class="font-display font-bold text-xl sm:text-2xl text-white mb-3">Built For Kondhwa</h3>
+                    <p class="text-gray-400 leading-relaxed">We're not a chain pretending to be local. This is our neighborhood, our regulars, our home turf.</p>
+                </div>
+                <div class="tilt-card bg-surface p-8 sm:p-10">
+                    <i class="fa-solid fa-certificate text-accent text-2xl sm:text-3xl mb-5" aria-hidden="true"></i>
+                    <h3 class="font-display font-bold text-xl sm:text-2xl text-white mb-3">Zero Shortcuts</h3>
+                    <p class="text-gray-400 leading-relaxed">From the bun toast to the last drizzle of sauce, every step gets the same care as the first burger we ever made.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Mission & Vision -->
+    <section class="py-20 sm:py-24 md:py-32 bg-primary border-t border-white/5" id="mission-vision">
+        <div class="max-w-6xl mx-auto px-6 sm:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 stagger-grid">
+                <div class="ticket-card torn-edge rounded-2xl p-8 sm:p-10" style="--tone:var(--surface)">
+                    <span class="font-ticket text-xs text-accent uppercase tracking-widest mb-5 inline-flex items-center gap-2"><i class="fa-solid fa-bullseye" aria-hidden="true"></i> Our Mission</span>
+                    <p class="font-display font-bold text-xl sm:text-2xl md:text-3xl text-white leading-snug">To smash out the best burger in Pune, one honest ingredient at a time — no gimmicks, no shortcuts, just serious flavor served fast.</p>
+                </div>
+                <div class="ticket-card torn-edge rounded-2xl p-8 sm:p-10" style="--tone:var(--surface)">
+                    <span class="font-ticket text-xs text-accentYellow uppercase tracking-widest mb-5 inline-flex items-center gap-2"><i class="fa-solid fa-eye" aria-hidden="true"></i> Our Vision</span>
+                    <p class="font-display font-bold text-xl sm:text-2xl md:text-3xl text-white leading-snug">To be the name Pune reaches for first when "burger" comes up — known not just for the hype, but for consistently backing it up.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Location & Map -->
+    <section class="py-20 sm:py-24 md:py-32 bg-primary text-center" id="location">
+        <div class="max-w-5xl mx-auto px-6 sm:px-8">
+            <span class="stamp text-accent font-ticket text-xs uppercase tracking-widest mb-6 gs-reveal"><i class="fa-solid fa-location-dot"></i> Kondhwa, Pune</span>
+            <h2 class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-white uppercase mb-4 gs-reveal">Find Your Besty</h2>
+            <p class="text-gray-400 text-base sm:text-lg mb-8 sm:mb-10 gs-reveal">Come say hi, grab a burger, and drop us a review.</p>
+
+            <div class="flex items-center justify-center gap-4 mb-10 sm:mb-14 gs-reveal">
+                <div class="text-accentYellow text-lg sm:text-xl" aria-hidden="true">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                </div>
+                <span class="text-white font-ticket font-bold text-2xl sm:text-3xl"><span class="stat-num" data-target="4.4" data-decimals="1">4.4</span></span>
+                <span class="text-gray-500 text-sm">&middot; <span class="stat-num" data-target="118" data-decimals="0">118</span> Google Reviews</span>
+            </div>
+
+            <div class="rounded-3xl overflow-hidden border border-white/10 shadow-2xl mb-8 sm:mb-12 h-64 sm:h-80 md:h-[450px] gs-reveal">
+                <iframe src="https://maps.google.com/maps?q=18.4812862,73.9050745&z=16&output=embed" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" title="Besty's Burgers location on Google Maps" class="opacity-80 grayscale hover:grayscale-0 transition-all duration-500"></iframe>
+            </div>
+
+            <a href="https://search.google.com/local/writereview?placeid=ChIJOWdyHEbrwjsR6BG-rfvGarI" target="_blank" class="magnetic inline-flex items-center gap-3 px-8 py-4 bg-white text-primary font-display font-bold text-lg rounded-full hover:bg-accentYellow transition-colors duration-300">
+                Drop a Google Review <i class="fa-brands fa-google"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Bottom CTA -->
+    <section class="py-24 sm:py-28 md:py-40 bg-accent text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=2500')] bg-cover bg-center opacity-10 mix-blend-multiply"></div>
+        <div class="grain"></div>
+        <div class="relative z-10 max-w-4xl mx-auto px-6 sm:px-8 gs-reveal">
+            <h2 class="font-display font-black text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white uppercase mb-8 sm:mb-10 tracking-tight">Stop Scrolling.<br/>Start Eating.</h2>
+            <a href="https://www.zomato.com/pune/bestys-burgers-kondhwa" target="_blank" class="magnetic inline-block px-8 sm:px-12 py-4 sm:py-5 bg-primary text-white font-display font-bold text-lg sm:text-2xl rounded-full hover:bg-white hover:text-primary transition-colors duration-300 shadow-2xl">
+                ORDER ONLINE NOW
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-surface py-12 md:py-16 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
+            <div class="font-display font-black text-3xl tracking-wide text-white">
+                BESTY'S<span class="text-accent">.</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-6 sm:gap-8 text-sm font-bold text-gray-500 uppercase tracking-widest font-display">
+                <a href="#" class="hover:text-white transition-colors">Drop Alerts</a>
+                <a href="#location" class="hover:text-white transition-colors">Locations</a>
+                <a href="#" class="hover:text-white transition-colors">Allergen Guide</a>
+                <a href="https://search.google.com/local/writereview?placeid=ChIJOWdyHEbrwjsR6BG-rfvGarI" target="_blank" class="hover:text-accentYellow transition-colors inline-flex items-center gap-2">
+                    <i class="fa-brands fa-google"></i> Review Us
+                </a>
+            </div>
+            <div class="text-xs text-gray-600 font-ticket tracking-widest uppercase">
+                &copy; 2026 Besty's Burger Co.
+            </div>
+        </div>
+    </footer>
+
+    <!-- GSAP Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Respect the OS-level "reduce motion" preference for everything below
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+            // ---------- Scroll progress bar (scrub, 1:1 with the user's own scroll input) ----------
+            gsap.to('#scroll-progress', {
+                scaleX: 1, ease: 'none',
+                scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: true }
+            });
+
+            // ---------- Nav: ticket-strip state on scroll ----------
+            const nav = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                nav.classList.toggle('nav-scrolled', window.scrollY > 50);
+            });
+
+            // ---------- Mobile / Tablet Hamburger Menu ----------
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburgerLines = menuToggle.querySelectorAll('.hamburger-line');
+            const mobileLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
+            let menuOpen = false;
+
+            function openMobileMenu() {
+                menuOpen = true;
+                mobileMenu.setAttribute('aria-hidden', 'false');
+                menuToggle.setAttribute('aria-expanded', 'true');
+                menuToggle.setAttribute('aria-label', 'Close menu');
+                document.body.style.overflow = 'hidden';
+
+                const d = prefersReducedMotion ? 0 : 0.5;
+                gsap.timeline()
+                    .to(hamburgerLines[0], { rotate: 45, y: 7, duration: d * 0.6, ease: 'power2.inOut' }, 0)
+                    .to(hamburgerLines[1], { opacity: 0, duration: d * 0.4 }, 0)
+                    .to(hamburgerLines[2], { rotate: -45, y: -7, duration: d * 0.6, ease: 'power2.inOut' }, 0)
+                    .to(mobileMenu, { autoAlpha: 1, duration: d * 0.4 }, 0)
+                    .from(mobileLinks, { y: 30, opacity: 0, duration: d * 0.6, stagger: prefersReducedMotion ? 0 : 0.08, ease: 'power3.out' }, d * 0.15);
+
+                mobileLinks[0].focus({ preventScroll: true });
+            }
+
+            function closeMobileMenu() {
+                menuOpen = false;
+                mobileMenu.setAttribute('aria-hidden', 'true');
+                menuToggle.setAttribute('aria-expanded', 'false');
+                menuToggle.setAttribute('aria-label', 'Open menu');
+                document.body.style.overflow = '';
+
+                const d = prefersReducedMotion ? 0 : 0.35;
+                gsap.timeline()
+                    .to(hamburgerLines[0], { rotate: 0, y: 0, duration: d, ease: 'power2.inOut' }, 0)
+                    .to(hamburgerLines[1], { opacity: 1, duration: d }, 0)
+                    .to(hamburgerLines[2], { rotate: 0, y: 0, duration: d, ease: 'power2.inOut' }, 0)
+                    .to(mobileMenu, { autoAlpha: 0, duration: d }, 0);
+
+                menuToggle.focus({ preventScroll: true });
+            }
+
+            menuToggle.addEventListener('click', () => (menuOpen ? closeMobileMenu() : openMobileMenu()));
+            mobileLinks.forEach(link => link.addEventListener('click', closeMobileMenu));
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && menuOpen) closeMobileMenu();
+            });
+
+            // Lightweight focus trap while the mobile menu is open
+            mobileMenu.addEventListener('keydown', (e) => {
+                if (e.key !== 'Tab' || !menuOpen) return;
+                const first = mobileLinks[0];
+                const last = mobileLinks[mobileLinks.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault(); last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault(); first.focus();
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (menuOpen && window.innerWidth >= 1024) closeMobileMenu();
+            });
+
+            // ---------- Hero: cinematic image scale + line-mask headline reveal + staggered supporting elements ----------
+            // Scoped per .hero-variant wrapper so only the currently-visible hero's own
+            // elements stagger together (three hero markups exist — mobile/tablet/desktop —
+            // gated by breakpoint visibility, not three separate animation timelines racing).
+            document.querySelectorAll('.hero-variant').forEach(hero => {
+                if (prefersReducedMotion) return;
+                const tl = gsap.timeline();
+                tl.from(hero.querySelectorAll('.hero-img'), { scale: 1.15, duration: 2.2, ease: 'power3.out' })
+                  .from(hero.querySelectorAll('.line-inner'), { yPercent: 110, duration: 1, stagger: 0.12, ease: 'power4.out' }, '-=1.75')
+                  .from(hero.querySelectorAll('.hero-anim'), { y: 26, opacity: 0, duration: 0.9, stagger: 0.12, ease: 'power3.out' }, '-=0.65');
+            });
+
+            // ---------- Parallax backgrounds ----------
+            if (!prefersReducedMotion) {
+                gsap.utils.toArray('.parallax-bg').forEach(bg => {
+                    gsap.to(bg, {
+                        yPercent: 18, ease: 'none',
+                        scrollTrigger: { trigger: bg.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
+                    });
+                });
+            }
+
+            // ---------- Scroll Reveals (single elements) ----------
+            gsap.utils.toArray('.gs-reveal').forEach(element => {
+                gsap.from(element, {
+                    scrollTrigger: { trigger: element, start: 'top 85%', toggleActions: 'play none none reverse' },
+                    y: 28, opacity: 0, duration: prefersReducedMotion ? 0.01 : 0.8, ease: 'power2.out'
+                });
+            });
+
+            // ---------- Scroll Reveals, staggered per list/grid (mobile menu cards, wings bento, combos) ----------
+            gsap.utils.toArray('.stagger-grid').forEach(grid => {
+                gsap.from(grid.children, {
+                    scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none reverse' },
+                    y: 28, opacity: 0, duration: prefersReducedMotion ? 0.01 : 0.7,
+                    stagger: prefersReducedMotion ? 0 : 0.1, ease: 'power2.out'
+                });
+            });
+
+            // ---------- Our Story: scroll-scrubbed word-by-word reveal ----------
+            gsap.utils.toArray('.story-scrub-text').forEach(el => {
+                const words = el.textContent.trim().split(/\s+/);
+                el.innerHTML = words.map(w => `<span class="word">${w}</span>`).join(' ');
+                const wordEls = el.querySelectorAll('.word');
+                if (prefersReducedMotion) {
+                    gsap.set(wordEls, { opacity: 1 });
+                } else {
+                    gsap.to(wordEls, {
+                        opacity: 1, stagger: 0.05, ease: 'none',
+                        scrollTrigger: { trigger: el, start: 'top 85%', end: 'bottom 55%', scrub: 0.6 }
+                    });
+                }
+            });
+
+            // ---------- Stat count-up (rating + review count) ----------
+            if (!prefersReducedMotion) {
+                document.querySelectorAll('.stat-num').forEach(el => {
+                    const target = parseFloat(el.dataset.target);
+                    const decimals = parseInt(el.dataset.decimals || '0', 10);
+                    const counter = { val: 0 };
+                    ScrollTrigger.create({
+                        trigger: el, start: 'top 90%', once: true,
+                        onEnter: () => {
+                            el.textContent = (0).toFixed(decimals);
+                            gsap.to(counter, {
+                                val: target, duration: 1.3, ease: 'power2.out',
+                                onUpdate: () => { el.textContent = counter.val.toFixed(decimals); }
+                            });
+                        }
+                    });
+                });
+            }
+
+            // ---------- Smooth Scrolling ----------
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    e.preventDefault();
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({ top: targetElement.offsetTop - 80, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+                    }
+                });
+            });
+
+            // ---------- Section-Scoped Interactive Menu Image Swapper (clip-path wipe) ----------
+            const menuSections = document.querySelectorAll('.menu-section');
+            menuSections.forEach(section => {
+                const menuItems = section.querySelectorAll('.menu-item');
+                const showcaseImg = section.querySelector('.showcase-img');
+
+                const swapShowcaseImage = (newSrc) => {
+                    if (!showcaseImg || showcaseImg.src === newSrc) return;
+                    if (prefersReducedMotion) { showcaseImg.src = newSrc; return; }
+                    gsap.to(showcaseImg, {
+                        clipPath: 'inset(0 0 0 100%)', duration: 0.32, ease: 'power2.in',
+                        onComplete: () => {
+                            showcaseImg.src = newSrc;
+                            gsap.fromTo(showcaseImg,
+                                { clipPath: 'inset(0 100% 0 0)' },
+                                { clipPath: 'inset(0 0% 0 0)', duration: 0.55, ease: 'power3.out' }
+                            );
+                        }
+                    });
+                };
+
+                if (showcaseImg && menuItems.length > 0) {
+                    menuItems.forEach(item => {
+                        item.addEventListener('mouseenter', () => swapShowcaseImage(item.getAttribute('data-img')));
+                    });
+                }
+
+                // ---------- Desktop menu accordion: shared open/close logic ----------
+                // Used by both direct clicks and the scroll-pinned auto-advance below, so the
+                // two interaction modes can never disagree about what "open" means.
+                const accordionItems = section.querySelectorAll('.accordion-item');
+                const openAccordionItem = (targetItem) => {
+                    const alreadyOpen = targetItem.classList.contains('is-open');
+                    accordionItems.forEach(sibling => {
+                        if (sibling !== targetItem) {
+                            sibling.classList.remove('is-open');
+                            sibling.querySelector('.accordion-trigger')?.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                    targetItem.classList.add('is-open');
+                    targetItem.querySelector('.accordion-trigger')?.setAttribute('aria-expanded', 'true');
+                    if (!alreadyOpen) swapShowcaseImage(targetItem.getAttribute('data-img'));
+                };
+
+                accordionItems.forEach(item => {
+                    const trigger = item.querySelector('.accordion-trigger');
+                    trigger?.addEventListener('click', () => {
+                        // A manual click while pinned should still feel responsive: toggle closed
+                        // if it was already the open one (matching the pre-existing behavior),
+                        // otherwise hand off to the shared open function.
+                        if (item.classList.contains('is-open')) {
+                            item.classList.remove('is-open');
+                            trigger.setAttribute('aria-expanded', 'false');
+                        } else {
+                            openAccordionItem(item);
+                        }
+                    });
+                });
+
+                // ---------- Menu accordion rows: reveal on normal scroll (no pin/hijack) ----------
+                // Each row wipes down into place via clip-path as it scrolls into view — like a
+                // blind unrolling — tied continuously to ordinary scroll position (scrub), the
+                // same way connected-grid.html reveals its grid items relative to their own
+                // position rather than pinning the page. The price settles with its own slight
+                // kinetic overshoot a beat behind, echoing the type-transition reference in
+                // miniature instead of a full-screen kinetic-type takeover.
+                if (!prefersReducedMotion) {
+                    accordionItems.forEach((row) => {
+                        gsap.fromTo(row,
+                            { clipPath: 'inset(0% 0% 100% 0%)', scale: 0.97, transformOrigin: '50% 0%' },
+                            {
+                                clipPath: 'inset(0% 0% 0% 0%)', scale: 1, ease: 'power2.out',
+                                scrollTrigger: { trigger: row, start: 'top 90%', end: 'top 55%', scrub: 0.5 }
+                            }
+                        );
+                        const price = row.querySelector('.accordion-trigger .font-ticket');
+                        if (price) {
+                            gsap.fromTo(price,
+                                { y: -12, rotate: -8, opacity: 0.3 },
+                                {
+                                    y: 0, rotate: 0, opacity: 1, ease: 'back.out(2.2)',
+                                    scrollTrigger: { trigger: row, start: 'top 88%', end: 'top 58%', scrub: 0.5 }
+                                }
+                            );
+                        }
+                    });
+                }
+            });
+
+            // ---------- Testimonial carousel: arrow navigation (native scroll-snap handles touch) ----------
+            const testimonialTrack = document.getElementById('testimonial-track');
+            if (testimonialTrack) {
+                const cardStep = () => {
+                    const card = testimonialTrack.querySelector('.testimonial-card');
+                    const gap = parseFloat(getComputedStyle(testimonialTrack).columnGap || '24');
+                    return card ? card.getBoundingClientRect().width + gap : 320;
+                };
+                document.getElementById('testimonial-prev')?.addEventListener('click', () => {
+                    testimonialTrack.scrollBy({ left: -cardStep(), behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+                });
+                document.getElementById('testimonial-next')?.addEventListener('click', () => {
+                    testimonialTrack.scrollBy({ left: cardStep(), behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+                });
+            }
+
+            // ---------- Micro-interactions: magnetic CTAs, tilting combo cards, cursor ring ----------
+            if (canHover && !prefersReducedMotion) {
+                document.querySelectorAll('.magnetic').forEach(el => {
+                    const xTo = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3' });
+                    const yTo = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3' });
+                    el.addEventListener('mousemove', (e) => {
+                        const r = el.getBoundingClientRect();
+                        xTo((e.clientX - r.left - r.width / 2) * 0.35);
+                        yTo((e.clientY - r.top - r.height / 2) * 0.35);
+                    });
+                    el.addEventListener('mouseleave', () => { xTo(0); yTo(0); });
+                });
+
+                document.querySelectorAll('.tilt-card').forEach(el => {
+                    gsap.set(el, { transformPerspective: 900 });
+                    const rxTo = gsap.quickTo(el, 'rotationX', { duration: 0.6, ease: 'power3' });
+                    const ryTo = gsap.quickTo(el, 'rotationY', { duration: 0.6, ease: 'power3' });
+                    el.addEventListener('mousemove', (e) => {
+                        const r = el.getBoundingClientRect();
+                        const px = (e.clientX - r.left) / r.width - 0.5;
+                        const py = (e.clientY - r.top) / r.height - 0.5;
+                        rxTo(-py * 9);
+                        ryTo(px * 9);
+                    });
+                    el.addEventListener('mouseleave', () => { rxTo(0); ryTo(0); });
+                });
+
+                const ring = document.getElementById('cursor-ring');
+                if (ring) {
+                    gsap.set(ring, { xPercent: -50, yPercent: -50 });
+                    const rxTo = gsap.quickTo(ring, 'x', { duration: 0.35, ease: 'power3' });
+                    const ryTo = gsap.quickTo(ring, 'y', { duration: 0.35, ease: 'power3' });
+                    window.addEventListener('mousemove', (e) => {
+                        document.body.classList.add('cursor-active');
+                        rxTo(e.clientX); ryTo(e.clientY);
+                    });
+                    document.querySelectorAll('a, button').forEach(el => {
+                        el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+                        el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

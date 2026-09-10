@@ -37,9 +37,14 @@ function computeOverlayRect(iframe: HTMLIFrameElement, el: Element, zoom = 1): R
 
   if (elRect.width === 0 && elRect.height === 0) return null;
 
+  const iframeWin = iframe.ownerDocument?.defaultView || window;
+  const computedIframe = iframeWin.getComputedStyle(iframe);
+  const borderLeft = parseFloat(computedIframe.borderLeftWidth) || 0;
+  const borderTop = parseFloat(computedIframe.borderTopWidth) || 0;
+
   const z = zoom || 1;
-  const rawTop = iframeRect.top + elRect.top * z;
-  const rawLeft = iframeRect.left + elRect.left * z;
+  const rawTop = iframeRect.top + borderTop * z + elRect.top * z;
+  const rawLeft = iframeRect.left + borderLeft * z + elRect.left * z;
   const rawWidth = elRect.width * z;
   const rawHeight = elRect.height * z;
 
@@ -63,6 +68,17 @@ const RESIZE_HANDLES: Array<{ id: HandleId; cursor: string; style: React.CSSProp
   { id: "sw", cursor: "nesw-resize", style: { bottom: -4, left: -4 } },
   { id: "w", cursor: "ew-resize", style: { top: "calc(50% - 4px)", left: -4 } },
 ];
+
+function rectsEqual(a: Rect | null, b: Rect | null, epsilon = 0.25): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    Math.abs(a.top - b.top) < epsilon &&
+    Math.abs(a.left - b.left) < epsilon &&
+    Math.abs(a.width - b.width) < epsilon &&
+    Math.abs(a.height - b.height) < epsilon
+  );
+}
 
 export default function SelectionOverlay({
   iframe,
@@ -183,15 +199,13 @@ export default function SelectionOverlay({
 
   useEffect(() => {
     function recompute() {
-      setHoverRect(iframe && hoveredElement ? computeOverlayRect(iframe, hoveredElement, zoom) : null);
-      setSelectedRect(
-        iframe && selectedElement ? computeOverlayRect(iframe, selectedElement, zoom) : null
-      );
-      setDropRect(
-        iframe && dropTargetInfo?.targetElement
-          ? computeOverlayRect(iframe, dropTargetInfo.targetElement, zoom)
-          : null
-      );
+      const nextHover = iframe && hoveredElement ? computeOverlayRect(iframe, hoveredElement, zoom) : null;
+      const nextSelected = iframe && selectedElement ? computeOverlayRect(iframe, selectedElement, zoom) : null;
+      const nextDrop = iframe && dropTargetInfo?.targetElement ? computeOverlayRect(iframe, dropTargetInfo.targetElement, zoom) : null;
+
+      setHoverRect((prev) => (rectsEqual(prev, nextHover) ? prev : nextHover));
+      setSelectedRect((prev) => (rectsEqual(prev, nextSelected) ? prev : nextSelected));
+      setDropRect((prev) => (rectsEqual(prev, nextDrop) ? prev : nextDrop));
     }
 
     recompute();
@@ -419,11 +433,12 @@ export default function SelectionOverlay({
 
       const iframeRect = iframe.getBoundingClientRect();
 
+      const z = zoom || 1;
       for (const sib of siblings) {
         const sibRect = sib.getBoundingClientRect();
 
         if (isFlexRow) {
-          const midX = iframeRect.left + sibRect.left + sibRect.width / 2;
+          const midX = iframeRect.left + sibRect.left * z + (sibRect.width * z) / 2;
           const d = Math.abs(moveEvent.clientX - midX);
           if (d < minDistance) {
             minDistance = d;
@@ -431,7 +446,7 @@ export default function SelectionOverlay({
             closestPos = moveEvent.clientX < midX ? "before" : "after";
           }
         } else {
-          const midY = iframeRect.top + sibRect.top + sibRect.height / 2;
+          const midY = iframeRect.top + sibRect.top * z + (sibRect.height * z) / 2;
           const d = Math.abs(moveEvent.clientY - midY);
           if (d < minDistance) {
             minDistance = d;
@@ -538,6 +553,9 @@ export default function SelectionOverlay({
     const initialWidth = targetEl.offsetWidth || parseFloat(computed?.width || "0") || 100;
     const initialHeight = targetEl.offsetHeight || parseFloat(computed?.height || "0") || 100;
 
+    const modifiesWidth = handleId.includes("e") || handleId.includes("w");
+    const modifiesHeight = handleId.includes("s") || handleId.includes("n");
+
     setIsResizing(true);
     setResizeDimensions({ width: Math.round(initialWidth), height: Math.round(initialHeight) });
 
@@ -562,14 +580,23 @@ export default function SelectionOverlay({
       latestW = newWidth;
       latestH = newHeight;
       setResizeDimensions({ width: newWidth, height: newHeight });
-      applyLiveStyle(selectedElement, "width", `${newWidth}px`, theme, undefined, viewport, structuralPath || undefined);
-      applyLiveStyle(selectedElement, "height", `${newHeight}px`, theme, undefined, viewport, structuralPath || undefined);
+
+      if (modifiesWidth) {
+        applyLiveStyle(selectedElement, "width", `${newWidth}px`, theme, undefined, viewport, structuralPath || undefined);
+      }
+      if (modifiesHeight) {
+        applyLiveStyle(selectedElement, "height", `${newHeight}px`, theme, undefined, viewport, structuralPath || undefined);
+      }
     }
 
     function onPointerUp() {
       if (selectedElement && structuralPath) {
-        commitStyleChange(selectedElement, structuralPath, "width", `${latestW}px`, theme, onEdit, `${initialWidth}px`, undefined, viewport);
-        commitStyleChange(selectedElement, structuralPath, "height", `${latestH}px`, theme, onEdit, `${initialHeight}px`, undefined, viewport);
+        if (modifiesWidth) {
+          commitStyleChange(selectedElement, structuralPath, "width", `${latestW}px`, theme, onEdit, `${initialWidth}px`, undefined, viewport);
+        }
+        if (modifiesHeight) {
+          commitStyleChange(selectedElement, structuralPath, "height", `${latestH}px`, theme, onEdit, `${initialHeight}px`, undefined, viewport);
+        }
       }
       cleanup();
     }

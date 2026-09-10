@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { parse as parseColor, converter, formatHex, formatRgb, formatHsl } from "culori";
 import { Pipette, ChevronDown, Check, Ban } from "lucide-react";
+import { DEFAULT_COLORS } from "@/lib/tailwind/default-theme";
 
 const toHsv = converter("hsv");
 const toRgb = converter("rgb");
@@ -57,6 +58,15 @@ export default function ColorPicker({
   const [alpha, setAlpha] = useState(1);
   const [isTransparent, setIsTransparent] = useState(false);
 
+  // Ref to always hold the latest HSV values avoiding stale closures in mouseup/pointerup
+  const currentHsvRef = useRef({
+    hue: 210,
+    sat: 1,
+    val: 1,
+    alpha: 1,
+    isTransparent: false,
+  });
+
   // Raw text input state
   const [textInput, setTextInput] = useState("#0099ff");
   const [alphaInput, setAlphaInput] = useState("100%");
@@ -70,28 +80,49 @@ export default function ColorPicker({
     if (!value || value === "transparent" || value === "rgba(0, 0, 0, 0)" || value === "#00000000") {
       setIsTransparent(true);
       setAlpha(0);
+      currentHsvRef.current = { ...currentHsvRef.current, alpha: 0, isTransparent: true };
       setTextInput("transparent");
       setAlphaInput("0%");
       return;
     }
 
     setIsTransparent(false);
-    const parsed = parseColor(value);
+    let colorToParse = value;
+    if (colorToParse === "white") colorToParse = "#ffffff";
+    else if (colorToParse === "black") colorToParse = "#000000";
+    else {
+      const match = DEFAULT_COLORS.find((c) => c.name === colorToParse);
+      if (match) colorToParse = match.hex;
+    }
+
+    const parsed = parseColor(colorToParse);
     if (parsed) {
       const hsv = toHsv(parsed);
-      setHue(hsv.h !== undefined && !isNaN(hsv.h) ? hsv.h : 0);
-      setSat(hsv.s !== undefined && !isNaN(hsv.s) ? hsv.s : 1);
-      setVal(hsv.v !== undefined && !isNaN(hsv.v) ? hsv.v : 1);
-      const a = parsed.alpha !== undefined ? parsed.alpha : 1;
-      setAlpha(a);
-      setAlphaInput(`${Math.round(a * 100)}%`);
+      // Preserve current hue if parsed color is achromatic (e.g. black, white, grayscale)
+      const nextHue = hsv.h !== undefined && !isNaN(hsv.h) ? hsv.h : currentHsvRef.current.hue;
+      const nextSat = hsv.s !== undefined && !isNaN(hsv.s) ? hsv.s : (hsv.v === 0 ? currentHsvRef.current.sat : 0);
+      const nextVal = hsv.v !== undefined && !isNaN(hsv.v) ? hsv.v : 1;
+      const nextAlpha = parsed.alpha !== undefined ? parsed.alpha : 1;
+
+      setHue(nextHue);
+      setSat(nextSat);
+      setVal(nextVal);
+      setAlpha(nextAlpha);
+      currentHsvRef.current = {
+        hue: nextHue,
+        sat: nextSat,
+        val: nextVal,
+        alpha: nextAlpha,
+        isTransparent: false,
+      };
+      setAlphaInput(`${Math.round(nextAlpha * 100)}%`);
 
       if (format === "hex") {
-        setTextInput(formatHex(parsed) || value);
+        setTextInput(formatHex(parsed) || colorToParse);
       } else if (format === "rgb") {
-        setTextInput(formatRgb(parsed) || value);
+        setTextInput(formatRgb(parsed) || colorToParse);
       } else {
-        setTextInput(formatHsl(parsed) || value);
+        setTextInput(formatHsl(parsed) || colorToParse);
       }
     } else {
       setTextInput(value);
@@ -133,7 +164,14 @@ export default function ColorPicker({
   }
 
   function emitColor(h: number, s: number, v: number, a: number, isCommit = false) {
-    setIsTransparent(a === 0);
+    const isTrans = a === 0;
+    setIsTransparent(isTrans);
+    setHue(h);
+    setSat(s);
+    setVal(v);
+    setAlpha(a);
+    currentHsvRef.current = { hue: h, sat: s, val: v, alpha: a, isTransparent: isTrans };
+
     const result = computeColorString(h, s, v, a, format);
     setTextInput(result);
     setAlphaInput(`${Math.round(a * 100)}%`);
@@ -149,6 +187,7 @@ export default function ColorPicker({
   function handleSelectTransparent() {
     setIsTransparent(true);
     setAlpha(0);
+    currentHsvRef.current = { ...currentHsvRef.current, alpha: 0, isTransparent: true };
     setTextInput("transparent");
     setAlphaInput("0%");
     onChange("transparent");
@@ -156,36 +195,35 @@ export default function ColorPicker({
   }
 
   // Spectrum 2D Drag Handling
-  function updateSpectrumFromEvent(e: MouseEvent | React.MouseEvent<HTMLDivElement>) {
-    if (!spectrumRef.current) return;
-    const rect = spectrumRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
-
-    const nextSat = Number((x / rect.width).toFixed(3));
-    const nextVal = Number((1 - y / rect.height).toFixed(3));
-
-    setSat(nextSat);
-    setVal(nextVal);
-    const nextAlpha = isTransparent ? 1 : alpha;
-    if (isTransparent) setAlpha(1);
-    emitColor(hue, nextSat, nextVal, nextAlpha, false);
-  }
-
   function handleSpectrumMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     isDraggingSpectrum.current = true;
-    updateSpectrumFromEvent(e);
+
+    function updateFromCoords(clientX: number, clientY: number, isCommit = false) {
+      if (!spectrumRef.current) return;
+      const rect = spectrumRef.current.getBoundingClientRect();
+      const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+      const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
+
+      const nextSat = Number((x / rect.width).toFixed(3));
+      const nextVal = Number((1 - y / rect.height).toFixed(3));
+      const h = currentHsvRef.current.hue;
+      const a = currentHsvRef.current.isTransparent ? 1 : currentHsvRef.current.alpha;
+
+      emitColor(h, nextSat, nextVal, a, isCommit);
+    }
+
+    updateFromCoords(e.clientX, e.clientY, false);
 
     function onMouseMove(moveEvent: MouseEvent) {
       if (isDraggingSpectrum.current) {
-        updateSpectrumFromEvent(moveEvent);
+        updateFromCoords(moveEvent.clientX, moveEvent.clientY, false);
       }
     }
 
-    function onMouseUp() {
+    function onMouseUp(upEvent: MouseEvent) {
       if (isDraggingSpectrum.current) {
         isDraggingSpectrum.current = false;
-        emitColor(hue, sat, val, alpha, true);
+        updateFromCoords(upEvent.clientX, upEvent.clientY, true);
       }
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
@@ -205,12 +243,10 @@ export default function ColorPicker({
           const parsed = parseColor(res.sRGBHex);
           if (parsed) {
             const hsv = toHsv(parsed);
-            setHue(hsv.h || 0);
-            setSat(hsv.s || 1);
-            setVal(hsv.v || 1);
-            setAlpha(1);
-            setIsTransparent(false);
-            emitColor(hsv.h || 0, hsv.s || 1, hsv.v || 1, 1, true);
+            const h = hsv.h || 0;
+            const s = hsv.s || 1;
+            const v = hsv.v || 1;
+            emitColor(h, s, v, 1, true);
           }
         }
       } catch {}
@@ -366,11 +402,19 @@ export default function ColorPicker({
                   aria-label="Hue angle"
                   onChange={(e) => {
                     const nextHue = parseFloat(e.target.value);
-                    setHue(nextHue);
-                    if (isTransparent) setAlpha(1);
-                    emitColor(nextHue, sat, val, isTransparent ? 1 : alpha, false);
+                    const s = currentHsvRef.current.sat;
+                    const v = currentHsvRef.current.val;
+                    const a = currentHsvRef.current.isTransparent ? 1 : currentHsvRef.current.alpha;
+                    emitColor(nextHue, s, v, a, false);
                   }}
-                  onPointerUp={() => emitColor(hue, sat, val, alpha, true)}
+                  onPointerUp={(e) => {
+                    const targetVal = parseFloat((e.target as HTMLInputElement).value);
+                    const nextHue = !isNaN(targetVal) ? targetVal : currentHsvRef.current.hue;
+                    const s = currentHsvRef.current.sat;
+                    const v = currentHsvRef.current.val;
+                    const a = currentHsvRef.current.isTransparent ? 1 : currentHsvRef.current.alpha;
+                    emitColor(nextHue, s, v, a, true);
+                  }}
                   className="w-full h-full opacity-0 absolute inset-0 cursor-pointer z-10"
                 />
                 <div
@@ -405,10 +449,19 @@ export default function ColorPicker({
                   aria-label="Color alpha opacity"
                   onChange={(e) => {
                     const nextA = parseFloat(e.target.value);
-                    setAlpha(nextA);
-                    emitColor(hue, sat, val, nextA, false);
+                    const h = currentHsvRef.current.hue;
+                    const s = currentHsvRef.current.sat;
+                    const v = currentHsvRef.current.val;
+                    emitColor(h, s, v, nextA, false);
                   }}
-                  onPointerUp={() => emitColor(hue, sat, val, alpha, true)}
+                  onPointerUp={(e) => {
+                    const targetVal = parseFloat((e.target as HTMLInputElement).value);
+                    const nextA = !isNaN(targetVal) ? targetVal : currentHsvRef.current.alpha;
+                    const h = currentHsvRef.current.hue;
+                    const s = currentHsvRef.current.sat;
+                    const v = currentHsvRef.current.val;
+                    emitColor(h, s, v, nextA, true);
+                  }}
                   className="w-full h-full opacity-0 absolute inset-0 cursor-pointer z-10"
                 />
                 <div

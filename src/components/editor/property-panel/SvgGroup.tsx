@@ -360,6 +360,38 @@ export default function SvgGroup({
           className="w-full accent-[#0099ff] cursor-pointer"
         />
       </div>
+
+      {/* SVG / Icon Scale & Size Presets */}
+      <div className="space-y-2 pt-2 border-t border-[#262626]">
+        <div className="flex items-center justify-between text-xs text-zinc-300 font-medium">
+          <span className="flex items-center gap-1.5">
+            <Shapes className="w-3.5 h-3.5 text-zinc-400" />
+            <span>Icon Size / Scale</span>
+          </span>
+          <span className="text-[10px] text-zinc-500 font-mono">Quick Preset</span>
+        </div>
+
+        {/* Quick Size Presets */}
+        <div className="grid grid-cols-6 gap-1">
+          {[16, 20, 24, 32, 48, 64].map((size) => (
+            <button
+              key={size}
+              type="button"
+              onClick={() => {
+                const target = parentSvg || element;
+                if (!target) return;
+                applyLiveStyle(target, "width", `${size}px`, theme, undefined, viewport, structuralPath!);
+                applyLiveStyle(target, "height", `${size}px`, theme, undefined, viewport, structuralPath!);
+                commitStyleChange(target, structuralPath!, "width", `${size}px`, theme, onEdit, undefined, undefined, viewport);
+                commitStyleChange(target, structuralPath!, "height", `${size}px`, theme, onEdit, undefined, undefined, viewport);
+              }}
+              className="py-1 text-[11px] font-mono rounded bg-[#141414] hover:bg-[#1c1c1c] text-zinc-400 hover:text-white border border-[#262626] hover:border-[#0099ff]/50 transition-all cursor-pointer text-center"
+            >
+              {size}px
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

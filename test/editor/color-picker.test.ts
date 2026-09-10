@@ -40,4 +40,18 @@ describe("ColorPicker and Transparency Engine", () => {
     const hslStr = formatHsl(parsed!);
     expect(hslStr).toContain("hsl");
   });
+
+  it("preserves color format and avoids resetting to #000000 for standard hex values", () => {
+    const parsed = parseColor("#ef4444");
+    expect(parsed).toBeDefined();
+    const hex = formatHex(parsed!);
+    expect(hex).toBe("#ef4444");
+  });
+
+  it("handles black and white parsing without throwing", () => {
+    const black = parseColor("#000000");
+    const white = parseColor("#ffffff");
+    expect(formatHex(black!)).toBe("#000000");
+    expect(formatHex(white!)).toBe("#ffffff");
+  });
 });

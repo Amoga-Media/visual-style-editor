@@ -91,6 +91,21 @@ export function convertHtmlToJsx(html: string): string {
   // 2. Convert HTML comments <!-- ... --> to JSX comments {/* ... */}
   content = content.replace(/<!--([\s\S]*?)-->/g, "{/*$1*/}");
 
+  // 2b. Safely handle <script> tags for React JSX with placeholder tokens
+  // Handle external script tags: <script src="..."></script> -> <script src="..." />
+  content = content.replace(/<script([^>]*\bsrc=[^>]*)>[\s\S]*?<\/script>/gi, (_, attrs) => {
+    const cleanAttrs = attrs.replace(/\/$/, "").trim();
+    return `__VSE_SCRIPT_EXTERNAL_${encodeURIComponent(cleanAttrs)}__`;
+  });
+
+  // Handle inline script tags: wrap in dangerouslySetInnerHTML so JS operators (<, &&) don't break JSX
+  content = content.replace(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/gi, (_, attrs, scriptBody) => {
+    const trimmed = scriptBody.trim();
+    if (!trimmed) return "";
+    const cleanAttrs = attrs.trim() ? ` ${attrs.trim()}` : "";
+    return `__VSE_SCRIPT_INLINE_${encodeURIComponent(cleanAttrs)}_${encodeURIComponent(trimmed)}__`;
+  });
+
   // 3. Process element opening tags and attributes
   content = content.replace(/<([a-zA-Z0-9:-]+)([^>]*?)(\/?)>/g, (fullTag, tagName, rawAttrs, selfCloseSlash) => {
     const lowerTag = tagName.toLowerCase();
@@ -125,6 +140,17 @@ export function convertHtmlToJsx(html: string): string {
     }
 
     return `<${tagName}${newAttrs}${selfCloseSlash ? " /" : ""}>`;
+  });
+
+  // Restore preserved script tags with clean JSX syntax
+  content = content.replace(/__VSE_SCRIPT_EXTERNAL_([^_]+)__/g, (_, encodedAttrs) => {
+    const attrs = decodeURIComponent(encodedAttrs);
+    return `<script ${attrs} />`;
+  });
+  content = content.replace(/__VSE_SCRIPT_INLINE_([^_]*)_([^_]+)__/g, (_, encodedAttrs, encodedBody) => {
+    const attrs = decodeURIComponent(encodedAttrs);
+    const body = decodeURIComponent(encodedBody);
+    return `<script${attrs} dangerouslySetInnerHTML={{ __html: ${JSON.stringify(body)} }} />`;
   });
 
   return content;
@@ -179,5 +205,29 @@ ${indentedJsx}
 }
 
 export default ${componentName};
+`;
+}
+
+/**
+ * Generates a full Next.js Client Component.
+ */
+export function exportAsNextComponent(html: string, componentName = "Page"): string {
+  const jsxMarkup = convertHtmlToJsx(html);
+  const indentedJsx = jsxMarkup
+    .split("\n")
+    .map((line) => `    ${line}`)
+    .join("\n");
+
+  return `"use client";
+
+import React from "react";
+
+export default function ${componentName}() {
+  return (
+    <main className="min-h-screen">
+${indentedJsx}
+    </main>
+  );
+}
 `;
 }

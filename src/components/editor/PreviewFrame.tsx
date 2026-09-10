@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useSettingsStore } from "@/store/settings-store";
 
 export interface DropTargetInfo {
   targetElement: Element;
@@ -89,15 +90,27 @@ function attachSelectionAndDragListeners(
 
   injectEditorHelperStyles(doc);
 
-  const handleOver = (e: MouseEvent) => onHover(e.target as Element);
+  const handleOver = (e: MouseEvent) => {
+    if (useSettingsStore.getState().canvasMode === "interact") {
+      onHover(null);
+      return;
+    }
+    onHover(e.target as Element);
+  };
   const handleOut = () => onHover(null);
   const handleClick = (e: MouseEvent) => {
+    if (useSettingsStore.getState().canvasMode === "interact") {
+      return; // allow natural click interactions for accordions, menus, links
+    }
     e.preventDefault();
     e.stopPropagation();
     onClick(e.target as Element);
   };
 
   const handleDblClick = (e: MouseEvent) => {
+    if (useSettingsStore.getState().canvasMode === "interact") {
+      return;
+    }
     const target = e.target as HTMLElement | null;
     if (!target) return;
 

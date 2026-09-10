@@ -5,12 +5,14 @@ interface KeyboardShortcutsModalProps {
 }
 
 const SHORTCUTS = [
+  { keys: ["Ctrl", "\\"], macKeys: ["⌘", "\\"], description: "Toggle UI (hide/show left & right sidebars)" },
+  { keys: ["Ctrl", "K"], macKeys: ["⌘", "K"], description: "Open keyboard shortcuts guide" },
+  { keys: ["Ctrl", "Z"], macKeys: ["⌘", "Z"], description: "Undo last style or copy change" },
+  { keys: ["Ctrl", "Shift", "Z"], macKeys: ["⌘", "⇧", "Z"], description: "Redo change (or Ctrl+Y)" },
+  { keys: ["Ctrl", "Scroll"], macKeys: ["⌘", "Scroll"], description: "Zoom canvas workspace in / out" },
   { keys: ["Ctrl", "+"], macKeys: ["⌘", "+"], description: "Increase webapp interface size" },
   { keys: ["Ctrl", "-"], macKeys: ["⌘", "-"], description: "Decrease webapp interface size" },
   { keys: ["Ctrl", "0"], macKeys: ["⌘", "0"], description: "Reset interface size to 100%" },
-  { keys: ["Ctrl", "Scroll"], macKeys: ["⌘", "Scroll"], description: "Zoom canvas workspace in / out" },
-  { keys: ["Ctrl", "Z"], macKeys: ["⌘", "Z"], description: "Undo last style or copy change" },
-  { keys: ["Ctrl", "Shift", "Z"], macKeys: ["⌘", "⇧", "Z"], description: "Redo change" },
   { keys: ["Ctrl", "D"], macKeys: ["⌘", "D"], description: "Duplicate selected element" },
   { keys: ["Delete"], macKeys: ["⌫"], description: "Delete selected element" },
   { keys: ["Escape"], macKeys: ["Esc"], description: "Deselect active element / close modals" },

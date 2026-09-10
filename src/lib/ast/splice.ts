@@ -34,9 +34,25 @@ export interface Splice {
  * isn't a side effect, it's the reason for the descending sort.
  */
 export function applySplices(originalHtml: string, splices: Splice[]): string {
-  const sorted = [...splices].sort((a, b) => b.startOffset - a.startOffset);
-  let out = originalHtml;
+  const sorted = [...splices].sort((a, b) => {
+    if (b.startOffset !== a.startOffset) {
+      return b.startOffset - a.startOffset;
+    }
+    return b.endOffset - a.endOffset;
+  });
+
+  // Filter out any splices that overlap with a wider splice already applied
+  const nonOverlapping: Splice[] = [];
+  let minAllowedOffset = Infinity;
   for (const s of sorted) {
+    if (s.endOffset <= minAllowedOffset) {
+      nonOverlapping.push(s);
+      minAllowedOffset = s.startOffset;
+    }
+  }
+
+  let out = originalHtml;
+  for (const s of nonOverlapping) {
     out = out.slice(0, s.startOffset) + s.replacement + out.slice(s.endOffset);
   }
   return out;

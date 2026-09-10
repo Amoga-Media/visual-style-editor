@@ -89,11 +89,32 @@ export function applyEditsClientSide(
     }
   }
 
+  // Find all ranges being removed (by delete or move operations) to prevent inner splices from desyncing byte offsets
+  const deletedRanges: Array<{ start: number; end: number }> = [];
+  for (const edit of structuralEdits) {
+    if (edit.kind === "delete" || edit.kind === "move") {
+      const node = resolveStructuralPath(htmlEl, edit.structuralPath);
+      if (node?.sourceCodeLocation) {
+        deletedRanges.push({
+          start: node.sourceCodeLocation.startOffset,
+          end: node.sourceCodeLocation.endOffset,
+        });
+      }
+    }
+  }
+
+  function isInsideDeleted(start: number, end: number): boolean {
+    return deletedRanges.some((r) => (start >= r.start && end <= r.end) || (start > r.start && start < r.end));
+  }
+
   // Apply Class Splices (1 consolidated class attribute per element)
   for (const [structuralPath, newClassList] of classEditsByPath) {
     const node = resolveStructuralPath(htmlEl, structuralPath);
-    if (!node) {
+    if (!node || !node.sourceCodeLocation) {
       conflicts.push({ structuralPath, reason: "not-found" });
+      continue;
+    }
+    if (isInsideDeleted(node.sourceCodeLocation.startOffset, node.sourceCodeLocation.endOffset)) {
       continue;
     }
     const classAttr = node.sourceCodeLocation?.attrs?.["class"];
@@ -120,8 +141,11 @@ export function applyEditsClientSide(
   // Apply Style Splices (1 consolidated style attribute per element)
   for (const [structuralPath, styleProps] of styleEditsByPath) {
     const node = resolveStructuralPath(htmlEl, structuralPath);
-    if (!node) {
+    if (!node || !node.sourceCodeLocation) {
       conflicts.push({ structuralPath, reason: "not-found" });
+      continue;
+    }
+    if (isInsideDeleted(node.sourceCodeLocation.startOffset, node.sourceCodeLocation.endOffset)) {
       continue;
     }
     const styleAttr = node.sourceCodeLocation?.attrs?.["style"];
@@ -150,8 +174,11 @@ export function applyEditsClientSide(
   // Apply Text Splices
   for (const [structuralPath, newText] of textEditsByPath) {
     const node = resolveStructuralPath(htmlEl, structuralPath);
-    if (!node) {
+    if (!node || !node.sourceCodeLocation) {
       conflicts.push({ structuralPath, reason: "not-found" });
+      continue;
+    }
+    if (isInsideDeleted(node.sourceCodeLocation.startOffset, node.sourceCodeLocation.endOffset)) {
       continue;
     }
     const startTag = node.sourceCodeLocation?.startTag;
@@ -170,8 +197,11 @@ export function applyEditsClientSide(
   // Apply Attribute Splices
   for (const [structuralPath, attrMap] of attrEditsByPath) {
     const node = resolveStructuralPath(htmlEl, structuralPath);
-    if (!node) {
+    if (!node || !node.sourceCodeLocation) {
       conflicts.push({ structuralPath, reason: "not-found" });
+      continue;
+    }
+    if (isInsideDeleted(node.sourceCodeLocation.startOffset, node.sourceCodeLocation.endOffset)) {
       continue;
     }
     for (const [attributeName, newValue] of attrMap) {
@@ -200,6 +230,41 @@ export function applyEditsClientSide(
             replacement: ` ${attributeName}="${newValue}"`,
           });
         }
+      }
+    }
+  }
+
+  // Ensure elements targeted by responsive style overrides have data-vse-path attribute if they lack an id
+  const responsivePaths = new Set<string>();
+  for (const edit of edits) {
+    if (edit.kind === "style" && (edit.viewport === "tablet" || edit.viewport === "mobile")) {
+      if (!edit.structuralPath.startsWith("#")) {
+        responsivePaths.add(edit.structuralPath);
+      }
+    }
+  }
+  for (const [rPath, propMap] of getResponsiveRegistry().entries()) {
+    if (!rPath.startsWith("#")) {
+      for (const overrides of propMap.values()) {
+        if (overrides.tablet || overrides.mobile) {
+          responsivePaths.add(rPath);
+          break;
+        }
+      }
+    }
+  }
+
+  for (const rPath of responsivePaths) {
+    const node = resolveStructuralPath(htmlEl, rPath);
+    if (node && !getAttr(node, "data-vse-path") && !getAttr(node, "id") && node.sourceCodeLocation?.startTag) {
+      if (!isInsideDeleted(node.sourceCodeLocation.startOffset, node.sourceCodeLocation.endOffset)) {
+        const tagStart = node.sourceCodeLocation.startTag.startOffset;
+        const insertAt = tagStart + node.tagName.length + 1;
+        splices.push({
+          startOffset: insertAt,
+          endOffset: insertAt,
+          replacement: ` data-vse-path="${rPath}"`,
+        });
       }
     }
   }
@@ -368,6 +433,9 @@ export function applyEditsClientSide(
   }
 
   const existingResponsiveStyle = findResponsiveStyleElement(htmlEl);
+  const shouldUpdateResponsiveTag =
+    (responsiveCss && responsiveCss.trim().length > 0) ||
+    options?.responsiveCss !== undefined;
   
   if (responsiveCss && responsiveCss.trim().length > 0) {
     const trimmedCss = responsiveCss.trim();
@@ -403,8 +471,8 @@ export function applyEditsClientSide(
         });
       }
     }
-  } else if (existingResponsiveStyle && existingResponsiveStyle.sourceCodeLocation) {
-    // If all responsive overrides were cleared, remove the responsive stylesheet block cleanly
+  } else if (shouldUpdateResponsiveTag && existingResponsiveStyle && existingResponsiveStyle.sourceCodeLocation) {
+    // If all responsive overrides were explicitly cleared via options, remove the responsive stylesheet block cleanly
     splices.push({
       startOffset: existingResponsiveStyle.sourceCodeLocation.startOffset,
       endOffset: existingResponsiveStyle.sourceCodeLocation.endOffset,

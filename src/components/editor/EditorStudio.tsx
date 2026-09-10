@@ -11,7 +11,7 @@ import { useSelectionStore } from "@/store/selection-store";
 import { useChangeSetStore } from "@/store/change-set-store";
 import { useUndoStore } from "@/store/undo-store";
 import { useSettingsStore } from "@/store/settings-store";
-import { clearResponsiveRegistry, syncResponsiveStylesheet } from "@/lib/dom/responsive-style-engine";
+import { clearResponsiveRegistry, syncResponsiveStylesheet, generateResponsiveCssString } from "@/lib/dom/responsive-style-engine";
 import { generateUniqueId } from "@/lib/ast/unique-id";
 import { exportAsReactComponent } from "@/lib/export/html-to-jsx";
 import Toolbar, { type ViewportMode } from "./Toolbar";
@@ -26,16 +26,71 @@ import LayersTree from "./LayersTree";
 import BasicComponents from "./BasicComponents";
 import ComponentBlocks from "./ComponentBlocks";
 import KeyboardShortcutsModal from "./KeyboardShortcutsModal";
+import ExportStudioModal from "./ExportStudioModal";
+import DevicePresetDropdown from "./DevicePresetDropdown";
+import { type DevicePreset, getDefaultPreset, getCategoryForWidth } from "@/lib/dom/device-presets";
 import { AlertTriangle, X, Layers, PlusSquare, PanelLeftClose, Sparkles } from "lucide-react";
 
 const EMPTY_THEME: ThemeMap = { mode: "none", colors: [], fonts: [] };
+
+export function serializeCleanDocument(doc: Document): string {
+  const docClone = doc.cloneNode(true) as Document;
+
+  // 1. Remove editor-only helper styles
+  const helperStyle = docClone.getElementById("vse-editor-helper-styles");
+  if (helperStyle) helperStyle.remove();
+
+  // 2. Remove temporary editor-injected markers and attributes
+  docClone.querySelectorAll("[contenteditable]").forEach((el) => {
+    el.removeAttribute("contenteditable");
+  });
+  docClone.querySelectorAll("[data-vse-hovered], [data-vse-selected], [data-vse-drop-target], [data-vse-drag-over]").forEach((el) => {
+    el.removeAttribute("data-vse-hovered");
+    el.removeAttribute("data-vse-selected");
+    el.removeAttribute("data-vse-drop-target");
+    el.removeAttribute("data-vse-drag-over");
+  });
+
+  // 3. Ensure responsive stylesheet contains clean standalone media queries
+  const responsiveCss = generateResponsiveCssString();
+  const existingResponsiveStyle = docClone.getElementById("vse-responsive-styles");
+  if (responsiveCss && responsiveCss.trim().length > 0) {
+    if (existingResponsiveStyle) {
+      existingResponsiveStyle.textContent = "\n" + responsiveCss.trim() + "\n";
+    } else {
+      const styleEl = docClone.createElement("style");
+      styleEl.id = "vse-responsive-styles";
+      styleEl.textContent = "\n" + responsiveCss.trim() + "\n";
+      if (docClone.head) {
+        docClone.head.appendChild(styleEl);
+      } else if (docClone.body) {
+        docClone.body.appendChild(styleEl);
+      }
+    }
+  } else if (existingResponsiveStyle) {
+    existingResponsiveStyle.remove();
+  }
+
+  // 4. Clean DOCTYPE
+  const docType = docClone.doctype
+    ? `<!DOCTYPE ${docClone.doctype.name || "html"}${docClone.doctype.publicId ? ` PUBLIC "${docClone.doctype.publicId}"` : ""}${docClone.doctype.systemId ? ` "${docClone.doctype.systemId}"` : ""}>\n`
+    : "<!DOCTYPE html>\n";
+
+  return docType + docClone.documentElement.outerHTML;
+}
 
 function toSaveRequestEdit(edit: EditRecord): SaveRequestEdit {
   if (edit.kind === "class") {
     return { kind: "class", structuralPath: edit.structuralPath, newClassList: edit.newClassList };
   }
   if (edit.kind === "style") {
-    return { kind: "style", structuralPath: edit.structuralPath, styleProperty: edit.styleProperty, newStyleValue: edit.newStyleValue };
+    return {
+      kind: "style",
+      structuralPath: edit.structuralPath,
+      styleProperty: edit.styleProperty,
+      newStyleValue: edit.newStyleValue,
+      viewport: edit.viewport,
+    };
   }
   if (edit.kind === "text") {
     return { kind: "text", structuralPath: edit.structuralPath, newText: edit.newText };
@@ -65,6 +120,7 @@ export default function EditorStudio() {
   const [dropTargetInfo, setDropTargetInfo] = useState<DropTargetInfo | null>(null);
   const [theme, setTheme] = useState<ThemeMap>(EMPTY_THEME);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [saveConflicts, setSaveConflicts] = useState<string[] | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [versionHistory, setVersionHistory] = useState<VersionEntry[]>([]);
@@ -74,6 +130,9 @@ export default function EditorStudio() {
   const [leftSidebarTab, setLeftSidebarTab] = useState<"layers" | "primitives" | "templates">("layers");
   const [zoom, setZoom] = useState(1);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [uiPanelsVisible, setUiPanelsVisible] = useState(true);
+  const [activePreset, setActivePreset] = useState<DevicePreset>(() => getDefaultPreset("desktop"));
+  const [customDimensions, setCustomDimensions] = useState<{ width: number; height: number } | null>(null);
   const versionIdRef = useRef(0);
 
   // Resizable Sidebars Width State
@@ -99,57 +158,94 @@ export default function EditorStudio() {
     return 320;
   });
 
-  const isResizingLeftRef = useRef(false);
-  const isResizingRightRef = useRef(false);
+  const [isResizingSidebar, setIsResizingSidebar] = useState(false);
 
-  function handleLeftResizeStart(e: React.MouseEvent) {
+  function handleLeftResizeStart(e: React.PointerEvent<HTMLDivElement>) {
     e.preventDefault();
-    isResizingLeftRef.current = true;
+    e.stopPropagation();
+    const handleEl = e.currentTarget;
+    try {
+      handleEl.setPointerCapture(e.pointerId);
+    } catch {}
+
+    setIsResizingSidebar(true);
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
 
-    function handleMouseMove(ev: MouseEvent) {
-      if (!isResizingLeftRef.current) return;
+    let latestWidth = leftSidebarWidth;
+
+    function handlePointerMove(ev: PointerEvent) {
       const newW = Math.max(220, Math.min(550, ev.clientX));
+      latestWidth = newW;
       setLeftSidebarWidth(newW);
-      localStorage.setItem("vse_left_panel_width", newW.toString());
     }
 
-    function handleMouseUp() {
-      isResizingLeftRef.current = false;
+    function handlePointerUp(ev: PointerEvent) {
+      try {
+        if (handleEl.hasPointerCapture(ev.pointerId)) {
+          handleEl.releasePointerCapture(ev.pointerId);
+        }
+      } catch {}
+
+      setIsResizingSidebar(false);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      try {
+        localStorage.setItem("vse_left_panel_width", latestWidth.toString());
+      } catch {}
+
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
     }
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
   }
 
-  function handleRightResizeStart(e: React.MouseEvent) {
+  function handleRightResizeStart(e: React.PointerEvent<HTMLDivElement>) {
     e.preventDefault();
-    isResizingRightRef.current = true;
+    e.stopPropagation();
+    const handleEl = e.currentTarget;
+    try {
+      handleEl.setPointerCapture(e.pointerId);
+    } catch {}
+
+    setIsResizingSidebar(true);
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
 
-    function handleMouseMove(ev: MouseEvent) {
-      if (!isResizingRightRef.current) return;
+    let latestWidth = rightSidebarWidth;
+
+    function handlePointerMove(ev: PointerEvent) {
       const newW = Math.max(260, Math.min(600, window.innerWidth - ev.clientX));
+      latestWidth = newW;
       setRightSidebarWidth(newW);
-      localStorage.setItem("vse_right_panel_width", newW.toString());
     }
 
-    function handleMouseUp() {
-      isResizingRightRef.current = false;
+    function handlePointerUp(ev: PointerEvent) {
+      try {
+        if (handleEl.hasPointerCapture(ev.pointerId)) {
+          handleEl.releasePointerCapture(ev.pointerId);
+        }
+      } catch {}
+
+      setIsResizingSidebar(false);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      try {
+        localStorage.setItem("vse_right_panel_width", latestWidth.toString());
+      } catch {}
+
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
     }
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
   }
 
   const hover = useSelectionStore((s) => s.hover);
@@ -157,6 +253,7 @@ export default function EditorStudio() {
   const edits = useChangeSetStore((s) => s.edits);
   const recordEdit = useChangeSetStore((s) => s.recordEdit);
   const clearEdits = useChangeSetStore((s) => s.clear);
+  const canvasMode = useSettingsStore((s) => s.canvasMode);
   const uiScale = useSettingsStore((s) => s.uiScale);
   const increaseUiScale = useSettingsStore((s) => s.increaseUiScale);
   const decreaseUiScale = useSettingsStore((s) => s.decreaseUiScale);
@@ -476,13 +573,45 @@ export default function EditorStudio() {
     downloadHtml(versionFilename(entry.label, openFile.name), entry.html);
   }
 
+  function getCurrentExportHtml(): string {
+    if (!openFile) {
+      if (iframeEl?.contentDocument) {
+        try {
+          const clean = serializeCleanDocument(iframeEl.contentDocument);
+          if (clean && clean.trim().length > 0) return clean;
+        } catch {}
+      }
+      return "";
+    }
+
+    // 1. Prioritize pristine AST Splicing whenever edits exist
+    if (edits.length > 0) {
+      const saveEdits = edits.map(toSaveRequestEdit);
+      const res = applyEditsClientSide(openFile.content, saveEdits);
+      if (res.ok && res.html) {
+        return res.html;
+      }
+    } else {
+      // Zero edits made - return original pristine source directly (zero runtime script corruption)
+      return openFile.content;
+    }
+
+    // 2. Fallback to clean serialized DOM if AST splicing encountered conflicts
+    if (iframeEl?.contentDocument) {
+      try {
+        const clean = serializeCleanDocument(iframeEl.contentDocument);
+        if (clean && clean.trim().length > 0) {
+          return clean;
+        }
+      } catch {}
+    }
+
+    return openFile.content;
+  }
+
   async function handleCopyCode() {
     if (!openFile) return;
-    let code = openFile.content;
-    if (edits.length > 0) {
-      const res = applyEditsClientSide(openFile.content, edits.map(toSaveRequestEdit));
-      if (res.ok) code = res.html;
-    }
+    const code = getCurrentExportHtml();
     try {
       await navigator.clipboard.writeText(code);
       setStatusMessage("HTML copied to clipboard!");
@@ -492,11 +621,7 @@ export default function EditorStudio() {
 
   async function handleCopyJsx() {
     if (!openFile) return;
-    let code = openFile.content;
-    if (edits.length > 0) {
-      const res = applyEditsClientSide(openFile.content, edits.map(toSaveRequestEdit));
-      if (res.ok) code = res.html;
-    }
+    const code = getCurrentExportHtml();
     const cleanName = openFile.name.replace(/\.html?$/i, "").replace(/[^a-zA-Z0-9]/g, "_");
     const compName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1) || "ExportedComponent";
     const jsxCode = exportAsReactComponent(code, { componentName: compName, typescript: true });
@@ -534,37 +659,58 @@ export default function EditorStudio() {
 
   function handleSave() {
     if (!openFile) return;
-    const saveEdits = edits.map(toSaveRequestEdit);
 
-    // 100% In-Browser AST Splicing (0ms network latency!)
-    const result = applyEditsClientSide(openFile.content, saveEdits);
-    if (result.ok) {
-      setSaveConflicts(null);
-      const preSaveHtml = openFile.content;
-      setVersionHistory((prev) => [...prev, { id: nextVersionId(), label: buildPreSaveLabel(), html: preSaveHtml }]);
-      clearEdits();
-      useUndoStore.getState().reset();
-      setReviewOpen(false);
-      persistUpdatedHtml(openFile, result.html);
+    let updatedHtml = "";
+
+    // 1. Prioritize pristine AST Splicing whenever edits exist
+    if (edits.length > 0) {
+      const saveEdits = edits.map(toSaveRequestEdit);
+      const result = applyEditsClientSide(openFile.content, saveEdits);
+      if (result.ok && result.html) {
+        updatedHtml = result.html;
+      }
     } else {
-      setSaveConflicts(result.conflicts.map((c) => `${c.structuralPath} (${c.reason})`));
+      // Zero edits made - preserve pristine original content
+      updatedHtml = openFile.content;
     }
+
+    // 2. Fallback to clean serialized DOM if AST splicing encountered unresolved conflicts
+    if (!updatedHtml && iframeEl?.contentDocument) {
+      try {
+        updatedHtml = serializeCleanDocument(iframeEl.contentDocument);
+      } catch {}
+    }
+
+    if (!updatedHtml) {
+      updatedHtml = openFile.content;
+    }
+
+    setSaveConflicts(null);
+    const preSaveHtml = openFile.content;
+    setVersionHistory((prev) => [...prev, { id: nextVersionId(), label: buildPreSaveLabel(), html: preSaveHtml }]);
+    clearEdits();
+    useUndoStore.getState().reset();
+    setReviewOpen(false);
+    persistUpdatedHtml(openFile, updatedHtml);
   }
 
   // Keyboard Shortcuts (Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z / Delete / Duplicate / Escape / ? / Ctrl++ / Ctrl+-)
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      const activeEl = (e.target as HTMLElement) || document.activeElement;
-      const isTyping =
-        activeEl?.tagName === "INPUT" ||
-        activeEl?.tagName === "TEXTAREA" ||
-        activeEl?.tagName === "SELECT" ||
-        activeEl?.isContentEditable === true ||
-        activeEl?.getAttribute("contenteditable") === "true";
+      const targetEl = e.target instanceof HTMLElement ? e.target : (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+      const isTyping = Boolean(
+        targetEl && (
+          targetEl.tagName === "INPUT" ||
+          targetEl.tagName === "TEXTAREA" ||
+          targetEl.tagName === "SELECT" ||
+          targetEl.isContentEditable === true ||
+          (typeof targetEl.getAttribute === "function" && targetEl.getAttribute("contenteditable") === "true")
+        )
+      );
 
       if (e.key === "Escape") {
-        if (isTyping && activeEl && "blur" in activeEl) {
-          (activeEl as HTMLElement).blur();
+        if (isTyping && targetEl && "blur" in targetEl) {
+          targetEl.blur();
           return;
         }
         setSelectedEl(null);
@@ -586,6 +732,21 @@ export default function EditorStudio() {
       }
 
       const isModifier = e.metaKey || e.ctrlKey;
+
+      // Toggle UI Panels via Ctrl + \ (or Cmd + \)
+      if (isModifier && (e.key === "\\" || e.code === "Backslash") && !isTyping) {
+        e.preventDefault();
+        setUiPanelsVisible((v) => !v);
+        return;
+      }
+
+      // Keyboard Shortcuts popup via Ctrl + K (or Cmd + K)
+      if (isModifier && e.key.toLowerCase() === "k" && !isTyping) {
+        e.preventDefault();
+        setShortcutsOpen((o) => !o);
+        return;
+      }
+
       if (isModifier && e.key.toLowerCase() === "d" && !isTyping && selectedEl) {
         e.preventDefault();
         handleDuplicateElement(selectedEl);
@@ -660,11 +821,35 @@ export default function EditorStudio() {
     if (iframeEl?.contentDocument) {
       const doc = iframeEl.contentDocument;
       if (doc.documentElement) {
-        doc.documentElement.setAttribute("data-vse-viewport", mode);
+        doc.documentElement.setAttribute("data-vse-viewport", mode === "all" ? "desktop" : mode);
       }
       syncResponsiveStylesheet(doc);
     }
     setViewport(mode);
+    if (mode !== "all") {
+      setActivePreset(getDefaultPreset(mode));
+      setCustomDimensions(null);
+    }
+  }
+
+  function handleSelectPreset(preset: DevicePreset) {
+    setActivePreset(preset);
+    setCustomDimensions(null);
+    if (viewport !== preset.category && viewport !== "all") {
+      handleViewportChange(preset.category);
+    }
+  }
+
+  function handleApplyCustomDimensions(width: number, height: number) {
+    setCustomDimensions({ width, height });
+    const cat = getCategoryForWidth(width);
+    if (viewport !== cat && viewport !== "all") {
+      handleViewportChange(cat);
+    }
+  }
+
+  function handlePresetCategoryChange(cat: "desktop" | "tablet" | "mobile") {
+    handleViewportChange(cat);
   }
 
   // Effective viewport for the property panel: in "all" mode, default to "desktop" editing
@@ -677,7 +862,35 @@ export default function EditorStudio() {
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // The viewport the property panel should use
-  const propertyViewport = viewport === "all" ? activeEditViewport : (viewport as "desktop" | "tablet" | "mobile");
+  const effectiveCategory = customDimensions
+    ? getCategoryForWidth(customDimensions.width)
+    : viewport === "all"
+    ? activeEditViewport
+    : (viewport as "desktop" | "tablet" | "mobile");
+
+  const propertyViewport = effectiveCategory;
+
+  const isDesktop = effectiveCategory === "desktop";
+
+  const currentWidth = customDimensions
+    ? customDimensions.width
+    : activePreset && activePreset.width > 0
+    ? activePreset.width
+    : viewport === "tablet"
+    ? 768
+    : viewport === "mobile"
+    ? 390
+    : 1440;
+
+  const currentHeight = customDimensions
+    ? customDimensions.height
+    : activePreset && activePreset.height > 0
+    ? activePreset.height
+    : viewport === "tablet"
+    ? 1024
+    : viewport === "mobile"
+    ? 844
+    : 900;
 
   // Ctrl+Scroll Canvas Zoom handler (intercepts native browser page zoom)
   useEffect(() => {
@@ -761,6 +974,7 @@ export default function EditorStudio() {
         historyCount={versionHistory.length}
         onToggleHistory={() => setHistoryOpen((o) => !o)}
         onOpenReview={() => setReviewOpen(true)}
+        onOpenExport={() => setExportOpen(true)}
         onCopyCode={handleCopyCode}
         onCopyJsx={handleCopyJsx}
         iframeDocument={iframeEl?.contentDocument ?? null}
@@ -775,7 +989,7 @@ export default function EditorStudio() {
 
       <div className="flex flex-1 min-h-0 relative">
         {/* Left Sidebar: Layers Tree & Component Blocks */}
-        {openFile && leftSidebarOpen && (
+        {openFile && leftSidebarOpen && uiPanelsVisible && (
           <aside
             style={{ width: `${leftSidebarWidth}px` }}
             className="border-r border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl animate-in slide-in-from-left-4 duration-200 relative"
@@ -858,10 +1072,10 @@ export default function EditorStudio() {
         )}
 
         {/* Left Sidebar Drag Resize Handle */}
-        {openFile && leftSidebarOpen && (
+        {openFile && leftSidebarOpen && uiPanelsVisible && (
           <div
-            onMouseDown={handleLeftResizeStart}
-            className="w-1.5 hover:w-2.5 bg-transparent hover:bg-[#0099ff]/40 active:bg-[#0099ff] cursor-col-resize z-30 transition-colors group shrink-0 relative flex items-center justify-center -ml-1 select-none"
+            onPointerDown={handleLeftResizeStart}
+            className="w-1.5 hover:w-2.5 bg-transparent hover:bg-[#0099ff]/40 active:bg-[#0099ff] cursor-col-resize z-30 transition-colors group shrink-0 relative flex items-center justify-center -ml-1 select-none touch-none"
             title="Drag to resize left panel"
           >
             <div className="w-0.5 h-10 bg-slate-300 dark:bg-[#333333] group-hover:bg-[#0099ff] rounded-full transition-colors" />
@@ -880,7 +1094,6 @@ export default function EditorStudio() {
                 style={{
                   transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
                   transformOrigin: "center center",
-                  transition: isPanningRef.current ? "none" : "transform 0.15s ease-out",
                 }}
                 className="w-full h-full flex items-center justify-center"
               >
@@ -948,57 +1161,81 @@ export default function EditorStudio() {
                   </div>
                 ) : (
                   /* ========== Single Viewport ========== */
-                  <div className="w-full h-full flex flex-col items-center justify-center relative">
-                    {viewport !== "desktop" && (
-                      <div className="mb-2 px-3 py-1 rounded-full bg-white/90 dark:bg-[#141414]/90 border border-slate-200 dark:border-[#262626] text-[11px] font-mono text-slate-600 dark:text-zinc-400 flex items-center gap-1.5 shadow-md select-none shrink-0">
-                        <span>{viewport === "tablet" ? "Tablet View" : "Mobile View"}</span>
-                        <span className="text-slate-400 dark:text-zinc-600">•</span>
-                        <span className="text-[#0099ff] font-semibold">
-                          {viewport === "tablet" ? "768 × 1024" : "375 × 812"}
-                        </span>
+                  <div className="w-full h-full flex items-center justify-center relative">
+                    {/* Floating Device Preset HUD Capsule */}
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+                      <DevicePresetDropdown
+                        category={effectiveCategory}
+                        activePreset={activePreset}
+                        customDimensions={customDimensions}
+                        onSelectPreset={handleSelectPreset}
+                        onApplyCustomDimensions={handleApplyCustomDimensions}
+                        onCategoryChange={handlePresetCategoryChange}
+                      />
+                    </div>
+
+                    {isDesktop ? (
+                      /* Desktop: 100% Fullscreen, Edge-to-Edge, Never a second screen or window frame */
+                      <div className="w-full h-full bg-white relative flex flex-col overflow-hidden">
+                        <div className="flex-1 w-full h-full relative overflow-hidden">
+                          <PreviewFrame
+                            key={loadToken}
+                            html={openFile.content}
+                            onIframeReady={setIframeEl}
+                            onHoverElement={handleHoverElement}
+                            onSelectElement={handleSelectElement}
+                            onDragOverTarget={setDropTargetInfo}
+                            onDropOnTarget={handleDropOnTarget}
+                            onMoveLayerOnTarget={handleMoveElement}
+                            onTextEdit={handleDirectTextEdit}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      /* Tablet and Mobile: Centered Device Bezels */
+                      <div
+                        style={{
+                          width: `${currentWidth}px`,
+                          height: `${currentHeight}px`,
+                        }}
+                        className={`bg-white relative transition-all duration-300 shadow-2xl flex flex-col ${
+                          effectiveCategory === "tablet"
+                            ? "rounded-2xl border-[8px] border-slate-900 dark:border-[#1c1c1c] overflow-hidden shrink-0"
+                            : "rounded-[2.5rem] border-[10px] border-slate-900 dark:border-[#1c1c1c] overflow-hidden shrink-0"
+                        }`}
+                      >
+                        {/* Phone Notch/Speaker */}
+                        {effectiveCategory === "mobile" && (
+                          <div className="w-full bg-white flex justify-center pt-2 pb-1 z-10 shrink-0">
+                            <div className="w-24 h-4 bg-[#141414] rounded-full flex items-center justify-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-[#262626]"></div>
+                              <div className="w-10 h-1.5 rounded-full bg-[#262626]"></div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex-1 w-full h-full relative overflow-hidden">
+                          <PreviewFrame
+                            key={loadToken}
+                            html={openFile.content}
+                            onIframeReady={setIframeEl}
+                            onHoverElement={handleHoverElement}
+                            onSelectElement={handleSelectElement}
+                            onDragOverTarget={setDropTargetInfo}
+                            onDropOnTarget={handleDropOnTarget}
+                            onMoveLayerOnTarget={handleMoveElement}
+                            onTextEdit={handleDirectTextEdit}
+                          />
+                        </div>
+
+                        {/* Phone Home Bar */}
+                        {effectiveCategory === "mobile" && (
+                          <div className="w-full bg-white py-1 flex justify-center z-10 shrink-0">
+                            <div className="w-28 h-1 bg-black/40 rounded-full"></div>
+                          </div>
+                        )}
                       </div>
                     )}
-
-                    <div
-                      className={`bg-white relative transition-all duration-300 shadow-2xl flex flex-col ${
-                        viewport === "desktop"
-                          ? "w-full h-full"
-                          : viewport === "tablet"
-                          ? "w-[768px] h-[calc(100vh-10rem)] max-h-[1024px] rounded-2xl border-[8px] border-slate-900 dark:border-[#1c1c1c] shadow-2xl overflow-hidden shrink-0"
-                          : "w-[375px] h-[calc(100vh-10rem)] max-h-[812px] rounded-[2.5rem] border-[10px] border-slate-900 dark:border-[#1c1c1c] shadow-2xl overflow-hidden shrink-0"
-                      }`}
-                    >
-                      {/* Phone Notch/Speaker */}
-                      {viewport === "mobile" && (
-                        <div className="w-full bg-white flex justify-center pt-2 pb-1 z-10 shrink-0">
-                          <div className="w-24 h-4 bg-[#141414] rounded-full flex items-center justify-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#262626]"></div>
-                            <div className="w-10 h-1.5 rounded-full bg-[#262626]"></div>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="flex-1 w-full h-full relative overflow-hidden">
-                        <PreviewFrame
-                          key={loadToken}
-                          html={openFile.content}
-                          onIframeReady={setIframeEl}
-                          onHoverElement={handleHoverElement}
-                          onSelectElement={handleSelectElement}
-                          onDragOverTarget={setDropTargetInfo}
-                          onDropOnTarget={handleDropOnTarget}
-                          onMoveLayerOnTarget={handleMoveElement}
-                          onTextEdit={handleDirectTextEdit}
-                        />
-                      </div>
-
-                      {/* Phone Home Bar */}
-                      {viewport === "mobile" && (
-                        <div className="w-full bg-white py-1 flex justify-center z-10 shrink-0">
-                          <div className="w-28 h-1 bg-black/40 rounded-full"></div>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 )}
               </div>
@@ -1020,9 +1257,9 @@ export default function EditorStudio() {
         {/* Highlight & Drop Overlay */}
         <SelectionOverlay
           iframe={iframeEl}
-          hoveredElement={hoveredEl}
-          selectedElement={selectedEl}
-          dropTargetInfo={dropTargetInfo}
+          hoveredElement={canvasMode === "interact" ? null : hoveredEl}
+          selectedElement={canvasMode === "interact" ? null : selectedEl}
+          dropTargetInfo={canvasMode === "interact" ? null : dropTargetInfo}
           structuralPath={selectedPath}
           theme={theme}
           zoom={zoom}
@@ -1033,18 +1270,23 @@ export default function EditorStudio() {
         />
 
         {/* Right Sidebar Drag Resize Handle */}
-        {openFile && (
+        {openFile && uiPanelsVisible && (
           <div
-            onMouseDown={handleRightResizeStart}
-            className="w-1.5 hover:w-2.5 bg-transparent hover:bg-[#0099ff]/40 active:bg-[#0099ff] cursor-col-resize z-30 transition-colors group shrink-0 relative flex items-center justify-center -mr-1 select-none"
+            onPointerDown={handleRightResizeStart}
+            className="w-1.5 hover:w-2.5 bg-transparent hover:bg-[#0099ff]/40 active:bg-[#0099ff] cursor-col-resize z-30 transition-colors group shrink-0 relative flex items-center justify-center -mr-1 select-none touch-none"
             title="Drag to resize property panel"
           >
             <div className="w-0.5 h-10 bg-slate-300 dark:bg-[#333333] group-hover:bg-[#0099ff] rounded-full transition-colors" />
           </div>
         )}
 
+        {/* Global Transparent Drag Backdrop to prevent pointer events being captured by iframes */}
+        {isResizingSidebar && (
+          <div className="fixed inset-0 z-50 cursor-col-resize select-none pointer-events-auto" />
+        )}
+
         {/* Right Sidebar: Property Panel */}
-        {openFile && (
+        {openFile && uiPanelsVisible && (
           <aside
             style={{ width: `${rightSidebarWidth}px` }}
             className="border-l border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl"
@@ -1067,6 +1309,23 @@ export default function EditorStudio() {
         )}
       </div>
 
+      {/* Hidden Panels Quick Restore Pill */}
+      {!uiPanelsVisible && openFile && (
+        <div className="fixed bottom-4 left-4 z-40 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <button
+            type="button"
+            onClick={() => setUiPanelsVisible(true)}
+            className="px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-[#141414]/90 hover:bg-slate-100 dark:hover:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] text-xs text-slate-700 dark:text-zinc-300 font-mono shadow-2xl backdrop-blur-md flex items-center gap-2 cursor-pointer transition-all hover:border-[#0099ff]/50"
+            title="Show Panels (Ctrl+\)"
+          >
+            <span>UI Panels Hidden</span>
+            <kbd className="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-[#262626] text-[10px] text-slate-800 dark:text-zinc-300 font-mono font-semibold">
+              Ctrl + \
+            </kbd>
+          </button>
+        </div>
+      )}
+
       {/* Review Modal */}
       {reviewOpen && (
         <ReviewModal
@@ -1074,6 +1333,17 @@ export default function EditorStudio() {
           onSave={handleSave}
           onClose={() => setReviewOpen(false)}
           onDiscardAll={handleDiscardAll}
+        />
+      )}
+
+      {/* Export Studio Modal */}
+      {exportOpen && (
+        <ExportStudioModal
+          isOpen={exportOpen}
+          onClose={() => setExportOpen(false)}
+          html={getCurrentExportHtml()}
+          fileName={openFile?.name}
+          iframeDocument={iframeEl?.contentDocument ?? null}
         />
       )}
 

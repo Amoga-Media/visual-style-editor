@@ -315,8 +315,8 @@ export default function EffectsGroup({
           <ValueInput
             amount={scale}
             unit="%"
-            min={25}
-            max={200}
+            min={10}
+            max={500}
             step={5}
             allowedUnits={["%"]}
             property="scale"
@@ -328,14 +328,42 @@ export default function EffectsGroup({
         </div>
         <input
           type="range"
-          min={25}
-          max={200}
+          min={10}
+          max={300}
           step={5}
           value={scale}
           onChange={(e) => handleScaleChange(parseFloat(e.target.value))}
           onPointerUp={() => handleScaleCommit(scale)}
           className="w-full accent-[#0099ff] cursor-pointer"
         />
+        {/* Scale Quick Multiplier Pills */}
+        <div className="grid grid-cols-7 gap-1 pt-1">
+          {[
+            { label: "0.5x", pct: 50 },
+            { label: "0.75x", pct: 75 },
+            { label: "1x", pct: 100 },
+            { label: "1.25x", pct: 125 },
+            { label: "1.5x", pct: 150 },
+            { label: "2x", pct: 200 },
+            { label: "3x", pct: 300 },
+          ].map((m) => (
+            <button
+              key={m.label}
+              type="button"
+              onClick={() => {
+                handleScaleChange(m.pct);
+                handleScaleCommit(m.pct);
+              }}
+              className={`py-0.5 text-[10px] font-mono rounded transition-all cursor-pointer text-center ${
+                scale === m.pct
+                  ? "bg-[#0099ff]/20 text-[#0099ff] border border-[#0099ff]/40 font-semibold"
+                  : "bg-[#141414] hover:bg-[#1c1c1c] text-zinc-400 hover:text-white border border-[#262626]"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -22,6 +22,8 @@ import {
   Sun,
   Moon,
   LayoutPanelTop,
+  MousePointerClick,
+  Play,
 } from "lucide-react";
 
 export type ViewportMode = "desktop" | "tablet" | "mobile" | "all";
@@ -35,6 +37,7 @@ interface ToolbarProps {
   historyCount: number;
   onToggleHistory: () => void;
   onOpenReview: () => void;
+  onOpenExport?: () => void;
   onCopyCode?: () => void;
   onCopyJsx?: () => void;
   iframeDocument: Document | null;
@@ -56,6 +59,7 @@ export default function Toolbar({
   historyCount,
   onToggleHistory,
   onOpenReview,
+  onOpenExport,
   onCopyCode,
   onCopyJsx,
   iframeDocument,
@@ -71,6 +75,8 @@ export default function Toolbar({
   const toggleSnap = useSettingsStore((s) => s.toggleSnap);
   const appTheme = useSettingsStore((s) => s.appTheme);
   const toggleAppTheme = useSettingsStore((s) => s.toggleAppTheme);
+  const canvasMode = useSettingsStore((s) => s.canvasMode);
+  const setCanvasMode = useSettingsStore((s) => s.setCanvasMode);
   const edits = useChangeSetStore((s) => s.edits);
   const past = useUndoStore((s) => s.past);
   const future = useUndoStore((s) => s.future);
@@ -165,6 +171,38 @@ export default function Toolbar({
               title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
             >
               <Redo className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Canvas Mode: Edit vs Interact */}
+          <div className="hidden sm:flex items-center bg-slate-100 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-full p-0.5">
+            <button
+              type="button"
+              onClick={() => setCanvasMode("edit")}
+              aria-label="Edit Mode"
+              className={`px-2 py-1 rounded-full text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                canvasMode === "edit"
+                  ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] font-semibold shadow-xs"
+                  : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+              }`}
+              title="Visual Edit Mode (Select, Drag, and Style Elements)"
+            >
+              <MousePointerClick className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Edit</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setCanvasMode("interact")}
+              aria-label="Interactive Preview Mode"
+              className={`px-2 py-1 rounded-full text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                canvasMode === "interact"
+                  ? "bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold shadow-xs"
+                  : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+              }`}
+              title="Interactive Preview Mode (Test Accordions, Links, Modals, Menus)"
+            >
+              <Play className="w-3 h-3 fill-current" />
+              <span className="hidden md:inline">Interact</span>
             </button>
           </div>
 
@@ -331,6 +369,18 @@ export default function Toolbar({
                 title="Keyboard Shortcuts (?)"
               >
                 <HelpCircle className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {onOpenExport && (
+              <button
+                type="button"
+                onClick={onOpenExport}
+                className="px-3.5 py-1 rounded-full bg-gradient-to-r from-[#0099ff] to-[#6366f1] hover:from-[#0088e6] hover:to-[#5254e0] text-white font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-md"
+                title="Open Export Studio (HTML, React, Next.js, Astro, PNG)"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Export Studio</span>
               </button>
             )}
 

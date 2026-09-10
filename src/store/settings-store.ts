@@ -1,14 +1,17 @@
 import { create } from "zustand";
 
 export type AppTheme = "dark" | "light";
+export type CanvasMode = "edit" | "interact";
 
 interface SettingsState {
   snapToDefaultScale: boolean;
   appTheme: AppTheme;
+  canvasMode: CanvasMode;
   uiScale: number;
   toggleSnap(): void;
   setAppTheme(theme: AppTheme): void;
   toggleAppTheme(): void;
+  setCanvasMode(mode: CanvasMode): void;
   setUiScale(scale: number): void;
   increaseUiScale(): void;
   decreaseUiScale(): void;
@@ -27,9 +30,11 @@ function getInitialTheme(): AppTheme {
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   snapToDefaultScale: false,
   appTheme: getInitialTheme(),
+  canvasMode: "edit",
   uiScale: 1.0,
 
   toggleSnap: () => set((s) => ({ snapToDefaultScale: !s.snapToDefaultScale })),
+  setCanvasMode: (mode: CanvasMode) => set({ canvasMode: mode }),
 
   setAppTheme: (theme: AppTheme) => {
     if (typeof document !== "undefined") {
