@@ -25,33 +25,43 @@ import Breadcrumbs from "./Breadcrumbs";
 import LayersTree from "./LayersTree";
 import BasicComponents from "./BasicComponents";
 import ComponentBlocks from "./ComponentBlocks";
+import PagesPanel from "./PagesPanel";
+import ProjectConfigModal from "./ProjectConfigModal";
 import KeyboardShortcutsModal from "./KeyboardShortcutsModal";
 import ExportStudioModal from "./ExportStudioModal";
 import DevicePresetDropdown from "./DevicePresetDropdown";
 import ErrorBoundary from "./ErrorBoundary";
-import { type DevicePreset, getDefaultPreset, getCategoryForWidth } from "@/lib/dom/device-presets";
-import { AlertTriangle, X, Layers, PlusSquare, PanelLeftClose, Sparkles } from "lucide-react";
+import { type DevicePreset, DEVICE_PRESETS, getDefaultPreset, getCategoryForWidth } from "@/lib/dom/device-presets";
+import { useWorkspaceStore } from "@/store/workspace-store";
+import { type IngestedProject, readDirectoryHandle, processDroppedFileList } from "@/lib/fs/directory-picker";
+import { AlertTriangle, X, Layers, PlusSquare, PanelLeftClose, PanelLeftOpen, Sparkles, FileText, Files, Maximize2, Scaling, Eye } from "lucide-react";
 
 const EMPTY_THEME: ThemeMap = { mode: "none", colors: [], fonts: [] };
 
 export function serializeCleanDocument(doc: Document): string {
   const docClone = doc.cloneNode(true) as Document;
 
-  // 1. Remove editor-only helper styles
+  // 1. Remove editor-only helper styles and scripts
   const helperStyle = docClone.getElementById("vse-editor-helper-styles");
   if (helperStyle) helperStyle.remove();
+  const tailwindRuntime = docClone.getElementById("vse-tailwind-runtime");
+  if (tailwindRuntime) tailwindRuntime.remove();
 
   // 2. Remove temporary editor-injected markers and attributes
   docClone.querySelectorAll("[contenteditable]").forEach((el) => {
     el.removeAttribute("contenteditable");
   });
-  docClone.querySelectorAll("[data-vse-hovered], [data-vse-selected], [data-vse-drop-target], [data-vse-drag-over], [data-vse-move-token], [data-vse-viewport]").forEach((el) => {
+  docClone.querySelectorAll("[data-vse-broken-handled]").forEach((el) => {
+    el.removeAttribute("data-vse-broken-handled");
+  });
+  docClone.querySelectorAll("[data-vse-hovered], [data-vse-selected], [data-vse-drop-target], [data-vse-drag-over], [data-vse-move-token], [data-vse-viewport], [data-vse-path]").forEach((el) => {
     el.removeAttribute("data-vse-hovered");
     el.removeAttribute("data-vse-selected");
     el.removeAttribute("data-vse-drop-target");
     el.removeAttribute("data-vse-drag-over");
     el.removeAttribute("data-vse-move-token");
     el.removeAttribute("data-vse-viewport");
+    el.removeAttribute("data-vse-path");
   });
 
   // 3. Ensure responsive stylesheet contains clean standalone media queries
@@ -128,15 +138,47 @@ export default function EditorStudio() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [versionHistory, setVersionHistory] = useState<VersionEntry[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [configModalOpen, setConfigModalOpen] = useState(false);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
-  const [leftSidebarTab, setLeftSidebarTab] = useState<"layers" | "primitives" | "templates">("layers");
+  const [leftSidebarTab, setLeftSidebarTab] = useState<"pages" | "layers" | "primitives" | "templates">("pages");
   const [zoom, setZoom] = useState(1);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [uiPanelsVisible, setUiPanelsVisible] = useState(true);
   const [activePreset, setActivePreset] = useState<DevicePreset>(() => getDefaultPreset("desktop"));
   const [customDimensions, setCustomDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [dimensionsCapsulePos, setDimensionsCapsulePos] = useState<{ x: number; y: number } | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("vse_dimensions_pos");
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return null;
+  });
+  const [isDimensionsCapsuleHidden, setIsDimensionsCapsuleHidden] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("vse_dimensions_hidden") === "true";
+    }
+    return false;
+  });
+  const [isDraggingCapsule, setIsDraggingCapsule] = useState(false);
+  const capsuleContainerRef = useRef<HTMLDivElement | null>(null);
+  const capsuleDragStartRef = useRef<{ startX: number; startY: number; initX: number; initY: number } | null>(null);
+  const [canvasGutter, setCanvasGutter] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("vse_canvas_gutter");
+      if (saved !== null) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 0 && parsed <= 200) return parsed;
+      }
+    }
+    return 0; // Default 0: Eliminate black space outside the canvas
+  });
+  const [gutterToast, setGutterToast] = useState<string | null>(null);
+  const [isResizingArtboard, setIsResizingArtboard] = useState(false);
   const versionIdRef = useRef(0);
+  const projectConfig = useWorkspaceStore((s) => s.projectConfig);
 
   // Resizable Sidebars Width State
   const [leftSidebarWidth, setLeftSidebarWidth] = useState<number>(() => {
@@ -251,6 +293,64 @@ export default function EditorStudio() {
     window.addEventListener("pointercancel", handlePointerUp);
   }
 
+  function handleCapsuleDragStart(e: React.PointerEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const el = capsuleContainerRef.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    capsuleDragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initX: dimensionsCapsulePos ? dimensionsCapsulePos.x : rect.left,
+      initY: dimensionsCapsulePos ? dimensionsCapsulePos.y : rect.top,
+    };
+    setIsDraggingCapsule(true);
+
+    function handlePointerMove(ev: PointerEvent) {
+      if (!capsuleDragStartRef.current) return;
+      const dx = ev.clientX - capsuleDragStartRef.current.startX;
+      const dy = ev.clientY - capsuleDragStartRef.current.startY;
+      const newX = Math.max(10, Math.min(window.innerWidth - 260, capsuleDragStartRef.current.initX + dx));
+      const newY = Math.max(50, Math.min(window.innerHeight - 70, capsuleDragStartRef.current.initY + dy));
+      const pos = { x: newX, y: newY };
+      setDimensionsCapsulePos(pos);
+      try {
+        localStorage.setItem("vse_dimensions_pos", JSON.stringify(pos));
+      } catch {}
+    }
+
+    function handlePointerUp() {
+      setIsDraggingCapsule(false);
+      capsuleDragStartRef.current = null;
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+    }
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
+  }
+
+  function handleResetCapsulePosition() {
+    setDimensionsCapsulePos(null);
+    try {
+      localStorage.removeItem("vse_dimensions_pos");
+    } catch {}
+  }
+
+  function handleToggleDimensionsCapsule() {
+    setIsDimensionsCapsuleHidden((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("vse_dimensions_hidden", String(next));
+      } catch {}
+      return next;
+    });
+  }
+
   const hover = useSelectionStore((s) => s.hover);
   const select = useSelectionStore((s) => s.select);
   const edits = useChangeSetStore((s) => s.edits);
@@ -261,6 +361,52 @@ export default function EditorStudio() {
   const increaseUiScale = useSettingsStore((s) => s.increaseUiScale);
   const decreaseUiScale = useSettingsStore((s) => s.decreaseUiScale);
   const resetUiScale = useSettingsStore((s) => s.resetUiScale);
+
+  // Auto-restore persisted workspace session on initial mount
+  useEffect(() => {
+    const didRestore = useWorkspaceStore.getState().loadPersistedSession();
+    if (didRestore) {
+      const active = useWorkspaceStore.getState().getActiveFile();
+      if (active) {
+        setOpenFile({
+          name: active.name,
+          content: active.content,
+          handle: null,
+        });
+        setLoadToken((t) => t + 1);
+        versionIdRef.current = 0;
+        setVersionHistory(
+          active.versionHistory || [{ id: 1, label: "Restored Session", html: active.content }]
+        );
+        try {
+          const data = analyzeHtmlClientSide(active.content, useWorkspaceStore.getState().projectConfig);
+          setTheme(data.theme);
+        } catch {
+          setTheme(EMPTY_THEME);
+        }
+        setStatusMessage(`Restored ${useWorkspaceStore.getState().files.length} pages from previous session`);
+      }
+    }
+  }, []);
+
+  // Save active document state on beforeunload
+  useEffect(() => {
+    function handleBeforeUnload() {
+      const currentFileId = useWorkspaceStore.getState().activeFileId;
+      if (currentFileId && iframeEl?.contentDocument) {
+        const currentEdits = useChangeSetStore.getState().edits;
+        if (currentEdits.length > 0) {
+          const cleanHtml = serializeCleanDocument(iframeEl.contentDocument);
+          useWorkspaceStore.getState().syncActiveFileState(currentFileId, {
+            edits: currentEdits,
+            content: cleanHtml,
+          });
+        }
+      }
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [iframeEl]);
 
   function nextVersionId(): number {
     versionIdRef.current += 1;
@@ -285,27 +431,235 @@ export default function EditorStudio() {
     useUndoStore.getState().reset();
   }
 
+  function handleProjectLoaded(project: IngestedProject) {
+    resetSessionState();
+    useWorkspaceStore.getState().resetWorkspace();
+
+    if (project.tailwindConfig) {
+      useWorkspaceStore.getState().setTailwindConfig(project.tailwindConfig);
+    }
+    if (project.customStyles) {
+      useWorkspaceStore.getState().setCustomStyles(project.customStyles);
+    }
+
+    if (project.htmlFiles.length > 0) {
+      useWorkspaceStore.getState().addFiles(project.htmlFiles);
+      const firstFile = project.htmlFiles[0];
+      setOpenFile({
+        name: firstFile.name,
+        content: firstFile.content,
+        handle: firstFile.handle,
+      });
+      setLoadToken((t) => t + 1);
+      versionIdRef.current = 0;
+      setVersionHistory([{ id: nextVersionId(), label: "Original (as opened)", html: firstFile.content }]);
+
+      try {
+        const data = analyzeHtmlClientSide(firstFile.content, useWorkspaceStore.getState().projectConfig);
+        setTheme(data.theme);
+      } catch {
+        setTheme(EMPTY_THEME);
+      }
+    } else {
+      // Config/CSS only uploaded without HTML files: create a default starter page so user can immediately style with their theme!
+      const defaultStarterHtml = `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-8">
+  <div class="max-w-2xl text-center space-y-4">
+    <h1 class="text-4xl font-bold">Custom Theme Workspace</h1>
+    <p class="text-slate-400">Your custom Tailwind config and styles are active across the project.</p>
+  </div>
+</body>
+</html>`;
+      const id = useWorkspaceStore.getState().addFile({ name: "index.html", content: defaultStarterHtml });
+      setOpenFile({ name: "index.html", content: defaultStarterHtml, handle: null });
+      setLoadToken((t) => t + 1);
+      versionIdRef.current = 0;
+      setVersionHistory([{ id: nextVersionId(), label: "Original (as opened)", html: defaultStarterHtml }]);
+      try {
+        const data = analyzeHtmlClientSide(defaultStarterHtml, useWorkspaceStore.getState().projectConfig);
+        setTheme(data.theme);
+      } catch {
+        setTheme(EMPTY_THEME);
+      }
+    }
+
+    setStatusMessage(`Loaded project with ${useWorkspaceStore.getState().files.length} pages.`);
+  }
+
   function handleFileLoaded(file: LoadedFile, warning?: string) {
     resetSessionState();
+    useWorkspaceStore.getState().resetWorkspace();
+    useWorkspaceStore.getState().addFile({
+      name: file.name,
+      content: file.content,
+      handle: file.handle,
+    });
     setOpenFile(file);
     setLoadToken((t) => t + 1);
     versionIdRef.current = 0;
     setVersionHistory([{ id: nextVersionId(), label: "Original (as opened)", html: file.content }]);
     if (warning) setStatusMessage(warning);
 
-    // 100% In-Browser AST Theme Analysis (0ms network latency!)
+    // 100% In-Browser AST Theme Analysis
     try {
-      const data = analyzeHtmlClientSide(file.content);
+      const data = analyzeHtmlClientSide(file.content, useWorkspaceStore.getState().projectConfig);
       setTheme(data.theme);
     } catch {
       setTheme(EMPTY_THEME);
     }
   }
 
+  function handleSwitchPage(nextFileId: string) {
+    const currentFileId = useWorkspaceStore.getState().activeFileId;
+    const currentFile = useWorkspaceStore.getState().files.find((f) => f.id === currentFileId);
+
+    // 1. Flush current in-memory edits & document state to workspace store
+    if (currentFileId && iframeEl?.contentDocument) {
+      const currentEdits = useChangeSetStore.getState().edits;
+      const undoPast = useUndoStore.getState().past;
+      const undoFuture = useUndoStore.getState().future;
+      const cleanHtml = serializeCleanDocument(iframeEl.contentDocument);
+
+      useWorkspaceStore.getState().syncActiveFileState(currentFileId, {
+        edits: currentEdits,
+        undoPast,
+        undoFuture,
+        versionHistory,
+        content: currentEdits.length > 0 ? cleanHtml : currentFile?.content,
+      });
+    }
+
+    // 2. Switch active file in workspace store
+    useWorkspaceStore.getState().switchActiveFile(nextFileId);
+    const nextFile = useWorkspaceStore.getState().files.find((f) => f.id === nextFileId);
+    if (!nextFile) return;
+
+    // 3. Reset canvas selection & UI state
+    setHoveredEl(null);
+    setSelectedEl(null);
+    setSelectedPath(null);
+    setDropTargetInfo(null);
+    setReviewOpen(false);
+    setSaveConflicts(null);
+    hover(null);
+    select(null);
+    clearResponsiveRegistry();
+
+    // 4. Mount new file & restore page-specific edits
+    setOpenFile({
+      name: nextFile.name,
+      content: nextFile.content,
+      handle: nextFile.handle,
+    });
+    setLoadToken((t) => t + 1);
+
+    clearEdits();
+    if (nextFile.edits && nextFile.edits.length > 0) {
+      for (const edit of nextFile.edits) {
+        recordEdit(edit);
+      }
+    }
+
+    setVersionHistory(
+      nextFile.versionHistory || [{ id: nextVersionId(), label: "Original (as opened)", html: nextFile.content }]
+    );
+
+    try {
+      const data = analyzeHtmlClientSide(nextFile.content, useWorkspaceStore.getState().projectConfig);
+      setTheme(data.theme);
+    } catch {
+      setTheme(EMPTY_THEME);
+    }
+  }
+
+  async function handleSaveAll() {
+    const files = useWorkspaceStore.getState().files;
+    const dirtyFiles = files.filter(
+      (f) => f.isDirty || (f.id === useWorkspaceStore.getState().activeFileId && edits.length > 0)
+    );
+
+    if (dirtyFiles.length === 0) {
+      setStatusMessage("All workspace pages are up to date.");
+      return;
+    }
+
+    let savedCount = 0;
+    for (const f of dirtyFiles) {
+      let finalHtml = f.content;
+      if (f.id === useWorkspaceStore.getState().activeFileId && iframeEl?.contentDocument) {
+        finalHtml = serializeCleanDocument(iframeEl.contentDocument);
+      }
+
+      let savedInPlace = false;
+      if (f.handle) {
+        try {
+          const permitted = await ensureWritePermission(f.handle);
+          if (permitted) {
+            await writeToHandle(f.handle, finalHtml);
+            savedInPlace = true;
+          }
+        } catch {}
+      }
+
+      if (!savedInPlace) {
+        downloadHtml(finalHtml, f.name);
+      }
+
+      useWorkspaceStore.getState().markFileSaved(f.id, finalHtml);
+      savedCount++;
+    }
+
+    clearEdits();
+    setStatusMessage(`Saved ${savedCount} workspace pages!`);
+    setTimeout(() => setStatusMessage(null), 3500);
+  }
+
+  async function handleFolderPicker() {
+    if (typeof window !== "undefined" && "showDirectoryPicker" in window) {
+      try {
+        const dirHandle = await (window as any).showDirectoryPicker();
+        if (dirHandle) {
+          const project = await readDirectoryHandle(dirHandle);
+          if (project.htmlFiles.length > 0 || project.tailwindConfig || project.customStyles) {
+            handleProjectLoaded(project);
+          }
+        }
+      } catch (err: any) {
+        if (err?.name === "AbortError") return;
+      }
+    }
+  }
+
+  function handleFilesPicker() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.multiple = true;
+    input.accept = ".html,.htm,.css,.js,.cjs,.mjs,.ts,.json";
+    input.onchange = async (e: any) => {
+      const files = Array.from(e.target.files || []) as File[];
+      if (files.length > 0) {
+        const project = await processDroppedFileList(files);
+        if (project.htmlFiles.length > 0) {
+          useWorkspaceStore.getState().addFiles(project.htmlFiles);
+          if (project.tailwindConfig) useWorkspaceStore.getState().setTailwindConfig(project.tailwindConfig);
+          if (project.customStyles) useWorkspaceStore.getState().setCustomStyles(project.customStyles);
+          setStatusMessage(`Added ${project.htmlFiles.length} pages to workspace.`);
+        }
+      }
+    };
+    input.click();
+  }
+
   function handleChangeFile() {
     if (edits.length > 0 && !window.confirm("You have unsaved edits that will be lost. Drop a different file anyway?")) {
       return;
     }
+    useWorkspaceStore.getState().resetWorkspace();
     setOpenFile(null);
     setIframeEl(null);
     setTheme(EMPTY_THEME);
@@ -615,10 +969,14 @@ export default function EditorStudio() {
       return "";
     }
 
-    // 1. Prioritize pristine AST Splicing whenever edits exist and can be cleanly applied
-    if (edits.length > 0) {
+    const responsiveCss = generateResponsiveCssString();
+
+    // 1. Prioritize pristine AST Splicing whenever edits or responsive styles exist and can be cleanly applied
+    if (edits.length > 0 || (responsiveCss && responsiveCss.trim().length > 0)) {
       const saveEdits = edits.map(toSaveRequestEdit);
-      const res = applyEditsClientSide(openFile.content, saveEdits);
+      const res = applyEditsClientSide(openFile.content, saveEdits, {
+        responsiveCss,
+      });
       if (res.ok && res.html && (!res.conflicts || res.conflicts.length === 0)) {
         return res.html;
       }
@@ -744,10 +1102,29 @@ export default function EditorStudio() {
           targetEl.blur();
           return;
         }
+        if (exportOpen) {
+          setExportOpen(false);
+          return;
+        }
+        if (configModalOpen) {
+          setConfigModalOpen(false);
+          return;
+        }
+        if (reviewOpen) {
+          setReviewOpen(false);
+          return;
+        }
+        if (shortcutsOpen) {
+          setShortcutsOpen(false);
+          return;
+        }
+        if (historyOpen) {
+          setHistoryOpen(false);
+          return;
+        }
         setSelectedEl(null);
         setSelectedPath(null);
         select(null);
-        setShortcutsOpen(false);
         return;
       }
 
@@ -930,13 +1307,32 @@ export default function EditorStudio() {
     ? 844
     : 900;
 
-  // Ctrl+Scroll Canvas Zoom handler (intercepts native browser page zoom)
+  // Ctrl+Scroll Canvas Zoom handler & Ctrl+Shift+Scroll Empty Space (Gutter) handler
   useEffect(() => {
+    let toastTimer: ReturnType<typeof setTimeout> | null = null;
+
     function handleWheel(e: WheelEvent) {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.05 : 0.05;
-        setZoom((z) => Math.min(Math.max(Number((z + delta).toFixed(2)), 0.25), 3));
+
+        if (e.shiftKey) {
+          // Ctrl + Shift + Scroll: Adjust black empty space around the canvas
+          const deltaGutter = e.deltaY > 0 ? 8 : -8;
+          setCanvasGutter((prev) => {
+            const next = Math.max(0, Math.min(160, prev + deltaGutter));
+            try {
+              localStorage.setItem("vse_canvas_gutter", next.toString());
+            } catch {}
+            setGutterToast(next === 0 ? "Empty Space: 0px (Flush Edge-to-Edge)" : `Empty Space: ${next}px`);
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => setGutterToast(null), 1500);
+            return next;
+          });
+        } else {
+          // Ctrl + Scroll: Zoom canvas workspace in / out
+          const delta = e.deltaY > 0 ? -0.05 : 0.05;
+          setZoom((z) => Math.min(Math.max(Number((z + delta).toFixed(2)), 0.25), 3));
+        }
       }
     }
 
@@ -947,11 +1343,76 @@ export default function EditorStudio() {
     iframeWin?.addEventListener("wheel", handleWheel, { passive: false });
 
     return () => {
+      if (toastTimer) clearTimeout(toastTimer);
       window.removeEventListener("wheel", handleWheel);
       iframeDoc?.removeEventListener("wheel", handleWheel);
       iframeWin?.removeEventListener("wheel", handleWheel);
     };
   }, [iframeEl]);
+
+  // Interactive Artboard Drag-to-Resize Handler
+  function handleArtboardResizeStart(
+    e: React.PointerEvent<HTMLDivElement>,
+    direction: "width" | "height" | "corner"
+  ) {
+    e.preventDefault();
+    e.stopPropagation();
+    const handleEl = e.currentTarget;
+    try {
+      handleEl.setPointerCapture(e.pointerId);
+    } catch {}
+
+    setIsResizingArtboard(true);
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startW = currentWidth;
+    const startH = currentHeight;
+    const currentZoom = zoom;
+    const currentUiScale = uiScale;
+
+    document.body.style.cursor =
+      direction === "width" ? "ew-resize" : direction === "height" ? "ns-resize" : "nwse-resize";
+    document.body.style.userSelect = "none";
+
+    function handlePointerMove(ev: PointerEvent) {
+      const dx = (ev.clientX - startX) / (currentZoom * currentUiScale);
+      const dy = (ev.clientY - startY) / (currentZoom * currentUiScale);
+
+      let newW = startW;
+      let newH = startH;
+
+      if (direction === "width" || direction === "corner") {
+        newW = Math.max(320, Math.min(3840, Math.round(startW + dx)));
+      }
+      if (direction === "height" || direction === "corner") {
+        newH = Math.max(300, Math.min(3840, Math.round(startH + dy)));
+      }
+
+      setCustomDimensions({ width: newW, height: newH });
+      const cat = getCategoryForWidth(newW);
+      if (viewport !== cat && viewport !== "all") {
+        setViewport(cat);
+      }
+    }
+
+    function handlePointerUp(ev: PointerEvent) {
+      try {
+        if (handleEl.hasPointerCapture(ev.pointerId)) {
+          handleEl.releasePointerCapture(ev.pointerId);
+        }
+      } catch {}
+      setIsResizingArtboard(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+    }
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
+  }
 
   // Middle-click / Space+drag pan handler
   useEffect(() => {
@@ -1008,6 +1469,9 @@ export default function EditorStudio() {
         viewport={viewport}
         onViewportChange={handleViewportChange}
         onChangeFile={handleChangeFile}
+        onOpenProjectConfig={() => setConfigModalOpen(true)}
+        onSaveAll={handleSaveAll}
+        onSwitchPage={handleSwitchPage}
         statusMessage={statusMessage}
         historyCount={versionHistory.length}
         onToggleHistory={() => setHistoryOpen((o) => !o)}
@@ -1023,56 +1487,75 @@ export default function EditorStudio() {
         onZoomOut={() => setZoom((z) => Math.max(Number((z - 0.1).toFixed(2)), 0.25))}
         onZoomReset={() => setZoom(1)}
         onOpenShortcuts={() => setShortcutsOpen(true)}
+        isDimensionsHUDHidden={isDimensionsCapsuleHidden}
+        onToggleDimensionsHUD={handleToggleDimensionsCapsule}
       />
 
       <div className="flex flex-1 min-h-0 relative">
-        {/* Left Sidebar: Layers Tree & Component Blocks */}
+        {/* Left Sidebar: Pages, Layers Tree & Component Blocks */}
         {openFile && leftSidebarOpen && uiPanelsVisible && (
           <aside
             style={{ width: `${leftSidebarWidth}px` }}
             className="border-r border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl animate-in slide-in-from-left-4 duration-200 relative"
           >
             {/* Tab Header */}
-            <div className="flex items-center justify-between p-2 border-b border-slate-200 dark:border-[#262626] bg-slate-50 dark:bg-[#090909]">
-              <div className="flex items-center gap-0.5 bg-slate-200/70 dark:bg-[#141414] p-0.5 rounded-full border border-slate-300/60 dark:border-[#262626]">
+            <div className="flex items-center justify-between px-2 py-1.5 border-b border-slate-200 dark:border-[#262626] bg-slate-50 dark:bg-[#090909] gap-1">
+              <div className="flex-1 grid grid-cols-4 gap-0.5 bg-slate-200/70 dark:bg-[#141414] p-0.5 rounded-lg border border-slate-300/60 dark:border-[#262626]">
+                <button
+                  type="button"
+                  onClick={() => setLeftSidebarTab("pages")}
+                  aria-label="Pages tab"
+                  className={`py-1 rounded-md text-[11px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer truncate ${
+                    leftSidebarTab === "pages"
+                      ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] dark:text-white shadow-2xs"
+                      : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
+                  }`}
+                  title="Pages (Multi-page workspace)"
+                >
+                  <Files className="w-3 h-3 shrink-0" />
+                  <span className="truncate">Pages</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => setLeftSidebarTab("layers")}
                   aria-label="Layers Tree tab"
-                  className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`py-1 rounded-md text-[11px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer truncate ${
                     leftSidebarTab === "layers"
-                      ? "bg-white dark:bg-[#1c1c1c] text-slate-900 dark:text-white shadow-2xs"
+                      ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] dark:text-white shadow-2xs"
                       : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
                   }`}
+                  title="Layers (DOM Tree)"
                 >
-                  <Layers className="w-3.5 h-3.5" />
-                  <span>Layers</span>
+                  <Layers className="w-3 h-3 shrink-0" />
+                  <span className="truncate">Layers</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setLeftSidebarTab("primitives")}
                   aria-label="Primitives tab"
-                  className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`py-1 rounded-md text-[11px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer truncate ${
                     leftSidebarTab === "primitives"
-                      ? "bg-white dark:bg-[#1c1c1c] text-slate-900 dark:text-white shadow-2xs"
+                      ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] dark:text-white shadow-2xs"
                       : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
                   }`}
+                  title="Primitives (HTML elements)"
                 >
-                  <PlusSquare className="w-3.5 h-3.5" />
-                  <span>Primitives</span>
+                  <PlusSquare className="w-3 h-3 shrink-0" />
+                  <span className="truncate">Prims</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setLeftSidebarTab("templates")}
                   aria-label="Templates tab"
-                  className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`py-1 rounded-md text-[11px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer truncate ${
                     leftSidebarTab === "templates"
-                      ? "bg-white dark:bg-[#1c1c1c] text-slate-900 dark:text-white shadow-2xs"
+                      ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] dark:text-white shadow-2xs"
                       : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
                   }`}
+                  title="Templates (UI Component Blocks)"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Templates</span>
+                  <Sparkles className="w-3 h-3 shrink-0" />
+                  <span className="truncate">Blocks</span>
                 </button>
               </div>
 
@@ -1080,7 +1563,7 @@ export default function EditorStudio() {
                 type="button"
                 onClick={() => setLeftSidebarOpen(false)}
                 aria-label="Collapse sidebar"
-                className="p-1 rounded-full text-slate-500 hover:text-slate-800 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-slate-200 dark:hover:bg-[#1c1c1c] cursor-pointer transition-colors"
+                className="p-1 rounded-lg text-slate-500 hover:text-slate-800 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-slate-200 dark:hover:bg-[#1c1c1c] cursor-pointer transition-colors shrink-0"
                 title="Collapse sidebar"
               >
                 <PanelLeftClose className="w-4 h-4" />
@@ -1089,7 +1572,13 @@ export default function EditorStudio() {
 
             {/* Tab Body */}
             <ErrorBoundary>
-              {leftSidebarTab === "layers" ? (
+              {leftSidebarTab === "pages" ? (
+                <PagesPanel
+                  onSwitchPage={handleSwitchPage}
+                  onOpenFolderPicker={handleFolderPicker}
+                  onOpenFilesPicker={handleFilesPicker}
+                />
+              ) : leftSidebarTab === "layers" ? (
                 <LayersTree
                   iframeDocument={iframeEl?.contentDocument ?? null}
                   selectedElement={selectedEl}
@@ -1127,10 +1616,27 @@ export default function EditorStudio() {
 
         {/* Main Canvas Area + Breadcrumbs */}
         <div className="flex-1 flex flex-col min-w-0 relative">
+          {/* Floating Sidebar Re-open Pill */}
+          {openFile && !leftSidebarOpen && uiPanelsVisible && (
+            <button
+              type="button"
+              onClick={() => setLeftSidebarOpen(true)}
+              aria-label="Open left navigator"
+              className="absolute left-3 top-3 z-30 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-slate-200 dark:border-[#333] text-slate-700 dark:text-zinc-200 text-xs font-medium shadow-lg hover:border-[#0099ff] hover:text-[#0099ff] transition-all cursor-pointer select-none"
+              title="Open Navigator & Layers"
+            >
+              <PanelLeftOpen className="w-3.5 h-3.5 text-[#0099ff]" />
+              <span>Navigator</span>
+            </button>
+          )}
+
           <div
             ref={canvasRef}
-            className="flex-1 relative flex items-center justify-center canvas-dot-grid p-2 sm:p-4 overflow-auto"
-            style={{ cursor: isPanningRef.current ? "grabbing" : undefined }}
+            className="flex-1 relative flex items-center justify-center canvas-dot-grid overflow-auto transition-all duration-150"
+            style={{
+              padding: `${canvasGutter}px`,
+              cursor: isPanningRef.current ? "grabbing" : undefined,
+            }}
           >
             {openFile ? (
               <div
@@ -1179,6 +1685,7 @@ export default function EditorStudio() {
                               <PreviewFrame
                                 key={`${loadToken}-${vp}`}
                                 html={openFile.content}
+                                customCss={projectConfig.customStyles?.rawContent}
                                 onIframeReady={(iframe) => {
                                   if (vp === "desktop") setIframeEl(iframe);
                                   if (iframe?.contentDocument?.documentElement) {
@@ -1205,25 +1712,84 @@ export default function EditorStudio() {
                 ) : (
                   /* ========== Single Viewport ========== */
                   <div className="w-full h-full flex items-center justify-center relative">
-                    {/* Floating Device Preset HUD Capsule */}
-                    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
-                      <DevicePresetDropdown
-                        category={effectiveCategory}
-                        activePreset={activePreset}
-                        customDimensions={customDimensions}
-                        onSelectPreset={handleSelectPreset}
-                        onApplyCustomDimensions={handleApplyCustomDimensions}
-                        onCategoryChange={handlePresetCategoryChange}
-                      />
-                    </div>
+                    {/* Ephemeral Canvas Gutter / Empty Space Toast */}
+                    {gutterToast && (
+                      <div className="absolute top-3 right-4 z-40 px-3 py-1.5 rounded-full bg-slate-900/95 dark:bg-[#1c1c1c]/95 text-white text-xs font-mono font-medium shadow-2xl border border-white/20 backdrop-blur-md flex items-center gap-2 animate-in fade-in zoom-in-95 pointer-events-none">
+                        <Maximize2 className="w-3.5 h-3.5 text-[#0099ff]" />
+                        <span>{gutterToast}</span>
+                      </div>
+                    )}
 
-                    {isDesktop ? (
-                      /* Desktop: 100% Fullscreen, Edge-to-Edge, Never a second screen or window frame */
-                      <div className="w-full h-full bg-white relative flex flex-col overflow-hidden">
+                    {/* Live Artboard Resizing Dimensions Pill */}
+                    {isResizingArtboard && (
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 px-3 py-1.5 rounded-full bg-slate-900/95 dark:bg-[#1c1c1c]/95 text-white text-xs font-mono font-semibold shadow-2xl border border-[#0099ff]/50 backdrop-blur-md flex items-center gap-2 animate-in fade-in zoom-in-95 pointer-events-none">
+                        <Scaling className="w-3.5 h-3.5 text-[#0099ff]" />
+                        <span>{currentWidth} × {currentHeight} px</span>
+                      </div>
+                    )}
+
+                    {/* Floating Device Preset HUD Capsule */}
+                    {!isDimensionsCapsuleHidden ? (
+                      <div
+                        ref={capsuleContainerRef}
+                        style={
+                          dimensionsCapsulePos
+                            ? {
+                                position: "fixed",
+                                left: `${dimensionsCapsulePos.x}px`,
+                                top: `${dimensionsCapsulePos.y}px`,
+                                zIndex: 40,
+                              }
+                            : undefined
+                        }
+                        className={
+                          dimensionsCapsulePos
+                            ? "pointer-events-auto select-none"
+                            : "absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto"
+                        }
+                      >
+                        <DevicePresetDropdown
+                          category={effectiveCategory}
+                          activePreset={activePreset}
+                          customDimensions={customDimensions}
+                          onSelectPreset={handleSelectPreset}
+                          onApplyCustomDimensions={handleApplyCustomDimensions}
+                          onCategoryChange={handlePresetCategoryChange}
+                          onHide={handleToggleDimensionsCapsule}
+                          onDragStart={handleCapsuleDragStart}
+                          onResetPosition={handleResetCapsulePosition}
+                          isCustomPosition={dimensionsCapsulePos !== null}
+                        />
+                      </div>
+                    ) : (
+                      /* Mini floating restore button when hidden */
+                      <button
+                        type="button"
+                        onClick={handleToggleDimensionsCapsule}
+                        title="Show Dimensions Dropdown"
+                        aria-label="Show Dimensions Dropdown"
+                        className="absolute top-3 right-4 z-30 px-3 py-1.5 rounded-full bg-white/95 dark:bg-[#141414]/95 hover:bg-slate-50 dark:hover:bg-[#1a1a1a] border border-slate-200 dark:border-[#262626] text-[11px] font-mono text-slate-700 dark:text-zinc-300 shadow-lg backdrop-blur-md flex items-center gap-1.5 transition-all cursor-pointer group hover:border-[#0099ff]/50 active:scale-95"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-[#0099ff]" />
+                        <span className="font-semibold text-slate-800 dark:text-zinc-200">Dimensions</span>
+                      </button>
+                    )}
+
+                    {isDesktop && !customDimensions && (activePreset?.width === 0 || activePreset?.id === "desktop-fill") ? (
+                      /* Desktop Fluid (Fill 100%): Seamless edge-to-edge canvas with zero wasted border */
+                      <div
+                        style={{
+                          transform: "translateZ(0)",
+                          willChange: "transform",
+                          contain: "layout paint",
+                        }}
+                        className="w-full h-full bg-white relative flex flex-col overflow-hidden rounded-none border-0 shadow-none"
+                      >
                         <div className="flex-1 w-full h-full relative overflow-hidden">
                           <PreviewFrame
                             key={loadToken}
                             html={openFile.content}
+                            customCss={projectConfig.customStyles?.rawContent}
                             onIframeReady={setIframeEl}
                             onHoverElement={handleHoverElement}
                             onSelectElement={handleSelectElement}
@@ -1235,14 +1801,21 @@ export default function EditorStudio() {
                         </div>
                       </div>
                     ) : (
-                      /* Tablet and Mobile: Centered Device Bezels */
+                      /* Resizable Artboard (Desktop Preset, Tablet, Mobile, or Custom Resized) */
                       <div
                         style={{
                           width: `${currentWidth}px`,
                           height: `${currentHeight}px`,
+                          transform: "translateZ(0)",
+                          willChange: "transform",
+                          contain: "layout paint",
                         }}
-                        className={`bg-white relative transition-all duration-300 shadow-2xl flex flex-col ${
-                          effectiveCategory === "tablet"
+                        className={`bg-white relative flex flex-col shadow-2xl transition-all ${
+                          isResizingArtboard ? "transition-none" : "duration-200"
+                        } ${
+                          effectiveCategory === "desktop"
+                            ? "rounded-xl border border-slate-200/80 dark:border-[#262626] overflow-hidden shrink-0"
+                            : effectiveCategory === "tablet"
                             ? "rounded-2xl border-[8px] border-slate-900 dark:border-[#1c1c1c] overflow-hidden shrink-0"
                             : "rounded-[2.5rem] border-[10px] border-slate-900 dark:border-[#1c1c1c] overflow-hidden shrink-0"
                         }`}
@@ -1261,6 +1834,7 @@ export default function EditorStudio() {
                           <PreviewFrame
                             key={loadToken}
                             html={openFile.content}
+                            customCss={projectConfig.customStyles?.rawContent}
                             onIframeReady={setIframeEl}
                             onHoverElement={handleHoverElement}
                             onSelectElement={handleSelectElement}
@@ -1277,13 +1851,49 @@ export default function EditorStudio() {
                             <div className="w-28 h-1 bg-black/40 rounded-full"></div>
                           </div>
                         )}
+
+                        {/* Interactive Drag-to-Resize Handles on Artboard Frame */}
+                        {/* Right Drag Handle (Width) */}
+                        <div
+                          onPointerDown={(e) => handleArtboardResizeStart(e, "width")}
+                          className="absolute -right-3 top-0 bottom-0 w-6 flex items-center justify-center cursor-ew-resize z-30 group select-none touch-none"
+                          title="Drag to resize artboard width (Double click for fluid 100%)"
+                          onDoubleClick={() => {
+                            setActivePreset(DEVICE_PRESETS.find((p) => p.id === "desktop-fill") || activePreset);
+                            setCustomDimensions(null);
+                          }}
+                        >
+                          <div className="w-1.5 h-12 rounded-full bg-slate-400/40 dark:bg-zinc-600/40 group-hover:bg-[#0099ff] group-active:bg-[#0099ff] transition-colors shadow-sm flex items-center justify-center">
+                            <div className="w-0.5 h-6 bg-white/70 rounded-full" />
+                          </div>
+                        </div>
+
+                        {/* Bottom Drag Handle (Height) */}
+                        <div
+                          onPointerDown={(e) => handleArtboardResizeStart(e, "height")}
+                          className="absolute left-0 right-0 -bottom-3 h-6 flex items-center justify-center cursor-ns-resize z-30 group select-none touch-none"
+                          title="Drag to resize artboard height"
+                        >
+                          <div className="h-1.5 w-12 rounded-full bg-slate-400/40 dark:bg-zinc-600/40 group-hover:bg-[#0099ff] group-active:bg-[#0099ff] transition-colors shadow-sm flex items-center justify-center">
+                            <div className="h-0.5 w-6 bg-white/70 rounded-full" />
+                          </div>
+                        </div>
+
+                        {/* Bottom-Right Corner Drag Handle (Width + Height) */}
+                        <div
+                          onPointerDown={(e) => handleArtboardResizeStart(e, "corner")}
+                          className="absolute -right-3 -bottom-3 w-6 h-6 flex items-center justify-center cursor-nwse-resize z-30 group select-none touch-none"
+                          title="Drag to resize width & height"
+                        >
+                          <div className="w-3.5 h-3.5 rounded-sm border-r-2 border-b-2 border-slate-400/60 dark:border-zinc-500/60 group-hover:border-[#0099ff] group-active:border-[#0099ff] transition-colors" />
+                        </div>
                       </div>
                     )}
                   </div>
                 )}
               </div>
             ) : (
-              <DropZone onFileLoaded={handleFileLoaded} />
+              <DropZone onFileLoaded={handleFileLoaded} onProjectLoaded={handleProjectLoaded} />
             )}
           </div>
 
@@ -1297,7 +1907,7 @@ export default function EditorStudio() {
           )}
         </div>
 
-        {/* Highlight & Drop Overlay */}
+        {/* Highlight & Drop Overlay with Contextual Action HUD */}
         <SelectionOverlay
           iframe={iframeEl}
           hoveredElement={canvasMode === "interact" ? null : hoveredEl}
@@ -1310,6 +1920,12 @@ export default function EditorStudio() {
           onEdit={handleEdit}
           onBatchEdit={handleBatchEdit}
           onMoveElement={handleMoveElement}
+          onSelectElement={handleSelectElement}
+          onDuplicate={handleDuplicateElement}
+          onDelete={handleDeleteElement}
+          onMoveUp={handleMoveUp}
+          onMoveDown={handleMoveDown}
+          onWrapWithDiv={handleWrapWithDiv}
         />
 
         {/* Right Sidebar Drag Resize Handle */}
@@ -1341,6 +1957,7 @@ export default function EditorStudio() {
                   structuralPath={selectedPath}
                   theme={theme}
                   viewport={propertyViewport}
+                  iframe={iframeEl}
                   onEdit={handleEdit}
                   onSelectElement={handleSelectElement}
                   onDelete={handleDeleteElement}
@@ -1389,6 +2006,8 @@ export default function EditorStudio() {
           html={getCurrentExportHtml()}
           fileName={openFile?.name}
           iframeDocument={iframeEl?.contentDocument ?? null}
+          onSave={handleSave}
+          isDirty={edits.length > 0 || Boolean(openFile && useWorkspaceStore.getState().files.find((f) => f.id === useWorkspaceStore.getState().activeFileId)?.isDirty)}
         />
       )}
 
@@ -1405,6 +2024,18 @@ export default function EditorStudio() {
       {shortcutsOpen && (
         <KeyboardShortcutsModal onClose={() => setShortcutsOpen(false)} />
       )}
+
+      {/* Project Config & Custom Styles Modal */}
+      <ProjectConfigModal
+        isOpen={configModalOpen}
+        onClose={() => setConfigModalOpen(false)}
+        onConfigChanged={() => {
+          if (openFile) {
+            const reAnalyzed = analyzeHtmlClientSide(openFile.content, projectConfig);
+            setTheme(reAnalyzed.theme);
+          }
+        }}
+      />
 
       {/* Save Conflict Notification */}
       {saveConflicts && (

@@ -1,0 +1,28 @@
+/* ============================================================
+   PAGE LAYOUT BASE
+   Lenis smooth-scroll root classes, global nav/footer visibility
+============================================================ */
+
+body {
+  overflow-x: hidden;
+}
+
+/* Lenis Smooth Scroll Base */
+html.lenis {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Ensure Nav and Footer are never hidden unexpectedly */
+#global-nav,
+#global-footer {
+  opacity: 1 !important;
+  visibility: visible !important;
+}

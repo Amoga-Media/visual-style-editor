@@ -1,0 +1,3185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Besty's | Premium Craft Burgers</title>
+    <meta
+      name="description"
+      content="Home of the legendary Double Smash and the crunchiest Korean Chicken. Besty's Burgers - fresh, delicious, better. Fast, fresh, legendary."
+    />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+    <meta name="theme-color" content="#050505" />
+
+    <!-- Open Graph / Facebook, WhatsApp, LinkedIn, etc. -->
+    <!-- NOTE: using the temp Hostinger domain below. Swap to https://bestysburgers.com (all 4 URLs) once the final domain is live. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://whitesmoke-crow-436467.hostingersite.com/" />
+    <meta property="og:title" content="Besty's | Premium Craft Burgers" />
+    <meta
+      property="og:description"
+      content="Home of the legendary Double Smash and the crunchiest Korean Chicken. Don't just eat, join the hype."
+    />
+    <meta property="og:image" content="https://whitesmoke-crow-436467.hostingersite.com/assets/Images/og-image.jpg" />
+    <meta property="og:image:secure_url" content="https://whitesmoke-crow-436467.hostingersite.com/assets/Images/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Besty's | Premium Craft Burgers" />
+    <meta
+      name="twitter:description"
+      content="Home of the legendary Double Smash and the crunchiest Korean Chicken. Don't just eat, join the hype."
+    />
+    <meta name="twitter:image" content="https://whitesmoke-crow-436467.hostingersite.com/assets/Images/og-image.jpg" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#050505",
+              accent: "#E63946",
+              accentYellow: "#FFC933",
+              surface: "#121212",
+              surface2: "#1A1A1A",
+            },
+            fontFamily: {
+              sans: ["Satoshi", "sans-serif"],
+              mono: ['"JetBrains Mono"', "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Typography: Satoshi carries the whole voice (display + body); JetBrains Mono is reserved for the "order ticket" motif only -->
+    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="antialiased selection:bg-accent selection:text-white">
+    <!-- Custom GSAP Preloader -->
+    <div
+      id="preloader"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-primary"
+    >
+      <img
+        id="preloader-text"
+        src="./assets/Images/Logo-Besty.png"
+        alt="Besty's Burgers"
+        class="h-32 sm:h-48 md:h-56 w-auto opacity-0 translate-y-8 scale-95"
+      />
+    </div>
+    <div
+      id="scroll-progress"
+      class="fixed top-0 left-0 h-[3px] w-full bg-accent z-[70]"
+    ></div>
+    <div id="cursor-ring" aria-hidden="true"></div>
+
+    <!-- Navigation -->
+    <nav
+      id="navbar"
+      aria-label="Primary"
+      class="fixed w-full z-50 transition-all duration-300 py-4 px-5 sm:px-8 border-b border-transparent"
+    >
+      <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <a href="#" class="shrink-0 flex items-center">
+          <img
+            src="./assets/Images/Logo-Besty.png"
+            alt="Besty's Burgers"
+            class="h-12 sm:h-14 w-auto"
+          />
+        </a>
+        <ul
+          class="hidden lg:flex gap-8 font-medium text-sm tracking-widest uppercase text-gray-400"
+        >
+          <li>
+            <a
+              href="#menu"
+              class="relative hover:text-white transition-colors duration-300 py-1 after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full"
+              >Menu</a
+            >
+          </li>
+          <li>
+            <a
+              href="#combos"
+              class="relative hover:text-white transition-colors duration-300 py-1 after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full"
+              >Combos</a
+            >
+          </li>
+          <li>
+            <a
+              href="#drinks"
+              class="relative hover:text-white transition-colors duration-300 py-1 after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full"
+              >Drinks</a
+            >
+          </li>
+          <li>
+            <a
+              href="#reviews"
+              class="relative hover:text-white transition-colors duration-300 py-1 after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full"
+              >Reviews</a
+            >
+          </li>
+        </ul>
+        <a
+          href="https://www.zomato.com/pune/bestys-burgers-kondhwa"
+          target="_blank"
+          class="magnetic hidden lg:inline-flex items-center justify-center px-6 py-3 text-sm font-bold tracking-widest uppercase bg-accent text-white rounded-full hover:bg-white hover:text-primary transition-colors duration-300"
+        >
+          Order Now
+        </a>
+
+        <!-- Mobile / Tablet controls: just the hamburger -->
+        <div class="flex items-center lg:hidden">
+          <button
+            id="menu-toggle"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+            class="relative w-11 h-11 shrink-0 flex flex-col items-center justify-center gap-[5px]"
+          >
+            <span
+              class="hamburger-line block w-6 h-0.5 bg-white rounded-full"
+            ></span>
+            <span
+              class="hamburger-line block w-6 h-0.5 bg-white rounded-full"
+            ></span>
+            <span
+              class="hamburger-line block w-6 h-0.5 bg-white rounded-full"
+            ></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <nav
+      id="mobile-menu"
+      aria-label="Mobile"
+      aria-hidden="true"
+      class="fixed inset-0 z-40 lg:hidden"
+    >
+      <div class="absolute inset-0 bg-primary"></div>
+      <div class="grain"></div>
+      <div
+        class="relative h-full flex flex-col items-center justify-center gap-6 px-8"
+      >
+        <a
+          href="#menu"
+          class="mobile-nav-link font-display font-black text-4xl uppercase text-white hover:text-accent transition-colors"
+          >Menu</a
+        >
+        <a
+          href="#combos"
+          class="mobile-nav-link font-display font-black text-4xl uppercase text-white hover:text-accent transition-colors"
+          >Combos</a
+        >
+        <a
+          href="#drinks"
+          class="mobile-nav-link font-display font-black text-4xl uppercase text-white hover:text-accent transition-colors"
+          >Drinks</a
+        >
+        <a
+          href="#reviews"
+          class="mobile-nav-link font-display font-black text-4xl uppercase text-white hover:text-accent transition-colors"
+          >Reviews</a
+        >
+        <a
+          href="https://www.zomato.com/pune/bestys-burgers-kondhwa"
+          target="_blank"
+          class="mobile-nav-link mt-4 inline-flex items-center gap-3 px-8 py-4 bg-accent text-white font-display font-bold text-lg rounded-full hover:bg-white hover:text-primary transition-all duration-300"
+        >
+          Order Now <i class="fa-solid fa-bag-shopping"></i>
+        </a>
+        <a
+          href="https://search.google.com/local/writereview?placeid=ChIJOWdyHEbrwjsR6BG-rfvGarI"
+          target="_blank"
+          class="mobile-nav-link mt-2 inline-flex items-center gap-2 text-sm font-bold tracking-widest uppercase text-gray-400 hover:text-accentYellow transition-colors"
+        >
+          <i class="fa-brands fa-google"></i> Leave a Review
+        </a>
+      </div>
+    </nav>
+
+    <!-- ============ HERO — MOBILE ONLY (< 768px): full-bleed video, bottom-aligned text ============ -->
+    <section
+      class="hero-variant relative min-h-screen flex items-end pb-16 pt-32 overflow-hidden md:hidden"
+    >
+      <div class="absolute inset-0 z-0">
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-primary via-primary/55 to-primary/15 z-10"
+        ></div>
+        <video
+          class="w-full h-full object-cover opacity-70 hero-img parallax-bg hero-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          poster="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=2000&auto=format&fit=crop"
+          aria-hidden="true"
+        >
+          <source src="assets/video/hero-bg.mp4" type="video/mp4" />
+        </video>
+        <div class="grain z-10"></div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 relative z-20 w-full">
+        <span
+          class="stamp text-accentYellow font-ticket text-xs uppercase tracking-widest mb-5 hero-anim"
+        >
+          <i class="fa-solid fa-fire"></i> Drops Daily
+        </span>
+        <h1
+          class="font-display font-black text-4xl leading-[1.05] mb-4 uppercase"
+        >
+          <span class="line-mask"
+            ><span class="line-inner">Don't Just Eat.</span></span
+          >
+          <span class="line-mask"
+            ><span class="line-inner text-accent">Join The Hype.</span></span
+          >
+        </h1>
+        <p
+          class="text-sm text-gray-400 mb-7 hero-anim max-w-sm font-light leading-relaxed"
+        >
+          Home of the legendary Double Smash. We don't just make burgers; we
+          craft obsessions.
+        </p>
+        <div class="flex flex-wrap gap-3 hero-anim">
+          <a
+            href="https://www.zomato.com/pune/bestys-burgers-kondhwa"
+            target="_blank"
+            class="magnetic px-6 py-3 bg-white text-primary font-display font-bold text-sm rounded-full hover:bg-accent hover:text-white transition-colors duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+          >
+            Secure The Bag
+          </a>
+          <a
+            href="#menu"
+            class="magnetic px-6 py-3 border border-white/25 text-white font-display font-bold text-sm rounded-full hover:border-white transition-colors duration-300"
+          >
+            See The Menu
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HERO — TABLET ONLY (768–1023px): full-bleed video, bottom-aligned text ============ -->
+    <section
+      class="hero-variant relative min-h-screen flex flex-col justify-end pt-32 pb-16 hidden md:flex lg:hidden overflow-hidden"
+    >
+      <div class="absolute inset-0 z-0">
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-primary/20 z-10"
+        ></div>
+        <video
+          class="w-full h-full object-cover hero-img parallax-bg hero-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          poster="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=2000&auto=format&fit=crop"
+          aria-hidden="true"
+        >
+          <source src="assets/video/hero-bg.mp4" type="video/mp4" />
+        </video>
+        <div class="grain z-10"></div>
+      </div>
+
+      <span
+        class="hidden sm:flex absolute top-28 right-8 z-20 font-ticket text-[11px] text-white/70 flex-col items-end gap-0.5 hero-anim"
+      >
+        <span>NO. 001 &middot; KONDHWA</span>
+        <span>OPEN &middot; 12:00 &ndash; 23:30</span>
+      </span>
+
+      <div class="max-w-4xl mx-auto px-8 w-full relative z-20 text-center">
+        <span
+          class="stamp text-accentYellow font-ticket text-xs uppercase tracking-widest mb-5 hero-anim inline-flex"
+        >
+          <i class="fa-solid fa-fire"></i> Drops Daily &middot; No Reservations
+        </span>
+        <h1
+          class="font-display font-black text-6xl leading-[1.05] mb-5 uppercase"
+        >
+          <span class="line-mask"
+            ><span class="line-inner">Don't Just Eat.</span></span
+          >
+          <span class="line-mask"
+            ><span class="line-inner text-accent">Join The Hype.</span></span
+          >
+        </h1>
+        <p
+          class="text-base text-gray-400 mb-8 hero-anim max-w-lg mx-auto font-light leading-relaxed"
+        >
+          Home of the legendary Double Smash and the crunchiest Korean Chicken.
+          Get in line before we sell out.
+        </p>
+        <div class="flex flex-wrap justify-center gap-3 hero-anim">
+          <a
+            href="https://www.zomato.com/pune/bestys-burgers-kondhwa"
+            target="_blank"
+            class="magnetic px-7 py-3.5 bg-white text-primary font-display font-bold text-base rounded-full hover:bg-accent hover:text-white transition-colors duration-300 shadow-[0_0_20px_rgba(255,255,255,0.25)]"
+          >
+            Secure The Bag
+          </a>
+          <a
+            href="#menu"
+            class="magnetic px-7 py-3.5 border border-white/40 bg-primary/40 backdrop-blur-sm text-white font-display font-bold text-base rounded-full hover:border-white transition-colors duration-300"
+          >
+            See The Menu
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HERO — DESKTOP ONLY (1024px+): full-bleed video, left-aligned text ============ -->
+    <section
+      class="hero-variant relative min-h-screen items-center hidden lg:flex overflow-hidden pt-24"
+    >
+      <div class="absolute inset-0 z-0">
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-primary via-primary/60 to-primary/10 z-10"
+        ></div>
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-primary/70 via-transparent to-transparent z-10"
+        ></div>
+        <video
+          class="w-full h-full object-cover hero-img parallax-bg hero-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          poster="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=2000&auto=format&fit=crop"
+          aria-hidden="true"
+        >
+          <source src="assets/video/hero-bg.mp4" type="video/mp4" />
+        </video>
+        <div class="grain z-10"></div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-8 relative z-20 w-full">
+        <div class="max-w-2xl">
+          <span
+            class="stamp text-accentYellow font-ticket text-xs uppercase tracking-widest mb-6 hero-anim"
+          >
+            <i class="fa-solid fa-fire"></i> Drops Daily &middot; No
+            Reservations
+          </span>
+          <h1
+            class="font-display font-black text-6xl xl:text-7xl leading-[1.05] mb-6 uppercase"
+          >
+            <span class="line-mask"
+              ><span class="line-inner">Don't Just Eat.</span></span
+            >
+            <span class="line-mask"
+              ><span class="line-inner text-accent">Join The Hype.</span></span
+            >
+          </h1>
+          <p
+            class="text-xl text-gray-400 mb-10 hero-anim max-w-md font-light leading-relaxed"
+          >
+            Home of the legendary Double Smash and the crunchiest Korean
+            Chicken. We don't just make burgers; we craft obsessions. Get in
+            line before we sell out.
+          </p>
+          <div class="flex flex-wrap gap-4 hero-anim">
+            <a
+              href="https://www.zomato.com/pune/bestys-burgers-kondhwa"
+              target="_blank"
+              class="magnetic px-8 py-4 bg-white text-primary font-display font-bold text-lg rounded-full hover:bg-accent hover:text-white transition-colors duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+            >
+              Secure The Bag
+            </a>
+            <a
+              href="#menu"
+              class="magnetic px-8 py-4 border border-white/25 text-white font-display font-bold text-lg rounded-full hover:border-white transition-colors duration-300"
+            >
+              See The Menu
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating order-ticket detail card -->
+      <div
+        class="ticket-card torn-edge absolute right-10 xl:right-16 bottom-12 z-20 rounded-2xl px-6 py-5 w-56 hero-anim"
+        style="--tone: var(--surface)"
+      >
+        <span
+          class="font-ticket text-[11px] text-gray-500 uppercase tracking-widest block mb-1"
+          >No. 001 &middot; Kondhwa</span
+        >
+        <span class="font-display font-bold text-white text-lg block mb-2"
+          >The Double Smash</span
+        >
+        <span class="font-ticket text-xs text-gray-500"
+          >OPEN &middot; 12:00 &ndash; 23:30</span
+        >
+      </div>
+    </section>
+
+    <!-- Hype Ticker -->
+    <div
+      class="marquee bg-accent py-3 border-y border-black/20 relative z-30"
+      aria-hidden="true"
+    >
+      <div
+        class="marquee__track font-ticket font-bold uppercase text-primary text-sm sm:text-base tracking-wide"
+      >
+        <span class="flex items-center gap-6 pr-6">
+          <span>Double Smash &#9670;</span><span>Korean Chicken &#9670;</span
+          ><span>Naked Burger &#9670;</span><span>Kondhwa, Pune &#9670;</span
+          ><span>Since Day One &#9670;</span><span>No Gimmicks &#9670;</span>
+        </span>
+        <span class="flex items-center gap-6 pr-6">
+          <span>Double Smash &#9670;</span><span>Korean Chicken &#9670;</span
+          ><span>Naked Burger &#9670;</span><span>Kondhwa, Pune &#9670;</span
+          ><span>Since Day One &#9670;</span><span>No Gimmicks &#9670;</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Manifesto Section -->
+    <!-- Manifesto Section -->
+    <section
+      class="relative py-32 sm:py-40 md:py-48 flex items-center justify-center overflow-hidden border-b border-white/5 bg-primary"
+      id="manifesto"
+    >
+      <!-- Massive Atmospheric Background Typography -->
+      <div
+        class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] overflow-hidden select-none"
+        aria-hidden="true"
+      >
+        <span
+          class="font-display font-black text-[20vw] leading-none whitespace-nowrap text-white transform -rotate-2"
+        >
+          MANIFESTO
+        </span>
+      </div>
+
+      <!-- Grain overlay to maintain cinematic texture -->
+      <div class="grain"></div>
+
+      <div
+        class="relative z-20 max-w-5xl mx-auto px-6 sm:px-8 text-center flex flex-col items-center"
+      >
+        <div
+          class="inline-flex items-center gap-4 font-ticket text-xs text-gray-500 uppercase tracking-widest mb-8 gs-reveal"
+        >
+          <span class="w-8 h-[1px] bg-accent"></span>
+          <span>The Standard</span>
+          <span class="w-8 h-[1px] bg-accent"></span>
+        </div>
+
+        <div class="overflow-hidden mb-10 sm:mb-12 w-full">
+          <h2
+            class="font-display font-black text-5xl sm:text-6xl md:text-8xl text-white uppercase tracking-tight gs-reveal"
+          >
+            We Don't Do <span class="text-accent italic pr-2">Boring.</span>
+          </h2>
+        </div>
+
+        <!-- Reusing your scroll-scrub GSAP logic for a high-end reveal -->
+        <p
+          class="story-scrub-text font-display font-medium text-xl sm:text-2xl md:text-4xl text-white leading-[1.4] max-w-4xl mx-auto tracking-tight"
+        >
+          You're not here for a basic meal. You're here for unapologetic
+          flavors, dripping cheese, and the kind of crunch that wakes up the
+          neighbors.
+        </p>
+
+        <div class="mt-16 sm:mt-24 gs-reveal">
+          <span
+            class="stamp border-accentYellow text-accentYellow font-ticket text-xs uppercase tracking-widest px-6 py-3 bg-accentYellow/5"
+          >
+            <i class="fa-solid fa-certificate mr-2"></i> 100% Smashed, Zero
+            Shortcuts
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Promo Banner (Naked Burger) -->
+    <section
+      class="relative py-24 sm:py-28 md:py-40 overflow-hidden"
+      id="naked-burger"
+    >
+      <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-primary/75 z-10"></div>
+        <img
+          src="https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=2500&auto=format&fit=crop"
+          class="w-full h-full object-cover parallax-bg"
+          alt="Fresh lettuce, gherkins, and onion laid out for the Naked Burger"
+        />
+        <div class="grain z-10"></div>
+      </div>
+      <div class="relative z-20 max-w-2xl mx-auto px-6 sm:px-8">
+        <div
+          class="ticket-card torn-edge rounded-2xl p-6 sm:p-8 md:p-12 text-center gs-reveal"
+          style="--tone: var(--ink)"
+        >
+          <span
+            class="stamp text-accent font-ticket text-xs uppercase tracking-widest mb-5"
+          >
+            <i class="fa-solid fa-leaf"></i> Off-Menu Favorite
+          </span>
+          <h2
+            class="font-display font-black text-3xl sm:text-4xl md:text-6xl text-white mb-3 sm:mb-4 tracking-tight"
+          >
+            THE NAKED BURGER
+          </h2>
+          <p
+            class="text-sm sm:text-base md:text-xl text-gray-400 mb-8 sm:mb-10"
+          >
+            All the hype, zero guilt. Your favorite patty served on fresh crisp
+            lettuce with gherkins &amp; onion.
+          </p>
+
+          <div
+            class="font-ticket text-sm divide-y divide-white/10 border-y border-white/10 mb-10 text-left max-w-xs mx-auto"
+          >
+            <div class="flex justify-between py-2.5">
+              <span class="text-gray-500">CALORIES</span
+              ><span class="text-white">250</span>
+            </div>
+            <div class="flex justify-between py-2.5">
+              <span class="text-gray-500">PROTEIN</span
+              ><span class="text-white">28g</span>
+            </div>
+            <div class="flex justify-between py-2.5">
+              <span class="text-gray-500">CARBS</span
+              ><span class="text-white">4g</span>
+            </div>
+            <div class="flex justify-between py-2.5">
+              <span class="text-accent">CONTAINS</span
+              ><span class="text-accent">Dairy, Beef</span>
+            </div>
+          </div>
+
+          <a
+            href="https://www.zomato.com/pune/bestys-burgers-kondhwa"
+            target="_blank"
+            class="magnetic inline-block px-8 py-4 bg-accentYellow text-primary font-display font-bold text-lg rounded-full hover:bg-white transition-colors duration-300"
+            >Try It Now</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- Buff Burgers Menu -->
+    <section
+      id="menu"
+      class="py-20 sm:py-24 md:py-32 relative z-10 bg-primary menu-section"
+    >
+      <div class="max-w-7xl mx-auto px-6 sm:px-8">
+        <div
+          class="mb-8 lg:mb-12 flex items-end justify-between gap-4 gs-reveal"
+        >
+          <div>
+            <h2
+              class="font-display font-black text-2xl sm:text-3xl md:text-5xl mb-3 sm:mb-4 text-white uppercase"
+            >
+              Buff Burgers
+            </h2>
+            <p class="text-gray-400 text-sm sm:text-base md:text-lg max-w-md">
+              The foundation of the hype. 100% premium buff patties, smashed to
+              perfection.
+            </p>
+          </div>
+          <span
+            class="hidden md:inline-flex font-ticket text-xs text-gray-600 uppercase tracking-widest whitespace-nowrap"
+            >Sec. 01</span
+          >
+        </div>
+
+        <!-- Mobile / Tablet: Simple Cards -->
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:hidden stagger-grid"
+        >
+          <div class="ticket-card rounded-2xl overflow-hidden">
+            <div class="h-72 sm:h-80 overflow-hidden">
+              <img
+                src="assets/Images/cheese-burger.webp"
+                class="w-full h-full object-cover"
+                alt="Cheese Burger, single buff patty with melted American cheese and house pickles"
+              />
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start gap-3 mb-1">
+                <h3
+                  class="font-display font-bold text-lg sm:text-xl text-white"
+                >
+                  Cheese Burger
+                </h3>
+                <span
+                  class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0"
+                  >₹250</span
+                >
+              </div>
+              <p class="text-accent text-xs sm:text-sm font-bold mb-2">
+                The Classic Setup
+              </p>
+              <p class="text-gray-400 text-sm leading-relaxed mb-3">
+                A single juicy buff patty smashed thin, topped with melted
+                American cheese, house pickles, ketchup, and mustard.
+              </p>
+              <span
+                class="inline-block px-2 py-1 text-xs rounded bg-white/5 text-gray-400 font-ticket"
+                >480 Cal</span
+              >
+            </div>
+          </div>
+          <div class="ticket-card rounded-2xl overflow-hidden">
+            <div class="h-72 sm:h-80 overflow-hidden">
+              <img
+                src="assets/Images/double-smash.webp"
+                class="w-full h-full object-cover"
+                alt="Double Smash burger with two lacy-edged patties and caramelized onions"
+              />
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start gap-3 mb-1">
+                <h3
+                  class="font-display font-bold text-lg sm:text-xl text-white"
+                >
+                  Double Smash
+                </h3>
+                <span
+                  class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0"
+                  >₹300</span
+                >
+              </div>
+              <p class="text-accent text-xs sm:text-sm font-bold mb-2">
+                Double Patty, Double Crust
+              </p>
+              <p class="text-gray-400 text-sm leading-relaxed mb-3">
+                Two lacy-edged smashed buff patties layered with double American
+                cheese, caramelized onions, and signature sauce.
+              </p>
+              <span
+                class="inline-block px-2 py-1 text-xs rounded bg-white/5 text-gray-400 font-ticket"
+                >720 Cal</span
+              >
+            </div>
+          </div>
+          <div
+            class="ticket-card rounded-2xl overflow-hidden sm:col-span-2 sm:flex sm:items-stretch"
+          >
+            <div class="h-72 sm:h-auto sm:w-2/5 overflow-hidden shrink-0">
+              <img
+                src="assets/Images/triple-smash.webp"
+                class="w-full h-full object-cover"
+                alt="Triple Smash burger, three patties with triple cheese and crispy bacon bits"
+              />
+            </div>
+            <div class="p-5 sm:w-3/5 sm:flex sm:flex-col sm:justify-center">
+              <div class="flex justify-between items-start gap-3 mb-1">
+                <h3
+                  class="font-display font-bold text-lg sm:text-xl text-white"
+                >
+                  Triple Smash
+                </h3>
+                <span
+                  class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0"
+                  >₹350</span
+                >
+              </div>
+              <p class="text-accent text-xs sm:text-sm font-bold mb-2">
+                For The Monsters
+              </p>
+              <p class="text-gray-400 text-sm leading-relaxed mb-3">
+                Three epic smashed patties, triple cheese, jalapeños, crispy
+                bacon bits, and smothered in BBQ sauce.
+              </p>
+              <span
+                class="inline-block px-2 py-1 text-xs rounded bg-white/5 text-gray-400 font-ticket w-fit"
+                >950 Cal</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop: Order-ticket list (hover swaps the showcase image) + Sticky Image -->
+        <div class="hidden lg:flex gap-16 items-start gs-reveal">
+          <div
+            class="w-1/2 ticket-card torn-edge rounded-2xl px-8"
+            style="--tone: var(--ink)"
+          >
+            <div
+              class="menu-item group menu-row accordion-item is-open cursor-pointer"
+              data-img="assets/Images/cheese-burger.webp"
+            >
+              <button
+                type="button"
+                class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left"
+                aria-expanded="true"
+                aria-controls="buff-panel-1"
+                id="buff-trigger-1"
+              >
+                <span class="min-w-0">
+                  <h3
+                    class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors"
+                  >
+                    Cheese Burger
+                  </h3>
+                  <p class="text-accent text-sm font-bold">The Classic Setup</p>
+                </span>
+                <span class="flex items-center gap-4 shrink-0">
+                  <span class="font-ticket font-bold text-2xl text-gray-300"
+                    >₹250</span
+                  >
+                  <i
+                    class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+              </button>
+              <div
+                class="accordion-panel"
+                id="buff-panel-1"
+                role="region"
+                aria-labelledby="buff-trigger-1"
+              >
+                <div class="accordion-panel-inner">
+                  <div class="pb-6">
+                    <p class="text-gray-300 text-base leading-relaxed mb-2">
+                      A single juicy buff patty smashed thin, topped with melted
+                      American cheese, house pickles, ketchup, and mustard.
+                    </p>
+                    <span class="font-ticket text-sm text-gray-400"
+                      >480 CAL</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="menu-item group menu-row accordion-item cursor-pointer"
+              data-img="assets/Images/double-smash.webp"
+            >
+              <button
+                type="button"
+                class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left"
+                aria-expanded="false"
+                aria-controls="buff-panel-2"
+                id="buff-trigger-2"
+              >
+                <span class="min-w-0">
+                  <h3
+                    class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors"
+                  >
+                    Double Smash
+                  </h3>
+                  <p class="text-accent text-sm font-bold">
+                    Double Patty, Double Crust
+                  </p>
+                </span>
+                <span class="flex items-center gap-4 shrink-0">
+                  <span class="font-ticket font-bold text-2xl text-gray-300"
+                    >₹300</span
+                  >
+                  <i
+                    class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+              </button>
+              <div
+                class="accordion-panel"
+                id="buff-panel-2"
+                role="region"
+                aria-labelledby="buff-trigger-2"
+              >
+                <div class="accordion-panel-inner">
+                  <div class="pb-6">
+                    <p class="text-gray-300 text-base leading-relaxed mb-2">
+                      Two lacy-edged smashed buff patties layered with double
+                      American cheese, caramelized onions, and signature sauce.
+                    </p>
+                    <span class="font-ticket text-sm text-gray-400"
+                      >720 CAL</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="menu-item group menu-row accordion-item cursor-pointer"
+              data-img="assets/Images/triple-smash.webp"
+            >
+              <button
+                type="button"
+                class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left"
+                aria-expanded="false"
+                aria-controls="buff-panel-3"
+                id="buff-trigger-3"
+              >
+                <span class="min-w-0">
+                  <h3
+                    class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors"
+                  >
+                    Triple Smash
+                  </h3>
+                  <p class="text-accent text-sm font-bold">For The Monsters</p>
+                </span>
+                <span class="flex items-center gap-4 shrink-0">
+                  <span class="font-ticket font-bold text-2xl text-gray-300"
+                    >₹350</span
+                  >
+                  <i
+                    class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+              </button>
+              <div
+                class="accordion-panel"
+                id="buff-panel-3"
+                role="region"
+                aria-labelledby="buff-trigger-3"
+              >
+                <div class="accordion-panel-inner">
+                  <div class="pb-6">
+                    <p class="text-gray-300 text-base leading-relaxed mb-2">
+                      Three epic smashed patties, triple cheese, jalapeños,
+                      crispy bacon bits, and smothered in BBQ sauce.
+                    </p>
+                    <span class="font-ticket text-sm text-gray-400"
+                      >950 CAL</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="w-1/2 sticky top-32 h-[650px] rounded-3xl overflow-hidden border border-white/10"
+          >
+            <img
+              src="assets/Images/cheese-burger.webp"
+              class="w-full h-full object-cover showcase-img transition-transform duration-700 hover:scale-105 cinematic-img"
+              alt="Buff Burgers showcase"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chicken Burgers Menu -->
+    <section
+      class="py-20 sm:py-24 md:py-32 relative z-10 bg-surface border-t border-white/5 menu-section"
+    >
+      <div class="max-w-7xl mx-auto px-6 sm:px-8">
+        <div
+          class="mb-8 lg:mb-12 flex items-end justify-between gap-4 gs-reveal"
+        >
+          <div>
+            <h2
+              class="font-display font-black text-2xl sm:text-3xl md:text-5xl mb-3 sm:mb-4 text-white uppercase"
+            >
+              Chicken Burgers
+            </h2>
+            <p class="text-gray-400 text-sm sm:text-base md:text-lg max-w-md">
+              Crispy on the outside, insanely juicy on the inside. Hand-breaded
+              daily.
+            </p>
+          </div>
+          <span
+            class="hidden md:inline-flex font-ticket text-xs text-gray-600 uppercase tracking-widest whitespace-nowrap"
+            >Sec. 02</span
+          >
+        </div>
+
+        <!-- Mobile / Tablet: Simple Cards -->
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:hidden stagger-grid"
+        >
+          <div class="ticket-card rounded-2xl overflow-hidden">
+            <div class="h-72 sm:h-80 overflow-hidden">
+              <img
+                src="assets/Images/crunchy-chicken.webp"
+                class="w-full h-full object-cover"
+                alt="Crunchy Chicken burger with buttermilk marinated fried chicken breast"
+              />
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start gap-3 mb-1">
+                <h3
+                  class="font-display font-bold text-lg sm:text-xl text-white"
+                >
+                  Crunchy Chicken
+                </h3>
+                <span
+                  class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0"
+                  >₹300</span
+                >
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed mt-2">
+                Buttermilk marinated fried chicken breast, crisp lettuce, mayo,
+                and pickles.
+              </p>
+            </div>
+          </div>
+          <div class="ticket-card rounded-2xl overflow-hidden">
+            <div class="h-72 sm:h-80 overflow-hidden">
+              <img
+                src="assets/Images/peri-peri-chicken.webp"
+                class="w-full h-full object-cover"
+                alt="Peri Peri Chicken burger topped with spicy mayo and jalapeños"
+              />
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start gap-3 mb-1">
+                <h3
+                  class="font-display font-bold text-lg sm:text-xl text-white"
+                >
+                  Peri Peri Chicken
+                </h3>
+                <span
+                  class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0"
+                  >₹350</span
+                >
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed mt-2">
+                Crunchy chicken dusted heavily in our house peri-peri seasoning,
+                topped with spicy mayo and jalapeños.
+              </p>
+            </div>
+          </div>
+          <div
+            class="ticket-card rounded-2xl overflow-hidden sm:col-span-2 sm:flex sm:items-stretch"
+          >
+            <div class="h-72 sm:h-auto sm:w-2/5 overflow-hidden shrink-0">
+              <img
+                src="assets/Images/korean-chicken.webp"
+                class="w-full h-full object-cover"
+                alt="Korean Chicken burger with sticky Gochujang glaze and Asian slaw"
+              />
+            </div>
+            <div class="p-5 sm:w-3/5 sm:flex sm:flex-col sm:justify-center">
+              <div class="flex justify-between items-start gap-3 mb-1">
+                <h3
+                  class="font-display font-bold text-lg sm:text-xl text-white"
+                >
+                  Korean Chicken
+                </h3>
+                <span
+                  class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0"
+                  >₹350</span
+                >
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed mt-2">
+                Fried chicken dunked in a sticky Gochujang glaze, topped with
+                Asian slaw and toasted sesame seeds.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop: Order-ticket list + Sticky Image, image on the left this time for rhythm -->
+        <div
+          class="hidden lg:flex flex-row-reverse gap-16 items-start gs-reveal"
+        >
+          <div
+            class="w-1/2 ticket-card torn-edge rounded-2xl px-8"
+            style="--tone: var(--surface)"
+          >
+            <div
+              class="menu-item group menu-row accordion-item is-open cursor-pointer"
+              data-img="assets/Images/crunchy-chicken.webp"
+            >
+              <button
+                type="button"
+                class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left"
+                aria-expanded="true"
+                aria-controls="chicken-panel-1"
+                id="chicken-trigger-1"
+              >
+                <span class="min-w-0"
+                  ><h3
+                    class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors"
+                  >
+                    Crunchy Chicken
+                  </h3></span
+                >
+                <span class="flex items-center gap-4 shrink-0">
+                  <span class="font-ticket font-bold text-2xl text-gray-300"
+                    >₹300</span
+                  >
+                  <i
+                    class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+              </button>
+              <div
+                class="accordion-panel"
+                id="chicken-panel-1"
+                role="region"
+                aria-labelledby="chicken-trigger-1"
+              >
+                <div class="accordion-panel-inner">
+                  <div class="pb-6">
+                    <p class="text-gray-300 text-base leading-relaxed">
+                      Buttermilk marinated fried chicken breast, crisp lettuce,
+                      mayo, and pickles.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="menu-item group menu-row accordion-item cursor-pointer"
+              data-img="assets/Images/peri-peri-chicken.webp"
+            >
+              <button
+                type="button"
+                class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left"
+                aria-expanded="false"
+                aria-controls="chicken-panel-2"
+                id="chicken-trigger-2"
+              >
+                <span class="min-w-0"
+                  ><h3
+                    class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors"
+                  >
+                    Peri Peri Chicken
+                  </h3></span
+                >
+                <span class="flex items-center gap-4 shrink-0">
+                  <span class="font-ticket font-bold text-2xl text-gray-300"
+                    >₹350</span
+                  >
+                  <i
+                    class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+              </button>
+              <div
+                class="accordion-panel"
+                id="chicken-panel-2"
+                role="region"
+                aria-labelledby="chicken-trigger-2"
+              >
+                <div class="accordion-panel-inner">
+                  <div class="pb-6">
+                    <p class="text-gray-300 text-base leading-relaxed">
+                      Crunchy chicken dusted heavily in our house peri-peri
+                      seasoning, topped with spicy mayo and jalapeños.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="menu-item group menu-row accordion-item cursor-pointer"
+              data-img="assets/Images/korean-chicken.webp"
+            >
+              <button
+                type="button"
+                class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left"
+                aria-expanded="false"
+                aria-controls="chicken-panel-3"
+                id="chicken-trigger-3"
+              >
+                <span class="min-w-0"
+                  ><h3
+                    class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors"
+                  >
+                    Korean Chicken
+                  </h3></span
+                >
+                <span class="flex items-center gap-4 shrink-0">
+                  <span class="font-ticket font-bold text-2xl text-gray-300"
+                    >₹350</span
+                  >
+                  <i
+                    class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+              </button>
+              <div
+                class="accordion-panel"
+                id="chicken-panel-3"
+                role="region"
+                aria-labelledby="chicken-trigger-3"
+              >
+                <div class="accordion-panel-inner">
+                  <div class="pb-6">
+                    <p class="text-gray-300 text-base leading-relaxed">
+                      Fried chicken dunked in a sticky Gochujang glaze, topped
+                      with Asian slaw and toasted sesame seeds.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="w-1/2 sticky top-32 h-[550px] rounded-3xl overflow-hidden border border-white/10"
+          >
+            <img
+              src="assets/Images/crunchy-chicken.webp"
+              class="w-full h-full object-cover showcase-img transition-transform duration-700 hover:scale-105 cinematic-img"
+              alt="Chicken Burgers showcase"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Wings & Popcorn (Bento layout — one featured tile, not a repeated card grid) -->
+    <section class="py-20 sm:py-24 md:py-32 bg-primary">
+      <div class="max-w-7xl mx-auto px-6 sm:px-8">
+        <div class="text-center mb-12 sm:mb-16 gs-reveal">
+          <h2
+            class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-white uppercase mb-4"
+          >
+            Wings &amp; Popcorn
+          </h2>
+          <p class="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">
+            Messy, saucy, bite-sized hype. The mandatory sidekicks to your
+            burger.
+          </p>
+        </div>
+
+        <div
+          class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 stagger-grid"
+        >
+          <!-- Featured: Peri Popcorn -->
+          <div
+            class="md:col-span-3 ticket-card torn-edge rounded-2xl p-7 sm:p-9 flex flex-col sm:flex-row sm:items-center justify-between gap-6"
+            style="
+              --tone: var(--ink);
+              background: linear-gradient(
+                135deg,
+                rgba(255, 201, 51, 0.1),
+                var(--surface-2) 55%
+              );
+            "
+          >
+            <div class="flex items-start gap-4">
+              <span class="stamp text-accentYellow shrink-0 mt-1"
+                ><i class="fa-solid fa-fire"></i
+              ></span>
+              <div>
+                <span
+                  class="font-ticket text-xs uppercase tracking-widest text-accentYellow"
+                  >Most Ordered</span
+                >
+                <h4
+                  class="font-display font-bold text-2xl sm:text-3xl text-white mt-1 mb-2"
+                >
+                  Peri Popcorn
+                </h4>
+                <p class="text-gray-400 text-sm sm:text-base max-w-sm">
+                  Crispy bite-sized chicken chunks tossed in Peri Peri, straight
+                  out the fryer.
+                </p>
+              </div>
+            </div>
+            <div
+              class="font-ticket font-bold text-4xl sm:text-5xl text-white shrink-0 sm:text-right"
+            >
+              ₹150
+            </div>
+          </div>
+
+          <!-- Wings -->
+          <div
+            class="ticket-card rounded-2xl p-6 flex flex-col justify-between group h-full"
+          >
+            <div>
+              <h4
+                class="font-display font-bold text-xl text-white group-hover:text-accent transition-colors mb-2"
+              >
+                Peri Peri Wings
+              </h4>
+              <p class="text-gray-400 text-sm mb-4">
+                Crispy fried wings tossed in our explosive peri-peri dry rub.
+              </p>
+            </div>
+            <div class="font-ticket font-bold text-xl text-gray-300">₹200</div>
+          </div>
+          <div
+            class="ticket-card rounded-2xl p-6 flex flex-col justify-between group h-full"
+          >
+            <div>
+              <h4
+                class="font-display font-bold text-xl text-white group-hover:text-accent transition-colors mb-2"
+              >
+                BBQ Wings
+              </h4>
+              <p class="text-gray-400 text-sm mb-4">
+                Smoky, sweet, and sticky classic BBQ glaze.
+              </p>
+            </div>
+            <div class="font-ticket font-bold text-xl text-gray-300">₹200</div>
+          </div>
+          <div
+            class="ticket-card rounded-2xl p-6 flex flex-col justify-between group h-full"
+          >
+            <div>
+              <h4
+                class="font-display font-bold text-xl text-white group-hover:text-accent transition-colors mb-2"
+              >
+                Spicy Wings
+              </h4>
+              <p class="text-gray-400 text-sm mb-4">
+                Drenched in house-made buffalo hot sauce with ranch.
+              </p>
+            </div>
+            <div class="font-ticket font-bold text-xl text-gray-300">₹250</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fries & Loaded Menu -->
+    <section
+      class="py-20 sm:py-24 md:py-32 bg-surface border-t border-white/5 menu-section"
+    >
+      <div class="max-w-7xl mx-auto px-6 sm:px-8">
+        <div
+          class="mb-8 lg:mb-12 flex items-end justify-between gap-4 gs-reveal"
+        >
+          <div>
+            <h2
+              class="font-display font-black text-2xl sm:text-3xl md:text-5xl mb-3 sm:mb-4 text-white uppercase"
+            >
+              Fries &amp; Loaded
+            </h2>
+            <p class="text-gray-400 text-sm sm:text-base md:text-lg max-w-md">
+              Because plain fries are just the beginning. Get them dirty.
+            </p>
+          </div>
+          <span
+            class="hidden md:inline-flex font-ticket text-xs text-gray-600 uppercase tracking-widest whitespace-nowrap"
+            >Sec. 03</span
+          >
+        </div>
+
+        <!-- Mobile / Tablet: Simple Cards -->
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:hidden stagger-grid"
+        >
+          <div class="ticket-card rounded-2xl overflow-hidden">
+            <div class="h-72 sm:h-80 overflow-hidden">
+              <img
+                src="assets/Images/fries-salted.webp"
+                class="w-full h-full object-cover"
+                alt="Salted and peri-peri double-fried shoestring fries"
+              />
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start gap-3 mb-1">
+                <h3
+                  class="font-display font-bold text-lg sm:text-xl text-white"
+                >
+                  Salted / Peri Fries
+                </h3>
+                <span
+                  class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0"
+                  >₹150</span
+                >
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                Double-fried crispy shoestring potatoes.
+              </p>
+            </div>
+          </div>
+          <div class="ticket-card rounded-2xl overflow-hidden">
+            <div class="h-72 sm:h-80 overflow-hidden">
+              <img
+                src="assets/Images/crunchy-loaded-fries.webp"
+                class="w-full h-full object-cover"
+                alt="Crunchy Loaded fries topped with fried chicken and liquid cheese"
+              />
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start gap-3 mb-1">
+                <h3
+                  class="font-display font-bold text-lg sm:text-xl text-white"
+                >
+                  Crunchy Loaded
+                </h3>
+                <span
+                  class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0"
+                  >₹300</span
+                >
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                Mountain of fries topped with crunchy chicken, liquid cheese,
+                jalapeños, and ranch.
+              </p>
+            </div>
+          </div>
+          <div
+            class="ticket-card rounded-2xl overflow-hidden sm:col-span-2 sm:flex sm:items-stretch"
+          >
+            <div class="h-72 sm:h-auto sm:w-2/5 overflow-hidden shrink-0">
+              <img
+                src="assets/Images/buff-fries.webp"
+                class="w-full h-full object-cover"
+                alt="Buff chopped cheese fries with caramelized onions and American cheese"
+              />
+            </div>
+            <div class="p-5 sm:w-3/5 sm:flex sm:flex-col sm:justify-center">
+              <div class="flex justify-between items-start gap-3 mb-1">
+                <h3
+                  class="font-display font-bold text-lg sm:text-xl text-white"
+                >
+                  Buff Chopped Cheese
+                </h3>
+                <span
+                  class="font-ticket font-bold text-lg sm:text-xl text-gray-300 shrink-0"
+                  >₹300</span
+                >
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                Fries smothered in chopped seasoned buff patty, caramelized
+                onions, dripping with American cheese.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop: Order-ticket accordion list (hover swaps the showcase image) + Sticky Image -->
+        <div class="hidden lg:flex gap-16 items-start gs-reveal">
+          <div
+            class="w-1/2 ticket-card torn-edge rounded-2xl px-8"
+            style="--tone: var(--surface)"
+          >
+            <div
+              class="menu-item group menu-row accordion-item is-open cursor-pointer"
+              data-img="assets/Images/fries-salted.webp"
+            >
+              <button
+                type="button"
+                class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left"
+                aria-expanded="true"
+                aria-controls="fries-panel-1"
+                id="fries-trigger-1"
+              >
+                <span class="min-w-0"
+                  ><h3
+                    class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors"
+                  >
+                    Salted / Peri Fries
+                  </h3></span
+                >
+                <span class="flex items-center gap-4 shrink-0">
+                  <span class="font-ticket font-bold text-2xl text-gray-300"
+                    >₹150</span
+                  >
+                  <i
+                    class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+              </button>
+              <div
+                class="accordion-panel"
+                id="fries-panel-1"
+                role="region"
+                aria-labelledby="fries-trigger-1"
+              >
+                <div class="accordion-panel-inner">
+                  <div class="pb-6">
+                    <p class="text-gray-300 text-base leading-relaxed">
+                      Double-fried crispy shoestring potatoes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="menu-item group menu-row accordion-item cursor-pointer"
+              data-img="assets/Images/crunchy-loaded-fries.webp"
+            >
+              <button
+                type="button"
+                class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left"
+                aria-expanded="false"
+                aria-controls="fries-panel-2"
+                id="fries-trigger-2"
+              >
+                <span class="min-w-0"
+                  ><h3
+                    class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors"
+                  >
+                    Crunchy Loaded
+                  </h3></span
+                >
+                <span class="flex items-center gap-4 shrink-0">
+                  <span class="font-ticket font-bold text-2xl text-gray-300"
+                    >₹300</span
+                  >
+                  <i
+                    class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+              </button>
+              <div
+                class="accordion-panel"
+                id="fries-panel-2"
+                role="region"
+                aria-labelledby="fries-trigger-2"
+              >
+                <div class="accordion-panel-inner">
+                  <div class="pb-6">
+                    <p class="text-gray-300 text-base leading-relaxed">
+                      Mountain of fries topped with crunchy chicken, liquid
+                      cheese, jalapeños, and ranch.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="menu-item group menu-row accordion-item cursor-pointer"
+              data-img="assets/Images/buff-fries.webp"
+            >
+              <button
+                type="button"
+                class="accordion-trigger w-full flex justify-between items-center gap-4 py-6 text-left"
+                aria-expanded="false"
+                aria-controls="fries-panel-3"
+                id="fries-trigger-3"
+              >
+                <span class="min-w-0"
+                  ><h3
+                    class="font-display font-bold text-2xl text-white group-hover:text-accent transition-colors"
+                  >
+                    Buff Chopped Cheese
+                  </h3></span
+                >
+                <span class="flex items-center gap-4 shrink-0">
+                  <span class="font-ticket font-bold text-2xl text-gray-300"
+                    >₹300</span
+                  >
+                  <i
+                    class="fa-solid fa-chevron-down accordion-chevron text-gray-500 group-hover:text-accent text-sm"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+              </button>
+              <div
+                class="accordion-panel"
+                id="fries-panel-3"
+                role="region"
+                aria-labelledby="fries-trigger-3"
+              >
+                <div class="accordion-panel-inner">
+                  <div class="pb-6">
+                    <p class="text-gray-300 text-base leading-relaxed">
+                      Fries smothered in chopped seasoned buff patty,
+                      caramelized onions, dripping with American cheese.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="w-1/2 sticky top-32 h-[500px] rounded-3xl overflow-hidden border border-white/10"
+          >
+            <img
+              src="assets/Images/fries-salted.webp"
+              class="w-full h-full object-cover showcase-img transition-transform duration-700 hover:scale-105 cinematic-img"
+              alt="Loaded Fries showcase"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Combos Section -->
+    <section
+      id="combos"
+      class="py-20 sm:py-24 md:py-32 relative overflow-hidden"
+    >
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-primary via-surface to-primary z-0"
+      ></div>
+      <div class="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 text-center">
+        <h2
+          class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-accentYellow uppercase mb-4 gs-reveal"
+        >
+          The Ultimate Combos
+        </h2>
+        <p class="text-gray-300 text-base sm:text-lg mb-12 sm:mb-16 gs-reveal">
+          Don't think. Just order the box. Maximum value, maximum hype.
+        </p>
+
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 stagger-grid text-left items-stretch"
+        >
+          <div
+            class="tilt-card ticket-card torn-edge rounded-2xl p-8 relative sm:col-span-2 lg:col-span-1 lg:-translate-y-3"
+            style="
+              --tone: var(--ink);
+              background: linear-gradient(
+                160deg,
+                rgba(255, 201, 51, 0.14),
+                var(--surface-2) 60%
+              );
+              border-color: rgba(255, 201, 51, 0.35);
+            "
+          >
+            <span
+              class="stamp absolute -top-4 right-6 bg-accentYellow text-primary text-[11px] font-ticket font-bold uppercase tracking-wide border-accentYellow"
+              >Most Hyped</span
+            >
+            <h3 class="font-display font-bold text-2xl text-white mb-2">
+              Besty's Share Box
+            </h3>
+            <p class="text-accentYellow text-sm font-bold mb-4">
+              Fries, Wings, Popcorn
+            </p>
+            <p class="text-gray-400 text-sm mb-8">
+              The ultimate squad meal. Salted fries, 6 peri peri wings, and a
+              large portion of BBQ popcorn chicken.
+            </p>
+            <div class="font-ticket font-bold text-3xl text-white">₹600</div>
+          </div>
+          <div
+            class="tilt-card ticket-card torn-edge rounded-2xl p-8"
+            style="--tone: var(--ink)"
+          >
+            <h3 class="font-display font-bold text-2xl text-white mb-2">
+              Classic Combo
+            </h3>
+            <p class="text-gray-300 text-sm font-bold mb-4">
+              Burger + Fries + Tea
+            </p>
+            <p class="text-gray-400 text-sm mb-8">
+              Your choice of our flagship burgers, accompanied by regular fries
+              and a refreshing iced tea.
+            </p>
+            <div class="font-ticket font-bold text-3xl text-white">₹500</div>
+          </div>
+          <div
+            class="tilt-card ticket-card torn-edge rounded-2xl p-8"
+            style="
+              --tone: var(--ink);
+              background: linear-gradient(
+                160deg,
+                rgba(230, 57, 70, 0.14),
+                var(--surface-2) 60%
+              );
+              border-color: rgba(230, 57, 70, 0.35);
+            "
+          >
+            <h3 class="font-display font-bold text-2xl text-white mb-2">
+              Wings &amp; Burger
+            </h3>
+            <p class="text-accent text-sm font-bold mb-4">
+              Burger + 4 Wings + Fries + Tea
+            </p>
+            <p class="text-gray-400 text-sm mb-8">
+              When you literally want everything. Any single patty burger, 4
+              wings, fries, and a drink.
+            </p>
+            <div class="font-ticket font-bold text-3xl text-white">₹600</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Drinks -->
+    <section id="drinks" class="py-20 sm:py-24 md:py-32 bg-primary">
+      <div class="max-w-7xl mx-auto px-6 sm:px-8">
+        <div class="flex flex-col md:flex-row gap-10 lg:gap-16 items-center">
+          <!-- Drinks list -->
+          <div class="w-full md:w-1/2 gs-reveal">
+            <h2
+              class="font-display font-black text-3xl sm:text-4xl md:text-5xl mb-4 text-white uppercase"
+            >
+              Iced Teas
+            </h2>
+            <p class="text-gray-400 mb-8 text-base sm:text-lg">
+              Wash down the heat. Ice cold, perfectly brewed.
+            </p>
+            <div
+              class="font-ticket border-y border-white/10 divide-y divide-white/10"
+            >
+              <div class="flex justify-between items-center py-4">
+                <div>
+                  <h4 class="font-display font-bold text-xl text-white">
+                    Peach Ice Tea
+                  </h4>
+                  <p class="text-gray-500 text-sm font-sans">
+                    Sweet, fruity, served over crushed ice.
+                  </p>
+                </div>
+                <span class="font-bold text-xl text-gray-300">₹80</span>
+              </div>
+              <div class="flex justify-between items-center py-4">
+                <div>
+                  <h4 class="font-display font-bold text-xl text-white">
+                    Lemon Ice Tea
+                  </h4>
+                  <p class="text-gray-500 text-sm font-sans">
+                    Classic citrus kick. Tart and refreshing.
+                  </p>
+                </div>
+                <span class="font-bold text-xl text-gray-300">₹80</span>
+              </div>
+            </div>
+          </div>
+          <!-- Drinks Image -->
+          <div
+            class="w-full md:w-1/2 h-72 sm:h-96 md:h-[420px] lg:h-[500px] rounded-3xl overflow-hidden border border-white/10 gs-reveal"
+          >
+            <img
+              src="assets/Images/peach-ice-tea.webp"
+              class="w-full h-full object-cover cinematic-img"
+              alt="Peach Iced Tea served over crushed ice"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pimp Your Burger (Add-ons) -->
+    <section
+      id="addons"
+      class="py-20 sm:py-24 md:py-32 bg-surface border-t border-white/5"
+    >
+      <div class="max-w-4xl mx-auto px-6 sm:px-8 text-center gs-reveal">
+        <h2
+          class="font-display font-black text-3xl sm:text-4xl md:text-5xl mb-4 text-white uppercase"
+        >
+          Pimp Your Burger
+        </h2>
+        <p class="text-gray-400 mb-10 sm:mb-12 text-base sm:text-lg">
+          Because sometimes one patty just isn't enough.
+        </p>
+        <div class="flex flex-wrap justify-center gap-3">
+          <span
+            class="px-5 py-2 rounded-full border border-white/20 text-sm font-bold font-ticket bg-surface2 hover:bg-white hover:text-primary transition-colors"
+            >Smash Patty (₹100)</span
+          >
+          <span
+            class="px-5 py-2 rounded-full border border-white/20 text-sm font-bold font-ticket bg-surface2 hover:bg-white hover:text-primary transition-colors"
+            >Juicy Patty (₹150)</span
+          >
+          <span
+            class="px-5 py-2 rounded-full border border-white/20 text-sm font-bold font-ticket bg-surface2 hover:bg-white hover:text-primary transition-colors"
+            >Fried Egg (₹30)</span
+          >
+          <span
+            class="px-5 py-2 rounded-full border border-accent text-accent text-sm font-bold font-ticket bg-accent/10 hover:bg-accent hover:text-white transition-colors"
+            >Extra Cheese (₹30)</span
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews Section: desktop 3-col parallax, mobile hype-ticker marquee of the same 9 quotes -->
+    <section
+      id="reviews"
+      class="py-20 sm:py-24 md:py-32 bg-surface border-y border-white/5 relative overflow-hidden"
+    >
+      <div
+        class="max-w-7xl mx-auto px-6 sm:px-8 mb-12 sm:mb-16 text-center gs-reveal"
+      >
+        <h2
+          class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-white uppercase"
+        >
+          The Word On The Street
+        </h2>
+      </div>
+
+      <!-- Mobile only: continuous marquee of review tickets -->
+      <div
+        class="marquee marquee--slow md:hidden"
+        style="--tone: var(--surface)"
+      >
+        <div class="marquee__track gap-5 px-5">
+          <div class="flex gap-5">
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Bro. The Double Smash changed my life. I dream about that
+                crust. Literally insane."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Rahul M.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Best burger in the city, period. The vibes are immaculate and
+                the food is next level."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Sarah T.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "I can't stop thinking about the peri peri dust. I want to put
+                it on absolutely everything."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Rajat P.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "I drove 45 minutes for the Korean Chicken burger. I'd do it
+                again right now."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Amit K.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Messy, loud, and absolutely perfect. Bring extra napkins!"
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Priya S.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Honestly, best meal I've had in a long time. Will be coming
+                back tomorrow for sure."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Rohan M.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Those Peri Peri fries hit different. Can't wait to come back
+                with the whole squad."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Karan V.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Finally, a place that gets it. Proper smashed patties. No
+                gimmicks, just flavor."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Anjali D.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "My mouth is on fire from the spicy wings and I am in heaven.
+                10/10 highly recommend."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Vikram S.
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-5" aria-hidden="true">
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Bro. The Double Smash changed my life. I dream about that
+                crust. Literally insane."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Rahul M.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Best burger in the city, period. The vibes are immaculate and
+                the food is next level."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Sarah T.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "I can't stop thinking about the peri peri dust. I want to put
+                it on absolutely everything."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Rajat P.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "I drove 45 minutes for the Korean Chicken burger. I'd do it
+                again right now."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Amit K.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Messy, loud, and absolutely perfect. Bring extra napkins!"
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Priya S.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Honestly, best meal I've had in a long time. Will be coming
+                back tomorrow for sure."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Rohan M.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Those Peri Peri fries hit different. Can't wait to come back
+                with the whole squad."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Karan V.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Finally, a place that gets it. Proper smashed patties. No
+                gimmicks, just flavor."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Anjali D.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge shrink-0 w-72 p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "My mouth is on fire from the spicy wings and I am in heaven.
+                10/10 highly recommend."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Vikram S.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tablet only: static 2-column grid (no auto-scroll — enough width for a real grid, not enough for the 3-col parallax) -->
+      <div
+        class="hidden md:grid lg:hidden max-w-3xl mx-auto px-6 sm:px-8 grid-cols-2 gap-6 stagger-grid"
+      >
+        <div
+          class="ticket-card torn-edge p-6 rounded-2xl"
+          style="--tone: var(--surface)"
+        >
+          <div class="text-accentYellow mb-3 text-sm">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="text-gray-300 font-medium mb-4">
+            "Bro. The Double Smash changed my life. I dream about that crust.
+            Literally insane."
+          </p>
+          <p class="text-accent font-ticket font-bold tracking-wide">
+            &ndash; Rahul M.
+          </p>
+        </div>
+        <div
+          class="ticket-card torn-edge p-6 rounded-2xl"
+          style="--tone: var(--surface)"
+        >
+          <div class="text-accentYellow mb-3 text-sm">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="text-gray-300 font-medium mb-4">
+            "Best burger in the city, period. The vibes are immaculate and the
+            food is next level."
+          </p>
+          <p class="text-accent font-ticket font-bold tracking-wide">
+            &ndash; Sarah T.
+          </p>
+        </div>
+        <div
+          class="ticket-card torn-edge p-6 rounded-2xl"
+          style="--tone: var(--surface)"
+        >
+          <div class="text-accentYellow mb-3 text-sm">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="text-gray-300 font-medium mb-4">
+            "I can't stop thinking about the peri peri dust. I want to put it on
+            absolutely everything."
+          </p>
+          <p class="text-accent font-ticket font-bold tracking-wide">
+            &ndash; Rajat P.
+          </p>
+        </div>
+        <div
+          class="ticket-card torn-edge p-6 rounded-2xl"
+          style="--tone: var(--surface)"
+        >
+          <div class="text-accentYellow mb-3 text-sm">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="text-gray-300 font-medium mb-4">
+            "I drove 45 minutes for the Korean Chicken burger. I'd do it again
+            right now."
+          </p>
+          <p class="text-accent font-ticket font-bold tracking-wide">
+            &ndash; Amit K.
+          </p>
+        </div>
+        <div
+          class="ticket-card torn-edge p-6 rounded-2xl"
+          style="--tone: var(--surface)"
+        >
+          <div class="text-accentYellow mb-3 text-sm">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="text-gray-300 font-medium mb-4">
+            "Messy, loud, and absolutely perfect. Bring extra napkins!"
+          </p>
+          <p class="text-accent font-ticket font-bold tracking-wide">
+            &ndash; Priya S.
+          </p>
+        </div>
+        <div
+          class="ticket-card torn-edge p-6 rounded-2xl"
+          style="--tone: var(--surface)"
+        >
+          <div class="text-accentYellow mb-3 text-sm">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="text-gray-300 font-medium mb-4">
+            "Honestly, best meal I've had in a long time. Will be coming back
+            tomorrow for sure."
+          </p>
+          <p class="text-accent font-ticket font-bold tracking-wide">
+            &ndash; Rohan M.
+          </p>
+        </div>
+        <div
+          class="ticket-card torn-edge p-6 rounded-2xl"
+          style="--tone: var(--surface)"
+        >
+          <div class="text-accentYellow mb-3 text-sm">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="text-gray-300 font-medium mb-4">
+            "Those Peri Peri fries hit different. Can't wait to come back with
+            the whole squad."
+          </p>
+          <p class="text-accent font-ticket font-bold tracking-wide">
+            &ndash; Karan V.
+          </p>
+        </div>
+        <div
+          class="ticket-card torn-edge p-6 rounded-2xl"
+          style="--tone: var(--surface)"
+        >
+          <div class="text-accentYellow mb-3 text-sm">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="text-gray-300 font-medium mb-4">
+            "Finally, a place that gets it. Proper smashed patties. No gimmicks,
+            just flavor."
+          </p>
+          <p class="text-accent font-ticket font-bold tracking-wide">
+            &ndash; Anjali D.
+          </p>
+        </div>
+        <div
+          class="ticket-card torn-edge p-6 rounded-2xl"
+          style="--tone: var(--surface)"
+        >
+          <div class="text-accentYellow mb-3 text-sm">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="text-gray-300 font-medium mb-4">
+            "My mouth is on fire from the spicy wings and I am in heaven. 10/10
+            highly recommend."
+          </p>
+          <p class="text-accent font-ticket font-bold tracking-wide">
+            &ndash; Vikram S.
+          </p>
+        </div>
+      </div>
+
+      <!-- Desktop: 3-column scroll parallax -->
+      <div
+        class="hidden lg:block max-w-7xl mx-auto px-6 sm:px-8 h-[600px] overflow-hidden fade-mask-y-lg"
+      >
+        <div class="grid grid-cols-3 gap-8 pb-32">
+          <div class="flex flex-col gap-6 review-col-up">
+            <div
+              class="ticket-card torn-edge p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Bro. The Double Smash changed my life. I dream about that
+                crust. Literally insane."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Rahul M.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Best burger in the city, period. The vibes are immaculate and
+                the food is next level."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Sarah T.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "I can't stop thinking about the peri peri dust. I want to put
+                it on absolutely everything."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Rajat P.
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-6 review-col-down -mt-32">
+            <div
+              class="ticket-card torn-edge p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "I drove 45 minutes for the Korean Chicken burger. I'd do it
+                again right now."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Amit K.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Messy, loud, and absolutely perfect. Bring extra napkins!"
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Priya S.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Honestly, best meal I've had in a long time. Will be coming
+                back tomorrow for sure."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Rohan M.
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-6 review-col-up">
+            <div
+              class="ticket-card torn-edge p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Those Peri Peri fries hit different. Can't wait to come back
+                with the whole squad."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Karan V.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "Finally, a place that gets it. Proper smashed patties. No
+                gimmicks, just flavor."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Anjali D.
+              </p>
+            </div>
+            <div
+              class="ticket-card torn-edge p-6 rounded-2xl"
+              style="--tone: var(--surface)"
+            >
+              <div class="text-accentYellow mb-3 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+                ><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-gray-300 font-medium mb-4">
+                "My mouth is on fire from the spicy wings and I am in heaven.
+                10/10 highly recommend."
+              </p>
+              <p class="text-accent font-ticket font-bold tracking-wide">
+                &ndash; Vikram S.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Our Story -->
+    <!-- Our Story - Cinematic Scrollytelling -->
+    <section id="our-story" class="relative bg-primary">
+      <!-- Sticky Background -->
+      <div class="sticky top-0 h-screen w-full overflow-hidden z-0">
+        <!-- Gradient overlays to ensure text readability -->
+        <div
+          class="absolute inset-0 bg-gradient-to-b from-primary via-primary/80 to-primary z-10"
+        ></div>
+        <img
+          src="https://images.unsplash.com/photo-1685161456730-200201620fae?q=80&w=2500"
+          class="w-full h-full object-cover scale-105 gs-story-bg"
+          alt="Patties smashing and searing on the flat-top grill"
+        />
+        <div class="grain z-10"></div>
+      </div>
+
+      <!-- Scrolling Narrative Panels -->
+      <div class="relative z-10 -mt-[100vh] pb-32">
+        <!-- Panel 1 -->
+        <div class="h-screen flex items-center justify-center px-6">
+          <div class="text-center gs-story-panel">
+            <span
+              class="font-ticket text-xs text-accent uppercase tracking-widest mb-5 inline-block"
+              >Our Story</span
+            >
+            <h2
+              class="font-display font-black text-5xl sm:text-7xl md:text-8xl text-white uppercase tracking-tight leading-[1.05]"
+            >
+              Started With<br /><span class="text-accent">One Smash.</span>
+            </h2>
+          </div>
+        </div>
+
+        <!-- Panel 2 -->
+        <div class="h-screen flex items-center justify-center px-6">
+          <p
+            class="font-display font-bold text-2xl sm:text-4xl md:text-5xl text-white max-w-4xl text-center leading-[1.3] gs-story-panel"
+          >
+            Besty's didn't open with a business plan. It opened with a griddle,
+            a stubborn refusal to serve a soft crust, and a bet that Kondhwa
+            deserved a burger worth queuing for.
+          </p>
+        </div>
+
+        <!-- Panel 3 -->
+        <div class="h-screen flex items-center justify-center px-6">
+          <p
+            class="font-display font-bold text-2xl sm:text-4xl md:text-5xl text-gray-300 max-w-4xl text-center leading-[1.3] gs-story-panel"
+          >
+            What started as a one-man obsession has turned into a neighborhood
+            staple. Built one patty, one late night, one sold-out weekend at a
+            time.
+          </p>
+        </div>
+
+        <!-- Panel 4 -->
+        <div class="min-h-[70vh] flex items-center justify-center px-6">
+          <h2
+            class="font-display font-black text-5xl sm:text-7xl md:text-8xl text-white uppercase tracking-tight text-center gs-story-panel"
+          >
+            Never<br /><span class="text-accentYellow">Looked Back.</span>
+          </h2>
+        </div>
+      </div>
+    </section>
+
+
+    
+    <!-- ============ MEET THE OWNER ============ -->
+    <section
+      id="meet-the-owner"
+      class="py-24 sm:py-32 md:py-40 bg-surface border-t border-white/5 relative overflow-hidden"
+    >
+      <!-- Atmospheric Background Lighting -->
+      <div class="absolute inset-0 z-0 opacity-30">
+        <div
+          class="absolute top-1/2 right-0 -translate-y-1/2 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[130px] pointer-events-none"
+          aria-hidden="true"
+        ></div>
+        <div class="grain"></div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
+        <div
+          class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center"
+        >
+          <!-- Portrait / Image (Takes 5 columns on desktop) -->
+          <div class="lg:col-span-5 relative gs-reveal">
+            <div
+              class="relative rounded-3xl overflow-hidden border border-white/10 h-[500px] sm:h-[600px]"
+            >
+              <!-- Replace with an actual high-res, moody photo of Ryan -->
+              <img
+                src="./assets/Images/Ryan.webp"
+                class="w-full h-full object-cover cinematic-img filter"
+                alt="Ryan, Founder of Besty's Burgers"
+                loading="lazy"
+              />
+            </div>
+            <!-- Floating accent badge -->
+            <div
+              class="absolute -bottom-6 -right-4 sm:-right-8 ticket-card torn-edge px-6 py-4 bg-accentYellow transform -rotate-3 hover:rotate-0 transition-transform duration-500 shadow-2xl"
+              style="--tone: var(--surface)"
+            >
+              <span
+                class="font-ticket font-bold text-primary text-xs sm:text-sm uppercase tracking-widest block"
+                >The Mastermind</span
+              >
+              <span
+                class="font-display font-black text-primary text-2xl sm:text-3xl uppercase"
+                >Ryan</span
+              >
+            </div>
+          </div>
+
+          <!-- Story Content (Takes 7 columns on desktop) -->
+          <div class="lg:col-span-7 gs-reveal lg:pl-10">
+            <span
+              class="stamp text-accent font-ticket text-xs uppercase tracking-widest mb-6 inline-flex"
+            >
+              <i class="fa-solid fa-user-astronaut"></i> Meet The Owner
+            </span>
+
+            <h2
+              class="font-display font-black text-4xl sm:text-5xl md:text-6xl text-white uppercase tracking-tight mb-8"
+            >
+              "It was never just <br class="hidden lg:block" />
+              <span class="text-accent italic pr-2">about burgers."</span>
+            </h2>
+
+            <!-- The Story Text -->
+            <div
+              class="space-y-6 text-gray-400 text-base sm:text-lg leading-relaxed font-light"
+            >
+              <p>
+                Ryan didn't start in a pristine culinary academy. He started
+                with a single cast-iron skillet, a restless obsession with the
+                Maillard reaction, and a dream that refused to be quieted.
+              </p>
+              <p>
+                Before the lines wrapped around the block in Kondhwa, there were
+                years of trial, error, and burnt buns. People told him the
+                market was too crowded, that you couldn't build a premium brand
+                around a smash burger. But Ryan wasn't listening to the noise;
+                he was listening to the sizzle.
+              </p>
+              <p>
+                His journey from serving friends out of a cramped kitchen to
+                redefining the city's street-food culture is baked into every
+                order ticket. It’s proof that when you refuse to compromise on
+                your craft, the world eventually takes a bite.
+              </p>
+            </div>
+
+            <!-- Signature & Mini Stat -->
+            <div
+              class="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+            >
+              <div>
+                <span
+                  class="font-display font-black text-3xl text-white tracking-widest block"
+                  >RYAN.</span
+                >
+                <span
+                  class="font-ticket text-xs text-gray-500 uppercase tracking-widest"
+                  >Founder & Head Smasher</span
+                >
+              </div>
+              <div
+                class="flex items-center gap-4 bg-surface2 px-5 py-3 rounded-xl border border-white/5"
+              >
+                <i class="fa-solid fa-fire text-accentYellow text-xl"></i>
+                <div class="text-left">
+                  <span class="block font-ticket font-bold text-white text-sm"
+                    >10,000+</span
+                  >
+                  <span
+                    class="block font-ticket text-[10px] text-gray-500 uppercase tracking-widest"
+                    >Patties Smashed</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Our Values -->
+    <section
+      class="py-20 sm:py-24 md:py-32 bg-surface border-t border-white/5"
+      id="our-values"
+    >
+      <div class="max-w-7xl mx-auto px-6 sm:px-8">
+        <div class="max-w-2xl mb-12 lg:mb-16 gs-reveal">
+          <span
+            class="font-ticket text-xs text-accent uppercase tracking-widest mb-4 sm:mb-5 inline-block"
+            >What We Stand For</span
+          >
+          <h2
+            class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-white uppercase tracking-tight"
+          >
+            Our Values
+          </h2>
+        </div>
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/10 border border-white/10 rounded-2xl overflow-hidden stagger-grid"
+        >
+          <div class="tilt-card bg-surface p-8 sm:p-10">
+            <i
+              class="fa-solid fa-fire text-accent text-2xl sm:text-3xl mb-5"
+              aria-hidden="true"
+            ></i>
+            <h3
+              class="font-display font-bold text-xl sm:text-2xl text-white mb-3"
+            >
+              No Gimmicks
+            </h3>
+            <p class="text-gray-400 leading-relaxed">
+              Real ingredients, honestly cooked. No freezer-to-fryer shortcuts,
+              no flavor tricks — just meat, fire, and technique.
+            </p>
+          </div>
+          <div class="tilt-card bg-surface p-8 sm:p-10">
+            <i
+              class="fa-solid fa-clock text-accent text-2xl sm:text-3xl mb-5"
+              aria-hidden="true"
+            ></i>
+            <h3
+              class="font-display font-bold text-xl sm:text-2xl text-white mb-3"
+            >
+              Smashed Fresh, Daily
+            </h3>
+            <p class="text-gray-400 leading-relaxed">
+              Patties are smashed to order, never pre-formed or frozen. If it's
+              not fresh off the griddle, it's not going out.
+            </p>
+          </div>
+          <div class="tilt-card bg-surface p-8 sm:p-10">
+            <i
+              class="fa-solid fa-location-dot text-accent text-2xl sm:text-3xl mb-5"
+              aria-hidden="true"
+            ></i>
+            <h3
+              class="font-display font-bold text-xl sm:text-2xl text-white mb-3"
+            >
+              Built For Kondhwa
+            </h3>
+            <p class="text-gray-400 leading-relaxed">
+              We're not a chain pretending to be local. This is our
+              neighborhood, our regulars, our home turf.
+            </p>
+          </div>
+          <div class="tilt-card bg-surface p-8 sm:p-10">
+            <i
+              class="fa-solid fa-certificate text-accent text-2xl sm:text-3xl mb-5"
+              aria-hidden="true"
+            ></i>
+            <h3
+              class="font-display font-bold text-xl sm:text-2xl text-white mb-3"
+            >
+              Zero Shortcuts
+            </h3>
+            <p class="text-gray-400 leading-relaxed">
+              From the bun toast to the last drizzle of sauce, every step gets
+              the same care as the first burger we ever made.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Our Mission & Vision -->
+    <!-- Our Mission & Vision -->
+    <section
+      class="py-24 sm:py-32 md:py-40 bg-primary border-t border-white/5 relative overflow-hidden"
+      id="mission-vision"
+    >
+      <!-- Atmospheric lighting / cinematic mask backdrop -->
+      <div class="absolute inset-0 z-0 opacity-40">
+        <div
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[140px] pointer-events-none"
+          aria-hidden="true"
+        ></div>
+        <div class="grain"></div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
+        <!-- Section Header Tag -->
+        <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-20 gs-reveal">
+          <span
+            class="stamp text-accent font-ticket text-xs uppercase tracking-widest mb-4 inline-flex"
+          >
+            <i class="fa-solid fa-compass"></i> The DNA of Besty's
+          </span>
+          <h2
+            class="font-display font-black text-3xl sm:text-5xl md:text-6xl text-white uppercase tracking-tight"
+          >
+            Driven By Obsession.
+          </h2>
+        </div>
+
+        <!-- Asymmetrical Cinematic Split Layout -->
+        <div
+          class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center stagger-grid"
+        >
+          <!-- Mission Box (Takes up 7 cols): Bold, Editorial Focus -->
+          <div
+            class="lg:col-span-7 ticket-card torn-edge rounded-3xl p-8 sm:p-12 md:p-16 relative overflow-hidden group"
+            style="--tone: var(--surface)"
+          >
+            <div
+              class="absolute -bottom-10 -right-10 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-700"
+            >
+              <i class="fa-solid fa-bullseye text-[15rem] text-white"></i>
+            </div>
+
+            <div
+              class="flex items-center gap-3 font-ticket text-xs text-accent uppercase tracking-widest mb-6"
+            >
+              <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
+              <span>01 / Our Mission Statement</span>
+            </div>
+
+            <p
+              class="font-display font-black text-2xl sm:text-4xl md:text-5xl text-white leading-[1.1] mb-8 uppercase tracking-tight"
+            >
+              To smash out the best burger in Pune, one honest ingredient at a
+              time.
+            </p>
+
+            <div class="border-l-2 border-accent pl-6 py-1">
+              <p
+                class="text-gray-300 text-base sm:text-lg font-light leading-relaxed"
+              >
+                No gimmicks, no shortcuts, and zero tolerance for mediocrity.
+                Just serious, high-impact flavor served fast to a city that
+                knows the difference.
+              </p>
+            </div>
+          </div>
+
+          <!-- Vision Box (Takes up 5 cols): Stacked contrast layout -->
+          <div class="lg:col-span-5 flex flex-col gap-6">
+            <!-- Vision Ticket Card -->
+            <div
+              class="tilt-card ticket-card torn-edge rounded-3xl p-8 sm:p-10 relative overflow-hidden"
+              style="
+                --tone: var(--surface);
+                background: linear-gradient(
+                  135deg,
+                  var(--surface-2),
+                  rgba(255, 201, 51, 0.05)
+                );
+              "
+            >
+              <div
+                class="flex items-center gap-3 font-ticket text-xs text-accentYellow uppercase tracking-widest mb-4"
+              >
+                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                <span>02 / The Vision</span>
+              </div>
+
+              <h3
+                class="font-display font-bold text-xl sm:text-2xl md:text-3xl text-white leading-snug mb-4"
+              >
+                To be the name Pune reaches for first when "burger" comes up.
+              </h3>
+
+              <p class="text-gray-400 text-sm sm:text-base leading-relaxed">
+                We aren’t aiming to be just another spot on the map. We're here
+                to build a legacy known not for temporary internet hype, but for
+                consistently backing it up—order after order, day after day.
+              </p>
+            </div>
+
+            <!-- Mini Stat / Manifesto Callout Box -->
+            <div
+              class="ticket-card rounded-2xl p-6 flex items-center justify-between"
+              style="background: var(--surface-2)"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0"
+                >
+                  <i class="fa-solid fa-fire"></i>
+                </div>
+                <div>
+                  <span
+                    class="font-display font-bold text-white block text-sm sm:text-base"
+                    >Zero Frozen Shortcuts</span
+                  >
+                  <span class="text-gray-500 text-xs font-ticket uppercase"
+                    >Fresh griddle-pressed daily</span
+                  >
+                </div>
+              </div>
+              <span class="font-ticket font-bold text-accentYellow text-sm"
+                >SINCE DAY ONE</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Location & Map -->
+    <section
+      class="py-20 sm:py-24 md:py-32 bg-primary text-center"
+      id="location"
+    >
+      <div class="max-w-5xl mx-auto px-6 sm:px-8">
+        <span
+          class="stamp text-accent font-ticket text-xs uppercase tracking-widest mb-6 gs-reveal"
+          ><i class="fa-solid fa-location-dot"></i> Kondhwa, Pune</span
+        >
+        <h2
+          class="font-display font-black text-3xl sm:text-4xl md:text-5xl text-white uppercase mb-4 gs-reveal"
+        >
+          Find Your Besty
+        </h2>
+        <p class="text-gray-400 text-base sm:text-lg mb-8 sm:mb-10 gs-reveal">
+          Come say hi, grab a burger, and drop us a review.
+        </p>
+
+        <div
+          class="flex items-center justify-center gap-4 mb-10 sm:mb-14 gs-reveal"
+        >
+          <div class="text-accentYellow text-lg sm:text-xl" aria-hidden="true">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i
+            ><i class="fa-solid fa-star-half-stroke"></i>
+          </div>
+          <span class="text-white font-ticket font-bold text-2xl sm:text-3xl"
+            ><span class="stat-num" data-target="4.4" data-decimals="1"
+              >4.4</span
+            ></span
+          >
+          <span class="text-gray-500 text-sm"
+            >&middot;
+            <span class="stat-num" data-target="118" data-decimals="0"
+              >118</span
+            >
+            Google Reviews</span
+          >
+        </div>
+
+        <div
+          class="rounded-3xl overflow-hidden border border-white/10 shadow-2xl mb-8 sm:mb-12 h-64 sm:h-80 md:h-[450px] gs-reveal"
+        >
+          <iframe
+            src="https://maps.google.com/maps?q=18.4812862,73.9050745&z=16&output=embed"
+            width="100%"
+            height="100%"
+            style="border: 0"
+            allowfullscreen=""
+            loading="lazy"
+            title="Besty's Burgers location on Google Maps"
+            class="opacity-80 grayscale hover:grayscale-0 transition-all duration-500"
+          ></iframe>
+        </div>
+
+        <a
+          href="https://search.google.com/local/writereview?placeid=ChIJOWdyHEbrwjsR6BG-rfvGarI"
+          target="_blank"
+          class="magnetic inline-flex items-center gap-3 px-8 py-4 bg-white text-primary font-display font-bold text-lg rounded-full hover:bg-accentYellow transition-colors duration-300"
+        >
+          Drop a Google Review <i class="fa-brands fa-google"></i>
+        </a>
+      </div>
+    </section>
+
+    <!-- Catering & Bulk Orders -->
+    <section
+      id="catering"
+      class="py-24 sm:py-32 md:py-40 bg-primary border-t border-white/5 relative overflow-hidden"
+    >
+      <!-- Atmospheric background lighting -->
+      <div class="absolute inset-0 z-0 opacity-30">
+        <div
+          class="absolute top-0 right-0 w-[500px] h-[500px] bg-accentYellow/10 rounded-full blur-[120px] pointer-events-none"
+          aria-hidden="true"
+        ></div>
+        <div class="grain"></div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
+        <div
+          class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center"
+        >
+          <!-- Text Content (Left on Desktop) -->
+          <div class="gs-reveal text-center lg:text-left">
+            <span
+              class="stamp text-accentYellow font-ticket text-xs uppercase tracking-widest mb-6 inline-flex"
+            >
+              <i class="fa-solid fa-truck-fast"></i> Catering & Bulk Orders
+            </span>
+            <h2
+              class="font-display font-black text-4xl sm:text-5xl md:text-6xl text-white uppercase tracking-tight mb-6"
+            >
+              Bring The Hype <br class="hidden lg:block" />
+              <span class="text-accentYellow pr-2">To Your Event.</span>
+            </h2>
+            <p
+              class="text-gray-400 text-base sm:text-lg md:text-xl leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0"
+            >
+              Office parties, corporate events, or just a massive squad link-up.
+              We bring the authentic Besty's experience directly to you. Smashed
+              fresh, served hot, zero compromises.
+            </p>
+
+            <div
+              class="grid grid-cols-2 gap-4 font-ticket text-sm text-gray-300 max-w-lg mx-auto lg:mx-0"
+            >
+              <div
+                class="flex items-center justify-center lg:justify-start gap-3 border border-white/10 rounded-lg p-3 bg-surface/50 hover:border-accentYellow/50 transition-colors"
+              >
+                <i class="fa-solid fa-fire text-accentYellow"></i> Live Griddles
+              </div>
+              <div
+                class="flex items-center justify-center lg:justify-start gap-3 border border-white/10 rounded-lg p-3 bg-surface/50 hover:border-accentYellow/50 transition-colors"
+              >
+                <i class="fa-solid fa-burger text-accentYellow"></i> Custom
+                Menus
+              </div>
+              <div
+                class="flex items-center justify-center lg:justify-start gap-3 border border-white/10 rounded-lg p-3 bg-surface/50 hover:border-accentYellow/50 transition-colors"
+              >
+                <i class="fa-solid fa-users text-accentYellow"></i> Min. 20
+                Burgers
+              </div>
+              <div
+                class="flex items-center justify-center lg:justify-start gap-3 border border-white/10 rounded-lg p-3 bg-surface/50 hover:border-accentYellow/50 transition-colors"
+              >
+                <i class="fa-solid fa-file-invoice text-accentYellow"></i> Corp.
+                Billing
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Order Ticket Form (Right on Desktop) -->
+          <div class="gs-reveal relative max-w-lg mx-auto lg:max-w-none w-full">
+            <!-- Floating decorative element -->
+            <div
+              class="absolute -top-6 -right-2 sm:-right-6 z-20 ticket-card torn-edge px-4 py-2 bg-accentYellow transform rotate-6 hover:rotate-0 transition-transform duration-300 shadow-xl"
+              style="--tone: var(--primary)"
+            >
+              <span
+                class="font-ticket font-bold text-primary text-xs uppercase tracking-widest"
+                >Bookings Open</span
+              >
+            </div>
+
+            <!-- Applying .tilt-card ties into your existing GSAP quickTo logic for the 3D hover effect -->
+            <div
+              class="tilt-card ticket-card torn-edge rounded-3xl p-8 sm:p-10"
+              style="
+                --tone: var(--primary);
+                background: linear-gradient(
+                  135deg,
+                  var(--surface),
+                  rgba(255, 201, 51, 0.05)
+                );
+                border-color: rgba(255, 201, 51, 0.2);
+              "
+            >
+              <div
+                class="font-ticket text-xs text-accentYellow uppercase tracking-widest mb-6 border-b border-white/10 pb-4 flex justify-between items-center"
+              >
+                <span>Order Inquiry</span>
+                <span>No. 004</span>
+              </div>
+
+              <!-- ================= FORM UPDATE ================= -->
+              <!-- Replace your existing <form> in the Catering section with this: -->
+              <form id="catering-form" class="space-y-6">
+                <div class="group">
+                  <label
+                    class="font-ticket text-xs text-gray-500 uppercase tracking-widest block mb-2 group-focus-within:text-accentYellow transition-colors"
+                    >Name / Company</label
+                  >
+                  <input
+                    type="text"
+                    required
+                    placeholder="Who's ordering?"
+                    class="w-full bg-transparent border-b border-white/20 pb-2 text-white font-display text-lg focus:outline-none focus:border-accentYellow transition-colors placeholder:text-gray-700"
+                  />
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                  <div class="group">
+                    <label
+                      class="font-ticket text-xs text-gray-500 uppercase tracking-widest block mb-2 group-focus-within:text-accentYellow transition-colors"
+                      >Guest Count</label
+                    >
+                    <input
+                      type="number"
+                      required
+                      min="20"
+                      placeholder="20+"
+                      class="w-full bg-transparent border-b border-white/20 pb-2 text-white font-display text-lg focus:outline-none focus:border-accentYellow transition-colors placeholder:text-gray-700"
+                    />
+                  </div>
+
+                  <!-- CUSTOM DATE PICKER WRAPPER -->
+                  <div class="group relative" id="date-picker-wrapper">
+                    <label
+                      class="font-ticket text-xs text-gray-500 uppercase tracking-widest block mb-2 group-focus-within:text-accentYellow transition-colors"
+                      >Event Date</label
+                    >
+                    <!-- Readonly input triggers the custom calendar -->
+                    <input
+                      type="text"
+                      id="event-date"
+                      readonly
+                      required
+                      placeholder="Select Date"
+                      class="w-full bg-transparent border-b border-white/20 pb-2 text-white font-display text-lg focus:outline-none focus:border-accentYellow transition-colors placeholder:text-gray-700 cursor-pointer"
+                    />
+
+                    <!-- Custom Calendar UI (Hidden by default) -->
+                    <div
+                      id="calendar-ui"
+                      class="absolute top-full right-0 lg:left-0 mt-4 w-72 bg-surface2 border border-white/10 rounded-2xl p-5 shadow-2xl opacity-0 invisible z-50 transform translate-y-4 transition-all duration-300"
+                    >
+                      <!-- Controls -->
+                      <div
+                        class="flex justify-between items-center mb-4 text-white"
+                      >
+                        <button
+                          type="button"
+                          id="prev-month"
+                          class="text-gray-400 hover:text-accentYellow transition-colors px-2 py-1"
+                        >
+                          <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <div
+                          id="month-year"
+                          class="font-ticket font-bold text-sm uppercase tracking-widest text-accentYellow"
+                        ></div>
+                        <button
+                          type="button"
+                          id="next-month"
+                          class="text-gray-400 hover:text-accentYellow transition-colors px-2 py-1"
+                        >
+                          <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                      </div>
+
+                      <!-- Days Header -->
+                      <div
+                        class="grid grid-cols-7 gap-1 text-center font-ticket text-[10px] text-gray-500 mb-2 uppercase tracking-wider"
+                      >
+                        <div>Su</div>
+                        <div>Mo</div>
+                        <div>Tu</div>
+                        <div>We</div>
+                        <div>Th</div>
+                        <div>Fr</div>
+                        <div>Sa</div>
+                      </div>
+
+                      <!-- Grid injected via JS -->
+                      <div
+                        id="calendar-grid"
+                        class="grid grid-cols-7 gap-1 text-center font-display text-sm text-white"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="group pb-4">
+                  <label
+                    class="font-ticket text-xs text-gray-500 uppercase tracking-widest block mb-2 group-focus-within:text-accentYellow transition-colors"
+                    >Event Details</label
+                  >
+                  <input
+                    type="text"
+                    required
+                    placeholder="Office party, birthday, etc."
+                    class="w-full bg-transparent border-b border-white/20 pb-2 text-white font-display text-lg focus:outline-none focus:border-accentYellow transition-colors placeholder:text-gray-700"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  class="magnetic w-full py-4 bg-accentYellow text-primary font-display font-bold text-lg rounded-full hover:bg-white transition-colors duration-300 flex justify-center items-center gap-2"
+                >
+                  Request Quote <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+              </form>
+
+              <!-- ================= SUCCESS MODAL ================= -->
+              <!-- Paste this right before your <footer> tag -->
+              <div
+                id="success-modal"
+                class="fixed inset-0 z-[200] flex items-center justify-center opacity-0 invisible"
+                aria-hidden="true"
+              >
+                <!-- Backdrop -->
+                <div
+                  class="absolute inset-0 bg-primary/80 backdrop-blur-md modal-backdrop"
+                ></div>
+
+                <!-- Modal Content -->
+                <div
+                  class="relative z-10 ticket-card torn-edge rounded-3xl p-8 sm:p-12 text-center max-w-sm w-full mx-4 modal-box"
+                  style="
+                    --tone: var(--primary);
+                    background: linear-gradient(
+                      135deg,
+                      var(--surface),
+                      rgba(255, 201, 51, 0.05)
+                    );
+                    border-color: rgba(255, 201, 51, 0.2);
+                  "
+                >
+                  <div
+                    class="w-16 h-16 rounded-full bg-accentYellow/10 text-accentYellow flex items-center justify-center text-3xl mx-auto mb-6"
+                  >
+                    <i class="fa-solid fa-check"></i>
+                  </div>
+                  <h3
+                    class="font-display font-black text-2xl sm:text-3xl text-white mb-3 uppercase tracking-tight"
+                  >
+                    Request Collected
+                  </h3>
+                  <p
+                    class="text-gray-400 text-sm leading-relaxed mb-8 font-light"
+                  >
+                    We've received your inquiry. Our team will review the
+                    details and contact you soon.
+                  </p>
+                  <button
+                    type="button"
+                    id="close-modal"
+                    class="magnetic inline-block w-full py-3 border border-accentYellow/50 text-accentYellow font-ticket font-bold tracking-widest uppercase text-sm rounded-full hover:bg-accentYellow hover:text-primary transition-colors duration-300"
+                  >
+                    Close Window
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom CTA -->
+    <section
+      class="py-24 sm:py-28 md:py-40 bg-accent text-center relative overflow-hidden"
+    >
+      <div
+        class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=2500')] bg-cover bg-center opacity-10 mix-blend-multiply"
+      ></div>
+      <div class="grain"></div>
+      <div class="relative z-10 max-w-4xl mx-auto px-6 sm:px-8 gs-reveal">
+        <h2
+          class="font-display font-black text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white uppercase mb-8 sm:mb-10 tracking-tight"
+        >
+          Stop Scrolling.<br />Start Eating.
+        </h2>
+        <a
+          href="https://www.zomato.com/pune/bestys-burgers-kondhwa"
+          target="_blank"
+          class="magnetic inline-block px-8 sm:px-12 py-4 sm:py-5 bg-primary text-white font-display font-bold text-lg sm:text-2xl rounded-full hover:bg-white hover:text-primary transition-colors duration-300 shadow-2xl"
+        >
+          ORDER ONLINE NOW
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-surface py-12 md:py-16 border-t border-white/5">
+      <div
+        class="max-w-7xl mx-auto px-6 sm:px-8 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left"
+      >
+        <div class="font-display font-black text-3xl tracking-wide text-white">
+          BESTY'S<span class="text-accent">.</span>
+        </div>
+        <div
+          class="flex flex-wrap justify-center gap-6 sm:gap-8 text-sm font-bold text-gray-500 uppercase tracking-widest font-display"
+        >
+          <a href="#" class="hover:text-white transition-colors">Drop Alerts</a>
+          <a href="#location" class="hover:text-white transition-colors"
+            >Locations</a
+          >
+          <a href="#" class="hover:text-white transition-colors"
+            >Allergen Guide</a
+          >
+          <a
+            href="https://search.google.com/local/writereview?placeid=ChIJOWdyHEbrwjsR6BG-rfvGarI"
+            target="_blank"
+            class="hover:text-accentYellow transition-colors inline-flex items-center gap-2"
+          >
+            <i class="fa-brands fa-google"></i> Review Us
+          </a>
+        </div>
+        <div
+          class="text-xs text-gray-600 font-ticket tracking-widest uppercase"
+        >
+          &copy; 2026 Besty's Burger Co.
+        </div>
+      </div>
+    </footer>
+
+    <!-- GSAP Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+
+    <script src="script.js"></script>
+  </body>
+</html>

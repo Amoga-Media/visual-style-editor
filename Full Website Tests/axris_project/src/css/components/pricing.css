@@ -1,0 +1,129 @@
+/* ============================================================
+   PRICING — VISUAL REDESIGN (session 5)
+   ------------------------------------------------------------
+   Axris doesn't currently ship a public pricing page (per
+   architecture.md's page inventory — pricing is a discovery-call
+   conversation, not a self-serve tier). This component exists so
+   the capability is ready the moment that changes, matching this
+   project's convention of building shared infrastructure ahead of
+   a specific page needing it. Markup shape:
+
+   <div class="pricing-grid">
+     <div class="pricing-card">...<ul class="list-feature">...</ul>
+       <a class="btn-magnetic bg-white ...">Talk to us</a></div>
+     <div class="pricing-card pricing-card--featured">
+       <span class="pricing-badge">Most popular</span> ...</div>
+   </div>
+============================================================ */
+
+  .pricing-grid {
+    display: grid;
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+  @media (min-width: 768px) {
+    .pricing-grid {
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+  }
+
+  .pricing-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid theme('colors.gray.200');
+    border-radius: 1.75rem;
+    padding: 2.25rem 2rem;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.45s ease;
+  }
+
+  .pricing-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px -20px rgba(20, 17, 15, 0.16);
+    border-color: theme('colors.brand.200');
+  }
+
+  .pricing-card__name {
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: theme('colors.gray.900');
+  }
+
+  .pricing-card__price {
+    font-family: 'Satoshi', sans-serif;
+    font-size: 2.75rem;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: theme('colors.gray.900');
+    margin-block: 0.75rem 0.25rem;
+  }
+  .pricing-card__price span {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: theme('colors.gray.500');
+  }
+
+  .pricing-card__desc {
+    color: theme('colors.gray.500');
+    font-size: 0.9375rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pricing-card .list-feature {
+    flex: 1 1 auto;
+    margin-bottom: 2rem;
+  }
+
+  /* ── Featured/highlighted tier — same shape, promoted visually,
+     never a different card component ── */
+  .pricing-card--featured {
+    border-color: theme('colors.brand.DEFAULT');
+    background: linear-gradient(180deg, theme('colors.brand.50') 0%, #fff 28%);
+    box-shadow: 0 24px 48px -18px rgba(14, 165, 233, 0.28);
+    transform: translateY(-0.5rem);
+  }
+  .pricing-card--featured:hover {
+    transform: translateY(-1.25rem);
+  }
+
+  .pricing-badge {
+    position: absolute;
+    top: -0.85rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: theme('colors.brand.DEFAULT');
+    color: #fff;
+    font-family: 'Satoshi', sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    border-radius: 9999px;
+    box-shadow: 0 6px 16px -4px rgba(14, 165, 233, 0.45);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pricing-card,
+    .pricing-card--featured {
+      transition: none;
+    }
+    .pricing-card:hover,
+    .pricing-card--featured:hover {
+      transform: none;
+    }
+  }
+
+/* Keyboard focus — pricing CTAs are already .btn-magnetic (own focus
+   ring), but the card itself may wrap a link in some layouts. */
+.pricing-card:focus-within {
+  outline: 2px solid theme('colors.brand.500');
+  outline-offset: 2px;
+}

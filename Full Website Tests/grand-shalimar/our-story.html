@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Story | Grand Shalimar</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=Cinzel+Decorative:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+
+</head>
+<body class="font-sans antialiased bg-pattern">
+
+    <nav class="fixed top-4 sm:top-6 left-1/2 transform -translate-x-1/2 w-[92%] sm:w-[95%] max-w-7xl bg-white/80 backdrop-blur-xl border border-white/40 rounded-full px-5 sm:px-8 py-3 sm:py-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-sm font-medium shadow-[0_8px_30px_rgb(0,0,0,0.04)] z-50 transition-all duration-300">
+        <div class="hidden md:flex gap-6 text-gray-500">
+            <a href="our-story.html" class="text-brand-dark font-semibold" aria-current="page">Our Story</a>
+            <a href="about-us.html" class="hover:text-brand-yellow transition">About Us</a>
+            <a href="menu.html" class="hover:text-brand-yellow transition">Menu</a>
+        </div>
+        <a href="index.html" class="justify-self-center text-xl sm:text-2xl md:text-3xl font-display font-bold tracking-tight text-brand-dark hover:scale-105 transition-transform whitespace-nowrap">
+            Grand Shalimar
+        </a>
+        <div class="flex items-center justify-end gap-3 md:gap-8">
+            <a href="reservations.html" class="hidden md:inline hover:text-brand-yellow transition text-gray-500">Reservations</a>
+            <a href="menu.html" class="hidden md:inline-flex bg-brand-dark text-white px-6 py-2.5 rounded-full text-xs uppercase tracking-widest hover:bg-brand-yellow hover:text-brand-dark transition shadow-md">
+                Order Now
+            </a>
+            <button id="menu-toggle" class="md:hidden flex flex-col gap-[5px] p-2 -mr-2" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+                <span class="w-6 h-0.5 bg-brand-dark block"></span>
+                <span class="w-6 h-0.5 bg-brand-dark block"></span>
+                <span class="w-6 h-0.5 bg-brand-dark block"></span>
+            </button>
+        </div>
+    </nav>
+
+    <div id="mobile-menu" class="fixed inset-0 bg-brand-dark/98 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 text-white font-serif text-3xl opacity-0 -translate-y-full pointer-events-none md:hidden">
+        <a href="index.html" class="hover:text-brand-yellow transition">Home</a>
+        <a href="our-story.html" class="text-brand-yellow">Our Story</a>
+        <a href="about-us.html" class="hover:text-brand-yellow transition">About Us</a>
+        <a href="menu.html" class="hover:text-brand-yellow transition">Menu</a>
+        <a href="reservations.html" class="hover:text-brand-yellow transition">Reservations</a>
+        <a href="menu.html" class="bg-brand-yellow text-brand-dark px-8 py-3 rounded-full text-xs uppercase tracking-widest font-sans font-semibold mt-4">Order Now</a>
+    </div>
+
+    <!-- HERO -->
+    <section class="max-w-7xl mx-auto px-6 pt-28 sm:pt-32 pb-16 sm:pb-24">
+        <div class="flex flex-col md:flex-row items-center gap-10 md:gap-16">
+            <div class="w-full md:w-1/2 text-center md:text-left gsap-fade-up order-2 md:order-1">
+                <span class="text-brand-yellow font-bold tracking-widest text-xs sm:text-sm uppercase mb-4 block">Our Story</span>
+                <h1 class="text-4xl sm:text-5xl md:text-6xl leading-[1.1] font-serif uppercase tracking-wide mb-6">
+                    Two Kitchens, One Lawn, No Shortcuts
+                </h1>
+                <p class="text-gray-500 text-sm sm:text-base leading-relaxed max-w-lg mx-auto md:mx-0">
+                    Grand Shalimar sits on NIBM Road doing something most restaurants don't attempt twice — a full tandoor and biryani kitchen, a full Indo-Chinese kitchen, and a lawn built for the celebrations too big for either dining room.
+                </p>
+            </div>
+            <div class="w-full md:w-1/2 flex justify-center order-1 md:order-2">
+                <div class="relative circle-bg-yellow">
+                    <img src="https://images.pexels.com/photos/30296301/pexels-photo-30296301.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Whole spices used across Grand Shalimar's kitchen" class="w-56 h-56 sm:w-72 sm:h-72 md:w-96 md:h-96 rounded-full object-cover shadow-2xl border-4 sm:border-8 border-white relative z-10">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROCESS -->
+    <section class="max-w-5xl mx-auto px-6 py-16 sm:py-28 border-t border-gray-200">
+        <div class="mb-12 sm:mb-16 text-center md:text-left">
+            <span class="text-brand-yellow font-bold tracking-widest text-xs sm:text-sm uppercase mb-3 block">The Process</span>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-serif uppercase tracking-wide">How A Dish Gets To You</h2>
+        </div>
+
+        <div class="relative pl-10 sm:pl-16">
+            <div class="timeline-line absolute left-3 sm:left-5 top-2 bottom-2 w-[2px]"></div>
+
+            <div class="relative mb-12 sm:mb-16 gsap-fade-up">
+                <div class="absolute -left-10 sm:-left-16 top-1 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-brand-yellow flex items-center justify-center text-brand-dark text-[10px] sm:text-xs font-bold">1</div>
+                <span class="text-brand-yellow font-serif font-bold text-lg">The Masala</span>
+                <h3 class="font-serif text-2xl sm:text-3xl mb-2">Ground That Morning</h3>
+                <p class="text-gray-500 text-sm sm:text-base leading-relaxed max-w-xl">Every gravy starts with a fresh spice mix made that day — not a jar labeled "ready-made" pulled off a shelf.</p>
+            </div>
+
+            <div class="relative mb-12 sm:mb-16 gsap-fade-up">
+                <div class="absolute -left-10 sm:-left-16 top-1 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-brand-orange flex items-center justify-center text-white text-[10px] sm:text-xs font-bold">2</div>
+                <span class="text-brand-orange font-serif font-bold text-lg">The Slow Part</span>
+                <h3 class="font-serif text-2xl sm:text-3xl mb-2">Hours, Not Minutes</h3>
+                <p class="text-gray-500 text-sm sm:text-base leading-relaxed max-w-xl">Biryani goes into a sealed handi for hours on dum; tandoor kebabs marinate overnight before they ever meet the charcoal.</p>
+            </div>
+
+            <div class="relative mb-12 sm:mb-16 gsap-fade-up">
+                <div class="absolute -left-10 sm:-left-16 top-1 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-brand-green flex items-center justify-center text-white text-[10px] sm:text-xs font-bold">3</div>
+                <span class="text-brand-green font-serif font-bold text-lg">Two Kitchens</span>
+                <h3 class="font-serif text-2xl sm:text-3xl mb-2">Run At The Same Time</h3>
+                <p class="text-gray-500 text-sm sm:text-base leading-relaxed max-w-xl">Tandoor and curries on one side, Indo-Chinese woks on the other — running in parallel so neither one waits on the other.</p>
+            </div>
+
+            <div class="relative gsap-fade-up">
+                <div class="absolute -left-10 sm:-left-16 top-1 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-brand-pink flex items-center justify-center text-white text-[10px] sm:text-xs font-bold">4</div>
+                <span class="text-brand-pink font-serif font-bold text-lg">Your Table</span>
+                <h3 class="font-serif text-2xl sm:text-3xl mb-2">Inside, Or On The Lawn</h3>
+                <p class="text-gray-500 text-sm sm:text-base leading-relaxed max-w-xl">A quiet dinner for two indoors, or the lawn set up for the whole family — either way, it reaches you hot, not reheated.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PHILOSOPHY -->
+    <section class="max-w-7xl mx-auto px-6 py-16 sm:py-28 border-t border-gray-200">
+        <div class="text-center mb-14 sm:mb-20 gsap-fade-up">
+            <span class="text-brand-orange font-bold tracking-widest text-xs sm:text-sm uppercase mb-3 block">The Standard</span>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-serif uppercase tracking-wide mb-6">What We Won't Compromise On</h2>
+            <p class="text-gray-500 max-w-xl mx-auto text-sm sm:text-base">Three things every dish has to clear before it reaches your table.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-12 sm:gap-8">
+            <div class="flex flex-col items-center text-center gsap-fade-up">
+                <div class="relative circle-bg-yellow mb-8">
+                    <img src="https://images.unsplash.com/photo-1705359573325-f2006d5e459f?auto=format&fit=crop&w=400&q=80" alt="Tandoori skewers fired fresh" class="w-32 h-32 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-white shadow-xl relative z-10">
+                </div>
+                <h4 class="font-serif font-bold text-xl sm:text-2xl mb-3">Nothing Frozen, Nothing Rushed</h4>
+                <p class="text-sm text-gray-500 max-w-[260px]">The tandoor is fired every morning, marinades sit overnight, and biryani gets its full hours on dum before it's ever served.</p>
+            </div>
+
+            <div class="flex flex-col items-center text-center gsap-fade-up">
+                <div class="relative circle-bg-green mb-8">
+                    <img src="https://images.pexels.com/photos/30296301/pexels-photo-30296301.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Whole spices ground fresh" class="w-32 h-32 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-white shadow-xl relative z-10">
+                </div>
+                <h4 class="font-serif font-bold text-xl sm:text-2xl mb-3">Ground In-House</h4>
+                <p class="text-sm text-gray-500 max-w-[260px]">Every masala is mixed fresh in our own kitchen — no pre-made pastes, no shortcuts on the spice box.</p>
+            </div>
+
+            <div class="flex flex-col items-center text-center gsap-fade-up">
+                <div class="relative circle-bg-orange mb-8">
+                    <img src="https://images.unsplash.com/photo-1559528896-c5310744cce8?auto=format&fit=crop&w=400&q=80" alt="Biryani, cooked with the same care as every dish" class="w-32 h-32 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-white shadow-xl relative z-10">
+                </div>
+                <h4 class="font-serif font-bold text-xl sm:text-2xl mb-3">Two Cuisines, One Standard</h4>
+                <p class="text-sm text-gray-500 max-w-[260px]">Indian and Indo-Chinese get the same care in the kitchen — nothing on this menu is treated as the "other" menu.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- OUR PROMISE -->
+    <section class="bg-brand-green text-white py-20 sm:py-32 overflow-hidden relative">
+        <div class="absolute inset-0 opacity-10 bg-pattern"></div>
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-10 gsap-fade-up">
+            <span class="text-brand-yellow text-xs sm:text-sm uppercase tracking-widest font-semibold mb-8 block">Our Promise</span>
+            <p class="font-serif text-2xl sm:text-3xl md:text-4xl leading-snug mb-4">
+                "Whether it's a table for two or the lawn full for someone's wedding, the kitchen doesn't change gears — everyone gets the same food, cooked the same way."
+            </p>
+            <span class="text-gray-300 text-xs sm:text-sm uppercase tracking-widest">The Grand Shalimar Kitchen</span>
+
+            <div class="grid grid-cols-3 gap-4 sm:gap-8 mt-16 pt-12 border-t border-white/10 max-w-lg mx-auto">
+                <div>
+                    <p class="font-serif text-3xl sm:text-4xl text-brand-yellow">107+</p>
+                    <p class="text-[11px] sm:text-xs text-gray-300 uppercase tracking-wide mt-1">Dishes On The Menu</p>
+                </div>
+                <div>
+                    <p class="font-serif text-3xl sm:text-4xl text-brand-yellow">2</p>
+                    <p class="text-[11px] sm:text-xs text-gray-300 uppercase tracking-wide mt-1">Kitchens, One Roof</p>
+                </div>
+                <div>
+                    <p class="font-serif text-3xl sm:text-4xl text-brand-yellow">100+</p>
+                    <p class="text-[11px] sm:text-xs text-gray-300 uppercase tracking-wide mt-1">Guests On The Lawn</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TEAM -->
+    <section class="max-w-7xl mx-auto px-6 py-16 sm:py-28">
+        <div class="mb-14 sm:mb-20 text-center md:text-left">
+            <span class="text-brand-pink font-bold tracking-widest text-xs sm:text-sm uppercase mb-3 block">The Team</span>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-serif uppercase tracking-wide">What's Running In The Kitchen</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-10 sm:gap-y-14">
+            <div class="flex items-center gap-5 gsap-fade-up">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-brand-yellow/15 text-brand-yellow flex items-center justify-center flex-shrink-0">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-3 7-7 0-3-2-5-3-7-.5 2-1.5 3-2.5 3C14 8 14 4 11 2c.5 3-1 5-3 7-1.5 1.5-3 3.5-3 6 0 4 3 7 7 7Z"/></svg>
+                </div>
+                <div>
+                    <h4 class="font-serif font-bold text-base sm:text-lg">Tandoor &amp; Kebabs</h4>
+                    <p class="text-xs sm:text-sm text-gray-500">Charcoal-fired every service</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-5 gsap-fade-up">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-brand-orange/15 text-brand-orange flex items-center justify-center flex-shrink-0">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16l-1.5 6.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5L4 12Z"/><path d="M4 12a8 8 0 0 1 16 0"/><path d="M12 4V2"/></svg>
+                </div>
+                <div>
+                    <h4 class="font-serif font-bold text-base sm:text-lg">Biryani &amp; Curries</h4>
+                    <p class="text-xs sm:text-sm text-gray-500">Slow-cooked on dum, daily</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-5 gsap-fade-up">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-brand-green/15 text-brand-green flex items-center justify-center flex-shrink-0">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8" stroke-opacity="0"/><path d="M6 9c2 2 4 2 6 0s4-2 6 0"/></svg>
+                </div>
+                <div>
+                    <h4 class="font-serif font-bold text-base sm:text-lg">The Wok Line</h4>
+                    <p class="text-xs sm:text-sm text-gray-500">Indo-Chinese, made to order</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-5 gsap-fade-up">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-brand-pink/15 text-brand-pink flex items-center justify-center flex-shrink-0">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9" r="2.6"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M14.5 15.2c2.6.3 4.5 2.4 4.5 4.8"/></svg>
+                </div>
+                <div>
+                    <h4 class="font-serif font-bold text-base sm:text-lg">Front Of House</h4>
+                    <p class="text-xs sm:text-sm text-gray-500">Tables, and the lawn on event days</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="max-w-7xl mx-auto px-6 py-20 sm:py-28 text-center border-t border-gray-200">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-serif uppercase tracking-wide mb-6">Come Taste The Story</h2>
+        <p class="text-gray-500 max-w-xl mx-auto mb-10 text-sm sm:text-base">The best way to understand any of this is with a fork in your hand.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="menu.html" class="inline-block border border-brand-dark text-brand-dark px-8 py-3.5 rounded-full text-xs uppercase tracking-widest hover:bg-brand-dark hover:text-white transition-colors duration-300">
+                View The Menu
+            </a>
+            <a href="reservations.html" class="inline-block bg-brand-dark text-white px-8 py-3.5 rounded-full text-xs uppercase tracking-widest hover:bg-brand-yellow hover:text-brand-dark transition shadow-md">
+                Reserve A Table
+            </a>
+        </div>
+    </section>
+
+    <footer class="bg-brand-dark text-white pt-20 sm:pt-24 pb-8 rounded-t-[2rem] sm:rounded-t-[3rem] mt-10">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10 sm:gap-12 mb-16">
+            <div class="sm:col-span-2">
+                <h3 class="text-3xl sm:text-4xl font-display font-black tracking-tighter mb-6">Grand Shalimar</h3>
+                <p class="text-gray-400 text-sm max-w-sm leading-relaxed mb-8">
+                    Elevating everyday ingredients into extraordinary culinary masterpieces. Join us for a journey of taste and sophistication.
+                </p>
+                <form id="newsletter-form" class="flex gap-2 max-w-xs">
+                    <label for="newsletter-email" class="sr-only">Email address</label>
+                    <input id="newsletter-email" type="email" required placeholder="Email address" class="bg-white/10 border border-white/20 rounded-full px-4 py-3 w-full text-xs focus:outline-none focus:border-brand-yellow text-white">
+                    <button type="submit" class="bg-brand-yellow text-brand-dark px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-white transition flex-shrink-0">
+                        Join
+                    </button>
+                </form>
+                <p id="newsletter-msg" class="text-xs text-brand-yellow mt-3 hidden">Thanks — you're on the list.</p>
+            </div>
+
+            <div>
+                <h4 class="text-sm font-serif mb-6 text-brand-yellow tracking-widest uppercase">Explore</h4>
+                <ul class="space-y-3 text-gray-400 text-sm">
+                    <li><a href="menu.html" class="hover:text-white transition">Our Menu</a></li>
+                    <li><a href="our-story.html" class="hover:text-white transition">Our Story</a></li>
+                    <li><a href="about-us.html" class="hover:text-white transition">About Us</a></li>
+                    <li><a href="reservations.html" class="hover:text-white transition">Reservations</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-sm font-serif mb-6 text-brand-yellow tracking-widest uppercase">Contact</h4>
+                <ul class="space-y-3 text-gray-400 text-sm">
+                    <li>Near Cloud9, Mohammed Wadi, Pune 411060</li>
+                    <li><a href="mailto:hello@grandshalimar.com" class="hover:text-white transition">hello@grandshalimar.com</a></li>
+                    <li><a href="tel:+918308890889" class="hover:text-white transition">083088 90889</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-sm font-serif mb-6 text-brand-yellow tracking-widest uppercase">Legal</h4>
+                <ul class="space-y-3 text-gray-400 text-sm">
+                    <li><a href="privacy.html" class="hover:text-white transition">Privacy Policy</a></li>
+                    <li><a href="terms.html" class="hover:text-white transition">Terms &amp; Conditions</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-2 text-center md:text-left">
+            <p>&copy; 2026 Grand Shalimar Restaurant. All rights reserved.</p>
+            <p class="text-gray-400 font-medium tracking-wide">Website designed and developed by Amoga Media</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/animations.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/custom-forms.js"></script>
+    <script src="assets/js/cursor.js"></script>
+</body>
+</html>

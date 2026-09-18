@@ -1,0 +1,426 @@
+/*
+  Tailwind v4 source file — this is the ONE place brand tokens and custom
+  component CSS live for the whole site. Every page links to the compiled
+  output (assets/css/style.css) instead of repeating a config or <style> block.
+
+  Build once:   npm run build:css
+  Watch mode:   npm run watch:css
+*/
+
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------- */
+/* Design tokens — generates bg-brand-dark, text-brand-yellow, font-serif, */
+/* etc. automatically. Edit colors/fonts here only.                       */
+/* ---------------------------------------------------------------------- */
+@theme {
+  /* Display: ornate flourish serif — reserved for the "Grand Shalimar" wordmark only */
+  --font-display: "Cinzel Decorative", serif;
+  /* Headings: antiqued, blocky-letterform serif — everything else that was font-serif */
+  --font-serif: "Cinzel", serif;
+  /* Body/UI: crisp modern sans, balances the ornamented display faces */
+  --font-sans: "Inter", sans-serif;
+
+  /* --- Grand Shalimar brand palette (Royal Teal / Midnight Teal / Antique Gold / Soft Brass) ---
+     Slot names below (brand-bg/dark/yellow/green/orange/pink) are kept unchanged on purpose:
+     they're the Tailwind utility-class roots used across every page (bg-brand-yellow, etc.),
+     so remapping just the hex values here recolors the whole site with no HTML/JS edits. */
+  --color-brand-bg: #faf6ec;       /* warm ivory surface — added for legible content backgrounds; not one of the 4 brand colors */
+  --color-brand-dark: #17434d;     /* Midnight Teal — dark surfaces, CTAs, body text */
+  --color-brand-yellow: #d4af37;   /* Antique Gold — primary accent (was the "yellow" slot) */
+  --color-brand-green: #2f6a74;    /* Royal Teal — decorative circles (was the "green" slot) */
+  --color-brand-orange: #c9ad7a;   /* Soft Brass — secondary highlight (was the "orange" slot) */
+  --color-brand-pink: #a6453d;     /* Muted terracotta — decorative + form-invalid state (was the "pink" slot; kept red-adjacent for error legibility) */
+
+  /* Diet indicators — used across the Menu page's veg/non-veg filter and dots */
+  --color-veg: #1a9c46;
+  --color-nonveg: #8c1a1a;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Base                                                                    */
+/* ---------------------------------------------------------------------- */
+@layer base {
+  body {
+    background-color: var(--color-brand-bg);
+    color: var(--color-brand-dark);
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--color-brand-bg); }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Components — shared across all pages                                   */
+/* ---------------------------------------------------------------------- */
+@layer components {
+
+  /* Dotted background pattern used on every page */
+  .bg-pattern {
+    background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Decorative circle shapes behind photos (hero, categories, story, etc.) */
+  .circle-bg-yellow::before {
+    content: ""; position: absolute; top: -15px; left: -25px;
+    width: 100%; height: 100%; background-color: var(--color-brand-yellow);
+    border-radius: 50%; z-index: -1;
+  }
+  .circle-bg-green::after {
+    content: ""; position: absolute; bottom: -20px; right: -20px;
+    width: 90%; height: 90%; background-color: var(--color-brand-green);
+    border-radius: 50%; z-index: -1;
+  }
+  .circle-bg-orange::before {
+    content: ""; position: absolute; top: -10px; right: -20px;
+    width: 80%; height: 80%; background-color: var(--color-brand-orange);
+    border-radius: 50%; z-index: -1;
+  }
+  .circle-bg-pink::before {
+    content: ""; position: absolute; top: -10px; right: -20px;
+    width: 80%; height: 80%; background-color: var(--color-brand-pink);
+    border-radius: 50%; z-index: -1;
+  }
+
+  /* Interactive menu rows (hover-to-preview + accordion) */
+  .menu-row { transition: padding-left 0.3s ease; }
+  .menu-row:hover,
+  .menu-row.active { padding-left: 15px; }
+
+  .accordion-content {
+    transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+  }
+
+  /* Mobile nav */
+  #mobile-menu { transition: opacity 0.4s ease, transform 0.4s ease; }
+
+  #menu-toggle span {
+    transform-origin: center;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  #menu-toggle.menu-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  #menu-toggle.menu-open span:nth-child(2) { opacity: 0; }
+  #menu-toggle.menu-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* Our Story: timeline connector */
+  .timeline-line {
+    background: repeating-linear-gradient(to bottom, #d1d5db 0, #d1d5db 6px, transparent 6px, transparent 14px);
+  }
+
+  /* Menu page: category tabs (mobile pill strip + diet filter) */
+  .tab-btn { transition: all 0.3s ease; }
+  .tab-btn.active { background-color: var(--color-brand-dark); color: #fff; }
+
+  /* Menu page: desktop left-rail category selector */
+  .cat-link {
+    color: #6b7280;
+    transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .cat-link:hover { background-color: #fff; color: var(--color-brand-dark); }
+  .cat-link.active {
+    background-color: #fff;
+    color: var(--color-brand-dark);
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 var(--color-brand-yellow), 0 4px 14px rgba(0, 0, 0, 0.05);
+  }
+  .cat-link .cat-count { color: #d1d5db; }
+  .cat-link.active .cat-count { color: var(--color-brand-yellow); font-weight: 700; }
+  .cat-link.is-empty { opacity: 0.35; pointer-events: none; }
+
+  /* Menu page: veg / non-veg indicator dots (filter pills) */
+  .diet-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 9999px;
+  }
+  .diet-dot-veg { background-color: var(--color-veg); }
+  .diet-dot-nonveg { background-color: var(--color-nonveg); }
+
+  /* Menu page: veg / non-veg square badge shown on each dish row */
+  .diet-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    border: 1.5px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .diet-badge-veg { border-color: var(--color-veg); }
+  .diet-badge-nonveg { border-color: var(--color-nonveg); }
+  .diet-badge .diet-badge-dot { width: 9px; height: 9px; border-radius: 9999px; }
+  .diet-badge-veg .diet-badge-dot { background-color: var(--color-veg); }
+  .diet-badge-nonveg .diet-badge-dot { background-color: var(--color-nonveg); }
+
+  /* Menu page: hide categories/items that don't match the active diet filter */
+  .menu-cat[hidden],
+  .menu-item[hidden] { display: none; }
+
+  /* Utility: scrollable strip / rail without a visible scrollbar */
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  /* Reservations: multi-step form */
+  .step-panel { display: none; }
+  .step-panel.active { display: block; }
+
+  .step-dot { transition: all 0.3s ease; }
+
+  .field-input {
+    width: 100%;
+    background: var(--color-brand-bg);
+    border: 1px solid #e5e7eb;
+    border-radius: 9999px;
+    padding: 0.85rem 1.25rem;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .field-input:focus {
+    outline: none;
+    border-color: var(--color-brand-yellow);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+  }
+  textarea.field-input { border-radius: 1.25rem; resize: vertical; min-height: 90px; }
+
+  /* Autofill: match the theme instead of the browser's blue/yellow flash */
+  .field-input:-webkit-autofill,
+  .field-input:-webkit-autofill:hover,
+  .field-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-brand-dark);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-brand-bg) inset;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Custom cursor — concentric ring + dot, morphs into a solid yellow  */
+  /* blob over anything clickable. Fine-pointer devices only (JS-gated). */
+  /* ------------------------------------------------------------------ */
+  body.has-custom-cursor,
+  body.has-custom-cursor a,
+  body.has-custom-cursor button,
+  body.has-custom-cursor input,
+  body.has-custom-cursor select,
+  body.has-custom-cursor textarea,
+  body.has-custom-cursor label,
+  body.has-custom-cursor [role="button"] {
+    cursor: none;
+  }
+
+  .cursor-dot,
+  .cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+  }
+
+  .cursor-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-brand-dark);
+    transition: opacity 0.25s ease, width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      height 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease;
+  }
+
+  .cursor-ring {
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid var(--color-brand-dark);
+    transition: opacity 0.25s ease, width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      height 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease,
+      border-color 0.4s ease;
+  }
+
+  .cursor-ring.is-visible,
+  .cursor-dot.is-visible { opacity: 1; }
+
+  /* Over a dark-background section (footer, the Hours card, etc.) the      */
+  /* default near-black dot/ring would be nearly invisible against a       */
+  /* similarly dark surface, so both switch to brand-yellow instead.       */
+  /* Toggled by cursor.js whenever the pointer is over `.bg-brand-dark`.   */
+  .cursor-dot.on-dark { background-color: var(--color-brand-yellow); }
+  .cursor-ring.on-dark { border-color: var(--color-brand-yellow); }
+
+  /* Hovering a clickable element: ring grows, fills solid yellow, and    */
+  /* animates through soft organic "blob" shapes; the inner dot vanishes. */
+  .cursor-ring.is-hovering {
+    width: 64px;
+    height: 64px;
+    background-color: var(--color-brand-yellow);
+    border-color: var(--color-brand-yellow);
+    animation: cursor-morph 3s ease-in-out infinite;
+  }
+  .cursor-dot.is-hovering {
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+
+  /* Pressed state: a quick squish for tactile feedback */
+  .cursor-ring.is-active { width: 26px; height: 26px; }
+  .cursor-ring.is-hovering.is-active { width: 52px; height: 52px; }
+
+  @keyframes cursor-morph {
+    0%, 100% { border-radius: 42% 58% 65% 35% / 45% 45% 55% 55%; }
+    25%      { border-radius: 62% 38% 40% 60% / 60% 55% 45% 40%; }
+    50%      { border-radius: 50% 50% 34% 66% / 38% 62% 38% 62%; }
+    75%      { border-radius: 36% 64% 56% 44% / 55% 38% 62% 45%; }
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .cursor-dot, .cursor-ring { display: none; }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Custom form controls — select + date picker share the .field-input */
+  /* pill look (background/border/focus glow) and add their own chrome. */
+  /* ------------------------------------------------------------------ */
+  .ui-select,
+  .ui-datepicker { position: relative; }
+
+  .ui-select-native,
+  .ui-datepicker-native {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .ui-select-trigger,
+  .ui-datepicker-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+  }
+  .ui-select-trigger[aria-expanded="true"],
+  .ui-datepicker-trigger[aria-expanded="true"] {
+    border-color: var(--color-brand-yellow);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+  }
+  .ui-select-trigger.is-invalid,
+  .ui-datepicker-trigger.is-invalid {
+    border-color: var(--color-brand-pink) !important;
+    box-shadow: 0 0 0 3px rgba(166, 69, 61, 0.14);
+  }
+
+  .ui-select-value.is-placeholder,
+  .ui-datepicker-value.is-placeholder { color: #9ca3af; }
+
+  .ui-select-caret,
+  .ui-datepicker-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    color: #9ca3af;
+    transition: transform 0.25s ease, color 0.25s ease;
+  }
+  .ui-select-trigger[aria-expanded="true"] .ui-select-caret { transform: rotate(180deg); color: var(--color-brand-dark); }
+  .ui-datepicker-trigger[aria-expanded="true"] .ui-datepicker-icon { color: var(--color-brand-dark); }
+
+  .ui-select-panel,
+  .ui-datepicker-panel {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 8px);
+    z-index: 40;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 1.25rem;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  .ui-select-panel.is-open,
+  .ui-datepicker-panel.is-open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+
+  /* When a panel would overflow the right edge of the viewport, it flips  */
+  /* to hang from the right of its trigger instead of the left (set by JS  */
+  /* collision detection in custom-forms.js) — this is what actually fixes */
+  /* the calendar/select getting clipped near the edge of the page.        */
+  .ui-select-panel.align-right,
+  .ui-datepicker-panel.align-right { left: auto; right: 0; }
+
+
+  .ui-select-panel {
+    right: 0;
+    padding: 0.4rem;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .ui-select-option {
+    padding: 0.65rem 1rem;
+    border-radius: 0.85rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .ui-select-option:hover,
+  .ui-select-option.is-active { background: var(--color-brand-bg); }
+  .ui-select-option.is-selected { background: var(--color-brand-dark); color: #fff; font-weight: 600; }
+  .ui-select-option[aria-disabled="true"] { opacity: 0.4; cursor: not-allowed; }
+
+  .ui-datepicker-panel { width: 300px; max-width: calc(100vw - 3rem); padding: 1.1rem; }
+  .ui-datepicker-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; }
+  .ui-datepicker-title { font-family: var(--font-serif); font-size: 1rem; font-weight: 600; }
+  .ui-datepicker-nav {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid #e5e7eb; font-size: 1rem; line-height: 1;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .ui-datepicker-nav:hover:not(:disabled) { background: var(--color-brand-yellow); border-color: var(--color-brand-yellow); }
+  .ui-datepicker-nav:disabled { opacity: 0.3; pointer-events: none; }
+
+  .ui-datepicker-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+  .ui-datepicker-weekday { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; padding: 0.4rem 0; font-weight: 600; }
+  .ui-datepicker-day {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; font-size: 0.8rem; cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .ui-datepicker-day:hover:not(.is-disabled):not(.is-selected) { background: var(--color-brand-bg); }
+  .ui-datepicker-day.is-today { color: var(--color-brand-orange); font-weight: 700; }
+  .ui-datepicker-day.is-selected { background: var(--color-brand-dark); color: #fff; font-weight: 700; }
+  .ui-datepicker-day.is-other-month { color: #e5e7eb; }
+  .ui-datepicker-day.is-disabled { color: #e5e7eb; cursor: not-allowed; }
+
+  .ui-datepicker-footer { display: flex; justify-content: center; margin-top: 0.5rem; padding-top: 0.75rem; border-top: 1px solid #f3f4f6; }
+  .ui-datepicker-today-btn { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--color-brand-dark); transition: color 0.15s ease; }
+  .ui-datepicker-today-btn:hover { color: var(--color-brand-yellow); }
+
+  /* Simple accordion look for <details> — used on About Us FAQ */
+  .faq-item { border-bottom: 1px solid #e5e7eb; }
+  .faq-item summary {
+    cursor: pointer; list-style: none; padding: 1.35rem 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary .faq-chevron { transition: transform 0.3s ease; flex-shrink: 0; color: var(--color-brand-yellow); }
+  .faq-item[open] summary .faq-chevron { transform: rotate(45deg); }
+  .faq-item .faq-answer { padding-bottom: 1.5rem; margin-top: -0.75rem; }
+}

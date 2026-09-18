@@ -1,0 +1,141 @@
+/* ============================================================
+   TYPOGRAPHY
+   Satoshi/Inter role assignment + fluid clamp() type scale
+============================================================ */
+
+/* ═══════════════════════════════════════════════════════════
+   AXRIS TYPOGRAPHY HIERARCHY
+   h1–h6, display numbers → Satoshi
+   body text, paragraphs  → Inter
+═══════════════════════════════════════════════════════════ */
+
+/* Headings always use Satoshi */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+  font-feature-settings: "ss01", "cv01";
+}
+
+/* Body, paragraphs, lists always Inter */
+p,
+li,
+blockquote,
+figcaption,
+td,
+th,
+label,
+input,
+textarea,
+select,
+small {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Buttons/nav use Satoshi (brand voice) */
+button,
+.btn-magnetic,
+nav a {
+  font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+}
+
+/* Explicit utility overrides (keep after base rules) */
+.font-satoshi {
+  font-family: 'Satoshi', system-ui, -apple-system, sans-serif !important;
+}
+
+.font-inter {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   AXRIS FLUID TYPOGRAPHY & ANTI-BREAK GLOBALS
+═══════════════════════════════════════════════════════════ */
+@layer base {
+
+  /* 1. Strictly prevent mid-word breaking globally */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-satoshi {
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    -webkit-hyphens: none !important;
+    hyphens: none !important;
+    text-wrap: balance;
+    /* Modern CSS: Automatically balances lines evenly */
+  }
+}
+
+@layer utilities {
+
+  /* 2. Fluid Typography Classes - Auto-shrinks without breaking */
+  .text-fluid-h1 {
+    /* clamp(MIN_SIZE, IDEAL_SCALING_SIZE, MAX_SIZE) */
+    font-size: clamp(2.25rem, 8vw + 0.5rem, 5rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .text-fluid-h2 {
+    font-size: clamp(1.875rem, 6vw + 0.5rem, 4rem) !important;
+    line-height: 1.1 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VISUAL REDESIGN — EYEBROW / KICKER LABEL
+   A single reusable class for the small uppercase label that
+   should sit above section headings (several pages already
+   hand-authored this look ad hoc with a rounded-full pill; this
+   gives it one real, consistent definition to converge on).
+═══════════════════════════════════════════════════════════ */
+@layer components {
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: theme('colors.brand.600');
+  }
+
+  .eyebrow::before {
+    content: "";
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.5px;
+    background: currentColor;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VISUAL REDESIGN — LINKS & TEXT SELECTION
+   Inline text links inside long-form copy (legal pages, blog-
+   style content) previously fell back to unstyled browser blue.
+   A quiet, on-brand underline treatment instead of default
+   Tailwind `text-blue-600 underline` combos hand-authored per
+   instance.
+═══════════════════════════════════════════════════════════ */
+.prose a,
+.legal-content a {
+  color: theme('colors.brand.700');
+  text-decoration: underline;
+  text-decoration-color: theme('colors.brand.200');
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.prose a:hover,
+.legal-content a:hover {
+  text-decoration-color: theme('colors.brand.600');
+}

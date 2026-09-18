@@ -15,8 +15,10 @@ export function findLiveElement(root: Document, path: string): Element | null {
 
   // 2. Try id if path is #id
   if (path.startsWith("#")) {
-    const byId = root.getElementById(path.slice(1));
-    if (byId) return byId;
+    try {
+      const byId = root.getElementById(path.slice(1));
+      if (byId) return byId;
+    } catch {}
   }
 
   // 3. Try resolveElementByStructuralPath (matches AST structural resolution)
@@ -29,6 +31,20 @@ export function findLiveElement(root: Document, path: string): Element | null {
   try {
     const byQuery = root.querySelector(path);
     if (byQuery) return byQuery;
+  } catch {}
+
+  // 5. Fallback: Parse path segments and match by tag / class
+  try {
+    const segments = path.split(">").map((s) => s.trim()).filter(Boolean);
+    if (segments.length > 0) {
+      const lastSegment = segments[segments.length - 1];
+      const match = lastSegment.match(/^([a-zA-Z0-9_-]+)/);
+      if (match) {
+        const tagName = match[1].toLowerCase();
+        const candidates = root.querySelectorAll(tagName);
+        if (candidates.length === 1) return candidates[0];
+      }
+    }
   } catch {}
 
   return null;
@@ -56,209 +72,220 @@ export function reconcileDom(from: EditRecord[], to: EditRecord[], iframeDocumen
   let responsiveUpdated = false;
 
   for (const key of allKeys) {
-    const target = toByKey.get(key);
-    const source = fromByKey.get(key);
-    const structuralPath = target?.structuralPath || source?.structuralPath;
-    if (!structuralPath) continue;
+    try {
+      const target = toByKey.get(key);
+      const source = fromByKey.get(key);
+      const structuralPath = target?.structuralPath || source?.structuralPath;
+      if (!structuralPath) continue;
 
-    // Handle structural mutations (delete, duplicate, insert, move)
-    if (target && !source) {
-      // Re-applying / Redoing an edit
-      if (target.kind === "delete") {
-        const delEl = findLiveElement(iframeDocument, target.structuralPath);
-        if (delEl && delEl !== iframeDocument.body) delEl.remove();
-        continue;
-      } else if (target.kind === "duplicate") {
-        const origEl = findLiveElement(iframeDocument, target.structuralPath);
-        if (origEl) {
-          const clone = origEl.cloneNode(true) as Element;
-          if (target.duplicateId) clone.id = target.duplicateId;
-          origEl.after(clone);
-        }
-        continue;
-      } else if (target.kind === "insert") {
-        const parent = findLiveElement(iframeDocument, target.structuralPath) || iframeDocument.body;
-        if (parent) {
-          const temp = iframeDocument.createElement("div");
-          temp.innerHTML = target.snippet;
-          const child = temp.firstElementChild;
-          if (child) {
-            if (target.position === "inside") {
-              parent.appendChild(child);
-            } else if (target.position === "before" && parent.parentElement) {
-              parent.parentElement.insertBefore(child, parent);
-            } else if (target.position === "after" && parent.parentElement) {
-              parent.parentElement.insertBefore(child, parent.nextSibling);
-            } else {
-              iframeDocument.body?.appendChild(child);
-            }
+      // Structural mutations: delete, duplicate, insert, move
+      if (target && !source) {
+        // Redoing a structural edit
+        if (target.kind === "delete") {
+          const delEl = findLiveElement(iframeDocument, target.structuralPath);
+          if (delEl && delEl !== iframeDocument.body && delEl.parentElement) {
+            delEl.remove();
           }
-        }
-        continue;
-      } else if (target.kind === "move") {
-        let moveEl: Element | null = null;
-        if (target.moveToken) {
-          moveEl = iframeDocument.querySelector(`[data-vse-move-token="${target.moveToken}"]`);
-        }
-        if (!moveEl && target.elementId) {
-          moveEl = iframeDocument.getElementById(target.elementId);
-        }
-        if (!moveEl) {
-          moveEl = findLiveElement(iframeDocument, target.structuralPath);
-        }
-        const targetParent = findLiveElement(iframeDocument, target.targetPath);
-        if (moveEl && targetParent) {
-          if (target.position === "inside") {
-            targetParent.appendChild(moveEl);
-          } else if (target.position === "before" && targetParent.parentElement) {
-            targetParent.parentElement.insertBefore(moveEl, targetParent);
-          } else if (target.position === "after" && targetParent.parentElement) {
-            targetParent.parentElement.insertBefore(moveEl, targetParent.nextSibling);
+          continue;
+        } else if (target.kind === "duplicate") {
+          const origEl = findLiveElement(iframeDocument, target.structuralPath);
+          if (origEl) {
+            const clone = origEl.cloneNode(true) as Element;
+            if (target.duplicateId) clone.id = target.duplicateId;
+            origEl.after(clone);
           }
-        }
-        continue;
-      }
-    } else if (source && !target) {
-      // Undoing an edit
-      if (source.kind === "delete") {
-        if (source.serializedHtml) {
-          const parent = source.parentPath ? findLiveElement(iframeDocument, source.parentPath) : iframeDocument.body;
+          continue;
+        } else if (target.kind === "insert") {
+          const parent = findLiveElement(iframeDocument, target.structuralPath) || iframeDocument.body;
           if (parent) {
             const temp = iframeDocument.createElement("div");
-            temp.innerHTML = source.serializedHtml;
-            const restored = temp.firstElementChild;
-            if (restored) {
-              const sibling = parent.children[source.siblingIndex ?? 0];
-              if (sibling) {
-                parent.insertBefore(restored, sibling);
+            temp.innerHTML = target.snippet;
+            const child = temp.firstElementChild;
+            if (child) {
+              if (target.position === "inside") {
+                parent.appendChild(child);
+              } else if (target.position === "before" && parent.parentElement) {
+                parent.parentElement.insertBefore(child, parent);
+              } else if (target.position === "after" && parent.parentElement) {
+                parent.parentElement.insertBefore(child, parent.nextSibling);
               } else {
-                parent.appendChild(restored);
+                iframeDocument.body?.appendChild(child);
               }
             }
           }
-        }
-        continue;
-      } else if (source.kind === "duplicate") {
-        let dupEl: Element | null = null;
-        if (source.duplicateId) {
-          dupEl = iframeDocument.getElementById(source.duplicateId);
-        }
-        if (!dupEl && source.duplicatePath) {
-          dupEl = findLiveElement(iframeDocument, source.duplicatePath);
-        }
-        if (dupEl && dupEl !== iframeDocument.body) {
-          dupEl.remove();
-        }
-        continue;
-      } else if (source.kind === "insert") {
-        const insertedEl = source.insertedPath
-          ? findLiveElement(iframeDocument, source.insertedPath)
-          : findLiveElement(iframeDocument, source.structuralPath);
-        if (insertedEl && insertedEl !== iframeDocument.body) {
-          insertedEl.remove();
-        }
-        continue;
-      } else if (source.kind === "move") {
-        let movedEl: Element | null = null;
-        if (source.moveToken) {
-          movedEl = iframeDocument.querySelector(`[data-vse-move-token="${source.moveToken}"]`);
-        }
-        if (!movedEl && source.elementId) {
-          movedEl = iframeDocument.getElementById(source.elementId);
-        }
-        if (!movedEl && source.newPath) {
-          movedEl = findLiveElement(iframeDocument, source.newPath);
-        }
-        if (!movedEl && source.newParentPath) {
-          const parent = findLiveElement(iframeDocument, source.newParentPath);
-          if (parent && source.newSiblingIndex !== undefined) {
-            movedEl = parent.children[source.newSiblingIndex] || null;
+          continue;
+        } else if (target.kind === "move") {
+          let moveEl: Element | null = null;
+          if (target.moveToken) {
+            moveEl = iframeDocument.querySelector(`[data-vse-move-token="${target.moveToken}"]`);
           }
-        }
-        if (!movedEl) {
-          movedEl = findLiveElement(iframeDocument, source.structuralPath);
-        }
-
-        const oldParent = source.oldParentPath ? findLiveElement(iframeDocument, source.oldParentPath) : iframeDocument.body;
-        if (movedEl && oldParent) {
-          const sibling = oldParent.children[source.oldSiblingIndex ?? 0];
-          if (sibling && sibling !== movedEl) {
-            oldParent.insertBefore(movedEl, sibling);
-          } else {
-            oldParent.appendChild(movedEl);
+          if (!moveEl && target.elementId) {
+            moveEl = iframeDocument.getElementById(target.elementId);
           }
-        }
-        continue;
-      }
-    }
-
-    const el = findLiveElement(iframeDocument, structuralPath);
-    if (!el) continue;
-
-    if (target) {
-      if (target.kind === "class") {
-        el.className = target.newClassList.join(" ");
-      } else if (target.kind === "style") {
-        const vp = target.viewport || "desktop";
-        const targetProp = target.property || target.styleProperty;
-        if (vp !== "desktop") {
-          setResponsiveStyle(el, target.structuralPath, targetProp, target.newStyleValue, vp);
-          responsiveUpdated = true;
-        } else {
-          if ("style" in el) {
-            (el as HTMLElement).style.setProperty(target.styleProperty, target.newStyleValue, "important");
-            if (target.styleProperty === "color" || target.property === "text-color") {
-              try { (el as HTMLElement).style.setProperty("-webkit-text-fill-color", target.newStyleValue, "important"); } catch {}
+          if (!moveEl) {
+            moveEl = findLiveElement(iframeDocument, target.structuralPath);
+          }
+          const targetParent = findLiveElement(iframeDocument, target.targetPath);
+          if (moveEl && targetParent) {
+            if (target.position === "inside") {
+              targetParent.appendChild(moveEl);
+            } else if (target.position === "before" && targetParent.parentElement) {
+              targetParent.parentElement.insertBefore(moveEl, targetParent);
+            } else if (target.position === "after" && targetParent.parentElement) {
+              targetParent.parentElement.insertBefore(moveEl, targetParent.nextSibling);
             }
           }
-          setResponsiveStyle(el, target.structuralPath, targetProp, target.newStyleValue, "desktop");
-          responsiveUpdated = true;
+          continue;
         }
-      } else if (target.kind === "attribute") {
-        el.setAttribute(target.attributeName, target.newValue);
-      } else if (target.kind === "text") {
-        el.textContent = target.newText;
-      }
-    } else if (source) {
-      if (source.kind === "class") {
-        el.className = source.oldClassList.join(" ");
-      } else if (source.kind === "style") {
-        const vp = source.viewport || "desktop";
-        const sourceProp = source.property || source.styleProperty;
-        if (vp !== "desktop") {
-          setResponsiveStyle(el, source.structuralPath, sourceProp, source.oldStyleValue || "", vp);
-          responsiveUpdated = true;
-        } else {
-          if ("style" in el) {
-            if (source.oldStyleValue) {
-              (el as HTMLElement).style.setProperty(source.styleProperty, source.oldStyleValue, "important");
-              if (source.styleProperty === "color" || source.property === "text-color") {
-                try { (el as HTMLElement).style.setProperty("-webkit-text-fill-color", source.oldStyleValue, "important"); } catch {}
+      } else if (source && !target) {
+        // Undoing a structural edit
+        if (source.kind === "delete") {
+          if (source.serializedHtml) {
+            const parent = source.parentPath ? findLiveElement(iframeDocument, source.parentPath) : iframeDocument.body;
+            if (parent) {
+              const temp = iframeDocument.createElement("div");
+              temp.innerHTML = source.serializedHtml;
+              const restored = temp.firstElementChild;
+              if (restored) {
+                const siblingIndex = source.siblingIndex ?? 0;
+                const sibling = parent.children[siblingIndex];
+                if (sibling) {
+                  parent.insertBefore(restored, sibling);
+                } else {
+                  parent.appendChild(restored);
+                }
               }
+            }
+          }
+          continue;
+        } else if (source.kind === "duplicate") {
+          let dupEl: Element | null = null;
+          if (source.duplicateId) {
+            dupEl = iframeDocument.getElementById(source.duplicateId);
+          }
+          if (!dupEl && source.duplicatePath) {
+            dupEl = findLiveElement(iframeDocument, source.duplicatePath);
+          }
+          if (dupEl && dupEl !== iframeDocument.body && dupEl.parentElement) {
+            dupEl.remove();
+          }
+          continue;
+        } else if (source.kind === "insert") {
+          const insertedEl = source.insertedPath
+            ? findLiveElement(iframeDocument, source.insertedPath)
+            : findLiveElement(iframeDocument, source.structuralPath);
+          if (insertedEl && insertedEl !== iframeDocument.body && insertedEl.parentElement) {
+            insertedEl.remove();
+          }
+          continue;
+        } else if (source.kind === "move") {
+          let movedEl: Element | null = null;
+          if (source.moveToken) {
+            movedEl = iframeDocument.querySelector(`[data-vse-move-token="${source.moveToken}"]`);
+          }
+          if (!movedEl && source.elementId) {
+            movedEl = iframeDocument.getElementById(source.elementId);
+          }
+          if (!movedEl && source.newPath) {
+            movedEl = findLiveElement(iframeDocument, source.newPath);
+          }
+          if (!movedEl && source.newParentPath) {
+            const parent = findLiveElement(iframeDocument, source.newParentPath);
+            if (parent && source.newSiblingIndex !== undefined) {
+              movedEl = parent.children[source.newSiblingIndex] || null;
+            }
+          }
+          if (!movedEl) {
+            movedEl = findLiveElement(iframeDocument, source.structuralPath);
+          }
+
+          const oldParent = source.oldParentPath ? findLiveElement(iframeDocument, source.oldParentPath) : iframeDocument.body;
+          if (movedEl && oldParent) {
+            const siblingIndex = source.oldSiblingIndex ?? 0;
+            const sibling = oldParent.children[siblingIndex];
+            if (sibling && sibling !== movedEl) {
+              oldParent.insertBefore(movedEl, sibling);
             } else {
-              (el as HTMLElement).style.removeProperty(source.styleProperty);
-              if (source.styleProperty === "color" || source.property === "text-color") {
-                try { (el as HTMLElement).style.removeProperty("-webkit-text-fill-color"); } catch {}
-              }
+              oldParent.appendChild(movedEl);
             }
           }
-          setResponsiveStyle(el, source.structuralPath, sourceProp, source.oldStyleValue || "", "desktop");
-          responsiveUpdated = true;
+          continue;
         }
-      } else if (source.kind === "attribute") {
-        if (source.oldValue) {
-          el.setAttribute(source.attributeName, source.oldValue);
-        } else {
-          el.removeAttribute(source.attributeName);
-        }
-      } else if (source.kind === "text") {
-        el.textContent = source.oldText;
       }
+
+      // Value mutations: class, style, attribute, text
+      const el = findLiveElement(iframeDocument, structuralPath);
+      if (!el) continue;
+
+      if (target) {
+        if (target.kind === "class") {
+          el.className = target.newClassList.join(" ");
+        } else if (target.kind === "style") {
+          const vp = target.viewport || "desktop";
+          const targetProp = target.property || target.styleProperty;
+          if (vp !== "desktop") {
+            setResponsiveStyle(el, target.structuralPath, targetProp, target.newStyleValue, vp);
+            responsiveUpdated = true;
+          } else {
+            if ("style" in el) {
+              (el as HTMLElement).style.setProperty(target.styleProperty, target.newStyleValue, "important");
+              if (target.styleProperty === "color" || target.property === "text-color") {
+                try { (el as HTMLElement).style.setProperty("-webkit-text-fill-color", target.newStyleValue, "important"); } catch {}
+              }
+            }
+            setResponsiveStyle(el, target.structuralPath, targetProp, target.newStyleValue, "desktop");
+            responsiveUpdated = true;
+          }
+        } else if (target.kind === "attribute") {
+          el.setAttribute(target.attributeName, target.newValue);
+        } else if (target.kind === "text") {
+          el.textContent = target.newText;
+        }
+      } else if (source) {
+        if (source.kind === "class") {
+          el.className = source.oldClassList.join(" ");
+        } else if (source.kind === "style") {
+          const vp = source.viewport || "desktop";
+          const sourceProp = source.property || source.styleProperty;
+          if (vp !== "desktop") {
+            setResponsiveStyle(el, source.structuralPath, sourceProp, source.oldStyleValue || "", vp);
+            responsiveUpdated = true;
+          } else {
+            if ("style" in el) {
+              if (source.oldStyleValue) {
+                (el as HTMLElement).style.setProperty(source.styleProperty, source.oldStyleValue, "important");
+                if (source.styleProperty === "color" || source.property === "text-color") {
+                  try { (el as HTMLElement).style.setProperty("-webkit-text-fill-color", source.oldStyleValue, "important"); } catch {}
+                }
+              } else {
+                (el as HTMLElement).style.removeProperty(source.styleProperty);
+                if (source.styleProperty === "color" || source.property === "text-color") {
+                  try { (el as HTMLElement).style.removeProperty("-webkit-text-fill-color"); } catch {}
+                }
+              }
+            }
+            setResponsiveStyle(el, source.structuralPath, sourceProp, source.oldStyleValue || "", "desktop");
+            responsiveUpdated = true;
+          }
+        } else if (source.kind === "attribute") {
+          if (source.oldValue) {
+            el.setAttribute(source.attributeName, source.oldValue);
+          } else {
+            el.removeAttribute(source.attributeName);
+          }
+        } else if (source.kind === "text") {
+          el.textContent = source.oldText;
+        }
+      }
+    } catch {
+      // Individual edit reconciliation failure must never crash the undo/redo engine
     }
   }
 
   if (responsiveUpdated) {
-    syncResponsiveStylesheet(iframeDocument);
+    try {
+      syncResponsiveStylesheet(iframeDocument);
+    } catch {}
   }
 }
 
@@ -275,28 +302,40 @@ export const useUndoStore = create<UndoState>((set, get) => ({
   past: [],
   future: [],
 
-  pushHistory: (preCommitEdits) => set((s) => ({ past: [...s.past, [...preCommitEdits]], future: [] })),
+  pushHistory: (preCommitEdits) =>
+    set((s) => ({
+      past: [...s.past, [...preCommitEdits]],
+      future: [],
+    })),
 
   undo: (iframeDocument) => {
-    const { past } = get();
-    if (past.length === 0) return;
-    const current = useChangeSetStore.getState().edits;
-    const target = past[past.length - 1];
+    try {
+      const { past } = get();
+      if (past.length === 0) return;
+      const current = useChangeSetStore.getState().edits;
+      const target = past[past.length - 1];
 
-    set((s) => ({ past: s.past.slice(0, -1), future: [current, ...s.future] }));
-    useChangeSetStore.setState({ edits: target });
-    reconcileDom(current, target, iframeDocument);
+      set((s) => ({ past: s.past.slice(0, -1), future: [current, ...s.future] }));
+      useChangeSetStore.setState({ edits: target });
+      reconcileDom(current, target, iframeDocument);
+    } catch {
+      // Guard against top-level undo exceptions
+    }
   },
 
   redo: (iframeDocument) => {
-    const { future } = get();
-    if (future.length === 0) return;
-    const current = useChangeSetStore.getState().edits;
-    const target = future[0];
+    try {
+      const { future } = get();
+      if (future.length === 0) return;
+      const current = useChangeSetStore.getState().edits;
+      const target = future[0];
 
-    set((s) => ({ future: s.future.slice(1), past: [...s.past, current] }));
-    useChangeSetStore.setState({ edits: target });
-    reconcileDom(current, target, iframeDocument);
+      set((s) => ({ future: s.future.slice(1), past: [...s.past, current] }));
+      useChangeSetStore.setState({ edits: target });
+      reconcileDom(current, target, iframeDocument);
+    } catch {
+      // Guard against top-level redo exceptions
+    }
   },
 
   reset: () => set({ past: [], future: [] }),

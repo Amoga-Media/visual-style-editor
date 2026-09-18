@@ -97,7 +97,7 @@ function splitPrefixSuffix(className: string): { prefix: string; suffix: string 
   return { prefix, suffix: className.slice(prefix.length + 1) };
 }
 
-export function classifyUtilityClass(className: string, theme: ThemeMap): Classification | null {
+export function classifyUtilityClass(className: string, theme?: ThemeMap): Classification | null {
   if (POSITION_TOKENS.has(className)) {
     return { property: "position", suffix: className };
   }

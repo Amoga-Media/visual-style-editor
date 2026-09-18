@@ -1,0 +1,75 @@
+/* ============================================================
+   DECORATIVE ANIMATION SUPPORT
+   CSS the animation JS modules (src/js/animations) depend on:
+   marquee track, horizontal timeline, CTA band
+============================================================ */
+
+/* CLS: Stable marquee track */
+.marquee-track {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Performance: Composite layer for animated elements.
+   will-change is intentionally NOT set here — it's toggled on/off in
+   initHorizontalTimeline() (main.js) only while this section is actually
+   being scrolled through, instead of holding a dedicated compositor layer
+   for this large element for the entire time it's on the page. */
+.ht-track {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Sticky accordion items (about-us.html, services.html) crossfade opacity
+   via direct style writes in initStickyAccordion() — will-change-opacity is
+   used as a class name in the HTML but isn't a real Tailwind utility
+   (Tailwind's will-change plugin only ships auto/scroll/contents/transform),
+   so without this rule it did nothing and the crossfade got no compositor
+   hint at all. */
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* ── Giant background marquee word (CTA band) ── */
+.cta-marquee-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.14);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+/* ── Clip-mask headline reveal (CTA band) ── */
+.cta-text-clip {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  line-height: 1.05;
+}
+
+.cta-text-slide {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* ── Giant faint stage numbers (horizontal timeline slides) ── */
+.ht-num {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+  font-weight: 900;
+  font-size: clamp(10rem, 32vw, 26rem);
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  white-space: nowrap;
+}

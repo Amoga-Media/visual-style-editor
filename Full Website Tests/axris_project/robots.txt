@@ -1,0 +1,50 @@
+# =============================================
+# robots.txt — Axris Media Solutions
+# https://www.axrissolutions.com
+# Last updated: 2026-06-29
+# =============================================
+
+User-agent: *
+Allow: /
+
+# Block non-indexable technical assets
+Disallow: /assets/vendor/
+Disallow: /.git/
+Disallow: /node_modules/
+
+# Allow CSS/JS for full rendering (Googlebot needs these)
+Allow: /assets/css/
+Allow: /assets/js/
+
+# Allow images for Google Image Search
+Allow: /assets/images/
+
+# Allow case study PDFs — trust signals for E-E-A-T
+Allow: /assets/case-studies/
+
+# =============================================
+# Crawl-delay for non-Google bots
+# =============================================
+User-agent: Bingbot
+Crawl-delay: 10
+
+User-agent: Slurp
+Crawl-delay: 10
+
+# =============================================
+# Block known bad / scraper bots
+# =============================================
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: SiteAuditBot
+Disallow: /
+
+# =============================================
+# Sitemap location
+# =============================================
+Sitemap: https://www.axrissolutions.com/sitemap.xml
+Sitemap: https://www.axrissolutions.com/sitemap-images.xml

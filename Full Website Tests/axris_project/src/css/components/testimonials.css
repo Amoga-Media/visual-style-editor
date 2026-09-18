@@ -1,0 +1,122 @@
+/* ============================================================
+   TESTIMONIALS — VISUAL REDESIGN (session 5)
+   ------------------------------------------------------------
+   Axris's proof-of-work currently lives in case-study PDFs
+   (assets/case-studies/*.pdf) and the case-studies timeline, not
+   short pull-quotes — see architecture.md. Real client-quote copy
+   would need to come from Axris directly rather than being invented
+   here, so this ships as a ready-to-use, documented component
+   (consistent with pricing.css's approach this session) rather than
+   fabricated content on a real page. Markup shape:
+
+   <blockquote class="testimonial-card">
+     <p class="testimonial-card__quote">"…quote…"</p>
+     <footer class="testimonial-card__author">
+       <img class="testimonial-card__avatar" src="..." alt="">
+       <div><cite>Name</cite><span>Title, Company</span></div>
+     </footer>
+   </blockquote>
+============================================================ */
+
+  .testimonial-card {
+    position: relative;
+    background: #fff;
+    border: 1px solid theme('colors.gray.200');
+    border-radius: 1.75rem;
+    padding: 2.25rem 2rem 2rem;
+    margin: 0;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .testimonial-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 48px -22px rgba(20, 17, 15, 0.18);
+  }
+
+  .testimonial-card::before {
+    content: "\201C";
+    position: absolute;
+    top: 1.25rem;
+    left: 1.75rem;
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 900;
+    font-size: 3.5rem;
+    line-height: 1;
+    color: theme('colors.brand.100');
+  }
+
+  .testimonial-card__quote {
+    position: relative;
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    font-size: 1.125rem;
+    line-height: 1.55;
+    color: theme('colors.gray.800');
+    margin-bottom: 1.75rem;
+  }
+
+  .testimonial-card__author {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    border-top: 1px solid theme('colors.gray.100');
+    padding-top: 1.25rem;
+  }
+
+  .testimonial-card__avatar {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid theme('colors.gray.200');
+  }
+
+  .testimonial-card__author cite {
+    display: block;
+    font-style: normal;
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: theme('colors.gray.900');
+  }
+
+  .testimonial-card__author span {
+    display: block;
+    font-size: 0.8125rem;
+    color: theme('colors.gray.500');
+  }
+
+  /* Dark-surface variant, for use inside bg-dark sections */
+  .testimonial-card--on-dark {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .testimonial-card--on-dark .testimonial-card__quote {
+    color: theme('colors.gray.100');
+  }
+  .testimonial-card--on-dark .testimonial-card__author {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+  .testimonial-card--on-dark .testimonial-card__author cite {
+    color: #fff;
+  }
+  .testimonial-card--on-dark::before {
+    color: rgba(14, 165, 233, 0.25);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .testimonial-card {
+      transition: none;
+    }
+    .testimonial-card:hover {
+      transform: none;
+    }
+  }
+
+.testimonial-card:focus-within {
+  outline: 2px solid theme('colors.brand.500');
+  outline-offset: 2px;
+}

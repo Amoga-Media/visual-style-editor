@@ -1,0 +1,457 @@
+/* ============================================================
+   NAVBAR — migrated from assets/components/navbar.html's inline
+   <style> block (see architecture.md §7.2 / design-system.md
+   "Additional color inconsistency — the navbar").
+
+   This used to be a standalone stylesheet that bypassed the
+   Tailwind build entirely and hardcoded its own hex values,
+   independent of both the configured tokens AND the site's
+   actually-rendered blue-600/gray-900. Now it lives in the real
+   build and consumes the resolved brand/dark tokens via theme(),
+   so a future color-system change updates the navbar automatically
+   instead of requiring someone to remember a second file.
+============================================================ */
+
+.ax-header-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 1.5rem 0;
+  z-index: 10001;
+  pointer-events: none;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+}
+
+.ax-nav-classic {
+  pointer-events: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid theme('colors.gray.200');
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border-radius: theme('borderRadius.full');
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.ax-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.ax-logo-img {
+  width: 130px;
+  height: auto;
+  object-fit: contain;
+}
+
+.ax-desktop-nav {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ax-nav-link {
+  position: relative;
+  padding: 0.5rem 0.2rem;
+  margin: 0 1.25rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: theme('colors.gray.600');
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.ax-nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: theme('colors.brand.DEFAULT');
+  transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.ax-nav-link:hover,
+.ax-nav-link.active {
+  color: theme('colors.dark');
+}
+
+.ax-nav-link:hover::after,
+.ax-nav-link.active::after {
+  width: 100%;
+}
+
+/* Dropdown */
+.ax-services-parent {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ax-services-dropdown {
+  position: absolute;
+  top: calc(100% + 20px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid theme('colors.gray.200');
+  padding: 12px;
+  min-width: 260px;
+}
+
+/* Accessibility pass: this was `:hover`-only. The dropdown starts
+   `visibility: hidden`, which also removes its links from the Tab
+   order — so a keyboard-only user landing on "Services" previously had
+   no way to ever reach the 8 links inside (Tab skipped straight to
+   "Case Studies"), even though the links are real, ordinary <a> tags.
+   `:focus-within` fires the instant the "Services" link itself is
+   focused (it's a direct child of `.ax-services-parent`), which flips
+   `visibility` to `visible` synchronously — by the next Tab press the
+   dropdown links are already focusable. No JS needed. */
+.ax-services-parent:hover .ax-services-dropdown,
+.ax-services-parent:focus-within .ax-services-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.ax-dropdown-link {
+  display: block;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: theme('colors.gray.600');
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.ax-dropdown-link:hover {
+  background: theme('colors.gray.100');
+  color: theme('colors.brand.DEFAULT');
+}
+
+.ax-dropdown-link.primary {
+  font-weight: 800;
+  color: theme('colors.brand.DEFAULT');
+  margin-bottom: 6px;
+  background: theme('colors.brand.50');
+}
+
+.ax-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ax-contact-btn {
+  display: none;
+  background: theme('colors.brand.DEFAULT');
+  color: white;
+  padding: 0.75rem 1.75rem;
+  border-radius: theme('borderRadius.full');
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.ax-contact-btn:hover {
+  background: theme('colors.brand.600');
+}
+
+/* 3-line animated hamburger */
+#ax-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 28px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10001;
+  margin-right: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+/* Scoped to :not(.ax-ham--open) so this hover dim never fights the
+   open-state's own opacity:0 on the middle line below. */
+#ax-hamburger:not(.ax-ham--open):hover .ax-ham-line {
+  opacity: 0.6;
+}
+
+#ax-hamburger:active {
+  transform: scale(0.88);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #ax-hamburger:active {
+    transform: none;
+  }
+}
+
+.ax-ham-line {
+  width: 100%;
+  height: 2px;
+  background-color: theme('colors.dark');
+  transition: all 0.3s ease-in-out;
+}
+
+#ax-hamburger.ax-ham--open .ax-ham-line:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+  background-color: theme('colors.dark');
+}
+
+#ax-hamburger.ax-ham--open .ax-ham-line:nth-child(2) {
+  opacity: 0;
+}
+
+#ax-hamburger.ax-ham--open .ax-ham-line:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+  background-color: theme('colors.dark');
+}
+
+/* Mobile menu
+   z-index note (session 9 fix): .ax-header-wrapper above sits at
+   z-index: 10001 — one higher than this was, meaning taps anywhere in
+   the top ~80px of the screen while this menu was open (including its
+   own close button and, now, its drag handle) were actually landing on
+   the always-present fixed header sitting invisibly on top of it,
+   rather than on the menu itself. This needs to be strictly the higher
+   of the two whenever the dialog is open. */
+#ax-mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 10010;
+  background: #ffffff;
+  transform: translateY(-100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  /* Safe-area inset (session 9) — on notched/Dynamic-Island phones in
+     portrait, `inset: 0` alone puts the drag handle and close button
+     right under the status bar/notch. env() falls back to 0 on devices
+     without a safe-area concept, so this is a no-op everywhere else. */
+  padding-top: env(safe-area-inset-top);
+}
+
+#ax-mobile-menu.ax-menu--open {
+  transform: translateY(0);
+}
+
+/* Swipe-to-dismiss handle (session 9) — a dedicated grab strip, the
+   standard bottom-sheet affordance, so the drag gesture wired up in
+   ui/mobile-nav.js has a discoverable, deliberate target instead of
+   silently living on the whole panel (which would make ordinary
+   scrolling/tapping inside the link list ambiguous with a dismiss
+   gesture). `touch-action: none` here is required, not decorative —
+   without it, the browser's own default touch scroll handling can
+   compete with GSAP Draggable for the same pointer gesture. */
+.ax-mobile-drag-handle {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0 0.25rem;
+  touch-action: none;
+  cursor: grab;
+  flex-shrink: 0;
+}
+
+.ax-mobile-drag-handle:active {
+  cursor: grabbing;
+}
+
+.ax-mobile-drag-bar {
+  width: 2.75rem;
+  height: 4px;
+  border-radius: 9999px;
+  background: theme('colors.gray.300');
+  transition: background-color 0.2s ease;
+}
+
+.ax-mobile-drag-handle:active .ax-mobile-drag-bar {
+  background: theme('colors.brand.400');
+}
+
+@media (min-width: 1024px) {
+  .ax-mobile-drag-handle { display: none; }
+}
+
+.ax-mobile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  height: 80px;
+  border-bottom: 1px solid theme('colors.gray.100');
+}
+
+.ax-mobile-logo-img {
+  width: 120px;
+  height: auto;
+  object-fit: contain;
+}
+
+.ax-mobile-nav-container {
+  flex: 1;
+  padding: 6rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+}
+
+.ax-mobile-navlink {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: theme('colors.dark');
+  text-decoration: none;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid theme('colors.gray.100');
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+
+.ax-mobile-submenu {
+  display: none;
+  flex-direction: column;
+  background: theme('colors.gray.50');
+  padding: 1rem 1.5rem;
+  border-radius: 0 0 1rem 1rem;
+  border: 1px solid theme('colors.gray.100');
+  border-top: none;
+}
+
+.ax-mobile-submenu.open {
+  display: flex;
+}
+
+.ax-mobile-sublink {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: theme('colors.gray.600');
+  text-decoration: none;
+  padding: 0.75rem 0;
+  transition: color 0.3s ease;
+}
+
+.ax-mobile-sublink:hover,
+.ax-mobile-sublink.active {
+  color: theme('colors.brand.DEFAULT');
+}
+
+.ax-mobile-footer {
+  padding: 2rem 1.5rem;
+  /* Same safe-area reasoning as #ax-mobile-menu's padding-top above,
+     applied to the bottom: without it, the primary CTA button's tap
+     target sits partly behind the home-indicator bar on iPhones. */
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  background: theme('colors.gray.50');
+  border-top: 1px solid theme('colors.gray.200');
+}
+
+.ax-mobile-contact-btn {
+  display: block;
+  background: theme('colors.brand.DEFAULT');
+  color: white;
+  text-align: center;
+  padding: 1.25rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: theme('borderRadius.full');
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
+}
+
+@media (max-width: 1023px) {
+  .ax-header-wrapper {
+    padding: 0;
+  }
+  .ax-nav-classic {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  }
+  .ax-desktop-nav {
+    display: none;
+  }
+  #ax-hamburger {
+    display: flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ax-contact-btn {
+    display: inline-flex;
+  }
+}
+
+/* ============================================================
+   KEYBOARD FOCUS — CRAFTSMANSHIP + ACCESSIBILITY PASS (session 5)
+   ------------------------------------------------------------
+   Every interactive element in this file had hover/active states
+   but nothing for :focus-visible, meaning keyboard users tabbing
+   through the nav got no visible indicator at all beyond whatever
+   the browser's silent default outline did against a floating pill
+   with rounded corners (often clipped/invisible). Added last, once,
+   here — not per-selector above — since the treatment is identical
+   across every nav control.
+============================================================ */
+
+.ax-nav-link:focus-visible,
+.ax-logo:focus-visible,
+#ax-hamburger:focus-visible,
+.ax-mobile-sublink:focus-visible,
+.ax-nav-classic a:focus-visible,
+.ax-nav-classic button:focus-visible {
+  outline: 2px solid theme('colors.brand.500');
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+/* ── Logo micro-interaction (session 6) ──────────────────────
+   The logo was a static <img> with no hover feedback at all — every
+   other interactive element in the nav has one. A small, restrained
+   scale + brightness lift signals "this is clickable" without
+   competing with the underline-on-hover nav links. ── */
+.ax-logo-img {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ax-logo:hover .ax-logo-img {
+  transform: scale(1.04);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ax-logo:hover .ax-logo-img {
+    transform: none;
+  }
+}

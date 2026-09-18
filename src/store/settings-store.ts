@@ -27,11 +27,23 @@ function getInitialTheme(): AppTheme {
   return "dark";
 }
 
+function getInitialUiScale(): number {
+  if (typeof window === "undefined") return 1.25;
+  try {
+    const saved = localStorage.getItem("vse_ui_scale");
+    if (saved) {
+      const parsed = parseFloat(saved);
+      if (!isNaN(parsed) && parsed >= 0.75 && parsed <= 1.5) return parsed;
+    }
+  } catch {}
+  return 1.25;
+}
+
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   snapToDefaultScale: false,
   appTheme: getInitialTheme(),
   canvasMode: "edit",
-  uiScale: 1.0,
+  uiScale: getInitialUiScale(),
 
   toggleSnap: () => set((s) => ({ snapToDefaultScale: !s.snapToDefaultScale })),
   setCanvasMode: (mode: CanvasMode) => set({ canvasMode: mode }),
@@ -59,16 +71,36 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   setUiScale: (scale: number) => {
     const clamped = Math.min(Math.max(Number(scale.toFixed(2)), 0.75), 1.5);
+    try {
+      localStorage.setItem("vse_ui_scale", clamped.toString());
+    } catch {}
     set({ uiScale: clamped });
   },
 
   increaseUiScale: () => {
-    set((s) => ({ uiScale: Math.min(Number((s.uiScale + 0.05).toFixed(2)), 1.5) }));
+    set((s) => {
+      const next = Math.min(Number((s.uiScale + 0.05).toFixed(2)), 1.5);
+      try {
+        localStorage.setItem("vse_ui_scale", next.toString());
+      } catch {}
+      return { uiScale: next };
+    });
   },
 
   decreaseUiScale: () => {
-    set((s) => ({ uiScale: Math.max(Number((s.uiScale - 0.05).toFixed(2)), 0.75) }));
+    set((s) => {
+      const next = Math.max(Number((s.uiScale - 0.05).toFixed(2)), 0.75);
+      try {
+        localStorage.setItem("vse_ui_scale", next.toString());
+      } catch {}
+      return { uiScale: next };
+    });
   },
 
-  resetUiScale: () => set({ uiScale: 1.0 }),
+  resetUiScale: () => {
+    try {
+      localStorage.setItem("vse_ui_scale", "1.25");
+    } catch {}
+    set({ uiScale: 1.25 });
+  },
 }));

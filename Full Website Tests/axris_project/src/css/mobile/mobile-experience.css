@@ -1,0 +1,311 @@
+/* ============================================================
+   MOBILE EXPERIENCE — SESSION 9
+   ------------------------------------------------------------
+   Everything in this file is written for phones on their own terms,
+   not "the desktop layout, shrunk." It's imported last (see main.css)
+   so it always wins the cascade against every other component file at
+   the widths it targets, and every rule here is scoped to a mobile-only
+   media condition — nothing in this file is reachable above its stated
+   breakpoint, so desktop is provably untouched by this file.
+
+   Two different media conditions are used on purpose, for two different
+   questions:
+     • `max-width: …`   → "is the viewport phone-sized?" (layout, type,
+                          spacing — things that are about available room)
+     • `hover: none`     → "can this input point without touching?"
+                          (interaction language — things that are about
+                          input capability, independent of screen size,
+                          so a touch laptop gets this treatment too)
+
+   Sections:
+     1. Typography        — bolder, more confident mobile type scale
+     2. Spacing rhythm     — a tighter, phone-native vertical scale
+     3. Touch interactions — real tap feedback instead of stuck hover
+     4. Forms              — prevents iOS's input-focus auto-zoom
+     5. Homepage set pieces — hero/CTA/manifesto-row mobile tuning
+     6. Mobile scroll-story — the sticky progress rail (see
+                              motion/mobile-story.js for the JS half)
+     7. Performance         — cuts real paint/compositing cost on mobile
+============================================================ */
+
+
+/* ────────────────────────────────────────────────────────────
+   1. TYPOGRAPHY
+   ------------------------------------------------------------
+   base/typography.css's fluid clamps were tuned against the whole
+   320px→1536px range at once, which means the low end of the curve —
+   the only end a phone ever sees — comes out conservative: at a 375px
+   viewport .text-fluid-h1 lands around 2.4rem, barely above its own
+   floor. A phone screen has no "keep growing toward a 5rem desktop
+   ceiling" to answer to; it can afford to start bolder and hit its own
+   ceiling sooner. These overrides only change the low end of the curve
+   (and only below 768px) — the moment a viewport crosses into tablet
+   width, base/typography.css's original desktop-facing clamp takes back
+   over untouched.
+──────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .text-fluid-h1 {
+    font-size: clamp(2.5rem, 11vw, 3.25rem) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.02em;
+  }
+
+  .text-fluid-h2 {
+    font-size: clamp(2.125rem, 9vw, 2.75rem) !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.015em;
+  }
+
+  .text-fluid-h3 {
+    font-size: clamp(1.5rem, 6.5vw, 1.875rem) !important;
+    line-height: 1.18 !important;
+  }
+
+  /* Eyebrow/kicker labels get a hair more letter-spacing on mobile —
+     at small sizes a tight tracking value (tuned for a bigger desktop
+     rendering of the same class) reads as cramped rather than crisp. */
+  .eyebrow,
+  .kicker__label {
+    letter-spacing: 0.09em;
+  }
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   2. SPACING RHYTHM
+   ------------------------------------------------------------
+   design-system.md documents py-16/20/24/32 (± matching pt-/pb- halves)
+   as the site's one recurring section-rhythm recipe, used the same way
+   in 77 places across all 16 pages — which is exactly what makes it
+   safe and high-leverage to retune in one place: fix it here and every
+   page inherits the correction automatically, with no per-page markup
+   edits and no risk of missing an instance.
+   A ~35–40% reduction across the board — phones are short; a rhythm
+   tuned to feel spacious on a 1440px desktop viewport just reads as
+   "a lot of empty space to scroll through" on a 6" screen. Kept
+   proportional rather than flattening everything to one value, so the
+   site's existing size hierarchy (which sections are meant to feel
+   more/less roomy than others) survives the translation to mobile.
+   Only below 768px — a 768–1023px tablet keeps the original values,
+   since a tablet has the vertical room to justify them.
+──────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .pt-40 { padding-top: 6.5rem; }
+  .pt-32 { padding-top: 5rem; }
+  .pt-24 { padding-top: 3.75rem; }
+  .pt-20 { padding-top: 3.25rem; }
+  .pt-16 { padding-top: 2.75rem; }
+
+  .pb-32 { padding-bottom: 5rem; }
+  .pb-24 { padding-bottom: 3.75rem; }
+  .pb-20 { padding-bottom: 3.25rem; }
+  .pb-16 { padding-bottom: 2.75rem; }
+
+  .py-32 { padding-top: 5rem; padding-bottom: 5rem; }
+  .py-24 { padding-top: 3.75rem; padding-bottom: 3.75rem; }
+  .py-20 { padding-top: 3.25rem; padding-bottom: 3.25rem; }
+  .py-16 { padding-top: 2.75rem; padding-bottom: 2.75rem; }
+
+  /* The index-row manifesto pattern (editorial.css) carries its own
+     fixed padding-block/gap independent of the py-* scale above —
+     tightened here to match the same phone-native rhythm. */
+  .index-row {
+    padding-block: 1.5rem;
+    gap: 1.125rem;
+  }
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   3. TOUCH INTERACTIONS
+   ------------------------------------------------------------
+   `:hover` is a mouse concept a touchscreen fakes: many mobile browsers
+   apply `:hover` styles on tap and hold them until the next unrelated
+   tap elsewhere, which reads as a bug on anything that shifts position
+   (a card that taps into a "floating" state and stays there) even
+   though nothing is actually broken. `hover: none` targets that input
+   capability directly, so this correctly also covers a touch laptop —
+   this is about what the input device can do, not how wide the screen
+   is. The JS-driven twin of this same bug (mouseenter without a
+   reliable mouseleave) is fixed at the source in motion/micro.js.
+──────────────────────────────────────────────────────────── */
+@media (hover: none) {
+  .rounded-card[class*="border-gray"][class*="bg-white"]:hover,
+  .rounded-card[class*="bg-dark"]:hover,
+  .rounded-card[class*="bg-brand"]:hover,
+  .btn-magnetic:hover {
+    transform: none;
+  }
+
+  .rounded-card[class*="border-gray"][class*="bg-white"]:hover {
+    border-color: theme('colors.gray.200');
+  }
+
+  .rounded-card[class*="border-gray"][class*="bg-white"]:hover::before {
+    width: 0.5rem;
+  }
+
+  .ax-logo:hover .ax-logo-img {
+    transform: none;
+  }
+
+  /* Real tap feedback in place of the hover metaphor that doesn't apply
+     here — a quick, subtle press-down rather than the desktop lift, so
+     the two input languages feel distinct rather than one being a
+     broken version of the other. */
+  .rounded-card[class*="border-gray"][class*="bg-white"]:active,
+  .rounded-card[class*="bg-dark"]:active,
+  .rounded-card[class*="bg-brand"]:active {
+    transform: scale(0.985);
+    transition-duration: 0.15s;
+  }
+}
+
+@media (hover: none) and (prefers-reduced-motion: reduce) {
+  .rounded-card[class*="border-gray"][class*="bg-white"]:active,
+  .rounded-card[class*="bg-dark"]:active,
+  .rounded-card[class*="bg-brand"]:active {
+    transform: none;
+  }
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   4. FORMS
+   ------------------------------------------------------------
+   Contact form fields use text-sm (14px) below the md breakpoint
+   (pages/contact.html). Below 16px, iOS Safari treats a tap into any
+   input/select/textarea as "the user wants to read this better" and
+   zooms the whole viewport in on focus — on this specific site that
+   means every visitor who taps into the lead-gen contact form on an
+   iPhone gets an unrequested zoom the moment they start filling it out.
+   Scoped to the form by ID rather than a blanket input selector, so it
+   can't have any effect on inputs elsewhere in the project this session
+   didn't audit.
+──────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  #contact-form input,
+  #contact-form select,
+  #contact-form textarea {
+    font-size: 16px;
+  }
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   5. HOMEPAGE SET PIECES
+   ------------------------------------------------------------
+──────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Decorative ambient blur circles (contact page glow, CTA-band glow)
+     — see §7 Performance for why blur radius specifically is trimmed
+     here rather than left at the desktop value. */
+  .blur-3xl {
+    filter: blur(28px);
+  }
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   6. MOBILE SCROLL-STORY — sticky progress rail
+   ------------------------------------------------------------
+   Companion to motion/mobile-story.js. The homepage's 4-stage process
+   section previously duplicated the desktop horizontal-pinned-timeline
+   markup into a second, motion-free, statically-stacked block for
+   mobile — every stage visible at once, no relationship between them
+   communicated by the scroll itself. This is mobile's own equivalent
+   set piece: a slim rail stays pinned just below the mobile nav for
+   the duration of the section, tracking progress through the four
+   stages with a filling bar and a crossfading "01 · Strategy"-style
+   label, while each stage card beneath it gets its own scale-in reveal
+   and a slow image parallax drift (motion/mobile-story.js). Sticky
+   positioning + transform-only animation only — no scroll-jacking pin,
+   which fights momentum scroll and reads as laggy on touch (the exact
+   reason the desktop timeline itself uses position: sticky over a
+   GSAP-driven pin — see motion/scroll-story.js's own comment on that
+   choice; this mirrors it rather than introducing a second convention).
+──────────────────────────────────────────────────────────── */
+.mobile-story-rail {
+  position: sticky;
+  top: 88px; /* clears the flush mobile nav bar (~72–80px) + a hair of air */
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid theme('colors.gray.100');
+  border-radius: theme('borderRadius.full');
+  box-shadow: 0 8px 24px -12px rgba(20, 17, 15, 0.12);
+}
+
+.mobile-story-rail__index {
+  font-family: 'Satoshi', sans-serif;
+  font-weight: 800;
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  color: theme('colors.brand.DEFAULT');
+  white-space: nowrap;
+  min-width: 2.75rem;
+}
+
+.mobile-story-rail__track {
+  position: relative;
+  flex: 1;
+  height: 3px;
+  border-radius: 9999px;
+  background: theme('colors.gray.200');
+  overflow: hidden;
+}
+
+.mobile-story-rail__fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border-radius: 9999px;
+  background: theme('colors.brand.DEFAULT');
+  transform-origin: left center;
+  transform: scaleX(0); /* driven by mobile-story.js via inline transform */
+  will-change: transform;
+}
+
+.mobile-story-rail__label {
+  font-family: 'Satoshi', sans-serif;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: theme('colors.gray.600');
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 1024px) {
+  .mobile-story-rail { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-story-rail__fill {
+    transition: none;
+  }
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   7. PERFORMANCE
+   ------------------------------------------------------------
+──────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* atmosphere.css's fixed, full-viewport film-grain layer
+     (body::after) combines position: fixed with mix-blend-mode, which
+     forces the browser to keep isolating and re-compositing that layer
+     against everything beneath it on every scroll frame — a cost every
+     mobile GPU pays for a texture too subtle to notice missing on a
+     phone screen at arm's length. Desktop keeps it; this is a
+     mobile-only, scroll-perf-motivated trade. */
+  body::after {
+    display: none;
+  }
+}

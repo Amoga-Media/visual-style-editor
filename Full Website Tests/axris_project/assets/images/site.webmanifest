@@ -1,0 +1,55 @@
+{
+  "name": "Axris Media Solutions",
+  "short_name": "Axris",
+  "description": "Enterprise B2B lead generation agency for SaaS, Cybersecurity, IT & MSP companies across US, UK, Canada & Europe",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#2563EB",
+  "background_color": "#ffffff",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/assets/images/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/images/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Contact Us",
+      "short_name": "Contact",
+      "description": "Book a free B2B pipeline audit",
+      "url": "/pages/contact.html",
+      "icons": [{"src": "/assets/images/android-chrome-192x192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Our Services",
+      "short_name": "Services",
+      "description": "Explore B2B lead generation services",
+      "url": "/pages/services.html",
+      "icons": [{"src": "/assets/images/android-chrome-192x192.png", "sizes": "192x192"}]
+    }
+  ]
+}

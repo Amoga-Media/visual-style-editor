@@ -1,0 +1,216 @@
+/* ============================================================
+   ATMOSPHERE — CINEMATIC DEPTH SYSTEM (session 7)
+   ------------------------------------------------------------
+   Brief this session worked from: "responsible for atmosphere —
+   depth, lighting, textures, layering, background systems, noise,
+   masks, blurs, gradients, visual hierarchy... cinematic... nothing
+   flat... don't overdo glassmorphism... subtle realism, premium
+   depth only."
+
+   SCOPE & METHOD — same convention as buttons.css / cards.css /
+   accordion.css etc: target the *recurring recipe* via
+   [class*="…"] attribute selectors, zero markup rewrites across
+   the 16 pages. Plain CSS (no @layer) on purpose — see Session 5's
+   "build-pipeline lesson" in Changelog.md: anything inside
+   `@layer components {}` gets purged by Tailwind's JIT if the
+   literal class name doesn't appear in a scanned file. These
+   selectors reference classes that already exist in every shipped
+   page, but staying outside `@layer` avoids the risk entirely,
+   matching how buttons.css/cards.css/forms.css already do it.
+
+   A SAFETY CONSTRAINT THAT SHAPED EVERY RULE BELOW: audited all 93
+   `<section>` elements site-wide before writing this file — only
+   20 of them combine `relative` + `overflow-hidden` (see this
+   session's notes). A technique built on `::before`/`::after`
+   decorative layers positioned *behind* text via z-index tricks
+   would silently break (glow painting over copy, or escaping a
+   section's bounds) on the other 73. Every rule in this file was
+   chosen specifically to have NO such prerequisite:
+     - `background-image` layers are always painted behind an
+       element's own content and always clipped to its own box,
+       regardless of `position`/`overflow` on that element or its
+       children. Zero stacking-context risk.
+     - the one exception (photo vignettes) uses `box-shadow: inset`
+       directly on the `<img>` itself — a shadow is a paint effect
+       of that element's own box, always rendered above whatever
+       that same element renders (its own image content), never
+       dependent on siblings' z-index either.
+   Nothing here uses `::before`/`::after` for anything that has to
+   sit "behind text, above background" — that specific effect is
+   the one this file deliberately avoids building, because it's
+   the one effect that isn't safe without an HTML audit-and-fix
+   pass across all 16 pages (a reasonable follow-up, not done here
+   — see Notes.md).
+
+   NO NEW GLASSMORPHISM: nothing here adds backdrop-blur or
+   translucent frosted panels. The existing backdrop-blur usage
+   (nav badges, sticky legal-page sidebar, contact modal) is
+   functional, not decorative, and is left exactly as-is. Depth
+   here is built entirely from gradients, tinted shadows, and grain
+   — restrained, not glassy.
+============================================================ */
+
+/* ── 1. Site-wide cinematic grain ──────────────────────────────
+   A single fixed, full-viewport layer, attached to <body> — not
+   tied to any one section's markup, so it can't be broken by a
+   page that's missing `relative`/`overflow-hidden` anywhere. Sits
+   above ordinary page content (highest in-page z-index found in
+   an audit of all 16 pages was 50) but below the floating nav /
+   custom cursor / cookie banner / page-transition curtain (all
+   ≥ 9999 — see navbar.css / cursor.css / cookie-consent.css /
+   transitions.css), so UI chrome stays perfectly crisp and the
+   grain never intercepts a click (`pointer-events: none`).
+
+   Built from an inline SVG fractal-noise filter (no image request,
+   no extra asset to self-host) desaturated to pure luminance noise,
+   then blended with `mix-blend-mode: overlay` at a very low opacity
+   — the standard, restrained way to make a flat digital surface
+   read as a lit, textured one instead of a vector fill. Static, not
+   animated: cheaper, and avoids re-triggering vestibular-motion
+   sensitivity for no real benefit. */
+body {
+  position: relative;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-repeat: repeat;
+  background-size: 220px 220px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media print {
+  body::after { display: none; }
+}
+
+/* Respect both explicit motion *and* transparency/contrast
+   preferences — grain is decorative texture, never load-bearing. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  body::after { display: none; }
+}
+
+/* ── 2. Dark-surface ambient light ─────────────────────────────
+   Targets every large panel using the `bg-dark` fill that also
+   signals "structural panel" (paired with `overflow-hidden` — an
+   audit of every element combining `bg-dark`+`overflow-hidden`
+   site-wide confirmed zero false positives: every match is a
+   section, a big bento-grid card, or a full-width CTA block, never
+   a button or badge). `footer` is matched separately since the
+   global footer doesn't carry `overflow-hidden` itself.
+
+   Two soft radial blooms establish a *consistent* light direction
+   (upper-left key light, matching the kicker rail's reading order)
+   instead of a random scatter, plus a top "seam" shadow so a dark
+   section reads as receding slightly behind whatever precedes it
+   rather than sitting as an abrupt flat block. Every color here is
+   the site's own tokens converted to rgba (brand #0EA5E9 →
+   14,165,233 · brand-400 #38bDF8 → 56,189,248 · accent #C2542E →
+   194,84,46 · ink #14110F → 20,17,15 — same rgba-from-hex approach
+   tailwind.config.js's own boxShadow tokens already use). */
+[class*="bg-dark"][class*="overflow-hidden"],
+footer[class*="bg-dark"] {
+  background-repeat: no-repeat;
+  background-image:
+    radial-gradient(ellipse 65% 55% at 12% -10%, rgba(14, 165, 233, 0.16), transparent 60%),
+    radial-gradient(ellipse 55% 45% at 105% 105%, rgba(194, 84, 46, 0.09), transparent 65%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.32), transparent 14%);
+}
+
+/* ── 3. Brand-surface dimensional shading ──────────────────────
+   Same audit / same selector shape as §2, for `bg-brand` panels
+   (the vision panel, the two brand bento cards on services.html,
+   the homepage's final CTA block). A flat brand-blue fill is the
+   single most "poster paint" surface on the site if left alone —
+   this gives it a soft top highlight (as if lit from above-left)
+   falling off to a deeper shade at the bottom-right, the same
+   light logic as §2's dark panels but inverted in weight so it
+   reads as a lit solid, not a hole. */
+[class*="bg-brand"][class*="overflow-hidden"] {
+  background-repeat: no-repeat;
+  background-image:
+    radial-gradient(ellipse 75% 65% at 18% -15%, rgba(255, 255, 255, 0.16), transparent 55%),
+    radial-gradient(ellipse 65% 55% at 105% 115%, rgba(10, 10, 10, 0.20), transparent 60%);
+}
+
+/* ── 4. Light & white section depth ────────────────────────────
+   `bg-light` (31 uses) and `bg-white` (51 uses, the site's single
+   most common section background) are scoped to the `<section>`
+   tag specifically — both classes are also used on form inputs
+   and dozens of small chips/badges site-wide, which must NOT get
+   a section-scale gradient wash. Deliberately closer to
+   imperceptible than the dark/brand treatments above: the goal is
+   only to keep a wall of near-identical light sections from
+   reading as flat vector fills stacked back to back, not to add a
+   visible effect. */
+section[class*="bg-light"] {
+  background-repeat: no-repeat;
+  background-image: radial-gradient(ellipse 80% 45% at 50% 0%, rgba(20, 17, 15, 0.03), transparent 60%);
+}
+
+section[class*="bg-white"] {
+  background-repeat: no-repeat;
+  background-image: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(20, 17, 15, 0.02), transparent 65%);
+}
+
+/* ── 5. Card depth — a "lit paper" surface, not a flat #fff tile ──
+   Extends cards.css's own `.rounded-card[border-gray][bg-white]`
+   selector (same element, additive property only — `background-
+   image` and `background-color` are independent CSS properties, so
+   this can never collide with cards.css's `background-color: #fff`
+   regardless of import order). A pure white-on-white gradient would
+   be invisible, so this leans on a hairline value shift plus a
+   faint brand-tinted glow at the top edge — a restrained "catching
+   the light" cue instead of a dead-flat fill. */
+.rounded-card[class*="border-gray"][class*="bg-white"] {
+  background-repeat: no-repeat;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(14, 165, 233, 0.035), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #fbfbfa 100%);
+}
+
+/* ── 6. Full-bleed photo vignette ───────────────────────────────
+   `box-shadow: inset` is a paint effect of the `<img>` element's
+   own box — it renders on top of that element's own raster content
+   regardless of what siblings do, so this needs no z-index/overflow
+   coordination with the gradient-overlay divs already sitting next
+   to these images in the DOM. Two layers (tight edge + broad
+   falloff) for a real lens-vignette curve rather than a single flat
+   ring — the same "tight contact + diffuse ambient" logic
+   tailwind.config.js's own two-layer boxShadow tokens already use,
+   applied here to a darkening effect instead of a drop shadow.
+   Selector covers both photo shapes actually in use: absolutely-
+   positioned full-bleed photos (the story-timeline images) and the
+   in-flow hero portrait image inside its own rounded/overflow-
+   hidden frame. */
+img[class*="absolute"][class*="inset-0"][class*="object-cover"],
+.rounded-card[class*="overflow-hidden"] > img[class*="object-cover"] {
+  box-shadow:
+    inset 0 0 50px rgba(10, 10, 10, 0.30),
+    inset 0 0 130px rgba(10, 10, 10, 0.14);
+}
+
+/* ── 7. Floating nav — a touch more "lift," still zero blur ─────
+   The pill nav (`.ax-nav-classic`, navbar.css) previously used a
+   single flat shadow. Upgraded to the site's own layered, ink-
+   tinted shadow language (see tailwind.config.js §boxShadow) so it
+   reads as genuinely floating above the page rather than merely
+   outlined — same token values as `shadow-lg`, applied directly
+   since this component's CSS lives outside the Tailwind utility
+   system. No background/blur change — still a solid white pill. */
+.ax-nav-classic {
+  box-shadow:
+    0 1px 2px 0 rgba(20, 17, 15, 0.05),
+    0 16px 32px -8px rgba(20, 17, 15, 0.12),
+    0 4px 10px -4px rgba(20, 17, 15, 0.06);
+}
+
+/* ── 8. Motion & accessibility guardrails ──────────────────────
+   Nothing above animates, so `prefers-reduced-motion` has nothing
+   to disable — noted here for whoever audits this file next so
+   that's a documented decision, not an oversight. */

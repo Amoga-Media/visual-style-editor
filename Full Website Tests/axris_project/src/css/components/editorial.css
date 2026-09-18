@@ -1,0 +1,162 @@
+/* ══════════════════════════════════════════════════════════════
+   EDITORIAL LAYOUT SYSTEM (visual redesign — magazine/luxury pass)
+   ------------------------------------------------------------
+   A small set of composition primitives used to break the site out
+   of the "left-image / right-text / card grid" rhythm: a display
+   serif for oversized moments, a running-folio kicker (page-number
+   style, replaces the repeated pill-badge-with-dot pattern), a
+   huge-numeral treatment for process/stat steps (replaces the
+   off-brand neon-green numerals flagged in design-system.md), a
+   pull-quote block, and a hairline-rule vocabulary for asymmetric
+   section dividers. Every class here is additive — nothing in this
+   file removes or renames an existing utility, so it can be adopted
+   page by page without breaking anything that hasn't been touched
+   yet.
+══════════════════════════════════════════════════════════════ */
+
+@layer base {
+  /* SESSION 12: was Fraunces (display serif). Every "big moment" element
+     that reaches for `.font-display` now stays inside the Satoshi family
+     and earns its emphasis from weight/tracking/color instead of a second
+     typeface — see tailwind.config.js's fontFamily.display comment for
+     the full reasoning (client feedback: the serif accents read as an
+     inconsistent third voice against Satoshi everywhere else). */
+  .font-display {
+    font-family: 'Satoshi', sans-serif;
+  }
+}
+
+@layer components {
+
+  /* ── Running folio / kicker ───────────────────────────────────
+     Replaces the hand-authored "pill badge + dot" pattern with an
+     editorial masthead convention: a tiny index number, a hairline
+     rule, and a label — the way a magazine marks a section or a
+     page number in a running header. */
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-family: 'Satoshi', sans-serif;
+  }
+  .kicker__index {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: theme('colors.accent.500');
+  }
+  .kicker__rule {
+    width: 2.5rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.35;
+  }
+  .kicker__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: theme('colors.gray.500');
+  }
+  .kicker--on-dark .kicker__label { color: theme('colors.gray.400'); }
+  .kicker--on-dark .kicker__index { color: theme('colors.accent.400'); }
+
+  /* ── Huge editorial numeral ───────────────────────────────────
+     SESSION 12: was a Fraunces italic serif outline. Rebuilt in
+     Satoshi's own black weight — geometric, tabular, outline-first —
+     so the "watermark numeral" motif stops importing a second
+     typeface and instead reads as the boldest possible expression of
+     the site's one type family (also a more current, less twee take
+     on the trope than an italic serif numeral). Deliberately not neon
+     green (design-system.md §Color) — uses the formalized terracotta
+     accent at low opacity so it reads as typographic watermark, not a
+     UI element. */
+  .numeral-display {
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 0.85;
+    color: transparent;
+    -webkit-text-stroke: 1.25px theme('colors.accent.400');
+    letter-spacing: -0.03em;
+  }
+  .numeral-display--solid {
+    -webkit-text-stroke: 0;
+    color: theme('colors.accent.500');
+  }
+
+  /* ── Pull quote ────────────────────────────────────────────────
+     SESSION 12: was Fraunces italic. Now a medium-weight Satoshi
+     setting — deliberately lighter than the extrabold headlines
+     around it (that weight *drop*, not a typeface swap, is what now
+     signals "this is a quieter, more considered line" against the
+     rest of the page's confident heavy weights). */
+  .pull-quote {
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+
+  /* ── Hairline rule vocabulary ─────────────────────────────────
+     Vertical/horizontal rules used to build asymmetric column
+     dividers instead of card borders/shadows everywhere. */
+  .rule-v { width: 1px; background: theme('colors.gray.200'); }
+  .rule-v--dark { background: theme('colors.gray.800'); }
+  .rule-h { height: 1px; background: theme('colors.gray.200'); }
+  .rule-h--dark { background: theme('colors.gray.800'); }
+
+  /* ── Masthead label (small caps running text along a vertical
+     rail — used as a page-edge signature element) ── */
+  .rail-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: 'Satoshi', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: theme('colors.gray.400');
+  }
+
+  /* ── Editorial index list (replaces uniform icon-card grids with
+     a numbered manifesto/list rhythm — variable-width rows instead
+     of equal-height cards) ── */
+  .index-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    padding-block: 2rem;
+    border-top: 1px solid theme('colors.gray.200');
+  }
+  .index-row--dark { border-top-color: theme('colors.gray.800'); }
+  .index-row:last-child { border-bottom: 1px solid theme('colors.gray.200'); }
+  .index-row--dark:last-child { border-bottom-color: theme('colors.gray.800'); }
+
+  /* ── FAQ running index — a quiet leading number per row, generated
+     via a CSS counter so no extra DOM nodes are added inside
+     <summary> (faq.js grabs its first <span> as the toggle icon;
+     adding a numbering span would break that lookup). ── */
+  .faq-index { counter-reset: faqnum; }
+  .faq-index details { counter-increment: faqnum; }
+  .faq-index details summary::before {
+    content: counter(faqnum, decimal-leading-zero);
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .faq-index details { position: relative; padding-left: 3.5rem; }
+    .faq-index details summary::before {
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 0.4rem;
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.8125rem;
+      letter-spacing: 0.02em;
+      color: theme('colors.accent.400');
+    }
+  }
+}

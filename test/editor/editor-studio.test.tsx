@@ -14,7 +14,7 @@ describe("EditorStudio integration", () => {
     });
 
     // Verify DropZone is rendered
-    expect(container.textContent).toContain("Drop your HTML file here");
+    expect(container.textContent).toContain("Drop HTML pages & project files");
     expect(container.textContent).toContain("AI SaaS Landing Page");
 
     // Click the first starter template

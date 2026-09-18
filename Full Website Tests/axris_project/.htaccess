@@ -1,0 +1,86 @@
+# ==========================================================
+# Axris Media Solutions — Performance & Compression Config
+# Applies only on Apache-based hosting. Ignored by static
+# hosts (Netlify, Vercel, Cloudflare Pages, etc.) which
+# apply their own compression automatically.
+# ==========================================================
+
+# --- GZIP Compression ---
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+  AddOutputFilterByType DEFLATE text/javascript application/javascript application/x-javascript
+  AddOutputFilterByType DEFLATE application/json application/ld+json
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE application/xml application/rss+xml
+</IfModule>
+
+# --- Brotli Compression (perf pass) ---
+# Brotli beats gzip by roughly 15-20% on text assets at the same CPU cost
+# and is supported by every browser this site needs to support. A no-op,
+# not a risk, on any host where mod_brotli isn't installed/enabled — the
+# <IfModule> guard means this block is simply skipped rather than erroring.
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css
+  AddOutputFilterByType BROTLI_COMPRESS text/javascript application/javascript application/x-javascript
+  AddOutputFilterByType BROTLI_COMPRESS application/json application/ld+json
+  AddOutputFilterByType BROTLI_COMPRESS image/svg+xml
+  AddOutputFilterByType BROTLI_COMPRESS application/xml application/rss+xml
+</IfModule>
+
+# --- Browser Caching for Static Assets ---
+# Perf pass note: assets/css/main.css and assets/js/**/*.js are now
+# requested with a content-hash query string (?v=<hash>, injected by
+# scripts/version-assets.js as part of `npm run build` — see that file)
+# that changes whenever the built output changes. That's what makes the
+# 1-year cache below actually safe: a stale cached copy is never served
+# under a *new* deploy's URL, because a new deploy means a new ?v= value
+# and therefore a new cache entry, not a cache hit against old bytes.
+# Without that, a 1-year cache on unversioned filenames risks returning
+# visitors never seeing a JS/CSS update until the cache naturally expires.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType application/xml "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(jpe?g|png|webp|svg|ico|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# --- Security Headers (also support SEO trust signals) ---
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # roadmap.md item 11: no CSP was configured despite the site talking to a
+  # real number of third-party origins. Scoped to exactly what's in use
+  # today — Google Fonts (stylesheet + font files), the hotlinked
+  # placeholder image hosts flagged in README.md as pending self-hosting
+  # (unsplash/pexels/pravatar/pinimg — tighten this list down once those
+  # are self-hosted, see README's "What changed in this reorg"), Supabase
+  # (contact form submission, src/js/pages/contact.js), and the Google Maps
+  # iframe embed on Contact + About. JSON-LD <script type="application/
+  # ld+json"> blocks are data, not executable script, so script-src can
+  # stay 'self'-only without an inline exception; no bare inline <script>
+  # blocks exist anywhere in the site (checked). style-src needs
+  # 'unsafe-inline' for the handful of inline style="" attributes still in
+  # navbar.html/index.html — narrowing that further is real markup cleanup
+  # (moving those into src/css/), not a header change.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://images.pexels.com https://i.pravatar.cc https://i.pinimg.com; connect-src 'self' https://mpwsiaarnccddejnkjdm.supabase.co; frame-src https://maps.google.com https://www.google.com; form-action 'self' https://mpwsiaarnccddejnkjdm.supabase.co; base-uri 'self'; object-src 'none'"
+</IfModule>

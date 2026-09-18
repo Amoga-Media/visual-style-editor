@@ -5,6 +5,7 @@ import { readCurrentValue } from "@/lib/dom/computed-style";
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
 import { getResponsivePropertyInfo } from "@/lib/dom/responsive-style-engine";
 import ValueInput from "./ValueInput";
+import BoxModelVisualizer from "./BoxModelVisualizer";
 import { ChevronDown, ChevronRight, Sliders, Lock, Unlock, Space } from "lucide-react";
 
 type Unit = "px" | "%" | "vw" | "vh" | "rem" | "em" | "pt" | "auto" | "none" | "fit";
@@ -917,6 +918,76 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
           </div>
         </div>
       )}
+
+      {/* Interactive Box-Model Visualizer (Concentric Margin / Padding / Core) */}
+      <div className="space-y-1.5 pt-1">
+        <label className="text-xs text-slate-700 dark:text-zinc-300 font-semibold block">Interactive Box Model</label>
+        <BoxModelVisualizer
+          margin={{
+            top: marT.amount,
+            right: marR.amount,
+            bottom: marB.amount,
+            left: marL.amount,
+            unit: margin.unit,
+          }}
+          padding={{
+            top: padT.amount,
+            right: padR.amount,
+            bottom: padB.amount,
+            left: padL.amount,
+            unit: padding.unit,
+          }}
+          width={width.amount > 0 ? `${width.amount}${width.unit}` : "auto"}
+          height={height.amount > 0 ? `${height.amount}${height.unit}` : "auto"}
+          tagName={element.tagName.toLowerCase()}
+          onMarginChange={(side, val) => {
+            if (side === "all") {
+              setMarT({ amount: val, unit: margin.unit });
+              setMarR({ amount: val, unit: margin.unit });
+              setMarB({ amount: val, unit: margin.unit });
+              setMarL({ amount: val, unit: margin.unit });
+              applyLiveStyle(element, "margin", `${val}${margin.unit}`, theme, undefined, viewport, structuralPath!);
+            } else {
+              const prop = `margin-${side}` as EditableProperty;
+              if (side === "top") setMarT({ amount: val, unit: margin.unit });
+              if (side === "right") setMarR({ amount: val, unit: margin.unit });
+              if (side === "bottom") setMarB({ amount: val, unit: margin.unit });
+              if (side === "left") setMarL({ amount: val, unit: margin.unit });
+              applyLiveStyle(element, prop, `${val}${margin.unit}`, theme, side, viewport, structuralPath!);
+            }
+          }}
+          onMarginCommit={(side, val) => {
+            if (side === "all") {
+              commitUniformMargin(val, margin.unit);
+            } else {
+              commitSideMargin(`margin-${side}` as any, val, margin.unit);
+            }
+          }}
+          onPaddingChange={(side, val) => {
+            if (side === "all") {
+              setPadT({ amount: val, unit: padding.unit });
+              setPadR({ amount: val, unit: padding.unit });
+              setPadB({ amount: val, unit: padding.unit });
+              setPadL({ amount: val, unit: padding.unit });
+              applyLiveStyle(element, "padding", `${val}${padding.unit}`, theme, undefined, viewport, structuralPath!);
+            } else {
+              const prop = `padding-${side}` as EditableProperty;
+              if (side === "top") setPadT({ amount: val, unit: padding.unit });
+              if (side === "right") setPadR({ amount: val, unit: padding.unit });
+              if (side === "bottom") setPadB({ amount: val, unit: padding.unit });
+              if (side === "left") setPadL({ amount: val, unit: padding.unit });
+              applyLiveStyle(element, prop, `${val}${padding.unit}`, theme, side, viewport, structuralPath!);
+            }
+          }}
+          onPaddingCommit={(side, val) => {
+            if (side === "all") {
+              commitUniformPadding(val, padding.unit);
+            } else {
+              commitSidePadding(`padding-${side}` as any, val, padding.unit);
+            }
+          }}
+        />
+      </div>
 
       {/* Padding 4-Side Box Model */}
       <div className="space-y-2">

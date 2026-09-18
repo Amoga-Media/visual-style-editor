@@ -1,0 +1,38 @@
+/* ============================================================
+   RESPONSIVE + ACCESSIBILITY MEDIA QUERIES
+   Mobile tap targets, prefers-reduced-motion, forced-colors
+============================================================ */
+
+/* Mobile: Improve tap target sizes for INP */
+@media (max-width: 768px) {
+  a, button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .ax-nav-link {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  .btn-magnetic,
+  .ax-nav-link {
+    border: 2px solid ButtonText;
+  }
+}

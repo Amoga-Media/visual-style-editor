@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <url>
+    <loc>https://www.axrissolutions.com/</loc>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/og-image.jpg</image:loc>
+      <image:title>Axris Media Solutions — Enterprise B2B Lead Generation Agency</image:title>
+      <image:caption>B2B lead generation, demand generation, and pipeline architecture for SaaS, Cybersecurity, and IT companies across the US, UK, Canada, Europe and Australia</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/Hero.jpeg</image:loc>
+      <image:title>B2B Pipeline Engineering Dashboard — Axris Media Solutions</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/logo.png</image:loc>
+      <image:title>Axris Media Solutions Logo</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.axrissolutions.com/pages/about-us.html</loc>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/asset-image.webp</image:loc>
+      <image:title>Axris Media Solutions B2B Sales Team</image:title>
+      <image:caption>ISO-certified B2B lead generation agency team serving enterprise clients globally</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.axrissolutions.com/pages/services.html</loc>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/impact.jpeg</image:loc>
+      <image:title>B2B Lead Generation Impact and Results — Axris Media Solutions</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.axrissolutions.com/pages/service-pages/lead-gen.html</loc>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/mapping.jpeg</image:loc>
+      <image:title>B2B Lead Generation Market Mapping — Axris Media Solutions</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.axrissolutions.com/pages/service-pages/demand-generation.html</loc>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/outreach.jpeg</image:loc>
+      <image:title>B2B Demand Generation Multi-Channel Outreach — Axris Media Solutions</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.axrissolutions.com/pages/service-pages/abm.html</loc>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/strategy.jpeg</image:loc>
+      <image:title>Account-Based Marketing Strategy — Axris Media Solutions</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.axrissolutions.com/pages/service-pages/email-marketing.html</loc>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/launch.jpeg</image:loc>
+      <image:title>B2B Email Marketing Campaign Launch — Axris Media Solutions</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.axrissolutions.com/pages/service-pages/bant-campaign.html</loc>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/orchestrate.jpg</image:loc>
+      <image:title>BANT Campaign Orchestration — Axris Media Solutions</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.axrissolutions.com/pages/service-pages/content-syndication.html</loc>
+    <image:image>
+      <image:loc>https://www.axrissolutions.com/assets/images/optimization.jpeg</image:loc>
+      <image:title>B2B Content Syndication Optimization — Axris Media Solutions</image:title>
+    </image:image>
+  </url>
+
+</urlset>

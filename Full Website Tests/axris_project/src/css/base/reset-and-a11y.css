@@ -1,0 +1,74 @@
+/* ============================================================
+   RESET & ACCESSIBILITY BASICS
+   CLS/LCP image handling, focus-visible ring, skip-link (.sr-only)
+============================================================ */
+
+/* ══════════════════════════════════════════════════════
+   CORE WEB VITALS OPTIMIZATIONS
+   LCP, CLS, INP, TTFB improvements
+══════════════════════════════════════════════════════ */
+
+/* Prevent CLS: Reserve space for images before load */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* LCP optimization: Ensure hero image is prioritised */
+img[fetchpriority="high"] {
+  image-rendering: auto;
+}
+
+/* CLS prevention: Explicit dimensions on logo */
+.ax-logo-img {
+  width: 130px;
+  height: auto;
+  aspect-ratio: 130 / 40;
+}
+
+/* Font loading: Prevent invisible text during font swap */
+@font-face {
+  font-display: swap;
+}
+
+/* INP optimisation: Improve interaction responsiveness */
+a, button, [role="button"], details summary {
+  touch-action: manipulation;
+}
+
+/* Accessibility: Focus visible for keyboard navigation
+   (was hardcoded #2563eb — the old, pre-migration blue that no
+   longer exists anywhere else on the site; now the real brand
+   token, see design-system.md §Color for why this file needed
+   fixing along with the navbar.) */
+:focus-visible {
+  outline: 2px solid theme('colors.brand.DEFAULT');
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Skip to main content link (screen readers + keyboard) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sr-only.focus\:not-sr-only:focus,
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}

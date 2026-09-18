@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { EditRecord } from "@/types";
 import { useChangeSetStore } from "@/store/change-set-store";
 import { useUndoStore } from "@/store/undo-store";
@@ -77,6 +78,17 @@ interface ReviewModalProps {
 export default function ReviewModal({ iframeDocument, onSave, onClose, onDiscardAll }: ReviewModalProps) {
   const edits = useChangeSetStore((s) => s.edits);
   const clear = useChangeSetStore((s) => s.clear);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose?.();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
   function handleDiscardAll() {
     if (window.confirm("Are you sure you want to discard all changes made in this session?")) {

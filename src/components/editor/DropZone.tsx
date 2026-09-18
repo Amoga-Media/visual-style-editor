@@ -6,12 +6,13 @@ import {
   type MinimalFileSystemFileHandle,
 } from "@/lib/fs/file-system-access";
 import { isHtmlFile } from "@/lib/fs/is-html-file";
-import { selectDropCandidate, type DropCandidate } from "@/lib/fs/select-drop-candidate";
+import { processDroppedFileList, readDirectoryHandle, readWebkitDirectoryEntry, type IngestedProject } from "@/lib/fs/directory-picker";
 import type { LoadedFile } from "@/types";
-import { UploadCloud, FileCode, Sparkles, ShieldCheck } from "lucide-react";
+import { UploadCloud, FileCode, Sparkles, ShieldCheck, FolderOpen, Palette, FileText } from "lucide-react";
 
 interface DropZoneProps {
   onFileLoaded: (file: LoadedFile, warning?: string) => void;
+  onProjectLoaded?: (project: IngestedProject) => void;
 }
 
 const SAMPLE_TEMPLATES = [
@@ -229,40 +230,56 @@ const SAMPLE_TEMPLATES = [
   },
 ];
 
-export default function DropZone({ onFileLoaded }: DropZoneProps) {
+export default function DropZone({ onFileLoaded, onProjectLoaded }: DropZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const folderInputRef = useRef<HTMLInputElement | null>(null);
+  const configInputRef = useRef<HTMLInputElement | null>(null);
 
-  async function loadFile(file: File, handle: MinimalFileSystemFileHandle | null, warning?: string) {
-    if (!isHtmlFile(file)) {
-      setError(`"${file.name}" doesn't look like an HTML file — drop a .html or .htm file.`);
+  async function handleProjectIngestion(project: IngestedProject) {
+    if (onProjectLoaded) {
+      onProjectLoaded(project);
       return;
     }
-    try {
-      const content = await file.text();
-      setError(null);
-      onFileLoaded({ name: file.name, content, handle: handle as any }, warning);
-    } catch {
-      setError(`Could not read "${file.name}" — check the file is readable.`);
+    if (project.htmlFiles.length > 0) {
+      const first = project.htmlFiles[0];
+      onFileLoaded({ name: first.name, content: first.content, handle: first.handle as any });
     }
   }
 
   async function handleFilePicker() {
     setError(null);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
-    try {
-      const res = await tryShowOpenFilePicker();
-      if (res) {
-        await loadFile(res.file, res.handle);
-        return;
-      }
-    } catch {
-      // Fall through to file input click
-    }
+    if (inputRef.current) inputRef.current.value = "";
     inputRef.current?.click();
+  }
+
+  async function handleFolderPicker() {
+    setError(null);
+    if (typeof window !== "undefined" && "showDirectoryPicker" in window) {
+      try {
+        const dirHandle = await (window as any).showDirectoryPicker();
+        if (dirHandle) {
+          const project = await readDirectoryHandle(dirHandle);
+          if (project.htmlFiles.length === 0 && !project.tailwindConfig && !project.customStyles) {
+            setError("No HTML or CSS/Tailwind config files found in the chosen folder.");
+            return;
+          }
+          await handleProjectIngestion(project);
+          return;
+        }
+      } catch (err: any) {
+        if (err?.name === "AbortError") return;
+      }
+    }
+    if (folderInputRef.current) folderInputRef.current.value = "";
+    folderInputRef.current?.click();
+  }
+
+  async function handleConfigPicker() {
+    setError(null);
+    if (configInputRef.current) configInputRef.current.value = "";
+    configInputRef.current?.click();
   }
 
   async function handleDrop(e: React.DragEvent) {
@@ -270,37 +287,52 @@ export default function DropZone({ onFileLoaded }: DropZoneProps) {
     setIsDragOver(false);
     setError(null);
 
-    const candidates: DropCandidate<MinimalFileSystemFileHandle>[] = [];
     const items = e.dataTransfer.items;
     const files = e.dataTransfer.files;
 
     if (items && items.length > 0) {
+      const rawFiles: File[] = [];
+      const handles: (FileSystemFileHandle | null)[] = [];
+
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         if (item.kind !== "file") continue;
-        const file = item.getAsFile();
-        if (!file) continue;
-        const handle = await tryGetFileSystemHandle(item);
-        candidates.push({ file, handle });
+
+        const entry = (item as any).webkitGetAsEntry?.();
+        if (entry?.isDirectory) {
+          const dirFiles = await readWebkitDirectoryEntry(entry);
+          rawFiles.push(...dirFiles);
+        } else {
+          const file = item.getAsFile();
+          if (file) {
+            rawFiles.push(file);
+            const handle = await tryGetFileSystemHandle(item);
+            handles.push(handle as unknown as FileSystemFileHandle | null);
+          }
+        }
+      }
+
+      if (rawFiles.length > 0) {
+        const project = await processDroppedFileList(rawFiles, handles);
+        if (project.htmlFiles.length === 0 && !project.tailwindConfig && !project.customStyles) {
+          setError("No HTML, Tailwind config, or CSS files found in the drop.");
+          return;
+        }
+        await handleProjectIngestion(project);
+        return;
       }
     } else if (files && files.length > 0) {
-      for (let i = 0; i < files.length; i++) {
-        candidates.push({ file: files[i], handle: null });
+      const rawFiles = Array.from(files);
+      const project = await processDroppedFileList(rawFiles);
+      if (project.htmlFiles.length === 0 && !project.tailwindConfig && !project.customStyles) {
+        setError("No HTML, Tailwind config, or CSS files found in the drop.");
+        return;
       }
-    }
-
-    const decision = selectDropCandidate(candidates);
-    if (!decision) {
-      setError("No files detected in the drop. Try dropping a .html file.");
+      await handleProjectIngestion(project);
       return;
     }
 
-    if (decision.kind === "no-html") {
-      setError(decision.error);
-      return;
-    }
-
-    await loadFile(decision.candidate.file, decision.candidate.handle, decision.warning);
+    setError("No files detected in the drop. Try dropping .html or .css files.");
   }
 
   return (
@@ -324,30 +356,83 @@ export default function DropZone({ onFileLoaded }: DropZoneProps) {
           </div>
 
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
-            Drop your HTML file here
+            Drop HTML pages & project files
           </h2>
           <p className="text-sm text-slate-600 dark:text-zinc-400 max-w-md mx-auto mb-6">
-            Drag and drop any <code className="text-indigo-600 dark:text-indigo-300 font-mono font-semibold">.html</code> or <code className="text-indigo-600 dark:text-indigo-300 font-mono font-semibold">.htm</code> file generated by AI or hand-coded to edit it visually.
+            Drag and drop multiple <code className="text-indigo-600 dark:text-indigo-300 font-mono font-semibold">.html</code> files, an entire project folder, or your <code className="text-indigo-600 dark:text-indigo-300 font-mono font-semibold">tailwind.config</code> & <code className="text-indigo-600 dark:text-indigo-300 font-mono font-semibold">style.css</code>.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               onClick={handleFilePicker}
-              className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-600/25 flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-xs transition-all shadow-lg shadow-indigo-600/25 flex items-center gap-2 cursor-pointer"
             >
               <FileCode className="w-4 h-4" />
-              Choose File from Disk
+              Choose HTML Files
+            </button>
+
+            <button
+              type="button"
+              onClick={handleFolderPicker}
+              className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-[#1e1e24] dark:hover:bg-[#282830] active:scale-95 text-slate-200 dark:text-white border border-slate-700 dark:border-[#33333d] font-semibold text-xs transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <FolderOpen className="w-4 h-4 text-indigo-400" />
+              Open Project Folder
+            </button>
+
+            <button
+              type="button"
+              onClick={handleConfigPicker}
+              className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#141416] dark:hover:bg-[#1c1c20] active:scale-95 text-slate-700 dark:text-zinc-300 border border-slate-300 dark:border-[#2a2a30] font-semibold text-xs transition-all flex items-center gap-2 cursor-pointer"
+              title="Upload tailwind.config.js or style.css"
+            >
+              <Palette className="w-4 h-4 text-emerald-500" />
+              Upload Config / CSS
             </button>
           </div>
 
           <input
             ref={inputRef}
             type="file"
+            multiple
             accept=".html,.htm,text/html"
             onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) await loadFile(file, null);
+              if (e.target.files && e.target.files.length > 0) {
+                const project = await processDroppedFileList(Array.from(e.target.files));
+                await handleProjectIngestion(project);
+              }
+              if (e.target) e.target.value = "";
+            }}
+            className="hidden"
+          />
+
+          <input
+            ref={folderInputRef}
+            type="file"
+            // @ts-expect-error webkitdirectory is standard for folder picker inputs
+            webkitdirectory="true"
+            multiple
+            onChange={async (e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                const project = await processDroppedFileList(Array.from(e.target.files));
+                await handleProjectIngestion(project);
+              }
+              if (e.target) e.target.value = "";
+            }}
+            className="hidden"
+          />
+
+          <input
+            ref={configInputRef}
+            type="file"
+            multiple
+            accept=".js,.cjs,.mjs,.ts,.json,.css"
+            onChange={async (e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                const project = await processDroppedFileList(Array.from(e.target.files));
+                await handleProjectIngestion(project);
+              }
               if (e.target) e.target.value = "";
             }}
             className="hidden"
@@ -361,7 +446,7 @@ export default function DropZone({ onFileLoaded }: DropZoneProps) {
 
           <div className="mt-6 pt-6 border-t border-slate-200 dark:border-[#242424] flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-zinc-500">
             <ShieldCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-            <span>100% In-Browser & Private • Zero files uploaded to any server</span>
+            <span>100% In-Browser & Private • Multi-page workspace & custom Tailwind config support</span>
           </div>
         </div>
       </div>

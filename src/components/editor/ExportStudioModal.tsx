@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   X,
   Copy,
@@ -12,6 +12,7 @@ import {
   Sparkles,
   Layers,
   Image as ImageIcon,
+  Save,
 } from "lucide-react";
 import { exportAsReactComponent, exportAsNextComponent } from "@/lib/export/html-to-jsx";
 import { convertHtmlToAstro } from "@/lib/export/html-to-astro";
@@ -25,6 +26,17 @@ interface ExportStudioModalProps {
   html: string;
   fileName?: string | null;
   iframeDocument?: Document | null;
+  onSave?: () => void;
+  isDirty?: boolean;
+}
+
+function toPascalCase(name: string): string {
+  const clean = name.replace(/[^a-zA-Z0-9]+/g, " ").trim();
+  if (!clean) return "VisualComponent";
+  return clean
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join("");
 }
 
 export default function ExportStudioModal({
@@ -33,27 +45,43 @@ export default function ExportStudioModal({
   html,
   fileName = "design",
   iframeDocument,
+  onSave,
+  isDirty = false,
 }: ExportStudioModalProps) {
   const [format, setFormat] = useState<ExportFormat>("html");
   const [viewport, setViewport] = useState<PreviewViewport>("desktop");
   const [copied, setCopied] = useState(false);
+  const [savedIndicator, setSavedIndicator] = useState(false);
   const [isExportingImage, setIsExportingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const previewIframeRef = useRef<HTMLIFrameElement | null>(null);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const baseName = (fileName || "design").replace(/\.[^/.]+$/, "");
+  const componentName = toPascalCase(baseName);
 
   // Generate code content based on active format
   const codeContent = (() => {
     switch (format) {
       case "react":
-        return exportAsReactComponent(html, { componentName: "VisualComponent", typescript: true });
+        return exportAsReactComponent(html, { componentName, typescript: true });
       case "next":
-        return exportAsNextComponent(html, "VisualPage");
+        return exportAsNextComponent(html, `${componentName}Page`);
       case "astro":
-        return convertHtmlToAstro(html, "VisualComponent");
+        return convertHtmlToAstro(html, componentName);
       case "html":
       default:
         return html;
@@ -82,6 +110,14 @@ export default function ExportStudioModal({
     navigator.clipboard.writeText(codeContent);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  function handleDirectSave() {
+    if (onSave) {
+      onSave();
+      setSavedIndicator(true);
+      setTimeout(() => setSavedIndicator(false), 2000);
+    }
   }
 
   function handleDownloadCode() {
@@ -448,6 +484,28 @@ export default function ExportStudioModal({
                 </button>
               ) : (
                 <div className="flex items-center gap-2">
+                  {onSave && (
+                    <button
+                      type="button"
+                      onClick={handleDirectSave}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                        savedIndicator
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                          : isDirty
+                          ? "bg-amber-500/20 text-amber-400 border border-amber-500/40 hover:bg-amber-500/30"
+                          : "bg-[#1c1c20] text-zinc-300 border border-[#2a2a32] hover:bg-[#26262c]"
+                      }`}
+                      title="Save edits directly to the open file"
+                    >
+                      {savedIndicator ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : (
+                        <Save className="w-3.5 h-3.5 text-amber-400" />
+                      )}
+                      <span>{savedIndicator ? "Saved!" : isDirty ? "Save File *" : "Save File"}</span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={handleCopy}

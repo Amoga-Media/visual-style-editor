@@ -185,3 +185,35 @@ export interface LoadedFile {
   content: string;
   handle?: FileSystemFileHandle | null;
 }
+
+export interface WorkspaceFile {
+  id: string;
+  name: string;
+  path: string;
+  content: string;
+  originalContent: string;
+  handle?: FileSystemFileHandle | null;
+  edits: EditRecord[];
+  undoPast: EditRecord[][];
+  undoFuture: EditRecord[][];
+  versionHistory: { id: number; label: string; html: string }[];
+  isDirty?: boolean;
+}
+
+export interface UploadedConfig {
+  fileName: string;
+  rawContent: string;
+  theme: Partial<ThemeMap>;
+}
+
+export interface UploadedStyles {
+  fileName: string;
+  rawContent: string;
+  extractedTheme?: Partial<ThemeMap>;
+}
+
+export interface ProjectConfig {
+  tailwindConfig?: UploadedConfig | null;
+  customStyles?: UploadedStyles | null;
+}
+

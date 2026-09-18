@@ -1,0 +1,146 @@
+/* ============================================================
+   BUTTONS — VISUAL REDESIGN
+   ------------------------------------------------------------
+   design-system.md documents exactly two recurring visual
+   variants, both hand-authored per instance rather than owned by
+   a real component:
+     • Primary:   bg-brand text-white          (+ btn-magnetic)
+     • Secondary: bg-white text-dark border     (+ btn-magnetic)
+   `.btn-magnetic` is already present on every CTA site-wide (it's
+   the JS hook magnetic-buttons.js uses), so it doubles as a free,
+   zero-markup-change hook for a real button component. This file
+   is imported *after* @tailwind utilities (see main.css), so
+   these rules win specificity ties against the inline Tailwind
+   utility classes without needing !important.
+============================================================ */
+
+.btn-magnetic {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  letter-spacing: 0.01em;
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Tactile press/lift feedback — replaces the flat, static "hover:bg-X"
+   only behavior every button previously had with real weight. */
+.btn-magnetic:hover {
+  transform: translateY(-2px);
+}
+
+.btn-magnetic:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ── Signature sheen sweep — a diagonal band of light that travels
+   across the button on hover, once. This is the detail that makes a
+   button read as "crafted" rather than "a div with a hover color";
+   it's rendered as a pseudo-element so it costs zero markup and is
+   automatically present on every .btn-magnetic site-wide. Clipped by
+   `overflow: hidden` above so it never escapes the pill shape. ── */
+.btn-magnetic::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 48%,
+    rgba(255, 255, 255, 0.35) 52%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.btn-magnetic:hover::before {
+  transform: translateX(120%);
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Secondary/white buttons get a darker, subtler sweep — a white sheen
+   on an already-white button would be invisible. */
+.btn-magnetic.bg-white::before {
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(14, 165, 233, 0.08) 48%,
+    rgba(14, 165, 233, 0.08) 52%,
+    transparent 70%
+  );
+}
+
+/* Real content (label, icon) needs to sit above the sheen layer. */
+.btn-magnetic > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Keyboard focus — this component had none at all before now, despite
+   being the button on every single CTA site-wide. */
+.btn-magnetic:focus-visible {
+  outline: 2px solid theme('colors.brand.500');
+  outline-offset: 3px;
+}
+.btn-magnetic.bg-dark:focus-visible,
+.btn-magnetic.bg-brand:focus-visible {
+  outline-color: #fff;
+}
+
+/* ── Primary (bg-brand) ──────────────────────────────────────
+   Adds a crafted edge (a slightly darker brand hairline) and a
+   two-layer colored ambient shadow instead of the flat single
+   shadow-brand/20 every instance previously hand-set. */
+.btn-magnetic.bg-brand {
+  border-color: theme('colors.brand.600');
+  box-shadow:
+    0 1px 2px rgba(3, 105, 161, 0.25),
+    0 10px 24px -8px rgba(14, 165, 233, 0.45);
+}
+
+.btn-magnetic.bg-brand:hover {
+  border-color: theme('colors.brand.700');
+  box-shadow:
+    0 2px 4px rgba(3, 105, 161, 0.3),
+    0 18px 36px -10px rgba(14, 165, 233, 0.55);
+}
+
+/* ── Secondary (bg-white, hairline border) ───────────────────
+   Sharpens the hairline into a real ink-tinted border (was flat
+   gray-200) and gives it a matching, quieter lift on hover. */
+.btn-magnetic.bg-white {
+  border-color: theme('colors.gray.300');
+  box-shadow: 0 1px 2px rgba(20, 17, 15, 0.05);
+}
+
+.btn-magnetic.bg-white:hover {
+  border-color: theme('colors.brand.400');
+  box-shadow: 0 10px 24px -10px rgba(20, 17, 15, 0.18);
+}
+
+/* ── Dark-surface variant (buttons rendered on bg-dark sections) ── */
+.btn-magnetic.bg-dark {
+  border-color: theme('colors.gray.700');
+}
+
+.btn-magnetic.bg-dark:hover {
+  border-color: theme('colors.gray.500');
+}
+
+/* Reduced-motion: keep the color/border feedback, drop the lift */
+@media (prefers-reduced-motion: reduce) {
+  .btn-magnetic:hover,
+  .btn-magnetic:active {
+    transform: none;
+  }
+  .btn-magnetic::before {
+    display: none;
+  }
+}

@@ -149,6 +149,7 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
   function handleVideoSrcCommit(newUrl: string) {
     const formatted = formatVideoEmbedUrl(newUrl);
     setSrc(formatted);
+    if (!element) return;
 
     if (tag === "iframe") {
       commitAttribute("src", formatted);

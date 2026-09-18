@@ -1,0 +1,76 @@
+/* ══════════════════════════════════════════════════════════════
+   AXRIS MEDIA SOLUTIONS — STYLESHEET ENTRY POINT
+   ------------------------------------------------------------
+   This file only assembles partials (via postcss-import) and marks
+   where Tailwind injects its own layers. Edit the partial files
+   under base/ · components/ · animations/ — not this one — unless
+   you're adding/removing/reordering a whole section.
+
+   Build:  npm run build:css   (one-off, minified)
+           npm run dev:css     (watch mode)
+   Output: assets/css/main.css — do not edit that file directly,
+           it is regenerated on every build and any manual edits
+           will be lost.
+
+   ORDER MATTERS: the two groups below sit before/after Tailwind's
+   own output on purpose, matching how the site's original single
+   stylesheet was laid out — moving a partial across the @tailwind
+   line changes which rules win when specificity ties.
+══════════════════════════════════════════════════════════════ */
+
+/* ── Pre-Tailwind: base resets + decorative animation hooks ── */
+@import "./base/reset-and-a11y.css";
+@import "./animations/decorative.css";
+@import "./base/responsive-a11y.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Post-Tailwind: layout, components, text-effects, type scale ── */
+@import "./base/layout.css";
+@import "./components/scrollbar-toc.css";
+@import "./components/cursor.css";
+@import "./components/cookie-consent.css";
+@import "./components/navbar.css";
+@import "./animations/text-effects.css";
+@import "./base/typography.css";
+
+/* ── Visual redesign (2026 session 3): reusable component recipes.
+   Imported last on purpose — they target compound Tailwind utility
+   patterns (see each file's header comment) and rely on this being
+   the final say in the cascade for those properties. ── */
+@import "./components/buttons.css";
+@import "./components/cards.css";
+@import "./components/forms.css";
+@import "./components/editorial.css";
+@import "./components/transitions.css";
+
+/* ── Component library completion (session 5): accordion, lists,
+   tables, pricing, testimonials, footer polish. Same "target the
+   recurring recipe, no markup rewrite" convention as the block
+   above — see each file's own header for specifics. ── */
+@import "./components/accordion.css";
+@import "./components/lists.css";
+@import "./components/tables.css";
+@import "./components/pricing.css";
+@import "./components/testimonials.css";
+@import "./components/footer-polish.css";
+
+/* ── Atmosphere / cinematic depth system (session 7): grain,
+   ambient light, section seams, card + photo depth. Imported last
+   on purpose — it only ever adds background-image/box-shadow
+   layers on top of what everything above already established, so
+   it needs to be last to safely win the one property (navbar's
+   box-shadow) it intentionally overrides. See the file's own
+   header comment for the full rationale. ── */
+@import "./components/atmosphere.css";
+
+/* ── Mobile experience (session 9) ────────────────────────────
+   Imported dead last, after atmosphere.css, so it wins the cascade
+   against every desktop-facing rule above it at the mobile widths it
+   targets. This is intentional and load-bearing: the whole point of
+   this file is to override, not append to, the desktop-authored
+   spacing/typography/interaction rules everything above it defines.
+   See the file's own header for the full breakdown by section. ── */
+@import "./mobile/mobile-experience.css";

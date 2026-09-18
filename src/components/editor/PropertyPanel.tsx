@@ -15,6 +15,7 @@ import ElementActionsGroup from "./property-panel/ElementActionsGroup";
 import SvgGroup from "./property-panel/SvgGroup";
 import AdvancedCssGroup from "./property-panel/AdvancedCssGroup";
 import ClassesGroup from "./property-panel/ClassesGroup";
+import DocumentInspector from "./property-panel/DocumentInspector";
 import InlineTextEditor from "./InlineTextEditor";
 import { classifyElement } from "@/lib/dom/element-classifier";
 import {
@@ -47,6 +48,7 @@ interface PropertyPanelProps {
   structuralPath: string | null;
   theme: ThemeMap;
   viewport?: ViewportMode;
+  iframe?: HTMLIFrameElement | null;
   onEdit?: (record: EditRecord) => void;
   onSelectElement?: (el: Element) => void;
   onDelete?: (el: Element) => void;
@@ -60,6 +62,7 @@ export default function PropertyPanel({
   structuralPath,
   theme,
   viewport = "desktop",
+  iframe = null,
   onEdit,
   onSelectElement,
   onDelete,
@@ -71,15 +74,12 @@ export default function PropertyPanel({
 
   if (!element || !structuralPath) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-6 text-center text-slate-400 dark:text-zinc-500 space-y-3 bg-white dark:bg-[#141414] transition-colors">
-        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-[#1c1c1c] border border-slate-200 dark:border-[#262626] flex items-center justify-center text-slate-500 dark:text-zinc-400">
-          <MousePointerClick className="w-5 h-5" />
-        </div>
-        <div className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300">No element selected</div>
-        <div className="text-xs max-w-[200px] text-slate-500 dark:text-zinc-400">
-          Click any element in the preview to edit its styles and text properties.
-        </div>
-      </div>
+      <DocumentInspector
+        iframe={iframe}
+        theme={theme}
+        onSelectElement={onSelectElement}
+        onEdit={onEdit}
+      />
     );
   }
 
@@ -90,7 +90,7 @@ export default function PropertyPanel({
   const showColors = showAll || visiblePanels.textColor || visiblePanels.backgroundColor;
 
   return (
-    <div key={`${structuralPath}-${viewport}`} className="text-slate-800 dark:text-zinc-200 bg-white dark:bg-[#141414] transition-colors">
+    <div key={`${structuralPath}-${viewport}`} className="text-slate-800 dark:text-zinc-200 bg-white dark:bg-[#141414] transition-colors pb-20">
       {/* Selected Element Header with Type Badge and Contextual Filter Mode */}
       <div className="p-3 bg-slate-50 dark:bg-[#090909] flex flex-col gap-2 border-b border-slate-200 dark:border-[#262626]">
         <div className="flex items-center justify-between gap-2">

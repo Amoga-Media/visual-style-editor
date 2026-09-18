@@ -1,0 +1,18 @@
+{
+  "name": "grand-shalimar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Grand Shalimar restaurant website — static multi-page site (Tailwind CSS v4 + GSAP + Lenis).",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/css/input.css -o ./assets/css/style.css --minify",
+    "watch:css": "tailwindcss -i ./src/css/input.css -o ./assets/css/style.css --watch",
+    "serve": "npx serve . -l 5000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.2",
+    "tailwindcss": "^4.3.2"
+  }
+}

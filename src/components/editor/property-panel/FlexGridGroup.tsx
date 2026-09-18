@@ -52,16 +52,16 @@ export default function FlexGridGroup({
   viewport = "desktop",
   onEdit,
 }: FlexGridGroupProps) {
-  const [display, setDisplay] = useState("block");
-  const [flexDirection, setFlexDirection] = useState("row");
+  const [display, setDisplay] = useState(() => (element ? (element as HTMLElement).style?.display || "block" : "block"));
+  const [flexDirection, setFlexDirection] = useState(() => (element ? (element as HTMLElement).style?.flexDirection || "row" : "row"));
   const [flexWrap, setFlexWrap] = useState("nowrap");
-  const [justifyContent, setJustifyContent] = useState("start");
-  const [alignItems, setAlignItems] = useState("start");
+  const [justifyContent, setJustifyContent] = useState(() => (element ? (element as HTMLElement).style?.justifyContent || "start" : "start"));
+  const [alignItems, setAlignItems] = useState(() => (element ? (element as HTMLElement).style?.alignItems || "start" : "start"));
   const [gridCols, setGridCols] = useState("1");
   const [gridRows, setGridRows] = useState("1");
   const [gridFlow, setGridFlow] = useState("row");
   const [gap, setGap] = useState<AxisValue>({ amount: 0, unit: "px" });
-  const [isGridMode, setIsGridMode] = useState(false);
+  const [isGridMode, setIsGridMode] = useState(() => Boolean(element && (element as HTMLElement).style?.display?.includes("grid")));
 
   useEffect(() => {
     if (!element) return;
@@ -354,6 +354,109 @@ export default function FlexGridGroup({
 
       {isFlexOrGrid && (
         <>
+          {/* 3×3 Interactive Alignment Matrix */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs text-slate-700 dark:text-zinc-300 font-medium">
+              <span>Quick Alignment Matrix</span>
+              <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-400 capitalize">
+                {alignItems} × {justifyContent}
+              </span>
+            </div>
+
+            <div className="p-3 bg-slate-50 dark:bg-[#121212] rounded-xl border border-slate-200 dark:border-[#242424] flex items-center justify-center gap-6">
+              {/* 3x3 Matrix Pad */}
+              <div className="grid grid-cols-3 gap-1.5 p-2 bg-slate-200/60 dark:bg-[#1c1c1c] rounded-lg border border-slate-300/50 dark:border-[#2a2a2a]">
+                {[
+                  { row: "start", col: "start", label: "Top-Left" },
+                  { row: "start", col: "center", label: "Top-Center" },
+                  { row: "start", col: "end", label: "Top-Right" },
+                  { row: "center", col: "start", label: "Center-Left" },
+                  { row: "center", col: "center", label: "Center" },
+                  { row: "center", col: "end", label: "Center-Right" },
+                  { row: "end", col: "start", label: "Bottom-Left" },
+                  { row: "end", col: "center", label: "Bottom-Center" },
+                  { row: "end", col: "end", label: "Bottom-Right" },
+                ].map((pos) => {
+                  const isActive =
+                    alignItems.includes(pos.row) &&
+                    (pos.col === "center"
+                      ? justifyContent.includes("center")
+                      : pos.col === "start"
+                      ? (justifyContent.includes("start") || (!justifyContent.includes("center") && !justifyContent.includes("end")))
+                      : justifyContent.includes("end"));
+                  return (
+                    <button
+                      key={`${pos.row}-${pos.col}`}
+                      type="button"
+                      onClick={() => {
+                        handleAlignChange(pos.row);
+                        handleJustifyChange(pos.col);
+                      }}
+                      title={`Align: ${pos.label}`}
+                      aria-label={`Align ${pos.label}`}
+                      className={`w-6 h-6 rounded flex items-center justify-center transition-all cursor-pointer ${
+                        isActive
+                          ? "bg-[#0099ff] text-white shadow-xs scale-105"
+                          : "bg-white dark:bg-[#222222] text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2a2a2a]"
+                      }`}
+                    >
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          isActive ? "bg-white" : "bg-slate-400 dark:bg-zinc-500"
+                        }`}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Quick Spacing & Stretch Distribute Presets */}
+              <div className="flex flex-col gap-1 text-[10px]">
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-bold">Distribution</span>
+                <div className="flex gap-1">
+                  {[
+                    { label: "Between", val: "between" },
+                    { label: "Around", val: "around" },
+                    { label: "Evenly", val: "evenly" },
+                  ].map((j) => (
+                    <button
+                      key={j.val}
+                      type="button"
+                      onClick={() => handleJustifyChange(j.val)}
+                      className={`px-1.5 py-1 rounded transition-colors cursor-pointer ${
+                        justifyContent.includes(j.val)
+                          ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-semibold"
+                          : "bg-white dark:bg-[#1a1a1a] text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-[#262626] hover:bg-slate-100 dark:hover:bg-[#222]"
+                      }`}
+                    >
+                      {j.label}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-bold mt-1">Cross-Axis</span>
+                <div className="flex gap-1">
+                  {[
+                    { label: "Stretch", val: "stretch" },
+                    { label: "Baseline", val: "baseline" },
+                  ].map((a) => (
+                    <button
+                      key={a.val}
+                      type="button"
+                      onClick={() => handleAlignChange(a.val)}
+                      className={`px-1.5 py-1 rounded transition-colors cursor-pointer ${
+                        alignItems.includes(a.val)
+                          ? "bg-[#0099ff]/15 text-[#0099ff] border border-[#0099ff]/30 font-semibold"
+                          : "bg-white dark:bg-[#1a1a1a] text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-[#262626] hover:bg-slate-100 dark:hover:bg-[#222]"
+                      }`}
+                    >
+                      {a.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Justify / Align */}
           <div className="grid grid-cols-2 gap-2">
             <div>

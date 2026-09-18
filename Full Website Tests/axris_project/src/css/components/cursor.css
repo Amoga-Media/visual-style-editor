@@ -1,0 +1,98 @@
+/* ============================================================
+   CUSTOM CURSOR
+   Desktop-only magnetic ring cursor (src/js/ui/cursor.js)
+============================================================ */
+
+/* ── Custom Cursor — z-index ABOVE nav (nav is 9999) ── */
+
+#ax-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 100000;
+  /* above everything including nav */
+  will-change: transform;
+}
+
+#ax-cursor.ax-cursor--hidden .ax-cursor-dot,
+#ax-cursor.ax-cursor--hidden .ax-cursor-ring {
+  opacity: 0;
+}
+
+.ax-cursor-dot {
+  display: none !important;
+  position: fixed;
+  top: -5px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  background: theme('colors.brand.600');
+  border-radius: 50%;
+  will-change: transform;
+  transition: width 0.25s ease, height 0.25s ease, background 0.25s ease;
+  pointer-events: none;
+}
+
+.ax-cursor-ring {
+  position: fixed;
+  top: -22px;
+  left: -22px;
+  width: 44px;
+  height: 44px;
+  border: 2px solid theme('colors.brand.600');
+  border-radius: 50%;
+  will-change: transform;
+  transition: width 0.3s ease, height 0.3s ease, background 0.3s ease, border-color 0.3s ease, top 0.3s ease, left 0.3s ease;
+  pointer-events: none;
+}
+
+/* Hover state — was hardcoded #f97316 (stock Tailwind orange-500),
+   now the formalized `accent` token (see tailwind.config.js) shared
+   with the cookie-consent primary button, so both instances of this
+   "second brand color" move together if it's ever retuned again. */
+#ax-cursor.ax-cursor--active .ax-cursor-ring {
+  width: 54px;
+  height: 54px;
+  top: -27px;
+  left: -27px;
+  background: rgba(194, 84, 46, 0.85);
+  border-color: theme('colors.accent.DEFAULT');
+}
+
+#ax-cursor.ax-cursor--active .ax-cursor-dot {
+  display: none !important;
+  width: 8px;
+  height: 8px;
+  top: -4px;
+  left: -4px;
+  background: #fff;
+}
+
+/* ── Drag affordance (session 8) — swaps the circular hover ring for a
+   horizontal pill so a draggable surface (currently: the logo marquee)
+   reads as "grab and slide sideways" before the visitor presses anything,
+   rather than reusing the generic link/button hover ring which would
+   incorrectly imply a click/navigation. See motion/drag.js, which is the
+   only place that sets [data-cursor="drag"], and motion/cursor-magnetic.js,
+   which listens for it. ── */
+#ax-cursor.ax-cursor--drag .ax-cursor-ring {
+  width: 64px;
+  height: 34px;
+  top: -17px;
+  left: -32px;
+  border-radius: 9999px;
+  border-color: theme('colors.brand.600');
+  background: rgba(14, 165, 233, 0.1);
+}
+
+/* While actually pressed/dragging — a tighter, filled pill reads as
+   "caught" rather than just "catchable", the same distinction the
+   magnetic buttons' mousedown scale already draws for click feedback. */
+#ax-cursor.ax-cursor--drag.ax-cursor--dragging .ax-cursor-ring {
+  width: 46px;
+  height: 30px;
+  top: -15px;
+  left: -23px;
+  background: rgba(14, 165, 233, 0.22);
+}

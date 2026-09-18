@@ -1,0 +1,218 @@
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-brand focus:text-white focus:rounded-lg font-satoshi font-bold">Skip to main content</a>
+<header class="ax-header-wrapper">
+  <nav class="ax-nav-classic" role="navigation" aria-label="Main navigation">
+    <a href="/" class="ax-logo">
+      <picture>
+        <source srcset="/assets/images/logo.webp" type="image/webp" />
+        <img
+          src="/assets/images/logo.png"
+          alt="Axris Media Solutions"
+          class="ax-logo-img"
+          width="400" height="185" loading="eager" fetchpriority="high" decoding="async" />
+      </picture>
+    </a>
+
+    <ul class="ax-desktop-nav">
+      <li><a href="/" class="ax-nav-link">Home</a></li>
+      <li><a href="/pages/about-us.html" class="ax-nav-link">About</a></li>
+
+      <li class="ax-services-parent">
+        <a
+          href="/pages/services.html"
+          class="ax-nav-link"
+          style="display: flex; align-items: center; gap: 4px"
+        >
+          Services
+          <svg
+            style="width: 16px; height: 16px; margin-top: 2px"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.75"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </a>
+        <div class="ax-services-dropdown">
+          <a href="/pages/services.html" class="ax-dropdown-link primary"
+            >All Services →</a
+          >
+          <a href="/pages/service-pages/lead-gen.html" class="ax-dropdown-link"
+            >Lead Generation</a
+          >
+          <a
+            href="/pages/service-pages/lead-nurturing.html"
+            class="ax-dropdown-link"
+            >Lead Nurturing</a
+          >
+          <a
+            href="/pages/service-pages/email-marketing.html"
+            class="ax-dropdown-link"
+            >Email Marketing</a
+          >
+          <a
+            href="/pages/service-pages/bant-campaign.html"
+            class="ax-dropdown-link"
+            >BANT Campaigns</a
+          >
+          <a href="/pages/service-pages/abm.html" class="ax-dropdown-link"
+            >ABM</a
+          >
+          <a
+            href="/pages/service-pages/demand-generation.html"
+            class="ax-dropdown-link"
+            >Demand Generation</a
+          >
+          <a
+            href="/pages/service-pages/content-syndication.html"
+            class="ax-dropdown-link"
+            >Content Syndication</a
+          >
+          <a
+            href="/pages/service-pages/data-cleaning.html"
+            class="ax-dropdown-link"
+            >Data Cleaning</a
+          >
+        </div>
+      </li>
+
+      <li>
+        <a href="/pages/case-studies.html" class="ax-nav-link">Case Studies</a>
+      </li>
+    </ul>
+
+    <div class="ax-nav-right">
+      <a href="/pages/contact.html" class="btn-magnetic ax-contact-btn"
+        >Contact Us</a
+      >
+      <button id="ax-hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="ax-mobile-menu">
+        <span class="ax-ham-line"></span>
+        <span class="ax-ham-line"></span>
+        <span class="ax-ham-line"></span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<div id="ax-mobile-menu" role="dialog" aria-modal="true" aria-label="Mobile navigation menu" aria-hidden="true">
+  <div id="ax-mobile-drag-handle" class="ax-mobile-drag-handle" aria-hidden="true">
+    <span class="ax-mobile-drag-bar"></span>
+  </div>
+  <div class="ax-mobile-header">
+    <picture>
+      <source srcset="/assets/images/logo.webp" type="image/webp" />
+      <img
+        src="/assets/images/logo.png"
+        alt="Axris Media Solutions"
+        class="ax-mobile-logo-img"
+        width="400"
+        height="185"
+        loading="lazy"
+        decoding="async" />
+    </picture>
+    <button
+      id="ax-mobile-close"
+      aria-label="Close menu"
+      style="background:none;border:none;cursor:pointer;padding:0.5rem;display:flex;align-items:center;justify-content:center;"
+    >
+      <svg width="24" height="24" fill="none" stroke="#0A0A0A" stroke-width="1.75" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+  <nav class="ax-mobile-nav-container" style="padding-top:1rem;">
+    <a href="/" class="ax-mobile-navlink">Home</a>
+    <a href="/pages/about-us.html" class="ax-mobile-navlink">About Us</a>
+
+    <div>
+      <button class="ax-mobile-navlink" id="ax-mobile-services-btn" aria-expanded="false" aria-controls="ax-mobile-submenu">
+        Services
+        <svg
+          id="ax-services-icon"
+          style="
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s;
+            color: #0EA5E9;
+          "
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.75"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      <div class="ax-mobile-submenu" id="ax-mobile-submenu">
+        <a
+          href="/pages/services.html"
+          class="ax-mobile-sublink"
+          style="color: #0EA5E9; font-weight: 700"
+          >All Services →</a
+        >
+        <a href="/pages/service-pages/lead-gen.html" class="ax-mobile-sublink"
+          >Lead Generation</a
+        >
+        <a
+          href="/pages/service-pages/lead-nurturing.html"
+          class="ax-mobile-sublink"
+          >Lead Nurturing</a
+        >
+        <a
+          href="/pages/service-pages/email-marketing.html"
+          class="ax-mobile-sublink"
+          >Email Marketing</a
+        >
+        <a
+          href="/pages/service-pages/bant-campaign.html"
+          class="ax-mobile-sublink"
+          >BANT Campaigns</a
+        >
+        <a href="/pages/service-pages/abm.html" class="ax-mobile-sublink"
+          >Account-Based Marketing</a
+        >
+        <a
+          href="/pages/service-pages/demand-generation.html"
+          class="ax-mobile-sublink"
+          >Demand Generation</a
+        >
+        <a
+          href="/pages/service-pages/content-syndication.html"
+          class="ax-mobile-sublink"
+          >Content Syndication</a
+        >
+        <a
+          href="/pages/service-pages/data-cleaning.html"
+          class="ax-mobile-sublink"
+          >Data Cleaning</a
+        >
+      </div>
+    </div>
+
+    <a
+      href="/pages/case-studies.html"
+      class="ax-mobile-navlink"
+      style="border-bottom: none"
+      >Case Studies</a
+    >
+  </nav>
+
+  <div class="ax-mobile-footer">
+    <a href="/pages/contact.html" class="ax-mobile-contact-btn"
+      >Book a Strategy Call</a
+    >
+  </div>
+</div>

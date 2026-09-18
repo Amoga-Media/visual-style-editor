@@ -1,0 +1,104 @@
+/* ============================================================
+   CARDS & PILLS — VISUAL REDESIGN
+   ------------------------------------------------------------
+   Like buttons.css, this targets the *recurring recipes*
+   design-system.md documents rather than requiring a markup
+   rewrite across 16 files. Every `rounded-card` element that also
+   carries `bg-white` + `border-*gray` is, without exception,
+   the site's "bordered content card" role (service cards,
+   testimonial cards, form panels) — never an image container
+   (image containers use `overflow-hidden` instead of a border).
+   Selector uses [class*="…"] so it matches regardless of the
+   exact order Tailwind classes were hand-authored in.
+============================================================ */
+
+/* ── Bordered content card ── */
+.rounded-card[class*="border-gray"][class*="bg-white"] {
+  position: relative;
+  border-color: theme('colors.gray.200');
+  background-color: #fff;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.45s ease;
+}
+
+/* Signature corner mark — a small brand-colored tick in the top-left,
+   the one recurring handcrafted motif tying every card on the site
+   back to the same visual language. Purely decorative, aria-hidden
+   by nature (generated content, never read by AT). On hover it grows
+   into a short accent line instead of staying a static dot — the
+   detail that reads as "designed," not "a div with a shadow." */
+.rounded-card[class*="border-gray"][class*="bg-white"]::before {
+  content: "";
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: theme('colors.brand.DEFAULT');
+  opacity: 0.9;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rounded-card[class*="border-gray"][class*="bg-white"]:hover::before {
+  width: 1.75rem;
+  border-radius: 9999px;
+}
+
+.rounded-card[class*="border-gray"][class*="bg-white"]:hover {
+  transform: translateY(-4px);
+  border-color: theme('colors.brand.200');
+  box-shadow: 0 24px 48px -24px rgba(20, 17, 15, 0.22);
+}
+
+/* Keyboard focus — for cards that are themselves (or wrap) a link. */
+.rounded-card[class*="border-gray"][class*="bg-white"]:focus-within,
+.rounded-card[class*="bg-dark"]:focus-within,
+.rounded-card[class*="bg-brand"]:focus-within {
+  outline: 2px solid theme('colors.brand.500');
+  outline-offset: 2px;
+}
+
+/* ── Dark content card (bg-dark / bg-brand variants) ──
+   Same lift behavior, no corner mark (would fight the dark/brand
+   fill instead of accenting it — a light dot on a brand-blue card
+   reads as a bug, not a feature). */
+.rounded-card[class*="bg-dark"],
+.rounded-card[class*="bg-brand"] {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rounded-card[class*="bg-dark"]:hover,
+.rounded-card[class*="bg-brand"]:hover {
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rounded-card[class*="border-gray"][class*="bg-white"]:hover,
+  .rounded-card[class*="bg-dark"]:hover,
+  .rounded-card[class*="bg-brand"]:hover {
+    transform: none;
+  }
+}
+
+/* ── Eyebrow pill (rounded-full chip: "hero-anim" badges, stat
+   labels, section kickers) — excludes .btn-magnetic so buttons that
+   happen to share the same rounded-full/border/bg-white recipe are
+   never double-styled by both this file and buttons.css. ── */
+.rounded-full[class*="border-gray"][class*="bg-white"]:not(.btn-magnetic) {
+  border-color: theme('colors.gray.200');
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ── Eyebrow / kicker label —available as a real utility class for
+   any small uppercase label above a heading (see typography.css for
+   the .eyebrow definition itself; this file only spaces it from the
+   heading that follows it consistently). ── */
+.eyebrow + h1,
+.eyebrow + h2,
+.eyebrow + h3 {
+  margin-top: 0.75rem;
+}

@@ -1,0 +1,387 @@
+/* ============================================================
+   Besty's | Premium Craft Burgers — Stylesheet
+   Extracted from inline <style> for maintainability.
+   ============================================================ */
+
+:root {
+    --ink: #050505;
+    --surface: #121212;
+    --surface-2: #1A1A1A;
+    --line: rgba(255, 255, 255, 0.10);
+    --accent: #E63946;
+    --accent-2: #FFC933;
+    --tone: var(--ink);
+    /* used by .torn-edge to punch holes matching whatever bg it sits on */
+}
+
+body {
+    font-family: 'Satoshi', sans-serif;
+    background-color: var(--ink);
+    color: #EDEDED;
+    overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+    font-family: 'Satoshi', sans-serif;
+}
+
+.font-ticket {
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.01em;
+}
+
+/* ---------- Ticket / receipt motif: replaces decorative glassmorphism everywhere ---------- */
+.ticket-card {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    transition: transform .4s cubic-bezier(.25, 1, .5, 1), border-color .4s cubic-bezier(.25, 1, .5, 1), box-shadow .4s cubic-bezier(.25, 1, .5, 1);
+}
+
+.ticket-card:hover {
+    transform: translate(-4px, -4px);
+    border-color: var(--accent);
+    box-shadow: 5px 5px 0 0 var(--accent);
+}
+
+@media (max-width: 767px) {
+    .ticket-card:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: var(--line);
+    }
+}
+
+/* .tilt-card owns `transform` via GSAP (rotationX/Y quickTo) — let the CSS hover only affect color/shadow */
+.tilt-card.ticket-card:hover {
+    transform: none;
+}
+
+.tilt-card {
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+/* .magnetic buttons get continuous quickTo(x/y) updates from GSAP while the
+   cursor is nearby; hinting the compositor avoids a layer-promotion stutter
+   right as the first mousemove tween kicks in. */
+.magnetic {
+    will-change: transform;
+}
+
+/* Perforated "torn from the roll" edge — the one signature device, reused deliberately */
+.torn-edge {
+    position: relative;
+}
+
+.torn-edge::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 13px;
+    background-image: radial-gradient(circle at 8px 6px, var(--tone) 4.5px, transparent 4.7px);
+    background-size: 16px 13px;
+    background-repeat: repeat-x;
+    transform: translateY(-50%);
+}
+
+.menu-item:hover {
+    transform: translateX(10px) translateY(0);
+}
+
+.menu-row {
+    border-bottom: 1px dashed var(--line);
+    transition: padding-left .35s cubic-bezier(.25, 1, .5, 1), border-color .35s;
+}
+
+.menu-row:last-child {
+    border-bottom: none;
+}
+
+.menu-row:hover {
+    padding-left: .85rem;
+    border-color: rgba(230, 57, 70, 0.4);
+}
+
+/* Desktop menu-list accordion: summary row (name/price) always visible, description
+           collapses via CSS grid-rows (no JS height math, respects prefers-reduced-motion
+           automatically through the global transition-duration override above). */
+.accordion-trigger {
+    background: transparent;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.accordion-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .45s cubic-bezier(.25, 1, .5, 1);
+}
+
+.accordion-panel>.accordion-panel-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.accordion-item.is-open .accordion-panel {
+    grid-template-rows: 1fr;
+}
+
+.accordion-chevron {
+    transition: transform .35s cubic-bezier(.25, 1, .5, 1), color .3s;
+}
+
+.accordion-item.is-open .accordion-chevron {
+    transform: rotate(180deg);
+}
+
+/* Our Story: scroll-scrubbed word reveal — each word dims until the scroll position reaches it */
+.story-scrub-text .word {
+    display: inline-block;
+    opacity: 0.16;
+}
+
+/* Cinematic Image Masking */
+.cinematic-img {
+    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+}
+
+/* Grain texture — replaces blur/glass as the "premium atmosphere" material over photography */
+.grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .15;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 180px 180px;
+}
+
+/* Stamp badge */
+.stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    border: 1.5px solid currentColor;
+    border-radius: 9999px;
+    padding: .45rem 1rem;
+    transform: rotate(-7deg);
+}
+
+/* Hype ticker marquee */
+.marquee {
+    overflow: hidden;
+}
+
+.marquee__track {
+    display: flex;
+    width: max-content;
+    animation: marquee 26s linear infinite;
+    will-change: transform;
+}
+
+.marquee--slow .marquee__track {
+    animation-duration: 55s;
+}
+
+.marquee:hover .marquee__track {
+    animation-play-state: paused;
+}
+
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+/* Hero line-reveal mask */
+.line-mask {
+    display: block;
+    overflow: hidden;
+}
+
+.line-inner {
+    display: block;
+    will-change: transform;
+}
+
+/* Parallax layers are re-positioned on every scroll tick (scrubbed to scroll
+   position) rather than a one-off tween, so they benefit most from a standing
+   compositor layer. */
+.parallax-bg {
+    will-change: transform;
+}
+
+/* Hero background video — used full-bleed across all three hero variants
+           (mobile/tablet/desktop). Slight contrast boost keeps it punchy under the
+           dark gradient overlays instead of reading flat/washed-out. */
+.hero-video {
+    filter: contrast(1.15);
+}
+
+/* Scroll progress */
+#scroll-progress {
+    transform-origin: left;
+    transform: scaleX(0);
+}
+
+/* Cursor ring — accompanies, never replaces, the native cursor */
+#cursor-ring {
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid var(--accent);
+    border-radius: 9999px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 80;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+    transition: opacity .3s, background-color .3s;
+    mix-blend-mode: difference;
+    will-change: transform;
+}
+
+.cursor-active #cursor-ring {
+    opacity: 1;
+}
+
+.cursor-hover #cursor-ring {
+    background-color: var(--accent);
+}
+
+.stat-num {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Nav — the one legitimate functional use of backdrop-blur (legibility over scrolling content, not decoration) */
+#navbar.nav-scrolled {
+    background: rgba(5, 5, 5, 0.82);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom-color: var(--line);
+}
+
+#navbar.nav-scrolled::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--accent);
+}
+
+/* Mobile Menu - hidden by default, GSAP animates it open/closed via opacity+visibility */
+#mobile-menu {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.hamburger-line {
+    transform-origin: center;
+}
+
+/* Desktop-only clipped-height parallax treatment for reviews */
+@media (min-width: 1024px) {
+    .fade-mask-y-lg {
+        mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+        -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--ink);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+/* Visible keyboard focus */
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* Respect OS-level reduced motion preference for CSS transitions/animations */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .marquee__track {
+        animation: none !important;
+    }
+
+    #cursor-ring {
+        display: none !important;
+    }
+}
+
+@media (hover: none),
+(pointer: coarse) {
+    #cursor-ring {
+        display: none !important;
+    }
+}
+
+/* Custom Date Picker UI States */
+#calendar-ui.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.calendar-day {
+    padding: 0.5rem 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.calendar-day:hover:not(.empty) {
+    background-color: rgba(255, 201, 51, 0.15);
+    /* Accent yellow low opacity */
+    color: var(--accent-2);
+}
+
+.calendar-day.selected {
+    background-color: var(--accent-2);
+    color: var(--ink);
+    font-weight: bold;
+}
+
+.calendar-day.empty {
+    cursor: default;
+}

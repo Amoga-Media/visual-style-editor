@@ -8,6 +8,9 @@ import {
   ArrowLeftRight,
   Sparkles,
   Maximize2,
+  GripVertical,
+  EyeOff,
+  RotateCcw,
 } from "lucide-react";
 import {
   type DevicePreset,
@@ -22,6 +25,10 @@ interface DevicePresetDropdownProps {
   onSelectPreset: (preset: DevicePreset) => void;
   onApplyCustomDimensions: (width: number, height: number) => void;
   onCategoryChange?: (category: "desktop" | "tablet" | "mobile") => void;
+  onHide?: () => void;
+  onDragStart?: (e: React.PointerEvent) => void;
+  onResetPosition?: () => void;
+  isCustomPosition?: boolean;
 }
 
 export default function DevicePresetDropdown({
@@ -31,6 +38,10 @@ export default function DevicePresetDropdown({
   onSelectPreset,
   onApplyCustomDimensions,
   onCategoryChange,
+  onHide,
+  onDragStart,
+  onResetPosition,
+  isCustomPosition = false,
 }: DevicePresetDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"desktop" | "tablet" | "mobile">(category);
@@ -133,32 +144,74 @@ export default function DevicePresetDropdown({
 
   return (
     <div className="relative mb-2 shrink-0 z-30" ref={dropdownRef}>
-      {/* Interactive Capsule Pill */}
-      <button
-        type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
-        aria-expanded={isOpen}
-        aria-label={`Resolution preset: ${viewLabel}, ${dimensionText}`}
-        className="px-3.5 py-1.5 rounded-full bg-white/95 dark:bg-[#141414]/95 hover:bg-slate-50 dark:hover:bg-[#1a1a1a] border border-slate-200 dark:border-[#262626] text-[11px] font-mono text-slate-700 dark:text-zinc-300 flex items-center gap-2 shadow-lg backdrop-blur-md select-none transition-all cursor-pointer group hover:border-[#0099ff]/50 active:scale-98"
-      >
-        <div className="flex items-center gap-1.5">
-          {category === "desktop" ? (
-            <Monitor className="w-3.5 h-3.5 text-[#0099ff]" />
-          ) : category === "tablet" ? (
-            <Tablet className="w-3.5 h-3.5 text-amber-500" />
-          ) : (
-            <Smartphone className="w-3.5 h-3.5 text-emerald-500" />
-          )}
-          <span className="font-medium text-slate-800 dark:text-zinc-200">{viewLabel}</span>
-        </div>
-        <span className="text-slate-300 dark:text-zinc-600">•</span>
-        <span className="text-[#0099ff] font-semibold">{dimensionText}</span>
-        <ChevronDown
-          className={`w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 transition-transform duration-200 ${
-            isOpen ? "rotate-180 text-[#0099ff]" : "group-hover:text-slate-700 dark:group-hover:text-zinc-300"
+      {/* Interactive Capsule Pill with Drag Handle & Hide Controls */}
+      <div className="flex items-center rounded-full bg-white/95 dark:bg-[#141414]/95 border border-slate-200 dark:border-[#262626] shadow-lg backdrop-blur-md transition-all hover:border-[#0099ff]/50 p-0.5">
+        {/* Drag handle */}
+        {onDragStart && (
+          <div
+            onPointerDown={onDragStart}
+            onDoubleClick={onResetPosition}
+            title="Drag to reposition on canvas (Double-click to center)"
+            className="pl-2 pr-1 py-1 cursor-grab active:cursor-grabbing text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-200 flex items-center select-none"
+          >
+            <GripVertical className="w-3.5 h-3.5" />
+          </div>
+        )}
+
+        {/* Interactive Capsule Pill */}
+        <button
+          type="button"
+          onClick={() => setIsOpen((prev) => !prev)}
+          aria-expanded={isOpen}
+          aria-label={`Resolution preset: ${viewLabel}, ${dimensionText}`}
+          className={`py-1 text-[11px] font-mono text-slate-700 dark:text-zinc-300 flex items-center gap-2 select-none transition-all cursor-pointer group active:scale-98 ${
+            onDragStart ? "px-2" : "px-3.5"
           }`}
-        />
-      </button>
+        >
+          <div className="flex items-center gap-1.5">
+            {category === "desktop" ? (
+              <Monitor className="w-3.5 h-3.5 text-[#0099ff]" />
+            ) : category === "tablet" ? (
+              <Tablet className="w-3.5 h-3.5 text-amber-500" />
+            ) : (
+              <Smartphone className="w-3.5 h-3.5 text-emerald-500" />
+            )}
+            <span className="font-medium text-slate-800 dark:text-zinc-200">{viewLabel}</span>
+          </div>
+          <span className="text-slate-300 dark:text-zinc-600">•</span>
+          <span className="text-[#0099ff] font-semibold">{dimensionText}</span>
+          <ChevronDown
+            className={`w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 transition-transform duration-200 ${
+              isOpen ? "rotate-180 text-[#0099ff]" : "group-hover:text-slate-700 dark:group-hover:text-zinc-300"
+            }`}
+          />
+        </button>
+
+        {/* Reset position button if dragged */}
+        {isCustomPosition && onResetPosition && (
+          <button
+            type="button"
+            onClick={onResetPosition}
+            title="Reset position to top center"
+            className="p-1 text-slate-400 dark:text-zinc-500 hover:text-[#0099ff] transition-colors rounded-full cursor-pointer"
+          >
+            <RotateCcw className="w-3 h-3" />
+          </button>
+        )}
+
+        {/* Hide / Minimize button */}
+        {onHide && (
+          <button
+            type="button"
+            onClick={onHide}
+            title="Hide Dimensions dropdown"
+            aria-label="Hide Dimensions dropdown"
+            className="p-1.5 pr-2 text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors cursor-pointer rounded-full"
+          >
+            <EyeOff className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
 
       {/* Dropdown Menu */}
       {isOpen && (

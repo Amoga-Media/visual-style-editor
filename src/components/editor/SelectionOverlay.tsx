@@ -2,7 +2,19 @@ import { useEffect, useState, useRef } from "react";
 import type { EditRecord, ThemeMap } from "@/types";
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
 import type { ViewportMode } from "@/components/editor/Toolbar";
-import { Move, GripVertical, Scaling, ZoomIn } from "lucide-react";
+import {
+  Move,
+  GripVertical,
+  Scaling,
+  ZoomIn,
+  ArrowUp,
+  Type,
+  Copy,
+  ChevronUp,
+  ChevronDown,
+  Layers,
+  Trash2,
+} from "lucide-react";
 
 interface Rect {
   top: number;
@@ -28,6 +40,14 @@ interface SelectionOverlayProps {
   onEdit?: (record: EditRecord) => void;
   onBatchEdit?: (records: EditRecord[]) => void;
   onMoveElement?: (sourceEl: HTMLElement, targetEl: HTMLElement, position: "before" | "after" | "inside") => void;
+  // Contextual HUD action props
+  onSelectElement?: (el: Element) => void;
+  onDuplicate?: (el: Element) => void;
+  onDelete?: (el: Element) => void;
+  onMoveUp?: (el: Element) => void;
+  onMoveDown?: (el: Element) => void;
+  onWrapWithDiv?: (el: Element) => void;
+  onEditText?: (el: Element) => void;
 }
 
 function computeOverlayRect(iframe: HTMLIFrameElement, el: Element, zoom = 1): Rect | null {
@@ -92,6 +112,13 @@ export default function SelectionOverlay({
   onEdit,
   onBatchEdit,
   onMoveElement,
+  onSelectElement,
+  onDuplicate,
+  onDelete,
+  onMoveUp,
+  onMoveDown,
+  onWrapWithDiv,
+  onEditText,
 }: SelectionOverlayProps) {
   const [hoverRect, setHoverRect] = useState<Rect | null>(null);
   const [selectedRect, setSelectedRect] = useState<Rect | null>(null);
@@ -698,6 +725,9 @@ export default function SelectionOverlay({
             pointerEvents: "none",
             boxSizing: "border-box",
             zIndex: 9998,
+            transform: "translateZ(0)",
+            willChange: "transform",
+            contain: "layout paint",
           }}
         />
       )}
@@ -715,50 +745,178 @@ export default function SelectionOverlay({
             pointerEvents: "none",
             boxSizing: "border-box",
             zIndex: 9999,
+            transform: "translateZ(0)",
+            willChange: "transform",
+            contain: "layout paint",
           }}
         >
-          {/* Label Badge with Drag Handle & Resize Mode Toggle */}
+          {/* Contextual Floating Action HUD (Fitts's Law + Immediate Feedback) */}
           {selectedLabel && (
             <div
+              data-testid="canvas-action-hud"
               style={{
                 position: "absolute",
-                top: -25,
+                top: selectedRect.top < 40 ? selectedRect.height + 6 : -34,
                 left: -2,
-                background: isAbsolute ? "#6366f1" : "#0099ff",
-                color: "#ffffff",
-                fontSize: "10px",
-                fontFamily: "monospace",
-                fontWeight: 600,
-                padding: "2px 6px",
-                borderRadius: "4px 4px 0 0",
-                whiteSpace: "nowrap",
                 pointerEvents: "auto",
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                userSelect: "none",
+                zIndex: 10001,
               }}
+              className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-slate-900/95 dark:bg-[#18181b]/95 backdrop-blur-md text-white border border-slate-700/80 dark:border-[#333]/90 shadow-xl select-none"
             >
               {/* Drag Handle: Position move for Absolute, sibling reordering for Flex/Flow */}
               <div
                 onPointerDown={isAbsolute ? handleStartDrag : handleStartReorder}
                 title={isAbsolute ? "Drag to move position" : "Drag to reorder among siblings"}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  cursor: isDragging || isReordering ? "grabbing" : "grab",
-                  padding: "1px 3px",
-                  borderRadius: 2,
-                  backgroundColor: "rgba(255, 255, 255, 0.2)",
-                }}
+                className="flex items-center p-0.5 rounded cursor-grab active:cursor-grabbing hover:bg-white/20 text-slate-300 hover:text-white transition-colors"
               >
-                {isAbsolute ? <Move style={{ width: 11, height: 11 }} /> : <GripVertical style={{ width: 11, height: 11 }} />}
+                {isAbsolute ? <Move className="w-3 h-3 text-indigo-400" /> : <GripVertical className="w-3 h-3 text-sky-400" />}
               </div>
 
-              <span>{isAbsolute ? `[Absolute] ${selectedLabel}` : selectedLabel}</span>
+              {/* Tag & Identifier Pill */}
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold tracking-tight ${
+                  isAbsolute ? "bg-indigo-600 text-white" : "bg-sky-600 text-white"
+                }`}
+                title={selectedLabel}
+              >
+                {isAbsolute ? `[Abs] ${selectedLabel}` : selectedLabel}
+              </span>
 
-              {/* Visual Resize Mode Toggle Button (BUG-024) */}
+              {/* Live Dimensions Readout */}
+              <span className="text-[10px] font-mono text-slate-400 dark:text-slate-400 px-0.5">
+                {Math.round(selectedRect.width / (zoom || 1))}×{Math.round(selectedRect.height / (zoom || 1))}
+              </span>
+
+              {/* Hairline Divider */}
+              <div className="w-px h-3 bg-slate-700 dark:bg-[#333] mx-0.5" />
+
+              {/* Select Parent Button */}
+              {selectedElement &&
+                selectedElement.parentElement &&
+                !["html", "body"].includes(selectedElement.parentElement.tagName.toLowerCase()) && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (selectedElement?.parentElement) {
+                        onSelectElement?.(selectedElement.parentElement);
+                      }
+                    }}
+                    title={`Select Parent Container <${selectedElement.parentElement.tagName.toLowerCase()}> (Esc)`}
+                    aria-label="Select parent element"
+                    className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/15 transition-colors"
+                  >
+                    <ArrowUp className="w-3 h-3" />
+                  </button>
+                )}
+
+              {/* Inline Text Edit Button */}
+              {selectedElement &&
+                !["img", "video", "iframe", "svg", "canvas", "input", "textarea", "select", "body", "html"].includes(
+                  selectedElement.tagName.toLowerCase()
+                ) && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onEditText) {
+                        onEditText(selectedElement);
+                      } else {
+                        try {
+                          selectedElement.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, cancelable: true }));
+                        } catch {}
+                      }
+                    }}
+                    title="Edit text content (Double-click)"
+                    aria-label="Edit text"
+                    className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/15 transition-colors"
+                  >
+                    <Type className="w-3 h-3" />
+                  </button>
+                )}
+
+              {/* Duplicate Button */}
+              {selectedElement && !["body", "html"].includes(selectedElement.tagName.toLowerCase()) && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDuplicate?.(selectedElement);
+                  }}
+                  title="Duplicate element (Ctrl+D / Cmd+D)"
+                  aria-label="Duplicate element"
+                  className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/15 transition-colors"
+                >
+                  <Copy className="w-3 h-3" />
+                </button>
+              )}
+
+              {/* Move Up / Move Down */}
+              {selectedElement?.previousElementSibling && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveUp?.(selectedElement);
+                  }}
+                  title="Move element up"
+                  aria-label="Move element up"
+                  className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/15 transition-colors"
+                >
+                  <ChevronUp className="w-3 h-3" />
+                </button>
+              )}
+              {selectedElement?.nextElementSibling && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveDown?.(selectedElement);
+                  }}
+                  title="Move element down"
+                  aria-label="Move element down"
+                  className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/15 transition-colors"
+                >
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+              )}
+
+              {/* Wrap with Container */}
+              {selectedElement && !["body", "html"].includes(selectedElement.tagName.toLowerCase()) && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onWrapWithDiv?.(selectedElement);
+                  }}
+                  title="Wrap in Auto-Div container (Ctrl+G / Cmd+G)"
+                  aria-label="Wrap with div"
+                  className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/15 transition-colors"
+                >
+                  <Layers className="w-3 h-3" />
+                </button>
+              )}
+
+              {/* Delete Button */}
+              {selectedElement && !["body", "html"].includes(selectedElement.tagName.toLowerCase()) && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete?.(selectedElement);
+                  }}
+                  title="Delete element (Del / Backspace)"
+                  aria-label="Delete element"
+                  className="p-1 rounded text-slate-300 hover:text-red-400 hover:bg-red-500/20 transition-colors"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              )}
+
+              {/* Hairline Divider */}
+              <div className="w-px h-3 bg-slate-700 dark:bg-[#333] mx-0.5" />
+
+              {/* Visual Resize Mode Toggle Button */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -770,22 +928,13 @@ export default function SelectionOverlay({
                   });
                 }}
                 title={isResizeMode ? "Disable visual resize handles" : "Enable visual resize handles"}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "3px",
-                  padding: "1px 5px",
-                  fontSize: "9px",
-                  fontWeight: 600,
-                  backgroundColor: isResizeMode && !isScaleMode ? "#ffffff" : "rgba(255, 255, 255, 0.2)",
-                  color: isResizeMode && !isScaleMode ? (isAbsolute ? "#6366f1" : "#0099ff") : "#ffffff",
-                  border: "none",
-                  borderRadius: 3,
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                }}
+                className={`flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-semibold rounded transition-colors ${
+                  isResizeMode && !isScaleMode
+                    ? "bg-sky-500 text-white"
+                    : "text-slate-300 hover:text-white hover:bg-white/15"
+                }`}
               >
-                <Scaling style={{ width: 10, height: 10 }} />
+                <Scaling className="w-2.5 h-2.5" />
                 <span>{isResizeMode && !isScaleMode ? "Resize ON" : "Resize"}</span>
               </button>
 
@@ -801,22 +950,13 @@ export default function SelectionOverlay({
                   });
                 }}
                 title={isScaleMode ? "Proportional Scale ON (Drag handles to scale proportionally)" : "Enable Proportional Scale Mode"}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "3px",
-                  padding: "1px 5px",
-                  fontSize: "9px",
-                  fontWeight: 600,
-                  backgroundColor: isScaleMode ? "#ffffff" : "rgba(255, 255, 255, 0.2)",
-                  color: isScaleMode ? (isAbsolute ? "#6366f1" : "#0099ff") : "#ffffff",
-                  border: "none",
-                  borderRadius: 3,
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                }}
+                className={`flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-semibold rounded transition-colors ${
+                  isScaleMode
+                    ? "bg-indigo-500 text-white"
+                    : "text-slate-300 hover:text-white hover:bg-white/15"
+                }`}
               >
-                <ZoomIn style={{ width: 10, height: 10 }} />
+                <ZoomIn className="w-2.5 h-2.5" />
                 <span>{isScaleMode ? "Scale ON" : "Scale"}</span>
               </button>
             </div>

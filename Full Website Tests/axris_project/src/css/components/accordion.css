@@ -1,0 +1,112 @@
+/* ============================================================
+   ACCORDION / FAQ — VISUAL REDESIGN (session 5)
+   ------------------------------------------------------------
+   faq.js (motion/faq.js) already unified the two DOM shapes
+   (service-page `.faq-item` and homepage native `<details>`)
+   onto one shared grid-track engine — see that file's header
+   comment. What was still missing was a shared *visual* language:
+   each shape had only ad-hoc Tailwind utilities in its markup, so
+   they looked like two different components even though they now
+   behave identically. This file gives both the same premium
+   finish — hover wash, active-state accent bar, icon rotation
+   with weight, keyboard-focus ring — via attribute/class selectors
+   only, so none of the 10 pages that use either shape need a
+   markup change.
+============================================================ */
+
+@layer components {
+
+  /* ── Shared row rhythm (service-page .faq-item + homepage
+     .faq-index details) ── */
+  .faq-item,
+  .faq-index details {
+    position: relative;
+    transition: background-color 0.4s ease, border-color 0.4s ease;
+  }
+
+  .faq-item::before,
+  .faq-index details::before {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: 0.75rem;
+    bottom: 0.75rem;
+    width: 3px;
+    border-radius: 9999px;
+    background: theme('colors.brand.DEFAULT');
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .faq-item.active::before,
+  .faq-index details[open]::before {
+    transform: scaleY(1);
+  }
+
+  .faq-item:hover,
+  .faq-index details:hover {
+    background-color: theme('colors.brand.50');
+  }
+
+  /* ── Trigger row (button / summary) ── */
+  .faq-btn,
+  .faq-index summary {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease;
+  }
+
+  .faq-btn:active,
+  .faq-index summary:active {
+    transform: scale(0.985);
+  }
+
+  .faq-index summary {
+    list-style: none;
+  }
+  .faq-index summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-btn:focus-visible,
+  .faq-index summary:focus-visible {
+    outline: 2px solid theme('colors.brand.500');
+    outline-offset: 4px;
+    border-radius: 0.5rem;
+  }
+
+  /* ── Icon (chevron/plus) — consistent weight + spring-like ease
+     regardless of whether the markup rotates 180° (chevron) or
+     45° (plus→x, homepage variant) ── */
+  .faq-icon,
+  .faq-index summary span:first-of-type {
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+                color 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .faq-item.active .faq-icon {
+    color: theme('colors.brand.600');
+  }
+
+  /* ── Answer copy — consistent tone/rhythm in both shapes ── */
+  .faq-content,
+  .faq-index details > div {
+    color: theme('colors.gray.600');
+    line-height: 1.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-item::before,
+    .faq-index details::before,
+    .faq-icon,
+    .faq-index summary span:first-of-type {
+      transition: none;
+    }
+    .faq-btn:active,
+    .faq-index summary:active {
+      transform: none;
+    }
+  }
+}

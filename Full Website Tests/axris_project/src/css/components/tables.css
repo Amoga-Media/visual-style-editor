@@ -1,0 +1,92 @@
+/* ============================================================
+   TABLES — VISUAL REDESIGN (session 5)
+   ------------------------------------------------------------
+   No page currently ships a real <table> (comparison tables,
+   pricing matrices, etc.), but a redesign that claims to cover
+   "every component" needs the table primitive ready before one
+   is needed — the whole point of Phase 1's "build the capability
+   ahead of the page needing it" convention (implementation-order.md
+   §Phase 1 item 6). Wrap any table in `.table-scroll` for a clean
+   horizontal-scroll fallback on mobile instead of a squeezed,
+   unreadable grid.
+============================================================ */
+
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid theme('colors.gray.200');
+    border-radius: 1.25rem;
+  }
+
+  .table-premium {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: 'Inter', sans-serif;
+    background: #fff;
+  }
+
+  .table-premium thead th {
+    text-align: left;
+    font-family: 'Satoshi', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: theme('colors.gray.500');
+    background: theme('colors.gray.50');
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid theme('colors.gray.200');
+    white-space: nowrap;
+  }
+
+  .table-premium tbody td {
+    padding: 1.15rem 1.5rem;
+    color: theme('colors.gray.700');
+    border-bottom: 1px solid theme('colors.gray.100');
+    font-size: 0.9375rem;
+  }
+
+  .table-premium tbody tr {
+    transition: background-color 0.25s ease;
+  }
+
+  .table-premium tbody tr:hover {
+    background-color: theme('colors.brand.50');
+  }
+
+  .table-premium tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* First column reads as a row label — give it a touch more weight */
+  .table-premium tbody td:first-child {
+    font-weight: 600;
+    color: theme('colors.gray.900');
+  }
+
+  /* Numeric/centered columns — opt in with data-align="center" */
+  .table-premium td[data-align="center"],
+  .table-premium th[data-align="center"] {
+    text-align: center;
+  }
+
+  /* Dark variant, for tables inside bg-dark sections */
+  .table-premium--dark {
+    background: transparent;
+  }
+  .table-premium--dark thead th {
+    background: rgba(255, 255, 255, 0.04);
+    color: theme('colors.gray.400');
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+  .table-premium--dark tbody td {
+    color: theme('colors.gray.300');
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+  .table-premium--dark tbody td:first-child {
+    color: #fff;
+  }
+  .table-premium--dark tbody tr:hover {
+    background-color: rgba(14, 165, 233, 0.08);
+  }
