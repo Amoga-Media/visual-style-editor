@@ -14,6 +14,7 @@ import {
   FolderOpen,
   Sparkles,
   Layers,
+  LogOut,
 } from "lucide-react";
 import { downloadHtml } from "@/lib/fs/download";
 
@@ -22,6 +23,7 @@ interface PagesPanelProps {
   onAddNewPage?: (name: string, content: string) => void;
   onOpenFolderPicker?: () => void;
   onOpenFilesPicker?: () => void;
+  onCloseProject?: () => void;
 }
 
 const STARTER_PRESETS = [
@@ -47,6 +49,7 @@ export default function PagesPanel({
   onAddNewPage,
   onOpenFolderPicker,
   onOpenFilesPicker,
+  onCloseProject,
 }: PagesPanelProps) {
   const files = useWorkspaceStore((s) => s.files);
   const activeFileId = useWorkspaceStore((s) => s.activeFileId);
@@ -254,25 +257,39 @@ export default function PagesPanel({
         )}
       </div>
 
-      {/* Quick Ingest Actions at bottom */}
-      <div className="p-2 border-t border-slate-200 dark:border-[#262626] grid grid-cols-2 gap-1.5 bg-slate-50/50 dark:bg-[#101012]">
-        <button
-          type="button"
-          onClick={onOpenFilesPicker}
-          className="px-2 py-1.5 rounded-lg bg-white dark:bg-[#18181a] border border-slate-200 dark:border-[#28282c] hover:border-slate-400 text-slate-700 dark:text-zinc-300 font-medium flex items-center justify-center gap-1.5 text-[11px] transition-all cursor-pointer"
-        >
-          <UploadCloud className="w-3 h-3 text-[#0099ff]" />
-          <span>Add HTML</span>
-        </button>
+      {/* Quick Ingest Actions & Exit at bottom */}
+      <div className="p-2 border-t border-slate-200 dark:border-[#262626] space-y-1.5 bg-slate-50/50 dark:bg-[#101012]">
+        <div className="grid grid-cols-2 gap-1.5">
+          <button
+            type="button"
+            onClick={onOpenFilesPicker}
+            className="px-2 py-1.5 rounded-lg bg-white dark:bg-[#18181a] border border-slate-200 dark:border-[#28282c] hover:border-slate-400 text-slate-700 dark:text-zinc-300 font-medium flex items-center justify-center gap-1.5 text-[11px] transition-all cursor-pointer"
+          >
+            <UploadCloud className="w-3 h-3 text-[#0099ff]" />
+            <span>Add HTML</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={onOpenFolderPicker}
-          className="px-2 py-1.5 rounded-lg bg-white dark:bg-[#18181a] border border-slate-200 dark:border-[#28282c] hover:border-slate-400 text-slate-700 dark:text-zinc-300 font-medium flex items-center justify-center gap-1.5 text-[11px] transition-all cursor-pointer"
-        >
-          <FolderOpen className="w-3 h-3 text-indigo-400" />
-          <span>Add Folder</span>
-        </button>
+          <button
+            type="button"
+            onClick={onOpenFolderPicker}
+            className="px-2 py-1.5 rounded-lg bg-white dark:bg-[#18181a] border border-slate-200 dark:border-[#28282c] hover:border-slate-400 text-slate-700 dark:text-zinc-300 font-medium flex items-center justify-center gap-1.5 text-[11px] transition-all cursor-pointer"
+          >
+            <FolderOpen className="w-3 h-3 text-indigo-400" />
+            <span>Add Folder</span>
+          </button>
+        </div>
+
+        {onCloseProject && (
+          <button
+            type="button"
+            onClick={onCloseProject}
+            className="w-full px-2 py-1.5 rounded-lg bg-white dark:bg-[#18181a] border border-rose-200/80 dark:border-rose-900/30 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 font-medium flex items-center justify-center gap-1.5 text-[11px] transition-all cursor-pointer"
+            title="Exit Project & Return to Home Screen (Ctrl+Shift+W)"
+          >
+            <LogOut className="w-3 h-3" />
+            <span>Exit Project / Close Workspace</span>
+          </button>
+        )}
       </div>
 
       {/* Add Page Modal */}

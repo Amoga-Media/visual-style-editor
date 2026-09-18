@@ -1168,21 +1168,29 @@ export default function EditorStudio() {
         return;
       }
 
+      // Close project / Exit workspace via Ctrl + Shift + W
+      if (isModifier && e.shiftKey && e.key.toLowerCase() === "w" && !isTyping) {
+        e.preventDefault();
+        handleChangeFile();
+        return;
+      }
+
       if (isModifier && !isTyping) {
-        // UI Scaling via Ctrl + + / Ctrl + - / Ctrl + 0
+        // Canvas Zoom via Ctrl + + / Ctrl + - / Ctrl + 0 (Figma/Webflow standard)
         if (e.key === "+" || e.key === "=" || e.key === "NumpadAdd") {
           e.preventDefault();
-          increaseUiScale();
+          setZoom((z) => Math.min(Number((z + 0.1).toFixed(2)), 3));
           return;
         }
         if (e.key === "-" || e.key === "_" || e.key === "NumpadSubtract") {
           e.preventDefault();
-          decreaseUiScale();
+          setZoom((z) => Math.max(Number((z - 0.1).toFixed(2)), 0.25));
           return;
         }
         if (e.key === "0" || e.key === "Numpad0") {
           e.preventDefault();
-          resetUiScale();
+          setZoom(1);
+          setPanOffset({ x: 0, y: 0 });
           return;
         }
       }
@@ -1458,9 +1466,8 @@ export default function EditorStudio() {
   return (
     <div
       style={{
-        zoom: uiScale,
-        width: uiScale === 1 ? "100vw" : `${(100 / uiScale).toFixed(3)}vw`,
-        height: uiScale === 1 ? "100vh" : `${(100 / uiScale).toFixed(3)}vh`,
+        width: "100vw",
+        height: "100vh",
       }}
       className="flex flex-col bg-slate-100 dark:bg-[#090909] text-slate-900 dark:text-white overflow-hidden font-sans transition-colors"
     >
@@ -1577,6 +1584,7 @@ export default function EditorStudio() {
                   onSwitchPage={handleSwitchPage}
                   onOpenFolderPicker={handleFolderPicker}
                   onOpenFilesPicker={handleFilesPicker}
+                  onCloseProject={handleChangeFile}
                 />
               ) : leftSidebarTab === "layers" ? (
                 <LayersTree
@@ -1916,6 +1924,7 @@ export default function EditorStudio() {
           structuralPath={selectedPath}
           theme={theme}
           zoom={zoom}
+          panOffset={panOffset}
           viewport={propertyViewport}
           onEdit={handleEdit}
           onBatchEdit={handleBatchEdit}

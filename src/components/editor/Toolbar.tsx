@@ -31,6 +31,7 @@ import {
   Layers,
   SaveAll,
   Eye,
+  LogOut,
 } from "lucide-react";
 import GpuStatusBadge from "./GpuStatusBadge";
 
@@ -216,9 +217,38 @@ export default function Toolbar({
                     </button>
                   ))}
                 </div>
+                {onChangeFile && (
+                  <div className="pt-1 mt-1 border-t border-slate-200 dark:border-[#28282c]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPageDropdownOpen(false);
+                        onChangeFile();
+                      }}
+                      className="w-full px-2.5 py-1.5 rounded-lg text-left text-xs flex items-center gap-2 text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer font-medium"
+                    >
+                      <LogOut className="w-3.5 h-3.5 shrink-0" />
+                      <span>Exit Project (Close Workspace)</span>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
+        )}
+
+        {/* Exit / Close Project Button */}
+        {fileName && onChangeFile && (
+          <button
+            type="button"
+            onClick={onChangeFile}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#141414] hover:bg-rose-500/10 hover:border-rose-500/30 text-slate-600 dark:text-zinc-400 hover:text-rose-500 border border-slate-200 dark:border-[#262626] text-xs font-medium cursor-pointer transition-all shrink-0"
+            title="Exit Project & Return to Home (Ctrl+Shift+W)"
+            aria-label="Exit Project"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Exit</span>
+          </button>
         )}
 
         {/* Undo / Redo */}

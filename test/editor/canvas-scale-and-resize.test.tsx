@@ -16,17 +16,17 @@ describe("Canvas Scale, Gutter & Artboard Resizing", () => {
     localStorage.clear();
   });
 
-  it("defaults uiScale to 1.25 so 100% zoom looks like 125% zoom by default", () => {
-    expect(useSettingsStore.getState().uiScale).toBe(1.25);
+  it("defaults uiScale to 1 for crisp 1:1 screen pixel alignment", () => {
+    expect(useSettingsStore.getState().uiScale).toBe(1);
 
     useSettingsStore.getState().increaseUiScale();
-    expect(useSettingsStore.getState().uiScale).toBe(1.3);
+    expect(useSettingsStore.getState().uiScale).toBe(1.05);
 
     useSettingsStore.getState().resetUiScale();
-    expect(useSettingsStore.getState().uiScale).toBe(1.25);
+    expect(useSettingsStore.getState().uiScale).toBe(1);
   });
 
-  it("renders EditorStudio root with zoom: 1.25 and 80vw/80vh scaling", async () => {
+  it("renders EditorStudio root with 100vw/100vh scaling without non-standard CSS zoom", async () => {
     const container = document.createElement("div");
     document.body.appendChild(container);
     const root = createRoot(container);
@@ -37,9 +37,9 @@ describe("Canvas Scale, Gutter & Artboard Resizing", () => {
 
     const rootElement = container.firstElementChild as HTMLElement;
     expect(rootElement).not.toBeNull();
-    expect(rootElement.style.zoom).toBe("1.25");
-    expect(rootElement.style.width).toMatch(/^80(\.000)?vw$/);
-    expect(rootElement.style.height).toMatch(/^80(\.000)?vh$/);
+    expect(rootElement.style.zoom).toBeFalsy();
+    expect(rootElement.style.width).toBe("100vw");
+    expect(rootElement.style.height).toBe("100vh");
 
     await act(async () => {
       root.unmount();
@@ -143,6 +143,45 @@ describe("Canvas Scale, Gutter & Artboard Resizing", () => {
     // Gutter should reduce back to 0px (flush)
     expect(canvasContainer.style.padding).toBe("0px");
     expect(container.textContent).toContain("Empty Space: 0px (Flush Edge-to-Edge)");
+
+    await act(async () => {
+      root.unmount();
+    });
+    container.remove();
+  });
+
+  it("exits the project and returns to DropZone when Exit Project is clicked", async () => {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(<EditorStudio />);
+    });
+
+    // Enter project via template
+    const templateButton = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("AI SaaS Landing Page")
+    );
+    await act(async () => {
+      templateButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    // Verify workspace is open
+    expect(container.querySelector(".canvas-dot-grid")).not.toBeNull();
+
+    // Click Exit button
+    const exitButton = container.querySelector("button[title*='Exit Project']") as HTMLButtonElement;
+    expect(exitButton).not.toBeNull();
+
+    await act(async () => {
+      exitButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    // Verify workspace is reset and DropZone is shown
+    expect(useWorkspaceStore.getState().files.length).toBe(0);
+    expect(container.querySelector("iframe")).toBeNull();
+    expect(container.textContent).toContain("Drop HTML pages & project files");
 
     await act(async () => {
       root.unmount();

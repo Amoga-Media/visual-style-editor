@@ -36,6 +36,7 @@ interface SelectionOverlayProps {
   structuralPath?: string | null;
   theme?: ThemeMap;
   zoom?: number;
+  panOffset?: { x: number; y: number };
   viewport?: ViewportMode;
   onEdit?: (record: EditRecord) => void;
   onBatchEdit?: (records: EditRecord[]) => void;
@@ -108,6 +109,7 @@ export default function SelectionOverlay({
   structuralPath,
   theme = { mode: "none", colors: [], fonts: [] },
   zoom = 1,
+  panOffset,
   viewport = "desktop",
   onEdit,
   onBatchEdit,
@@ -301,7 +303,7 @@ export default function SelectionOverlay({
       observer?.disconnect();
       resizeObserver?.disconnect();
     };
-  }, [iframe, hoveredElement, selectedElement, dropTargetInfo, zoom, isDragging, isResizing, isReordering]);
+  }, [iframe, hoveredElement, selectedElement, dropTargetInfo, zoom, panOffset?.x, panOffset?.y, isDragging, isResizing, isReordering]);
 
   // Check if selected element is positioned absolute/fixed
   const win = selectedElement?.ownerDocument?.defaultView || (typeof window !== "undefined" ? window : null);

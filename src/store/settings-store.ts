@@ -28,15 +28,20 @@ function getInitialTheme(): AppTheme {
 }
 
 function getInitialUiScale(): number {
-  if (typeof window === "undefined") return 1.25;
+  if (typeof window === "undefined") return 1;
   try {
     const saved = localStorage.getItem("vse_ui_scale");
+    // Clear out broken legacy 1.25 value
+    if (saved === "1.25" || saved === "1.250") {
+      localStorage.removeItem("vse_ui_scale");
+      return 1;
+    }
     if (saved) {
       const parsed = parseFloat(saved);
       if (!isNaN(parsed) && parsed >= 0.75 && parsed <= 1.5) return parsed;
     }
   } catch {}
-  return 1.25;
+  return 1;
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
@@ -99,8 +104,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   resetUiScale: () => {
     try {
-      localStorage.setItem("vse_ui_scale", "1.25");
+      localStorage.removeItem("vse_ui_scale");
     } catch {}
-    set({ uiScale: 1.25 });
+    set({ uiScale: 1 });
   },
 }));
