@@ -1,0 +1,177 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Navbar from "@/components/marketing/Navbar.astro";
+import Footer from "@/components/marketing/Footer.astro";
+import CtaBanner from "@/components/marketing/CtaBanner.astro";
+
+const pillars = [
+  {
+    num: "I",
+    title: "Code Belongs On Your Machine, Not in Someone Else's Cloud",
+    quote: "When your code is locked in a SaaS database, you don't own your website. You are merely renting it.",
+    desc: "Over the last decade, modern web development software was systematically converted into centralized SaaS subscriptions. Tools that once lived on your operating system now demand monthly fees, lock your source code in proprietary cloud databases, and disable exports if your payment fails. We believe in software sovereignty: your files must reside on your physical drive, version-controlled by Git, accessible offline, and safe from corporate shutdown."
+  },
+  {
+    num: "II",
+    title: "Clean Standards > Proprietary Frameworks",
+    quote: "A tool that generates messy, proprietary markup is not helping you. It is creating technical debt.",
+    desc: "Traditional visual builders generate thousands of lines of unreadable CSS class soup, inject runtime helper scripts, and pollute your HTML with proprietary data attributes. Visual Style Editor was founded on the uncompromising rule of AST cleanliness. When you style visually, we produce idiomatic, human-readable Tailwind CSS utility classes and clean HTML5. If you open your code in VS Code tomorrow, it looks like it was handcrafted by a senior frontend engineer."
+  },
+  {
+    num: "III",
+    title: "Privacy is Non-Negotiable",
+    quote: "Creative work requires a sanctuary. We have zero interest in watching over your shoulder.",
+    desc: "Most cloud design platforms record every mouse movement, track every color swatch you inspect, and upload your client assets to corporate data centers. Visual Style Editor is radically local-first. We operate with zero telemetry, zero analytics tracking, and zero cloud databases. We don't want to know who your clients are, what products you are prototyping, or how often you design. What happens in your browser stays on your machine."
+  },
+  {
+    num: "IV",
+    title: "Zero Latency: Speed as a Creative Medium",
+    quote: "Creative intuition is fragile. A 300ms server delay breaks the flow state.",
+    desc: "When you drag a slider to adjust letter spacing or test a color harmony, waiting for an API response to serialize and re-render kills creative velocity. By running Parse5 and our Live Style Engine directly in the browser's JavaScript runtime, Visual Style Editor achieves instantaneous sub-16ms updates at 60 frames per second. Visual design should move at the exact speed of human thought."
+  },
+  {
+    num: "V",
+    title: "Eradicating the Rent-Seeking Tollbooth",
+    quote: "Foundational developer tools should empower humanity to build, not extract monthly toll fees.",
+    desc: "Charging developers and designers $20 to $50 per month to edit local text files is an extraction scheme. We believe the open web was built on free, open-source building blocks like Linux, Git, HTML, and Tailwind. Visual Style Editor is released under the MIT license and will remain completely free forever. Supported by voluntary community sponsors, we exist to give creators power, not invoice them."
+  }
+];
+
+const contrasts = [
+  {
+    category: "File Storage",
+    saas: "Stored in proprietary cloud database. Requires constant internet.",
+    vse: "Directly on your local hard drive. 100% offline capable."
+  },
+  {
+    category: "Cost & Licensing",
+    saas: "$19–$49/month per seat. Features locked behind paywalls.",
+    vse: "100% Free Forever. MIT Open Source with zero paywalls."
+  },
+  {
+    category: "Markup Quality",
+    saas: "Bloated HTML, proprietary CSS classes, injected runtime JS.",
+    vse: "Surgical AST edits, idiomatic Tailwind classes, zero bloat."
+  },
+  {
+    category: "Account & Data Privacy",
+    saas: "Requires account, email, credit card, and tracks user telemetry.",
+    vse: "Zero account, zero tracking, zero cookies, zero telemetry."
+  },
+  {
+    category: "Code Portability",
+    saas: "Hard to migrate. Exported code is difficult to maintain in Git.",
+    vse: "Git-native. Every save is ready to commit, push, and deploy."
+  }
+];
+---
+
+<BaseLayout
+  title="Why We Do What We Do — The Manifesto | Visual Style Editor"
+  description="Why web development tools shouldn't hold your source code hostage. The 5 pillars of local-first web sovereignty and why we reject the SaaS subscription model."
+  theme="light"
+>
+  <div class="relative min-h-screen flex flex-col bg-white overflow-hidden text-slate-900">
+    <!-- Ambient Purple Glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-purple-200/40 via-purple-100/20 to-transparent blur-[130px] pointer-events-none -z-10"></div>
+
+    <Navbar activePage="why" />
+
+    <main class="flex-1">
+      <!-- HERO SECTION -->
+      <section class="pt-16 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-6">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200/80">
+          <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+          The Manifesto • Developer Sovereignty
+        </div>
+
+        <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-950 tracking-tight leading-[1.1]">
+          Code belongs on your machine, <br class="hidden sm:inline" />
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600">
+            not in someone else's cloud.
+          </span>
+        </h1>
+
+        <p class="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          We believe the software you use to design and edit the web should be as durable, private, and free as the open standards it is built upon. Here is our philosophical foundation.
+        </p>
+      </section>
+
+      <!-- 5 PILLARS SECTION -->
+      <section class="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-12">
+        {pillars.map((p) => (
+          <div class="p-2 sm:p-2.5 rounded-[2.5rem] bg-gradient-to-b from-purple-100/80 via-purple-50/40 to-slate-100/60 border border-purple-200/80 shadow-xs">
+            <div class="rounded-[calc(2.5rem-0.625rem)] bg-white p-7 sm:p-12 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] space-y-5">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-600 to-purple-600 text-white font-mono font-bold text-xs flex items-center justify-center shadow-xs">
+                  {p.num}
+                </span>
+                <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+                  Pillar {p.num}
+                </span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
+                {p.title}
+              </h2>
+
+              <blockquote class="pl-4 border-l-2 border-purple-400 text-base sm:text-lg font-medium italic text-purple-900 leading-snug">
+                "{p.quote}"
+              </blockquote>
+
+              <p class="text-sm sm:text-base text-slate-600 leading-relaxed pt-2">
+                {p.desc}
+              </p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <!-- CONTRAST TABLE -->
+      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-slate-50/50 border-t border-purple-100/60">
+        <div class="max-w-5xl mx-auto space-y-12">
+          <div class="text-center space-y-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 border border-purple-200/80 px-3 py-1 rounded-full">
+              Two Divergent Philosophies
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight">
+              The SaaS Subscription Trap vs The Sovereign Studio
+            </h2>
+            <p class="text-base text-slate-600 max-w-2xl mx-auto">
+              How Visual Style Editor stands fundamentally apart from venture-funded cloud platforms.
+            </p>
+          </div>
+
+          <div class="overflow-x-auto rounded-3xl border border-purple-100 shadow-sm bg-white">
+            <table class="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr class="bg-purple-50/70 text-slate-900 border-b border-purple-100">
+                  <th class="p-4 sm:p-5 font-bold w-1/4">Aspect</th>
+                  <th class="p-4 sm:p-5 font-semibold text-rose-700 bg-rose-50/40 w-3/8">Conventional SaaS Builders</th>
+                  <th class="p-4 sm:p-5 font-extrabold text-purple-800 bg-purple-100/50 w-3/8">Visual Style Editor</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-purple-100/60">
+                {contrasts.map((c) => (
+                  <tr class="hover:bg-purple-50/30 transition-colors">
+                    <td class="p-4 sm:p-5 font-bold text-slate-900">{c.category}</td>
+                    <td class="p-4 sm:p-5 text-slate-600 bg-rose-50/10">{c.saas}</td>
+                    <td class="p-4 sm:p-5 font-medium text-purple-900 bg-purple-50/30">{c.vse}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA BANNER -->
+      <CtaBanner
+        headline="Reclaim sovereignty over your web designs"
+        subheadline="Open your files in an editor that respects your privacy, your workflow, and your freedom."
+      />
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

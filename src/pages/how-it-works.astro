@@ -1,0 +1,194 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Navbar from "@/components/marketing/Navbar.astro";
+import Footer from "@/components/marketing/Footer.astro";
+import CtaBanner from "@/components/marketing/CtaBanner.astro";
+
+const steps = [
+  {
+    step: "01",
+    title: "Intake & Local File Mount",
+    headline: "Zero uploads. File stays on your machine.",
+    desc: "When you drag-and-drop an HTML file or open a workspace folder, Visual Style Editor requests access through the native Chromium File System Access API. The file contents are read directly into browser memory as a string. Not a single packet leaves your computer.",
+    code: `// Chromium File System Access API
+const [fileHandle] = await window.showOpenFilePicker({
+  types: [{ description: 'HTML Files', accept: { 'text/html': ['.html', '.htm'] } }]
+});
+const file = await fileHandle.getFile();
+const sourceHtml = await file.text();`
+  },
+  {
+    step: "02",
+    title: "Parse5 AST & Location Map",
+    headline: "Exact source code character boundaries indexed.",
+    desc: "The source HTML is processed through Parse5 with source location tracking enabled. Every opening tag, closing tag, attribute, comment, script block, and DOCTYPE is cataloged with its exact start and end byte offsets. This creates a high-fidelity map of your entire document structure.",
+    code: `// Parse5 AST Construction with source tracking
+const documentAst = parse5.parse(sourceHtml, { 
+  sourceCodeLocationInfo: true 
+});
+const locationMap = buildLocationMap(documentAst);`
+  },
+  {
+    step: "03",
+    title: "Sandboxed 60fps Live Canvas",
+    headline: "Isolated rendering with instant visual feedback.",
+    desc: "The HTML is injected into an isolated, secure iframe sandbox. A lightweight bridge script establishes bidirectional postMessage communication. Clicking any element projects an interactive selection overlay with millimeter-accurate bounding boxes and resize handles, running smoothly at 60fps.",
+    code: `// Canvas Selection Bridge
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'ELEMENT_SELECTED') {
+    highlightBoundingBox(event.data.rect);
+    propertyPanel.mount(event.data.computedStyles);
+  }
+});`
+  },
+  {
+    step: "04",
+    title: "Intelligent Tailwind Synthesis",
+    headline: "Sliders become semantic utility classes.",
+    desc: "As you interact with visual sliders for font weights, colors, paddings, and shadow presets, the Live Style Engine immediately mutates the preview element for zero-latency feedback. Simultaneously, the forward-mapping engine translates styles into standard Tailwind v3/v4 classes (e.g., font-semibold, rounded-2xl).",
+    code: `// Forward Mapping to Tailwind Utilities
+const tailwindClass = forwardMapStyleProperty('font-weight', '600');
+// Result: 'font-semibold' (not arbitrary font-[600])`
+  },
+  {
+    step: "05",
+    title: "Surgical AST Splicing",
+    headline: "Untouched HTML nodes remain bit-for-bit identical.",
+    desc: "Conventional tools re-serialize the entire DOM tree, altering indentation and stripping template comments. Visual Style Editor applies changesets using string slicing: it takes the exact start and end offsets of the target class attribute from the location map and replaces only those bytes. Surrounding code is never touched.",
+    code: `// Surgical Splicing
+const before = sourceHtml.slice(0, attrLoc.startOffset);
+const after = sourceHtml.slice(attrLoc.endOffset);
+const updatedHtml = before + newClassString + after;`
+  },
+  {
+    step: "06",
+    title: "Direct Disk Save & Crash Shield",
+    headline: "Saved straight to disk. Backed up in local storage.",
+    desc: "When you hit Save (⌘S / Ctrl+S), the updated HTML writes directly back to your local file handle on disk. During editing, a 2-second debounced local storage auto-save shield continuously preserves your active session so your work is never lost if your battery dies.",
+    code: `// Direct Disk Write
+const writable = await fileHandle.createWritable();
+await writable.write(updatedHtml);
+await writable.close();`
+  }
+];
+---
+
+<BaseLayout
+  title="How It Works — Visual Style Editor Architecture"
+  description="Discover how Visual Style Editor opens, manipulates, and saves local HTML & Tailwind CSS files client-side using native Web APIs and Parse5 AST."
+  theme="light"
+>
+  <div class="relative min-h-screen flex flex-col bg-white overflow-hidden text-slate-900">
+    <!-- Ambient Purple Glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-purple-200/40 via-purple-100/20 to-transparent blur-[130px] pointer-events-none -z-10"></div>
+
+    <Navbar activePage="how it works" />
+
+    <main class="flex-1">
+      <!-- HERO SECTION -->
+      <section class="pt-16 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-6">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200/80">
+          <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+          Under The Hood • 6-Step Visual Pipeline
+        </div>
+
+        <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-950 tracking-tight leading-[1.1]">
+          From your local disk to interactive canvas. <br class="hidden sm:inline" />
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600">
+            In milliseconds.
+          </span>
+        </h1>
+
+        <p class="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          A step-by-step walkthrough of how Visual Style Editor delivers real-time visual editing without ever sending your source code to a remote server or mangling your markup.
+        </p>
+      </section>
+
+      <!-- DATA FLOW ARCHITECTURE OVERVIEW -->
+      <section class="pb-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div class="p-2 sm:p-2.5 rounded-[2.5rem] bg-gradient-to-b from-purple-100/80 via-purple-50/40 to-slate-100/60 border border-purple-200/80 shadow-xs">
+          <div class="rounded-[calc(2.5rem-0.625rem)] bg-white p-6 sm:p-10 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] space-y-8">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+              <h2 class="text-2xl sm:text-3xl font-bold text-slate-950">Visual Data-Flow Cycle</h2>
+              <p class="text-sm text-slate-600">How data moves between your physical storage, browser memory, and the visual canvas.</p>
+            </div>
+
+            <!-- Flow Step Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              <div class="p-5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2">
+                <div class="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center mx-auto">1</div>
+                <h4 class="font-bold text-slate-900 text-sm">Local File Handle</h4>
+                <p class="text-xs text-slate-600">Local HTML read into memory via Chromium File System Access API</p>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2">
+                <div class="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center mx-auto">2</div>
+                <h4 class="font-bold text-slate-900 text-sm">Parse5 AST & Live Canvas</h4>
+                <p class="text-xs text-slate-600">Byte offsets mapped; live DOM rendered in 60fps sandbox</p>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2">
+                <div class="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center mx-auto">3</div>
+                <h4 class="font-bold text-slate-900 text-sm">Surgical Splicing</h4>
+                <p class="text-xs text-slate-600">Offset-based write saves clean code straight to disk</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6-STEP TIMELINE -->
+      <section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-slate-50/50 border-t border-purple-100/60">
+        <div class="max-w-6xl mx-auto space-y-16">
+          <div class="text-center max-w-3xl mx-auto space-y-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 border border-purple-200/80 px-3 py-1 rounded-full">
+              Detailed Architecture
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight">
+              The 6 Stages of Visual Style Editor
+            </h2>
+          </div>
+
+          <div class="space-y-10">
+            {steps.map((item) => (
+              <div class="p-2 sm:p-2.5 rounded-[2.5rem] bg-gradient-to-b from-purple-100/80 via-purple-50/40 to-slate-100/60 border border-purple-200/80 shadow-xs">
+                <div class="rounded-[calc(2.5rem-0.625rem)] bg-white p-6 sm:p-10 shadow-[inset_0_1px_1px_rgba(255,255,255,1)]">
+                  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-6 space-y-4">
+                      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold font-mono bg-purple-50 text-purple-700 border border-purple-200">
+                        Step {item.step}
+                      </div>
+                      <h3 class="text-2xl font-bold text-slate-950 tracking-tight">{item.title}</h3>
+                      <h4 class="text-base font-semibold text-purple-800">{item.headline}</h4>
+                      <p class="text-sm sm:text-base text-slate-600 leading-relaxed">{item.desc}</p>
+                    </div>
+
+                    <div class="lg:col-span-6">
+                      <div class="rounded-2xl bg-slate-950 p-5 text-slate-200 border border-slate-800 font-mono text-xs shadow-xl space-y-2">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-800 text-[10px] text-slate-400">
+                          <span>STAGE IMPLEMENTATION</span>
+                          <span class="text-purple-400">Step {item.step}</span>
+                        </div>
+                        <pre class="overflow-x-auto text-[11px] leading-relaxed text-purple-200 whitespace-pre p-1">
+                          <code>{item.code}</code>
+                        </pre>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA BANNER -->
+      <CtaBanner
+        headline="See the surgical pipeline in action"
+        subheadline="Drop an HTML file or test our built-in templates right now."
+      />
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

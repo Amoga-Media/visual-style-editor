@@ -1,0 +1,134 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Navbar from "@/components/marketing/Navbar.astro";
+import Footer from "@/components/marketing/Footer.astro";
+import CtaBanner from "@/components/marketing/CtaBanner.astro";
+
+const sections = [
+  {
+    id: "zero-collection",
+    title: "1. The Zero-Collection Guarantee",
+    content: "Visual Style Editor operates on a fundamental principle of data sovereignty: we cannot leak, sell, or compromise your data because we never collect it in the first place. When you open this application, all code processing, HTML parsing, AST manipulation, and live preview rendering occur entirely in your local browser sandbox via JavaScript. No telemetry packets, canvas analytics, keystroke logs, or document contents are ever transmitted to any remote server."
+  },
+  {
+    id: "local-storage",
+    title: "2. Use of Browser LocalStorage",
+    content: "To provide a seamless workflow, Visual Style Editor utilizes your browser's native localStorage API solely on your local device. The data stored includes: (a) 'vse_theme' to remember your preference for light or dark mode; (b) 'vse_ui_scale' to preserve your chosen interface scale; and (c) 'vse_autosave_*' keys which store a debounced 2-second local backup of your open document to protect you against unexpected browser crashes or power interruptions. This data remains strictly in your browser and is never uploaded or synchronized to the cloud."
+  },
+  {
+    id: "filesystem-api",
+    title: "3. File System Access API & User Permissions",
+    content: "When you choose to open a file or directory from your computer, Visual Style Editor uses the standardized Chromium File System Access API (such as window.showOpenFilePicker and window.showDirectoryPicker). Access to files or directories requires explicit, user-initiated permission granted through your browser's security dialog. The editor interacts only with the specific files you authorize and writes modifications back to your disk only when you trigger a save action."
+  },
+  {
+    id: "analytics-trackers",
+    title: "4. Complete Absence of Analytics & Trackers",
+    content: "We do not embed Google Analytics, Mixpanel, Hotjar, Meta Pixel, or any third-party advertising or telemetry trackers. We believe web development tools should be private sanctuaries for creative and commercial engineering. When you test client code or private startup designs in Visual Style Editor, you can be 100% confident that no third party is monitoring your work."
+  },
+  {
+    id: "external-services",
+    title: "5. Third-Party Links & External Services",
+    content: "Our website contains links to external platforms including GitHub (for source code and sponsorship) and Ko-fi (for voluntary community donations). If you choose to visit these external websites or contribute via their platforms, any information you provide is subject to their respective privacy policies and terms of service. We encourage you to review their policies."
+  },
+  {
+    id: "gdpr-ccpa",
+    title: "6. Global Privacy Compliance (GDPR, CCPA, COPPA)",
+    content: "Because Visual Style Editor does not collect, process, retain, or share Personally Identifiable Information (PII), we comply with the European Union General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), and international privacy frameworks by design. There are no user accounts to delete, no marketing databases to unsubscribe from, and no data profiling mechanisms."
+  },
+  {
+    id: "contact",
+    title: "7. Inquiries & Contact",
+    content: "If you have questions regarding this Privacy Policy, our open-source codebase, or our client-side architecture, please submit an issue on our public GitHub repository. This privacy policy was last updated on September 30, 2026."
+  }
+];
+---
+
+<BaseLayout
+  title="Privacy Policy — Visual Style Editor"
+  description="Read our comprehensive zero-telemetry privacy policy. Learn why Visual Style Editor never collects, stores, transmits, or monetizes your data."
+  theme="light"
+>
+  <div class="relative min-h-screen flex flex-col bg-white overflow-hidden text-slate-900">
+    <!-- Ambient Purple Glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-purple-200/40 via-purple-100/20 to-transparent blur-[130px] pointer-events-none -z-10"></div>
+
+    <Navbar />
+
+    <main class="flex-1">
+      <!-- HERO SECTION -->
+      <section class="pt-16 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-6">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200/80">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Privacy by Architecture • Zero Telemetry
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-950 tracking-tight leading-[1.15]">
+          Radical Transparency: <br class="hidden sm:inline" />
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600">
+            We do not collect your data.
+          </span>
+        </h1>
+
+        <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          Because Visual Style Editor operates 100% client-side in your browser, we do not operate user tracking databases, session recorders, or backend servers.
+        </p>
+      </section>
+
+      <!-- POLICY DOCUMENT CONTENT -->
+      <section class="pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+        <div class="p-2 sm:p-2.5 rounded-[2.5rem] bg-gradient-to-b from-purple-100/80 via-purple-50/40 to-slate-100/60 border border-purple-200/80 shadow-xs">
+          <div class="rounded-[calc(2.5rem-0.625rem)] bg-white p-7 sm:p-12 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] space-y-10">
+            <!-- Table of Contents Pill Bar -->
+            <div class="p-4 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-purple-800">Quick Navigation:</span>
+              <div class="flex flex-wrap gap-2 text-xs">
+                {sections.map((s) => (
+                  <a href={`#${s.id}`} class="text-slate-600 hover:text-purple-700 font-medium hover:underline">
+                    {s.title.split(". ")[1]} &bull;
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <!-- Sections -->
+            <div class="space-y-10 divide-y divide-purple-100/80">
+              {sections.map((sec, idx) => (
+                <div id={sec.id} class={idx > 0 ? "pt-8 space-y-3" : "space-y-3"}>
+                  <h2 class="text-xl sm:text-2xl font-bold text-slate-950 tracking-tight">
+                    {sec.title}
+                  </h2>
+                  <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                    {sec.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <!-- Bottom Assurance Box -->
+            <div class="pt-6 border-t border-purple-100">
+              <div class="p-6 rounded-2xl bg-emerald-50/50 border border-emerald-200/60 flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                  ✓
+                </div>
+                <div class="space-y-1">
+                  <h4 class="font-bold text-emerald-950 text-sm">Our Inviolable Promise</h4>
+                  <p class="text-xs text-emerald-800 leading-relaxed">
+                    Visual Style Editor will never introduce telemetry, analytics beacons, or remote code tracking in any future update.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA BANNER -->
+      <CtaBanner
+        headline="Build with complete peace of mind"
+        subheadline="No trackers, no cookies, no accounts. Just pure local HTML & Tailwind styling."
+      />
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

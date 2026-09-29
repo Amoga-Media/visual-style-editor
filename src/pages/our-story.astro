@@ -1,0 +1,158 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Navbar from "@/components/marketing/Navbar.astro";
+import Footer from "@/components/marketing/Footer.astro";
+import CtaBanner from "@/components/marketing/CtaBanner.astro";
+
+const chapters = [
+  {
+    num: "01",
+    tag: "The Spark",
+    title: "The Frustration with the SaaS Cloud Trap",
+    lead: "Why does tweaking a margin on a local HTML file require a $39/month subscription and a remote server?",
+    text: "In late 2024, our team was building client websites and marketing landing pages with Tailwind CSS. Every day we faced the same exhausting dichotomy: either tweak styles manually in Chrome DevTools — only to lose every change the moment you accidentally hit refresh — or import the design into a proprietary SaaS website builder, which held our code hostage in their cloud database, stripped our custom comments, and exported bloated, unmaintainable markup. We thought: why can't a visual editor simply operate directly on our local files on disk?"
+  },
+  {
+    num: "02",
+    tag: "The Breakthrough",
+    title: "The In-Memory AST Splicer",
+    lead: "Proving that real-time visual editing could happen 100% inside the browser with zero backend.",
+    text: "The breakthrough came when we paired Parse5's source-code location tracking with the Chromium File System Access API. Instead of converting HTML into an internal proprietary document tree and regenerating the whole page, we engineered a surgical string splicer. By indexing exact byte offsets, we could change a class name from 'text-slate-500' to 'text-violet-600 font-semibold' without altering a single adjacent character, comment, or server-side template tag. The result was instantaneous 60fps editing with zero server lag."
+  },
+  {
+    num: "03",
+    tag: "The Mission",
+    title: "Zero Paywalls, Zero Lock-In",
+    lead: "Believing that foundational developer tools should empower, not extract.",
+    text: "From day one, we committed to a radical principle: Visual Style Editor would never require an account, would never collect telemetry, and would remain 100% free and open source under the MIT license. We don't want your email address, we don't want your credit card, and we don't want your code on our servers. Your project belongs to you, on your hard drive, in your git repository."
+  },
+  {
+    num: "04",
+    tag: "The Present & Future",
+    title: "Visual Style Editor v2.0",
+    lead: "From an internal prototyping utility to a full-fledged visual design studio.",
+    text: "Today, Visual Style Editor has grown into a comprehensive design workspace: automated Tailwind v3 and v4 detection, an OKLCH perceptual color harmonizer, 12 photorealistic shadow and glow presets, a keyframe animation studio, and responsive breakpoint inheritance. We are continually building features driven by community feedback, proving that open-source software can match and exceed the polish of venture-backed SaaS platforms."
+  }
+];
+
+const values = [
+  {
+    icon: "🔒",
+    title: "Zero Telemetry",
+    desc: "We don't track what you build, what templates you open, or what code you save. Your creative privacy is absolute."
+  },
+  {
+    icon: "⚡",
+    title: "Local-First Speed",
+    desc: "By removing server round-trips entirely, every slider, color pick, and keyframe preview renders at a fluid 60 frames per second."
+  },
+  {
+    icon: "💎",
+    title: "AST Integrity",
+    desc: "We respect your code. Your custom comments, formatting indentation, and script tags are preserved with surgical accuracy."
+  },
+  {
+    icon: "🤝",
+    title: "Community Owned",
+    desc: "Free forever under the MIT license. Built by developers, funded by voluntary supporters, and designed for the open web."
+  }
+];
+---
+
+<BaseLayout
+  title="Our Story — Visual Style Editor"
+  description="How frustration with bloated SaaS site builders inspired a free, local-first visual HTML & Tailwind editor running 100% in your browser."
+  theme="light"
+>
+  <div class="relative min-h-screen flex flex-col bg-white overflow-hidden text-slate-900">
+    <!-- Ambient Purple Glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-purple-200/40 via-purple-100/20 to-transparent blur-[130px] pointer-events-none -z-10"></div>
+
+    <Navbar activePage="our story" />
+
+    <main class="flex-1">
+      <!-- HERO SECTION -->
+      <section class="pt-16 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-6">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200/80">
+          <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+          The Origin Story • Crafted With Conviction
+        </div>
+
+        <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-950 tracking-tight leading-[1.1]">
+          We built the tool we needed <br class="hidden sm:inline" />
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600">
+            every single day.
+          </span>
+        </h1>
+
+        <p class="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          A journey from frustration with cloud lock-in and mangled code to an open-source visual editor running entirely in your browser.
+        </p>
+      </section>
+
+      <!-- CHAPTER TIMELINE -->
+      <section class="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-12">
+        {chapters.map((ch) => (
+          <div class="p-2 sm:p-2.5 rounded-[2.5rem] bg-gradient-to-b from-purple-100/80 via-purple-50/40 to-slate-100/60 border border-purple-200/80 shadow-xs">
+            <div class="rounded-[calc(2.5rem-0.625rem)] bg-white p-7 sm:p-12 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] space-y-5">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-600 to-purple-600 text-white font-mono font-bold text-xs flex items-center justify-center shadow-xs">
+                  {ch.num}
+                </span>
+                <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+                  {ch.tag}
+                </span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
+                {ch.title}
+              </h2>
+
+              <p class="text-base sm:text-lg font-medium text-purple-900 leading-snug">
+                {ch.lead}
+              </p>
+
+              <p class="text-sm sm:text-base text-slate-600 leading-relaxed pt-2">
+                {ch.text}
+              </p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <!-- VALUES GRID -->
+      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-slate-50/50 border-t border-purple-100/60">
+        <div class="max-w-6xl mx-auto space-y-16">
+          <div class="text-center max-w-3xl mx-auto space-y-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 border border-purple-200/80 px-3 py-1 rounded-full">
+              Our Core Convictions
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight">
+              Principles We Refuse to Compromise
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {values.map((val) => (
+              <div class="p-1.5 rounded-[2rem] bg-gradient-to-b from-purple-100/80 to-purple-50/40 border border-purple-200/60 shadow-xs">
+                <div class="h-full rounded-[calc(2rem-0.375rem)] bg-white p-6 space-y-4 shadow-[inset_0_1px_1px_rgba(255,255,255,1)]">
+                  <div class="text-3xl">{val.icon}</div>
+                  <h3 class="text-lg font-bold text-slate-950">{val.title}</h3>
+                  <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">{val.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA BANNER -->
+      <CtaBanner
+        headline="Join us in building the sovereign web"
+        subheadline="Try the editor, drop your files, star us on GitHub, and help us make web design free and open."
+      />
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

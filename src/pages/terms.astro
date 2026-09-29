@@ -1,0 +1,134 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Navbar from "@/components/marketing/Navbar.astro";
+import Footer from "@/components/marketing/Footer.astro";
+import CtaBanner from "@/components/marketing/CtaBanner.astro";
+
+const terms = [
+  {
+    id: "acceptance",
+    title: "1. Acceptance of Terms",
+    content: "By accessing, loading, or using Visual Style Editor (the 'Application'), you agree to be bound by these Terms of Service ('Terms'). Visual Style Editor is an open-source, client-side web application distributed under the MIT License. If you do not agree to these terms, do not use the application."
+  },
+  {
+    id: "ip-ownership",
+    title: "2. Absolute User IP & Code Ownership",
+    content: "You retain 100% exclusive intellectual property ownership of all files, HTML documents, Tailwind CSS configurations, styles, graphics, copy, and code that you create, import, edit, or export using Visual Style Editor. We assert zero claim, license, or copyright over your work. What you build is entirely yours, whether for personal, educational, or commercial production."
+  },
+  {
+    id: "local-saving",
+    title: "3. Local File System & Backup Recommendations",
+    content: "Visual Style Editor interacts directly with your local files using the browser's File System Access API. Although we employ surgical AST splicing and automatic 2-second debounced local storage crash recovery, software bugs, browser memory exhaustion, or power failures can occur. We strongly advise that you keep your project directories under Git version control or maintain regular backups before performing batch edits."
+  },
+  {
+    id: "mit-license",
+    title: "4. MIT Open Source License Terms",
+    content: "The Visual Style Editor application itself is licensed under the MIT License. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files, to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software."
+  },
+  {
+    id: "disclaimer",
+    title: "5. Disclaimer of Warranties",
+    content: "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+  },
+  {
+    id: "browser-support",
+    title: "6. Browser Support & Web Standards",
+    content: "Certain capabilities — including direct file overwriting and directory tree synchronization — depend on modern Web APIs (specifically the File System Access API) which are supported primarily in Chromium-based browsers (Google Chrome, Microsoft Edge, Brave, Opera, Arc). Users accessing the application via non-supporting browsers can use one-click HTML downloads as an alternative."
+  },
+  {
+    id: "governing",
+    title: "7. Community Governance & Contact",
+    content: "These Terms are governed by principles of the open-source software community. All feedback, bug reports, and legal inquiries should be directed to the official project repository on GitHub. These terms were last updated on September 30, 2026."
+  }
+];
+---
+
+<BaseLayout
+  title="Terms of Service — Visual Style Editor"
+  description="Read the terms of service governing the use of Visual Style Editor, an open-source MIT-licensed client-side web application."
+  theme="light"
+>
+  <div class="relative min-h-screen flex flex-col bg-white overflow-hidden text-slate-900">
+    <!-- Ambient Purple Glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-purple-200/40 via-purple-100/20 to-transparent blur-[130px] pointer-events-none -z-10"></div>
+
+    <Navbar />
+
+    <main class="flex-1">
+      <!-- HERO SECTION -->
+      <section class="pt-16 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-6">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200/80">
+          <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+          Developer-Friendly Terms • MIT License
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-950 tracking-tight leading-[1.15]">
+          Terms of Service: <br class="hidden sm:inline" />
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600">
+            Fair, clear, and open.
+          </span>
+        </h1>
+
+        <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          Open-source terms designed to protect developer freedom, guarantee code ownership, and ensure a collaborative web.
+        </p>
+      </section>
+
+      <!-- TERMS DOCUMENT CONTENT -->
+      <section class="pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+        <div class="p-2 sm:p-2.5 rounded-[2.5rem] bg-gradient-to-b from-purple-100/80 via-purple-50/40 to-slate-100/60 border border-purple-200/80 shadow-xs">
+          <div class="rounded-[calc(2.5rem-0.625rem)] bg-white p-7 sm:p-12 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] space-y-10">
+            <!-- Table of Contents Pill Bar -->
+            <div class="p-4 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-purple-800">Quick Navigation:</span>
+              <div class="flex flex-wrap gap-2 text-xs">
+                {terms.map((t) => (
+                  <a href={`#${t.id}`} class="text-slate-600 hover:text-purple-700 font-medium hover:underline">
+                    {t.title.split(". ")[1]} &bull;
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <!-- Sections -->
+            <div class="space-y-10 divide-y divide-purple-100/80">
+              {terms.map((sec, idx) => (
+                <div id={sec.id} class={idx > 0 ? "pt-8 space-y-3" : "space-y-3"}>
+                  <h2 class="text-xl sm:text-2xl font-bold text-slate-950 tracking-tight">
+                    {sec.title}
+                  </h2>
+                  <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                    {sec.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <!-- IP Highlight Guarantee -->
+            <div class="pt-6 border-t border-purple-100">
+              <div class="p-6 rounded-2xl bg-purple-50/60 border border-purple-200/70 flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                  ★
+                </div>
+                <div class="space-y-1">
+                  <h4 class="font-bold text-slate-950 text-sm">Summary of Key Right</h4>
+                  <p class="text-xs text-slate-600 leading-relaxed">
+                    You own 100% of the code, designs, and files you open or save in Visual Style Editor. We never license, inspect, or restrict your output.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA BANNER -->
+      <CtaBanner
+        headline="Ready to start editing?"
+        subheadline="Launch the studio now and experience the power of sovereign web editing."
+      />
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>
