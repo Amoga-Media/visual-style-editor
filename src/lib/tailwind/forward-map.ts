@@ -164,19 +164,17 @@ export function forwardMap(property: EditableProperty, value: string, options: F
     case "text-align":
       return `text-${value}`;
     case "font-weight": {
-      const namedWeights: Record<string, string> = {
-        thin: "font-thin",
-        extralight: "font-extralight",
-        light: "font-light",
-        normal: "font-normal",
-        medium: "font-medium",
-        semibold: "font-semibold",
-        bold: "font-bold",
-        extrabold: "font-extrabold",
-        black: "font-black",
+      const WEIGHT_MAP: Record<string, string> = {
+        "100": "font-thin", "200": "font-extralight", "300": "font-light",
+        "400": "font-normal", "500": "font-medium", "600": "font-semibold",
+        "700": "font-bold", "800": "font-extrabold", "900": "font-black",
+        "bold": "font-bold", "normal": "font-normal",
+        "lighter": "font-light", "bolder": "font-extrabold",
+        "thin": "font-thin", "extralight": "font-extralight", "light": "font-light",
+        "medium": "font-medium", "semibold": "font-semibold",
+        "extrabold": "font-extrabold", "black": "font-black",
       };
-      const clean = value.toLowerCase().trim();
-      return namedWeights[clean] ?? `font-[${value}]`;
+      return WEIGHT_MAP[value.trim()] ?? `font-[${value}]`;
     }
     case "font-family": {
       const foundTheme = options.theme.fonts.find((f) => f.stack === value || f.name.toLowerCase() === value.toLowerCase());

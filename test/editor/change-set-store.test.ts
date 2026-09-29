@@ -137,3 +137,38 @@ describe("useChangeSetStore", () => {
     expect(edits.find((e) => e.property === "font-size")).toEqual(styleEditRecord);
   });
 });
+
+// BUG-001 regression: structural edits must always accumulate, never overwrite
+describe("structural edit accumulation (BUG-001)", () => {
+  beforeEach(() => useChangeSetStore.setState({ edits: [] }));
+
+  it("accumulates multiple insert edits on the same path", () => {
+    const s = useChangeSetStore.getState();
+    s.recordEdit({ kind: "insert", structuralPath: "#box", snippet: "<h1>A</h1>", position: "inside", timestamp: "t1" });
+    s.recordEdit({ kind: "insert", structuralPath: "#box", snippet: "<p>B</p>", position: "inside", timestamp: "t2" });
+    expect(useChangeSetStore.getState().edits).toHaveLength(2);
+  });
+
+  it("accumulates multiple delete edits on the same path", () => {
+    const s = useChangeSetStore.getState();
+    s.recordEdit({ kind: "delete", structuralPath: "#box", timestamp: "t1" });
+    s.recordEdit({ kind: "delete", structuralPath: "#box", timestamp: "t2" });
+    expect(useChangeSetStore.getState().edits).toHaveLength(2);
+  });
+
+  it("accumulates multiple duplicate edits on the same path", () => {
+    const s = useChangeSetStore.getState();
+    s.recordEdit({ kind: "duplicate", structuralPath: "#card", timestamp: "t1" });
+    s.recordEdit({ kind: "duplicate", structuralPath: "#card", timestamp: "t2" });
+    expect(useChangeSetStore.getState().edits).toHaveLength(2);
+  });
+
+  it("still deduplicates class edits on same path+property", () => {
+    const s = useChangeSetStore.getState();
+    const base = { kind: "class" as const, structuralPath: "#h", property: "font-size" as const, oldClassList: ["text-sm"], newClassList: ["text-lg"], viewport: "desktop" as const, timestamp: "t1" };
+    s.recordEdit(base);
+    s.recordEdit({ ...base, newClassList: ["text-xl"] });
+    expect(useChangeSetStore.getState().edits).toHaveLength(1);
+    expect((useChangeSetStore.getState().edits[0] as any).newClassList).toEqual(["text-xl"]);
+  });
+});

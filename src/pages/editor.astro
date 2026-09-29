@@ -1,0 +1,11 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import EditorStudio from "@/components/editor/EditorStudio";
+---
+
+<BaseLayout
+  title="Visual Style Editor — Free Visual HTML & Tailwind CSS Editor"
+  description="100% in-browser, no login. Drop your HTML file and edit typography, layout, colors, and responsive styles visually. Export clean Tailwind code."
+>
+  <EditorStudio client:only="react" />
+</BaseLayout>

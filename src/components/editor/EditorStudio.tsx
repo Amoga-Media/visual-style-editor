@@ -5,6 +5,7 @@ import { analyzeHtmlClientSide } from "@/lib/ast/analyze";
 import { applyEditsClientSide } from "@/lib/ast/apply-edits";
 import { ensureWritePermission, writeToHandle } from "@/lib/fs/file-system-access";
 import { downloadHtml } from "@/lib/fs/download";
+import { autoSave, restoreAutoSave, clearAutoSave } from "@/lib/fs/auto-save";
 import { buildPreSaveLabel, versionFilename, type VersionEntry } from "@/lib/fs/version-history";
 import type { EditRecord, SaveRequestEdit, ThemeMap, LoadedFile } from "@/types";
 import { useSelectionStore } from "@/store/selection-store";
@@ -136,6 +137,7 @@ export default function EditorStudio() {
   const [exportOpen, setExportOpen] = useState(false);
   const [saveConflicts, setSaveConflicts] = useState<string[] | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [recoveryBanner, setRecoveryBanner] = useState<{ fileId: string; recoveredHtml: string } | null>(null);
   const [versionHistory, setVersionHistory] = useState<VersionEntry[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [configModalOpen, setConfigModalOpen] = useState(false);
@@ -389,6 +391,37 @@ export default function EditorStudio() {
     }
   }, []);
 
+  // Support ?template=<id> param on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const templateId = params.get("template");
+    if (templateId) {
+      fetch(`/templates/${templateId}.html`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Template not found");
+          return res.text();
+        })
+        .then((templateHtml) => {
+          handleFileLoaded({
+            name: `${templateId}.html`,
+            content: templateHtml,
+            handle: null,
+          });
+        })
+        .catch(() => {});
+    }
+  }, []);
+
+  // Auto-Save active document to localStorage on edits
+  useEffect(() => {
+    if (!openFile || !iframeEl?.contentDocument || edits.length === 0) return;
+    try {
+      const cleanHtml = serializeCleanDocument(iframeEl.contentDocument);
+      autoSave(openFile.name, cleanHtml);
+    } catch {}
+  }, [edits, openFile, iframeEl]);
+
   // Save active document state on beforeunload
   useEffect(() => {
     function handleBeforeUnload() {
@@ -512,6 +545,14 @@ export default function EditorStudio() {
     } catch {
       setTheme(EMPTY_THEME);
     }
+
+    // Check for auto-saved recovery session
+    const recovered = restoreAutoSave(file.name);
+    if (recovered && recovered.trim() !== file.content.trim()) {
+      setRecoveryBanner({ fileId: file.name, recoveredHtml: recovered });
+    } else {
+      setRecoveryBanner(null);
+    }
   }
 
   function handleSwitchPage(nextFileId: string) {
@@ -610,10 +651,12 @@ export default function EditorStudio() {
         downloadHtml(finalHtml, f.name);
       }
 
+      clearAutoSave(f.name);
       useWorkspaceStore.getState().markFileSaved(f.id, finalHtml);
       savedCount++;
     }
 
+    setRecoveryBanner(null);
     clearEdits();
     setStatusMessage(`Saved ${savedCount} workspace pages!`);
     setTimeout(() => setStatusMessage(null), 3500);
@@ -945,6 +988,14 @@ export default function EditorStudio() {
     setTimeout(() => setStatusMessage(null), 2500);
   }
 
+  function handleRestoreSession(recoveredHtml: string) {
+    if (!openFile) return;
+    setOpenFile({ ...openFile, content: recoveredHtml });
+    setLoadToken((t) => t + 1);
+    setStatusMessage("Restored unsaved auto-save session!");
+    setTimeout(() => setStatusMessage(null), 3000);
+  }
+
   function handleInsertPrimitive(snippet: string, position: "inside" | "after" | "before") {
     handleDropOnTarget(snippet, selectedEl || (iframeEl?.contentDocument?.body as Element), position);
   }
@@ -1022,6 +1073,8 @@ export default function EditorStudio() {
   }
 
   async function persistUpdatedHtml(file: LoadedFile, html: string) {
+    clearAutoSave(file.name);
+    setRecoveryBanner(null);
     if (file.handle) {
       const granted = await ensureWritePermission(file.handle);
       if (granted) {
@@ -1050,11 +1103,12 @@ export default function EditorStudio() {
     if (!openFile) return;
 
     let updatedHtml = "";
+    const responsiveCss = generateResponsiveCssString();
 
     // 1. Prioritize pristine AST Splicing whenever edits exist
-    if (edits.length > 0) {
+    if (edits.length > 0 || (responsiveCss && responsiveCss.trim().length > 0)) {
       const saveEdits = edits.map(toSaveRequestEdit);
-      const result = applyEditsClientSide(openFile.content, saveEdits);
+      const result = applyEditsClientSide(openFile.content, saveEdits, { responsiveCss });
       if (result.ok && result.html && (!result.conflicts || result.conflicts.length === 0)) {
         updatedHtml = result.html;
       }
@@ -1497,6 +1551,40 @@ export default function EditorStudio() {
         isDimensionsHUDHidden={isDimensionsCapsuleHidden}
         onToggleDimensionsHUD={handleToggleDimensionsCapsule}
       />
+
+      {recoveryBanner && (
+        <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 flex items-center justify-between text-xs text-amber-200 z-30 shrink-0">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>
+              Unsaved auto-saved session recovered for{" "}
+              <strong className="text-white font-mono">{recoveryBanner.fileId}</strong>. Would you like to restore your changes?
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                handleRestoreSession(recoveryBanner.recoveredHtml);
+                setRecoveryBanner(null);
+              }}
+              className="px-3 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs cursor-pointer transition-all shadow-xs"
+            >
+              Restore
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                clearAutoSave(recoveryBanner.fileId);
+                setRecoveryBanner(null);
+              }}
+              className="px-3 py-1 rounded-md bg-white/10 hover:bg-white/20 text-zinc-300 text-xs cursor-pointer transition-all"
+            >
+              Discard
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-1 min-h-0 relative">
         {/* Left Sidebar: Pages, Layers Tree & Component Blocks */}

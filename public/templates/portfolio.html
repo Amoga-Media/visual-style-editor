@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creative Portfolio Grid</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-[#09090b] text-white min-h-screen py-16 px-6">
+  <div class="max-w-5xl mx-auto space-y-12">
+    <header class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-8">
+      <div class="space-y-2">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Selected Works</h1>
+        <p class="text-zinc-400 text-sm">Explorations in digital craft, interactive front-ends, and motion systems.</p>
+      </div>
+      <div class="text-xs font-mono text-zinc-500">
+        2024 &mdash; 2026 ARCHIVE
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <article class="p-6 rounded-2xl bg-[#111116] border border-white/[0.08] space-y-4 group cursor-pointer hover:border-white/20 transition-all">
+        <div class="h-56 rounded-xl bg-gradient-to-tr from-sky-950 via-slate-900 to-indigo-950 flex items-center justify-center p-6 border border-white/5">
+          <span class="text-sky-400 font-mono text-sm tracking-wider uppercase font-semibold">Project One</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-white group-hover:text-[#0084FF] transition-colors">Spatial Canvas Engine</h2>
+          <span class="text-xs font-mono text-zinc-400">WebGPU &bull; React</span>
+        </div>
+        <p class="text-xs text-zinc-400 leading-relaxed">High-performance infinite 2D/3D pan-and-zoom rendering architecture.</p>
+      </article>
+
+      <article class="p-6 rounded-2xl bg-[#111116] border border-white/[0.08] space-y-4 group cursor-pointer hover:border-white/20 transition-all">
+        <div class="h-56 rounded-xl bg-gradient-to-tr from-rose-950 via-slate-900 to-purple-950 flex items-center justify-center p-6 border border-white/5">
+          <span class="text-rose-400 font-mono text-sm tracking-wider uppercase font-semibold">Project Two</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-white group-hover:text-rose-400 transition-colors">Kinetic Type Foundry</h2>
+          <span class="text-xs font-mono text-zinc-400">GSAP &bull; SVG</span>
+        </div>
+        <p class="text-xs text-zinc-400 leading-relaxed">Variable font motion choreography and parametric text destruction.</p>
+      </article>
+    </div>
+  </div>
+</body>
+</html>

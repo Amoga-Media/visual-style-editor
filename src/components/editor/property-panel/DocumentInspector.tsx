@@ -8,6 +8,7 @@ import {
   Layers,
   Check,
 } from "lucide-react";
+import PaletteHarmonizerGroup from "./PaletteHarmonizerGroup";
 
 interface DocumentInspectorProps {
   iframe: HTMLIFrameElement | null;
@@ -186,6 +187,11 @@ export default function DocumentInspector({
           </div>
         </div>
       )}
+
+      {/* Color Palette Harmonizer */}
+      <div className="pt-1">
+        <PaletteHarmonizerGroup defaultOpen={true} />
+      </div>
 
       {/* Helpful Shortcuts Card */}
       <div className="rounded-xl border border-slate-200 dark:border-[#262626] bg-slate-50/60 dark:bg-[#121212]/60 p-3 space-y-2">

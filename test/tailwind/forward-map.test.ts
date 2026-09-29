@@ -75,10 +75,21 @@ describe("forwardMap — text-align (keyword passthrough)", () => {
   });
 });
 
-describe("forwardMap — font-weight (always arbitrary numeric)", () => {
-  it("wraps the numeric weight in bracket syntax", () => {
-    expect(forwardMap("font-weight", "600", { snap: false, theme: emptyTheme })).toBe("font-[600]");
-    expect(forwardMap("font-weight", "600", { snap: true, theme: emptyTheme })).toBe("font-[600]");
+describe("forwardMap — font-weight (WEIGHT_MAP lookup, BUG-010 fix)", () => {
+  it("maps numeric weight 600 to font-semibold (not bracket syntax)", () => {
+    // BUG-010: numeric weights must map to semantic Tailwind classes via WEIGHT_MAP
+    expect(forwardMap("font-weight", "600", { snap: false, theme: emptyTheme })).toBe("font-semibold");
+    expect(forwardMap("font-weight", "600", { snap: true, theme: emptyTheme })).toBe("font-semibold");
+  });
+
+  it("maps other common numeric weights to semantic classes", () => {
+    expect(forwardMap("font-weight", "700", { snap: false, theme: emptyTheme })).toBe("font-bold");
+    expect(forwardMap("font-weight", "400", { snap: false, theme: emptyTheme })).toBe("font-normal");
+    expect(forwardMap("font-weight", "900", { snap: false, theme: emptyTheme })).toBe("font-black");
+  });
+
+  it("falls back to bracket syntax for unknown weights", () => {
+    expect(forwardMap("font-weight", "350", { snap: false, theme: emptyTheme })).toBe("font-[350]");
   });
 });
 

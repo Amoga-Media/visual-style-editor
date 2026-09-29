@@ -16,6 +16,8 @@ import SvgGroup from "./property-panel/SvgGroup";
 import AdvancedCssGroup from "./property-panel/AdvancedCssGroup";
 import ClassesGroup from "./property-panel/ClassesGroup";
 import DocumentInspector from "./property-panel/DocumentInspector";
+import ShadowPresetsGroup from "./property-panel/ShadowPresetsGroup";
+import AnimationBuilderGroup from "./property-panel/AnimationBuilderGroup";
 import InlineTextEditor from "./InlineTextEditor";
 import { classifyElement } from "@/lib/dom/element-classifier";
 import {
@@ -249,10 +251,16 @@ export default function PropertyPanel({
 
       {/* Shadows & Effects */}
       {(showAll || visiblePanels.effects) && (
-        <CollapsibleGroup groupId="effects" title="Effects & Shadows" icon={<Zap className="w-3.5 h-3.5" />} defaultOpen={false}>
-          <EffectsGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
-        </CollapsibleGroup>
+        <>
+          <CollapsibleGroup groupId="effects" title="Effects & Shadows" icon={<Zap className="w-3.5 h-3.5" />} defaultOpen={false}>
+            <EffectsGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} />
+          </CollapsibleGroup>
+          <ShadowPresetsGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} defaultOpen={false} />
+        </>
       )}
+
+      {/* CSS Animations & Transitions */}
+      <AnimationBuilderGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} defaultOpen={false} />
 
       {/* Position & Layering */}
       {(showAll || visiblePanels.positionLayering) && (

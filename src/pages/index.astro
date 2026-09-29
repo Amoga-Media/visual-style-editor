@@ -1,10 +1,342 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import EditorStudio from '../components/editor/EditorStudio';
+import BaseLayout from "@/layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="Free Visual HTML & Tailwind CSS Editor | Zero Code & Instant Preview">
-  <main class="w-screen h-screen overflow-hidden bg-[#0b0f19]">
-    <EditorStudio client:only="react" />
-  </main>
+<BaseLayout
+  title="Visual Style Editor — The Fastest Way to Edit HTML & Tailwind Visually"
+  description="100% in-browser visual editor for HTML and Tailwind CSS. Drop your HTML, adjust styles with live 60fps sliders, and save clean code directly back to your file."
+>
+  <div class="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col selection:bg-[#0084FF] selection:text-white relative overflow-x-hidden">
+    <!-- Ambient Radial Gradients -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-[#0084FF]/15 via-indigo-500/5 to-transparent blur-3xl pointer-events-none -z-10"></div>
+    <div class="absolute top-[800px] -right-[200px] w-[600px] h-[600px] bg-blue-600/10 blur-[128px] pointer-events-none -z-10"></div>
+
+    <!-- Navigation Header -->
+    <header class="border-b border-white/[0.06] bg-[#09090b]/80 backdrop-blur-xl sticky top-0 z-40">
+      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5 group">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0084FF] to-blue-500 flex items-center justify-center text-white shadow-lg shadow-[#0084FF]/25 group-hover:scale-105 transition-transform">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            </svg>
+          </div>
+          <span class="font-bold text-sm tracking-tight text-white">Visual Style Editor</span>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-7 text-xs font-medium text-zinc-400">
+          <a href="#features" class="hover:text-white transition-colors">Features</a>
+          <a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a>
+          <a href="/templates" class="hover:text-white transition-colors">Templates</a>
+          <a href="/support" class="hover:text-white transition-colors flex items-center gap-1 text-rose-400/90 hover:text-rose-300">
+            <svg class="w-3 h-3 fill-rose-500/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+            </svg>
+            <span>Support</span>
+          </a>
+        </nav>
+
+        <div class="flex items-center gap-3">
+          <a
+            href="/editor"
+            class="text-xs font-semibold px-4 py-2 rounded-xl bg-[#0084FF] hover:bg-[#0074E0] active:scale-95 text-white shadow-lg shadow-[#0084FF]/25 transition-all flex items-center gap-1.5"
+          >
+            <span>Open Editor Free</span>
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14m-7-7 7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Hero -->
+    <section class="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center space-y-6">
+      <!-- Eyebrow Badge -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-medium text-zinc-300 backdrop-blur-md shadow-inner">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>100% Free &bull; Zero Login &bull; 100% In-Browser AST</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-[1.12]">
+        The Fastest Way to Edit <br class="hidden sm:inline" />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0084FF] via-sky-400 to-indigo-400">
+          HTML & Tailwind CSS
+        </span>
+        — Visually.
+      </h1>
+
+      <!-- Subtext -->
+      <p class="text-zinc-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-normal">
+        Drop any HTML file. Click any element. Adjust typography, layout, and colors with live sliders, and save back to your exact file — no backend, no telemetry, no lock-in.
+      </p>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
+        <a
+          href="/editor"
+          class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0084FF] to-blue-600 hover:from-[#0074E0] hover:to-blue-700 text-white font-semibold text-sm shadow-xl shadow-[#0084FF]/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+        >
+          <span>Open Editor Free &rarr;</span>
+        </a>
+        <a
+          href="/templates"
+          class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.1] text-zinc-200 font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>Browse Starter Templates</span>
+        </a>
+      </div>
+
+      <!-- Editor Interface Mockup Preview -->
+      <div class="pt-10 max-w-5xl mx-auto">
+        <div class="rounded-2xl border border-white/[0.12] bg-[#111116] p-2 shadow-2xl shadow-black/80 relative overflow-hidden group">
+          <!-- Window Controls Header -->
+          <div class="h-9 px-4 bg-[#16161c] rounded-xl flex items-center justify-between border-b border-white/[0.06] mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+              <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+              <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+              <span class="ml-2 text-[11px] font-mono text-zinc-400">index.html &bull; Visual Style Editor Studio</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#0084FF]/20 text-[#0084FF] border border-[#0084FF]/30">Tailwind v4 Active</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">GPU 60fps</span>
+            </div>
+          </div>
+
+          <!-- Preview Canvas Frame -->
+          <div class="relative rounded-xl overflow-hidden bg-slate-950 border border-white/[0.06] p-6 text-left min-h-[360px] flex items-center justify-center">
+            <!-- Simulated Selected Canvas Element with Inspector Box -->
+            <div class="max-w-xl w-full p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border-2 border-[#0084FF] shadow-2xl shadow-[#0084FF]/20 relative">
+              <div class="absolute -top-3.5 left-4 px-2 py-0.5 rounded bg-[#0084FF] text-white text-[10px] font-mono font-bold tracking-wide uppercase flex items-center gap-1 shadow-md">
+                <span>&lt;section#hero&gt;</span>
+                <span class="opacity-75">&bull; flex-col p-8 rounded-2xl</span>
+              </div>
+              <div class="space-y-4">
+                <div class="inline-flex px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-semibold">
+                  Live AST Splicer
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                  Design systems built with zero friction.
+                </h2>
+                <p class="text-sm text-zinc-400 leading-relaxed">
+                  Interactive real-time visual editing directly in your web browser. Tweak classes or inline CSS, preview across responsive viewports, and write back surgically.
+                </p>
+                <div class="flex items-center gap-3 pt-2">
+                  <div class="px-4 py-2 rounded-lg bg-[#0084FF] text-white text-xs font-semibold shadow-md">
+                    Live Component
+                  </div>
+                  <div class="text-xs font-mono text-zinc-500">
+                    &larr; Click any property to edit
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating Property Inspector Overlay Pill -->
+            <div class="absolute bottom-6 right-6 hidden md:flex items-center gap-3 p-3 rounded-xl bg-[#141418]/95 border border-white/[0.1] shadow-2xl backdrop-blur-md text-xs font-mono">
+              <span class="text-zinc-400">Class:</span>
+              <span class="text-[#0084FF] font-semibold bg-[#0084FF]/10 px-2 py-0.5 rounded border border-[#0084FF]/20">shadow-2xl rounded-2xl p-8</span>
+              <span class="text-emerald-400 text-[11px]">&bull; Auto-Saved</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Features Grid -->
+    <section id="features" class="max-w-6xl mx-auto px-6 py-20 border-t border-white/[0.06]">
+      <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          Engineered for Real-World Front-End Code
+        </h2>
+        <p class="text-zinc-400 text-sm sm:text-base">
+          Unlike ordinary website builders that output messy obfuscated code, Visual Style Editor operates surgically on your actual source files.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Feature 1 -->
+        <div class="p-6 rounded-2xl bg-[#111114] border border-white/[0.08] hover:border-white/[0.16] transition-all space-y-3 shadow-lg">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-white">Zero Setup &bull; Zero Login</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            No installation, no npm commands, no accounts. Runs 100% inside your browser using standard Web APIs. Open the page and begin immediately.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="p-6 rounded-2xl bg-[#111114] border border-white/[0.08] hover:border-white/[0.16] transition-all space-y-3 shadow-lg">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/>
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-white">Tailwind-Aware Splicer</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Automatically detects Tailwind v3 and v4. Sliders map intelligently to semantic utilities like <code class="text-indigo-300">font-semibold</code>, <code class="text-indigo-300">rounded-xl</code>, and theme colors.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="p-6 rounded-2xl bg-[#111114] border border-white/[0.08] hover:border-white/[0.16] transition-all space-y-3 shadow-lg">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-white">Surgical AST Save</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Only modifies the exact character offsets you touched. Your existing comments, indentation, custom scripts, GSAP animations, and scripts remain 100% pristine.
+          </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="p-6 rounded-2xl bg-[#111114] border border-white/[0.08] hover:border-white/[0.16] transition-all space-y-3 shadow-lg">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
+              <line x1="12" x2="12.01" y1="18" y2="18"/>
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-white">Responsive Viewport Cascade</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Switch between Desktop, Tablet, and Mobile viewports with 1 click. Responsive overrides are saved into clean CSS media queries in your document &lt;head&gt;.
+          </p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="p-6 rounded-2xl bg-[#111114] border border-white/[0.08] hover:border-white/[0.16] transition-all space-y-3 shadow-lg">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-white">Your Files Stay Private</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Zero telemetry. Zero tracking. Your files never get uploaded to any remote server or cloud database — all computation is 100% on your local machine.
+          </p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="p-6 rounded-2xl bg-[#111114] border border-white/[0.08] hover:border-white/[0.16] transition-all space-y-3 shadow-lg">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-white">Auto-Save & Undo History</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Multi-level undo/redo (Ctrl+Z / Ctrl+Y) with live DOM reconciliation. Plus debounced auto-save so you never lose your progress if you close your tab.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="max-w-5xl mx-auto px-6 py-20 border-t border-white/[0.06]">
+      <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          How It Works
+        </h2>
+        <p class="text-zinc-400 text-sm sm:text-base">
+          Go from an existing HTML file to a polished design in 3 frictionless steps.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Step 1 -->
+        <div class="p-6 rounded-2xl bg-[#111114] border border-white/[0.08] relative space-y-3">
+          <div class="w-8 h-8 rounded-full bg-[#0084FF]/20 text-[#0084FF] border border-[#0084FF]/40 font-mono text-xs font-bold flex items-center justify-center">
+            01
+          </div>
+          <h3 class="text-base font-semibold text-white">Drop Your HTML File</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Drag and drop any .html file or entire multi-page directory directly onto the canvas. Works with vanilla HTML or Tailwind layouts.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="p-6 rounded-2xl bg-[#111114] border border-white/[0.08] relative space-y-3">
+          <div class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 font-mono text-xs font-bold flex items-center justify-center">
+            02
+          </div>
+          <h3 class="text-base font-semibold text-white">Click & Style Visually</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Click any element on canvas. Adjust padding, shadows, colors, animation presets, and layout with real-time 60fps sliders.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="p-6 rounded-2xl bg-[#111114] border border-white/[0.08] relative space-y-3">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-mono text-xs font-bold flex items-center justify-center">
+            03
+          </div>
+          <h3 class="text-base font-semibold text-white">Save Back to Disk</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Save directly back to your local file via the File System Access API or download an updated copy. Zero backend needed.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom CTA Banner -->
+    <section class="max-w-5xl mx-auto px-6 pb-24">
+      <div class="rounded-3xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-[#0084FF]/20 border border-[#0084FF]/30 p-10 sm:p-14 text-center space-y-6 relative overflow-hidden shadow-2xl">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Ready to visually style your web pages?
+        </h2>
+        <p class="text-zinc-300 text-sm sm:text-base max-w-xl mx-auto">
+          Start editing right now in your browser. No registration, no credit card, no download required.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <a
+            href="/editor"
+            class="px-8 py-3.5 rounded-xl bg-[#0084FF] hover:bg-[#0074E0] text-white font-semibold text-sm shadow-xl shadow-[#0084FF]/30 transition-all cursor-pointer active:scale-95"
+          >
+            Launch Visual Style Editor &rarr;
+          </a>
+          <a
+            href="/templates"
+            class="px-6 py-3.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white font-semibold text-sm transition-all"
+          >
+            Explore Templates
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/[0.06] bg-[#09090b] py-12">
+      <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-zinc-500">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-[#0084FF] flex items-center justify-center text-white">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            </svg>
+          </div>
+          <span class="font-semibold text-zinc-300">Visual Style Editor</span>
+          <span>&bull; Made for developers and designers</span>
+        </div>
+
+        <div class="flex items-center gap-6">
+          <a href="/editor" class="hover:text-zinc-300 transition-colors">Editor</a>
+          <a href="/templates" class="hover:text-zinc-300 transition-colors">Templates</a>
+          <a href="/support" class="hover:text-zinc-300 transition-colors">Support</a>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hover:text-zinc-300 transition-colors">GitHub</a>
+        </div>
+
+        <div>
+          &copy; {new Date().getFullYear()} Visual Style Editor &bull; Free & Open-Source
+        </div>
+      </div>
+    </footer>
+  </div>
 </BaseLayout>

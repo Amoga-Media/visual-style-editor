@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Pricing Table</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-[#09090b] text-white min-h-screen py-16 px-6 flex flex-col justify-center">
+  <div class="max-w-5xl mx-auto w-full space-y-12">
+    <div class="text-center space-y-3">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Simple, predictable pricing</h2>
+      <p class="text-zinc-400 text-sm max-w-md mx-auto">Choose the tier that fits your stage of growth. No hidden platform fees.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+      <!-- Tier 1 -->
+      <div class="p-8 rounded-2xl bg-[#111115] border border-white/[0.08] flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <div class="text-sm font-semibold text-zinc-400">Starter</div>
+          <div class="text-4xl font-extrabold text-white">$0 <span class="text-xs text-zinc-500 font-normal">/ month</span></div>
+          <p class="text-xs text-zinc-400">Ideal for side projects and individual designers tinkering with ideas.</p>
+          <ul class="text-xs text-zinc-300 space-y-2 pt-2">
+            <li class="flex items-center gap-2">&check; Up to 5 export files</li>
+            <li class="flex items-center gap-2">&check; Standard Tailwind classes</li>
+            <li class="flex items-center gap-2">&check; Community forum support</li>
+          </ul>
+        </div>
+        <button class="w-full py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white font-semibold text-xs transition-colors cursor-pointer">
+          Start for Free
+        </button>
+      </div>
+
+      <!-- Tier 2 (Highlighted) -->
+      <div class="p-8 rounded-2xl bg-gradient-to-b from-[#181824] to-[#12121a] border-2 border-[#0084FF] flex flex-col justify-between space-y-6 shadow-2xl shadow-[#0084FF]/20 relative">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#0084FF] text-white text-[10px] font-bold uppercase tracking-wider">
+          Most Popular
+        </div>
+        <div class="space-y-4">
+          <div class="text-sm font-semibold text-[#0084FF]">Professional</div>
+          <div class="text-4xl font-extrabold text-white">$29 <span class="text-xs text-zinc-500 font-normal">/ month</span></div>
+          <p class="text-xs text-zinc-400">Everything needed for agencies and full-time freelance engineers.</p>
+          <ul class="text-xs text-zinc-200 space-y-2 pt-2">
+            <li class="flex items-center gap-2">&check; Unlimited file saves</li>
+            <li class="flex items-center gap-2">&check; React & Astro JSX exports</li>
+            <li class="flex items-center gap-2">&check; Custom CSS & OKLCH color palettes</li>
+            <li class="flex items-center gap-2">&check; Priority developer assistance</li>
+          </ul>
+        </div>
+        <button class="w-full py-2.5 rounded-xl bg-[#0084FF] hover:bg-[#0074E0] text-white font-semibold text-xs shadow-md shadow-[#0084FF]/30 transition-all cursor-pointer">
+          Upgrade to Pro
+        </button>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="p-8 rounded-2xl bg-[#111115] border border-white/[0.08] flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <div class="text-sm font-semibold text-zinc-400">Enterprise</div>
+          <div class="text-4xl font-extrabold text-white">$99 <span class="text-xs text-zinc-500 font-normal">/ month</span></div>
+          <p class="text-xs text-zinc-400">For large software organizations requiring customized tooling workflows.</p>
+          <ul class="text-xs text-zinc-300 space-y-2 pt-2">
+            <li class="flex items-center gap-2">&check; Shared design tokens</li>
+            <li class="flex items-center gap-2">&check; Custom Tailwind plugins support</li>
+            <li class="flex items-center gap-2">&check; Dedicated Slack channel</li>
+          </ul>
+        </div>
+        <button class="w-full py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white font-semibold text-xs transition-colors cursor-pointer">
+          Contact Team
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

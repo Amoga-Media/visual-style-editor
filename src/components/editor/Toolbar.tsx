@@ -32,6 +32,7 @@ import {
   SaveAll,
   Eye,
   LogOut,
+  Heart,
 } from "lucide-react";
 import GpuStatusBadge from "./GpuStatusBadge";
 
@@ -541,6 +542,18 @@ export default function Toolbar({
                 </span>
               </button>
             )}
+
+            {/* Support Link */}
+            <a
+              href="/support"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 text-xs font-medium transition-all cursor-pointer"
+              title="Support this free tool"
+            >
+              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500/20" />
+              <span className="hidden md:inline">Support</span>
+            </a>
 
             {/* Review & Save Button */}
             <button
