@@ -2,46 +2,52 @@
 
 @layer base {
   :root {
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
+    /* Light Theme Tokens */
     --vse-canvas: #f8fafc;
     --vse-surface-1: #ffffff;
     --vse-surface-2: #f1f5f9;
     --vse-surface-3: #e2e8f0;
-    --vse-hairline: #e2e8f0;
-    --vse-hairline-subtle: #f1f5f9;
-    --vse-accent: #0099ff;
-    --vse-accent-soft: rgba(0, 153, 255, 0.1);
-    --vse-ink-primary: #0f172a;
+    --vse-hairline: rgba(0, 0, 0, 0.08);
+    --vse-hairline-subtle: rgba(0, 0, 0, 0.04);
+    --vse-accent: #0284c7;
+    --vse-accent-soft: rgba(2, 132, 199, 0.1);
+    --vse-ink-primary: #090d16;
     --vse-ink-secondary: #475569;
     --vse-ink-muted: #94a3b8;
     --vse-input-bg: #ffffff;
     --vse-input-border: #cbd5e1;
+    --glow-primary: rgba(2, 132, 199, 0.15);
   }
 
-  html.dark {
-    --vse-canvas: #090909;
-    --vse-surface-1: #141414;
-    --vse-surface-2: #1c1c1c;
-    --vse-surface-3: #262626;
-    --vse-hairline: #262626;
-    --vse-hairline-subtle: #1a1a1a;
-    --vse-accent: #0099ff;
-    --vse-accent-soft: rgba(0, 153, 255, 0.12);
-    --vse-ink-primary: #ffffff;
-    --vse-ink-secondary: #a1a1aa;
-    --vse-ink-muted: #999999;
-    --vse-input-bg: #141414;
-    --vse-input-border: #262626;
+  html.dark, :root {
+    /* OLED Luxury Dark Palette (Default) */
+    --vse-canvas: #060608;
+    --vse-surface-1: #0c0e14;
+    --vse-surface-2: #12151f;
+    --vse-surface-3: #1a1e2b;
+    --vse-hairline: rgba(255, 255, 255, 0.08);
+    --vse-hairline-subtle: rgba(255, 255, 255, 0.04);
+    --vse-accent: #00e5ff;
+    --vse-accent-secondary: #6366f1;
+    --vse-accent-soft: rgba(0, 229, 255, 0.12);
+    --vse-ink-primary: #f8fafc;
+    --vse-ink-secondary: #94a3b8;
+    --vse-ink-muted: #64748b;
+    --vse-input-bg: #0c0e14;
+    --vse-input-border: rgba(255, 255, 255, 0.1);
+    --glow-primary: rgba(0, 229, 255, 0.18);
+    --glow-secondary: rgba(99, 102, 241, 0.18);
   }
 
   *, ::before, ::after {
     font-family: var(--font-sans);
+    border-color: var(--vse-hairline);
   }
 
-  body, input, button, select, textarea, optgroup, option {
-    font-family: var(--font-sans);
+  body {
     background-color: var(--vse-canvas);
     color: var(--vse-ink-primary);
     margin: 0;
@@ -49,39 +55,111 @@
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    selection-background-color: #00e5ff;
+    selection-color: #000;
   }
 }
 
-/* Subtle Dot Matrix Canvas Background */
-.canvas-dot-grid {
-  background-color: var(--vse-canvas);
-  background-image: radial-gradient(rgba(100, 116, 139, 0.15) 1px, transparent 1px);
-  background-size: 24px 24px;
+/* ==========================================================
+   DOUBLE-BEZEL (DOPPELRAND) ARCHITECTURE
+   Machined hardware depth: outer chassis + concentric inner core
+   ========================================================== */
+.doppelrand-shell {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.375rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-html.dark .canvas-dot-grid {
-  background-color: #090909;
+.doppelrand-shell:hover {
+  border-color: rgba(0, 229, 255, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 229, 255, 0.15);
+}
+
+.doppelrand-core {
+  background: var(--vse-surface-1);
+  border-radius: calc(1.5rem - 0.375rem);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+/* ==========================================================
+   SPOTLIGHT MOUSE ILLUMINATION CARDS
+   ========================================================== */
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(
+    600px circle at var(--spotlight-x, -999px) var(--spotlight-y, -999px),
+    rgba(0, 229, 255, 0.06),
+    transparent 40%
+  ), var(--vse-surface-1);
+}
+
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    400px circle at var(--spotlight-x, -999px) var(--spotlight-y, -999px),
+    rgba(0, 229, 255, 0.4),
+    transparent 40%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ==========================================================
+   GRADIENT TEXT & SHIMMER
+   ========================================================== */
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #ffffff 0%, #a5f3fc 50%, #00e5ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 50%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.badge-glow {
+  box-shadow: 0 0 20px -3px var(--glow-primary);
+}
+
+/* Subtle Matrix Dot Canvas Overlay */
+.canvas-matrix-grid {
   background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-size: 28px 28px;
 }
 
 /* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #060608;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(150, 150, 150, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(150, 150, 150, 0.4);
+  background: rgba(0, 229, 255, 0.4);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -91,28 +169,3 @@ html.dark .canvas-dot-grid {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
-/* Range Slider Styling */
-input[type="range"] {
-  height: 4px;
-  border-radius: 9999px;
-  background: #262626;
-  appearance: none;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #0099ff;
-  cursor: pointer;
-  box-shadow: 0 0 8px rgba(0, 153, 255, 0.4);
-  transition: transform 0.1s ease;
-}
-
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-}
-
-

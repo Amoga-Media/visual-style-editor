@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import PixelCanvas from '../components/effects/PixelCanvas.astro';
 
 interface Props {
   title?: string;
@@ -7,14 +8,16 @@ interface Props {
   image?: string;
   canonicalURL?: string;
   theme?: "light" | "dark";
+  showPixelCanvas?: boolean;
 }
 
 const {
-  title = "Free Visual HTML & Tailwind CSS Editor | Zero Code & Instant Preview",
-  description = "A powerful, 100% free in-browser visual editor for HTML and Tailwind CSS. Drop your HTML files or templates, tweak styles visually, edit text live, and save clean code back to your disk.",
+  title = "Visual Style Editor | Next-Gen Visual HTML & Tailwind CSS Studio",
+  description = "A powerful, 100% in-browser visual design studio for HTML & Tailwind CSS. Drop components, tune design tokens visually, edit typography & colors live, and export production-ready code with zero lock-in.",
   image = "/og-image.png",
   canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : "https://visualstyleeditor.com",
-  theme = "light",
+  theme = "dark",
+  showPixelCanvas = true,
 } = Astro.props;
 
 const jsonLd = {
@@ -31,28 +34,28 @@ const jsonLd = {
     "priceCurrency": "USD"
   },
   "featureList": [
-    "100% In-Browser AST Parsing & Splicing",
-    "Tailwind CSS v3 and v4 Detection",
-    "Real-Time 60fps Visual Style Sliders",
-    "Double-Click Inline Text Editing",
-    "File System Access API Direct Local Saving",
-    "Diff Review Modal & Version History"
+    "In-Browser AST Parsing & Splicing",
+    "Tailwind CSS v3 and v4 Intelligent Token Mapping",
+    "Real-Time 60fps Visual Style Studio",
+    "Double-Click Inline Live Text Editing",
+    "Direct File System Access API Disk Sync",
+    "Interactive Diff Review & Version History"
   ]
 };
 ---
 
 <!doctype html>
-<html lang="en" class={theme === "dark" ? "dark" : "light"}>
+<html lang="en" class="dark scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Plus Jakarta Sans, Geist, JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
     <!-- Primary Meta Tags -->
     <title>{title}</title>
@@ -76,28 +79,22 @@ const jsonLd = {
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
-
-    <!-- Theme Initializer (For Editor Studio) -->
-    {theme === "dark" && (
-      <script is:inline>
-        (function () {
-          try {
-            const saved = localStorage.getItem("vse_theme");
-            if (saved === "light") {
-              document.documentElement.classList.remove("dark");
-              document.documentElement.classList.add("light");
-            } else {
-              document.documentElement.classList.add("dark");
-              document.documentElement.classList.remove("light");
-            }
-          } catch {}
-        })();
-      </script>
-    )}
   </head>
-  <body class={theme === "dark" 
-    ? "min-h-screen bg-[#090909] text-white antialiased selection:bg-purple-600 selection:text-white flex flex-col font-sans" 
-    : "min-h-screen bg-white text-slate-900 antialiased selection:bg-purple-600 selection:text-white flex flex-col font-sans"}>
-    <slot />
+  <body class="min-h-[100dvh] bg-[#060608] text-slate-100 antialiased selection:bg-cyan-500 selection:text-black flex flex-col font-sans relative overflow-x-hidden">
+    {showPixelCanvas && <PixelCanvas density={35} interactive={true} />}
+    
+    <div class="relative z-10 flex flex-col min-h-screen">
+      <slot />
+    </div>
+
+    <!-- Spotlight cursor tracking & entrance initializer -->
+    <script>
+      import { initMotion, setupSpotlightCards } from '../lib/motion';
+
+      document.addEventListener('DOMContentLoaded', () => {
+        initMotion();
+        setupSpotlightCards('.spotlight-card');
+      });
+    </script>
   </body>
 </html>

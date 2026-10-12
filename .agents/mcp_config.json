@@ -6,6 +6,22 @@
         "-y",
         "@playwright/mcp@latest"
       ]
+    },
+    "shadcnspace": {
+      "serverUrl": "https://mcp.shadcnspace.com/mcp"
+    },
+    "reui": {
+      "serverUrl": "https://mcp.reui.io",
+      "headers": {
+        "Authorization": "Bearer reui_pat_EmeNxZOtbnqth950S_2qUPFs3QltIYyMEcZ6Tfir2Sk"
+      }
+    },
+    "magicuidesign-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@magicuidesign/mcp@latest"
+      ]
     }
   }
 }

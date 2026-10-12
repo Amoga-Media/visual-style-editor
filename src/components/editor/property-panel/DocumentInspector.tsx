@@ -190,7 +190,7 @@ export default function DocumentInspector({
 
       {/* Color Palette Harmonizer */}
       <div className="pt-1">
-        <PaletteHarmonizerGroup defaultOpen={true} />
+        <PaletteHarmonizerGroup defaultOpen={false} />
       </div>
 
       {/* Helpful Shortcuts Card */}

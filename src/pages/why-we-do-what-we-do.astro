@@ -69,58 +69,52 @@ const contrasts = [
 <BaseLayout
   title="Why We Do What We Do — The Manifesto | Visual Style Editor"
   description="Why web development tools shouldn't hold your source code hostage. The 5 pillars of local-first web sovereignty and why we reject the SaaS subscription model."
-  theme="light"
+  theme="dark"
+  showPixelCanvas={true}
 >
-  <div class="relative min-h-screen flex flex-col bg-white overflow-hidden text-slate-900">
-    <!-- Ambient Purple Glow -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-purple-200/40 via-purple-100/20 to-transparent blur-[130px] pointer-events-none -z-10"></div>
-
+  <div class="relative min-h-screen flex flex-col bg-[#060608] text-slate-100 overflow-hidden">
     <Navbar activePage="why" />
 
     <main class="flex-1">
       <!-- HERO SECTION -->
-      <section class="pt-16 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-6">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200/80">
-          <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+      <section class="pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-8">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
           The Manifesto • Developer Sovereignty
         </div>
 
-        <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-950 tracking-tight leading-[1.1]">
+        <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
           Code belongs on your machine, <br class="hidden sm:inline" />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
             not in someone else's cloud.
           </span>
         </h1>
 
-        <p class="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+        <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
           We believe the software you use to design and edit the web should be as durable, private, and free as the open standards it is built upon. Here is our philosophical foundation.
         </p>
       </section>
 
       <!-- 5 PILLARS SECTION -->
-      <section class="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-12">
-        {pillars.map((p) => (
-          <div class="p-2 sm:p-2.5 rounded-[2.5rem] bg-gradient-to-b from-purple-100/80 via-purple-50/40 to-slate-100/60 border border-purple-200/80 shadow-xs">
-            <div class="rounded-[calc(2.5rem-0.625rem)] bg-white p-7 sm:p-12 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] space-y-5">
-              <div class="flex items-center gap-3">
-                <span class="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-600 to-purple-600 text-white font-mono font-bold text-xs flex items-center justify-center shadow-xs">
-                  {p.num}
+      <section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-12">
+        {pillars.map((pillar) => (
+          <div class="doppelrand-shell spotlight-card">
+            <div class="doppelrand-core p-8 sm:p-12 space-y-6">
+              <div class="flex items-center gap-4">
+                <span class="w-10 h-10 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-mono font-bold text-sm flex items-center justify-center">
+                  {pillar.num}
                 </span>
-                <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
-                  Pillar {p.num}
-                </span>
+                <h3 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                  {pillar.title}
+                </h3>
               </div>
 
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-                {p.title}
-              </h2>
-
-              <blockquote class="pl-4 border-l-2 border-purple-400 text-base sm:text-lg font-medium italic text-purple-900 leading-snug">
-                "{p.quote}"
+              <blockquote class="pl-4 border-l-2 border-cyan-500/40 text-base sm:text-lg italic text-cyan-200/90 font-serif">
+                "{pillar.quote}"
               </blockquote>
 
-              <p class="text-sm sm:text-base text-slate-600 leading-relaxed pt-2">
-                {p.desc}
+              <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
+                {pillar.desc}
               </p>
             </div>
           </div>
@@ -128,47 +122,46 @@ const contrasts = [
       </section>
 
       <!-- CONTRAST TABLE -->
-      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-slate-50/50 border-t border-purple-100/60">
+      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#07090e]/60">
         <div class="max-w-5xl mx-auto space-y-12">
           <div class="text-center space-y-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 border border-purple-200/80 px-3 py-1 rounded-full">
-              Two Divergent Philosophies
+            <span class="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
+              Clear Differentiation
             </span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight">
-              The SaaS Subscription Trap vs The Sovereign Studio
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              The Contrast: Traditional SaaS vs Local-First Studio
             </h2>
-            <p class="text-base text-slate-600 max-w-2xl mx-auto">
-              How Visual Style Editor stands fundamentally apart from venture-funded cloud platforms.
-            </p>
           </div>
 
-          <div class="overflow-x-auto rounded-3xl border border-purple-100 shadow-sm bg-white">
-            <table class="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr class="bg-purple-50/70 text-slate-900 border-b border-purple-100">
-                  <th class="p-4 sm:p-5 font-bold w-1/4">Aspect</th>
-                  <th class="p-4 sm:p-5 font-semibold text-rose-700 bg-rose-50/40 w-3/8">Conventional SaaS Builders</th>
-                  <th class="p-4 sm:p-5 font-extrabold text-purple-800 bg-purple-100/50 w-3/8">Visual Style Editor</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-purple-100/60">
-                {contrasts.map((c) => (
-                  <tr class="hover:bg-purple-50/30 transition-colors">
-                    <td class="p-4 sm:p-5 font-bold text-slate-900">{c.category}</td>
-                    <td class="p-4 sm:p-5 text-slate-600 bg-rose-50/10">{c.saas}</td>
-                    <td class="p-4 sm:p-5 font-medium text-purple-900 bg-purple-50/30">{c.vse}</td>
+          <div class="doppelrand-shell overflow-x-auto">
+            <div class="doppelrand-core p-4 sm:p-6">
+              <table class="w-full text-left text-xs sm:text-sm font-mono">
+                <thead>
+                  <tr class="border-b border-white/10 text-slate-400">
+                    <th class="p-4 font-bold">Category</th>
+                    <th class="p-4 text-cyan-400 font-bold bg-cyan-950/40 rounded-t-lg">Visual Style Editor</th>
+                    <th class="p-4 text-slate-400 font-bold">Closed SaaS Site Builders</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                  {contrasts.map((c) => (
+                    <tr class="hover:bg-white/5 transition-colors">
+                      <td class="p-4 font-semibold text-white">{c.category}</td>
+                      <td class="p-4 text-cyan-300 font-medium bg-cyan-950/20">{c.vse}</td>
+                      <td class="p-4 text-slate-400">{c.saas}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- CTA BANNER -->
       <CtaBanner
-        headline="Reclaim sovereignty over your web designs"
-        subheadline="Open your files in an editor that respects your privacy, your workflow, and your freedom."
+        headline="Take back your developer autonomy"
+        subheadline="Zero subscriptions. Zero telemetry. Start designing on your local files right now."
       />
     </main>
 

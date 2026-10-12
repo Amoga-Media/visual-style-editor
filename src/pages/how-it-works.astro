@@ -76,61 +76,59 @@ await writable.close();`
 <BaseLayout
   title="How It Works — Visual Style Editor Architecture"
   description="Discover how Visual Style Editor opens, manipulates, and saves local HTML & Tailwind CSS files client-side using native Web APIs and Parse5 AST."
-  theme="light"
+  theme="dark"
+  showPixelCanvas={true}
 >
-  <div class="relative min-h-screen flex flex-col bg-white overflow-hidden text-slate-900">
-    <!-- Ambient Purple Glow -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-purple-200/40 via-purple-100/20 to-transparent blur-[130px] pointer-events-none -z-10"></div>
-
+  <div class="relative min-h-screen flex flex-col bg-[#060608] text-slate-100 overflow-hidden">
     <Navbar activePage="how it works" />
 
     <main class="flex-1">
       <!-- HERO SECTION -->
-      <section class="pt-16 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-6">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200/80">
-          <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+      <section class="pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-8">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
           Under The Hood • 6-Step Visual Pipeline
         </div>
 
-        <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-950 tracking-tight leading-[1.1]">
+        <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
           From your local disk to interactive canvas. <br class="hidden sm:inline" />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
             In milliseconds.
           </span>
         </h1>
 
-        <p class="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+        <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
           A step-by-step walkthrough of how Visual Style Editor delivers real-time visual editing without ever sending your source code to a remote server or mangling your markup.
         </p>
       </section>
 
       <!-- DATA FLOW ARCHITECTURE OVERVIEW -->
-      <section class="pb-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        <div class="p-2 sm:p-2.5 rounded-[2.5rem] bg-gradient-to-b from-purple-100/80 via-purple-50/40 to-slate-100/60 border border-purple-200/80 shadow-xs">
-          <div class="rounded-[calc(2.5rem-0.625rem)] bg-white p-6 sm:p-10 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] space-y-8">
+      <section class="pb-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div class="doppelrand-shell spotlight-card">
+          <div class="doppelrand-core p-8 sm:p-12 space-y-8">
             <div class="text-center max-w-2xl mx-auto space-y-2">
-              <h2 class="text-2xl sm:text-3xl font-bold text-slate-950">Visual Data-Flow Cycle</h2>
-              <p class="text-sm text-slate-600">How data moves between your physical storage, browser memory, and the visual canvas.</p>
+              <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Visual Data-Flow Cycle</h2>
+              <p class="text-sm text-slate-400">How data moves between your physical storage, browser memory, and the visual canvas.</p>
             </div>
 
             <!-- Flow Step Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div class="p-5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2">
-                <div class="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center mx-auto">1</div>
-                <h4 class="font-bold text-slate-900 text-sm">Local File Handle</h4>
-                <p class="text-xs text-slate-600">Local HTML read into memory via Chromium File System Access API</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+              <div class="p-6 rounded-2xl bg-[#090b10] border border-white/5 space-y-3 shadow-inner">
+                <div class="w-9 h-9 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-bold font-mono text-xs flex items-center justify-center mx-auto">1</div>
+                <h4 class="font-bold text-white text-base">Local File Handle</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Local HTML read into memory via Chromium File System Access API</p>
               </div>
 
-              <div class="p-5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2">
-                <div class="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center mx-auto">2</div>
-                <h4 class="font-bold text-slate-900 text-sm">Parse5 AST & Live Canvas</h4>
-                <p class="text-xs text-slate-600">Byte offsets mapped; live DOM rendered in 60fps sandbox</p>
+              <div class="p-6 rounded-2xl bg-[#090b10] border border-white/5 space-y-3 shadow-inner">
+                <div class="w-9 h-9 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-500/30 font-bold font-mono text-xs flex items-center justify-center mx-auto">2</div>
+                <h4 class="font-bold text-white text-base">Parse5 AST & Live Canvas</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Byte offsets mapped; live DOM rendered in 60fps sandbox</p>
               </div>
 
-              <div class="p-5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2">
-                <div class="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center mx-auto">3</div>
-                <h4 class="font-bold text-slate-900 text-sm">Surgical Splicing</h4>
-                <p class="text-xs text-slate-600">Offset-based write saves clean code straight to disk</p>
+              <div class="p-6 rounded-2xl bg-[#090b10] border border-white/5 space-y-3 shadow-inner">
+                <div class="w-9 h-9 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-bold font-mono text-xs flex items-center justify-center mx-auto">3</div>
+                <h4 class="font-bold text-white text-base">Surgical Splicing</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Offset-based write saves clean code straight to disk</p>
               </div>
             </div>
           </div>
@@ -138,38 +136,38 @@ await writable.close();`
       </section>
 
       <!-- 6-STEP TIMELINE -->
-      <section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-slate-50/50 border-t border-purple-100/60">
+      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#07090e]/60">
         <div class="max-w-6xl mx-auto space-y-16">
           <div class="text-center max-w-3xl mx-auto space-y-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 border border-purple-200/80 px-3 py-1 rounded-full">
+            <span class="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
               Detailed Architecture
             </span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               The 6 Stages of Visual Style Editor
             </h2>
           </div>
 
           <div class="space-y-10">
             {steps.map((item) => (
-              <div class="p-2 sm:p-2.5 rounded-[2.5rem] bg-gradient-to-b from-purple-100/80 via-purple-50/40 to-slate-100/60 border border-purple-200/80 shadow-xs">
-                <div class="rounded-[calc(2.5rem-0.625rem)] bg-white p-6 sm:p-10 shadow-[inset_0_1px_1px_rgba(255,255,255,1)]">
+              <div class="doppelrand-shell spotlight-card">
+                <div class="doppelrand-core p-6 sm:p-10">
                   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                     <div class="lg:col-span-6 space-y-4">
-                      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold font-mono bg-purple-50 text-purple-700 border border-purple-200">
-                        Step {item.step}
+                      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">
+                        Stage {item.step}
                       </div>
-                      <h3 class="text-2xl font-bold text-slate-950 tracking-tight">{item.title}</h3>
-                      <h4 class="text-base font-semibold text-purple-800">{item.headline}</h4>
-                      <p class="text-sm sm:text-base text-slate-600 leading-relaxed">{item.desc}</p>
+                      <h3 class="text-2xl font-bold text-white tracking-tight">{item.title}</h3>
+                      <h4 class="text-base font-semibold text-cyan-300 font-mono">{item.headline}</h4>
+                      <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">{item.desc}</p>
                     </div>
 
                     <div class="lg:col-span-6">
-                      <div class="rounded-2xl bg-slate-950 p-5 text-slate-200 border border-slate-800 font-mono text-xs shadow-xl space-y-2">
-                        <div class="flex items-center justify-between pb-2 border-b border-slate-800 text-[10px] text-slate-400">
+                      <div class="rounded-2xl bg-[#090b10] p-5 text-slate-200 border border-white/10 font-mono text-xs shadow-xl space-y-2">
+                        <div class="flex items-center justify-between pb-2 border-b border-white/5 text-[10px] text-slate-400">
                           <span>STAGE IMPLEMENTATION</span>
-                          <span class="text-purple-400">Step {item.step}</span>
+                          <span class="text-cyan-400">Step {item.step}</span>
                         </div>
-                        <pre class="overflow-x-auto text-[11px] leading-relaxed text-purple-200 whitespace-pre p-1">
+                        <pre class="overflow-x-auto text-[11px] leading-relaxed text-cyan-200 whitespace-pre p-1">
                           <code>{item.code}</code>
                         </pre>
                       </div>

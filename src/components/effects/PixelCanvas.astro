@@ -1,0 +1,175 @@
+---
+// High-performance 60fps interactive pixel & ambient constellation canvas
+interface Props {
+  density?: number;
+  interactive?: boolean;
+}
+
+const { density = 45, interactive = true } = Astro.props;
+---
+
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+  <canvas id="pixel-canvas" class="w-full h-full opacity-60"></canvas>
+  <div class="absolute inset-0 bg-radial-[circle_at_50%_15%] from-cyan-500/10 via-transparent to-transparent"></div>
+  <div class="absolute inset-0 bg-radial-[circle_at_80%_80%] from-indigo-500/10 via-transparent to-transparent"></div>
+</div>
+
+<script is:inline define:vars={{ density, interactive }}>
+  (function () {
+    const canvas = document.getElementById('pixel-canvas');
+    if (!canvas) return;
+
+    // Respect reduced motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      canvas.style.display = 'none';
+      return;
+    }
+
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+
+    let width = 0;
+    let height = 0;
+    let animationFrameId = null;
+
+    const mouse = {
+      x: -1000,
+      y: -1000,
+      targetX: -1000,
+      targetY: -1000,
+      active: false,
+    };
+
+    interface Particle {
+      x: number;
+      y: number;
+      originX: number;
+      originY: number;
+      size: number;
+      color: string;
+      alpha: number;
+      vx: number;
+      vy: number;
+      pulse: number;
+      speed: number;
+    }
+
+    const particles = [];
+    const colors = [
+      'rgba(0, 229, 255, ',    // Cyan
+      'rgba(99, 102, 241, ',   // Indigo
+      'rgba(255, 255, 255, ',  // White
+      'rgba(56, 189, 248, ',   // Sky
+    ];
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      initParticles();
+    }
+
+    function initParticles() {
+      particles.length = 0;
+      const count = Math.floor((width * height) / 14000) * (density / 40);
+
+      for (let i = 0; i < count; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        particles.push({
+          x,
+          y,
+          originX: x,
+          originY: y,
+          size: Math.random() * 2 + 1,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: Math.random() * 0.4 + 0.1,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          pulse: Math.random() * Math.PI * 2,
+          speed: Math.random() * 0.02 + 0.01,
+        });
+      }
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Smooth mouse follow
+      mouse.x += (mouse.targetX - mouse.x) * 0.1;
+      mouse.y += (mouse.targetY - mouse.y) * 0.1;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        // Pulse alpha
+        p.pulse += p.speed;
+        const currentAlpha = p.alpha + Math.sin(p.pulse) * 0.15;
+
+        // Normal drift
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Wrap around bounds
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        // Mouse displacement & glow
+        if (interactive && mouse.active) {
+          const dx = mouse.x - p.x;
+          const dy = mouse.y - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const maxDist = 140;
+
+          if (dist < maxDist) {
+            const force = (1 - dist / maxDist) * 12;
+            const angle = Math.atan2(dy, dx);
+            p.x -= Math.cos(angle) * force * 0.4;
+            p.y -= Math.sin(angle) * force * 0.4;
+
+            // Brighten up close
+            ctx.fillStyle = `rgba(0, 229, 255, ${Math.min(1, currentAlpha + 0.6)})`;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#00e5ff';
+          } else {
+            ctx.fillStyle = p.color + Math.max(0.05, currentAlpha) + ')';
+            ctx.shadowBlur = 0;
+          }
+        } else {
+          ctx.fillStyle = p.color + Math.max(0.05, currentAlpha) + ')';
+          ctx.shadowBlur = 0;
+        }
+
+        // Draw micro pixel or circle
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    }
+
+    if (interactive) {
+      window.addEventListener('mousemove', (e) => {
+        mouse.targetX = e.clientX;
+        mouse.targetY = e.clientY;
+        mouse.active = true;
+      }, { passive: true });
+
+      window.addEventListener('mouseleave', () => {
+        mouse.active = false;
+      });
+    }
+
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 150);
+    }, { passive: true });
+
+    resize();
+    render();
+  })();
+</script>

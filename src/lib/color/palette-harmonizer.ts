@@ -61,7 +61,7 @@ export function generateHarmonizedPalette(brandHex: string, _depth = 0): Harmoni
     ],
     "oklch"
   );
-  const shades = samples(9).map((t) => formatHex(interp(t)) ?? "#000000");
+  const shades = samples(9).map((t: number) => formatHex(interp(t)) ?? "#000000");
 
   return { primary, secondary, accent, neutral, shades };
 }

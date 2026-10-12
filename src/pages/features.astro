@@ -11,11 +11,11 @@ const deepFeatures = [
     tagline: "Your comments, scripts, and indentation stay 100% intact.",
     desc: "Most visual editors convert your HTML into an internal proprietary JSON structure, edit the JSON, and re-export the entire document — destroying formatting, stripping comments, and mangling your code. Visual Style Editor parses your markup directly into an in-memory Parse5 Abstract Syntax Tree (AST), identifies the exact character offsets of targeted class or style attributes, and splices modifications surgically. Untouched DOM nodes remain bit-for-bit identical.",
     specs: ["Parse5 In-Browser Parser", "Offset-based string splicing", "Preserves HTML5 doctypes & conditional comments", "Zero cloud server dependencies"],
-    codeSnippet: `<div class="p-6 rounded-2xl bg-white shadow-md">
+    codeSnippet: `<div class="p-6 rounded-2xl bg-[#0c0e14] border border-white/10">
   <!-- Original developer comment preserved -->
-  <h2 class="text-2xl font-bold text-purple-950">Welcome</h2>
+  <h2 class="text-2xl font-bold text-white">Welcome</h2>
   <!-- Splicer modifies ONLY classes below: -->
-  <button class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-full">
+  <button class="bg-cyan-400 hover:bg-cyan-300 text-black px-6 py-2.5 rounded-full font-bold">
     Get Started
   </button>
 </div>`
@@ -29,8 +29,8 @@ const deepFeatures = [
     codeSnippet: `/* Forward Map Output */
 font-weight: 600       --> class="font-semibold"
 letter-spacing: -0.02em --> class="tracking-tight"
-box-shadow: neon-glow  --> class="shadow-lg shadow-purple-500/25"
-color: oklch(...)      --> class="text-violet-600"`
+box-shadow: neon-glow  --> class="shadow-xl shadow-cyan-500/25"
+color: oklch(...)      --> class="text-cyan-400"`
   },
   {
     badge: "Engine 03",
@@ -39,11 +39,11 @@ color: oklch(...)      --> class="text-violet-600"`
     desc: "Traditional sRGB color interpolation suffers from perceptual non-uniformity — yellows look brighter than blues, and mid-tones quickly turn muddy or gray. Visual Style Editor embeds a high-precision OKLCH color science engine using Culori. Choose any base color and instantly generate 9 harmonious tonal stops (50 through 900) across Monochromatic, Analogous, Complementary, Triadic, or Split-Complementary schemes with true perceptual lightness.",
     specs: ["Culori OKLCH mathematical interpolation", "5 classic color harmony schemes", "Automated 9-step tonal scale generation", "1-click injection into CSS or Tailwind classes"],
     codeSnippet: `// OKLCH Palette Harmonizer Output
-50:  oklch(0.97 0.02 290) // Soft lavender tint
-100: oklch(0.93 0.05 290)
-500: oklch(0.62 0.22 290) // Royal vibrant purple
-700: oklch(0.48 0.20 290) // Deep royal shade
-900: oklch(0.28 0.14 290) // Deep imperial plum`
+50:  oklch(0.97 0.02 200) // Ethereal cyan tint
+100: oklch(0.93 0.05 200)
+500: oklch(0.62 0.22 200) // Electric cyan
+700: oklch(0.48 0.20 200) // Deep ocean shade
+900: oklch(0.28 0.14 200) // Abyssal navy`
   },
   {
     badge: "Engine 04",
@@ -51,11 +51,11 @@ color: oklch(...)      --> class="text-violet-600"`
     tagline: "Photorealistic elevations and radiant ambient lighting.",
     desc: "Crafting realistic shadows by hand requires coordinating multiple box-shadow layers, ambient occlusion offsets, and subtle alpha blurs. Visual Style Editor includes 12 professionally tuned shadow presets spanning five core categories: Subtle, Elevated, Dramatic, Neon Glow, and Inner Bevel. Preview any shadow live on your active selection with real-time hardware acceleration.",
     specs: ["12 hand-tuned elevation presets", "Dual-layer ambient + direct shadow simulation", "Vibrant neon glow luminance", "Full Tailwind shadow utility integration"],
-    codeSnippet: `/* Neon Purple Glow Preset */
+    codeSnippet: `/* Cyber Cyan Glow Preset */
 box-shadow: 
-  0 0 15px rgba(168, 85, 247, 0.45),
-  0 0 35px rgba(147, 51, 234, 0.25),
-  0 10px 25px -5px rgba(0, 0, 0, 0.1);`
+  0 0 15px rgba(0, 229, 255, 0.45),
+  0 0 35px rgba(0, 229, 255, 0.20),
+  0 10px 25px -5px rgba(0, 0, 0, 0.5);`
   },
   {
     badge: "Engine 05",
@@ -98,42 +98,40 @@ const benchmarks = [
 
 <BaseLayout
   title="Features & Architecture — Visual Style Editor"
-  description="Explore the 9 native engines powering Visual Style Editor: In-browser AST splicing, dual Tailwind v3/v4 intelligence, OKLCH color harmonizer, shadow presets, and direct disk saving."
-  theme="light"
+  description="Explore the 6 native engines powering Visual Style Editor: In-browser AST splicing, dual Tailwind v3/v4 intelligence, OKLCH color harmonizer, shadow presets, and direct disk saving."
+  theme="dark"
+  showPixelCanvas={true}
 >
-  <div class="relative min-h-screen flex flex-col bg-white overflow-hidden text-slate-900">
-    <!-- Ambient Purple Glow -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-purple-200/40 via-purple-100/20 to-transparent blur-[130px] pointer-events-none -z-10"></div>
-
+  <div class="relative min-h-screen flex flex-col bg-[#060608] text-slate-100 overflow-hidden">
     <Navbar activePage="features" />
 
     <main class="flex-1">
       <!-- HERO SECTION -->
-      <section class="pt-16 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-6">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200/80">
-          <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+      <section class="pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-8">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
           Deep Technical Architecture • 6 Native In-Browser Engines
         </div>
 
-        <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-950 tracking-tight leading-[1.1]">
+        <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
           Engineered for speed, precision, and <br class="hidden sm:inline" />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
             complete code sovereignty.
           </span>
         </h1>
 
-        <p class="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+        <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
           Explore the internal mechanics behind our zero-backend visual editor. From real-time AST manipulation to perceptual OKLCH color science, discover how Visual Style Editor bridges visual creativity with production code.
         </p>
 
         <div class="pt-4 flex items-center justify-center gap-4">
           <a
             href="/editor"
-            class="group inline-flex items-center gap-3 pl-6 pr-2.5 py-3.5 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg shadow-purple-600/25 transition-all"
+            class="group inline-flex items-center gap-3 pl-8 pr-2.5 py-3.5 rounded-full text-sm font-bold text-black bg-gradient-to-r from-cyan-400 via-sky-300 to-cyan-300 hover:brightness-110 shadow-lg shadow-cyan-500/25 transition-all"
           >
             <span>Experience Engines in Studio</span>
-            <span class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
-              <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <span class="w-7 h-7 rounded-full bg-black/15 flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
+              <svg class="w-3.5 h-3.5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>
             </span>
@@ -142,52 +140,52 @@ const benchmarks = [
       </section>
 
       <!-- DEEP DIVE ENGINE CARDS -->
-      <section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-slate-50/50 border-t border-purple-100/60">
+      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#07090e]/60">
         <div class="max-w-7xl mx-auto space-y-16">
           <div class="text-center max-w-3xl mx-auto space-y-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 border border-purple-200/80 px-3 py-1 rounded-full">
+            <span class="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
               Core Capabilities
             </span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               Anatomy of the Visual Studio
             </h2>
-            <p class="text-base text-slate-600">
-              Every feature was designed from first principles to respect your source code.
+            <p class="text-base text-slate-400">
+              Every engine was designed from first principles to respect your source code.
             </p>
           </div>
 
           <!-- Feature Cards List -->
           <div class="space-y-12">
-            {deepFeatures.map((feat, index) => (
-              <div class="p-2 sm:p-2.5 rounded-[2.5rem] bg-gradient-to-b from-purple-100/80 via-purple-50/40 to-slate-100/60 border border-purple-200/80 shadow-xs">
-                <div class="rounded-[calc(2.5rem-0.625rem)] bg-white p-6 sm:p-10 shadow-[inset_0_1px_1px_rgba(255,255,255,1)]">
+            {deepFeatures.map((feat) => (
+              <div class="doppelrand-shell spotlight-card">
+                <div class="doppelrand-core p-6 sm:p-10">
                   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                     <!-- Text Description Column -->
                     <div class="lg:col-span-7 space-y-5">
                       <div class="flex items-center gap-3">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-purple-50 text-purple-700 border border-purple-200">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">
                           {feat.badge}
                         </span>
-                        <span class="text-xs font-semibold text-slate-400">Production Tested</span>
+                        <span class="text-xs font-mono text-slate-400">Production Tested</span>
                       </div>
 
-                      <h3 class="text-2xl sm:text-3xl font-bold text-slate-950 tracking-tight">
+                      <h3 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                         {feat.title}
                       </h3>
 
-                      <p class="text-base font-medium text-purple-800">
+                      <p class="text-base font-medium text-cyan-300 font-mono">
                         {feat.tagline}
                       </p>
 
-                      <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                      <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
                         {feat.desc}
                       </p>
 
                       <!-- Key Specs Pills -->
                       <div class="pt-2 flex flex-wrap gap-2">
                         {feat.specs.map((spec) => (
-                          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-purple-50/60 text-slate-700 border border-purple-200/60">
-                            <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono bg-white/5 text-slate-300 border border-white/10">
+                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
                             {spec}
                           </span>
                         ))}
@@ -196,15 +194,15 @@ const benchmarks = [
 
                     <!-- Code / Spec Snippet Column -->
                     <div class="lg:col-span-5">
-                      <div class="rounded-2xl bg-slate-950 p-5 text-slate-200 border border-slate-800 font-mono text-xs shadow-xl space-y-3">
-                        <div class="flex items-center justify-between pb-3 border-b border-slate-800 text-[11px] text-slate-400">
+                      <div class="rounded-2xl bg-[#090b10] p-5 text-slate-200 border border-white/10 font-mono text-xs shadow-xl space-y-3">
+                        <div class="flex items-center justify-between pb-3 border-b border-white/5 text-[11px] text-slate-400">
                           <span class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
                             Engine Verification
                           </span>
-                          <span>Verified Client-Side</span>
+                          <span class="text-emerald-400">Verified Client-Side</span>
                         </div>
-                        <pre class="overflow-x-auto text-[11px] leading-relaxed text-purple-200 whitespace-pre font-mono p-1">
+                        <pre class="overflow-x-auto text-[11px] leading-relaxed text-cyan-200 whitespace-pre font-mono p-1">
                           <code>{feat.codeSnippet}</code>
                         </pre>
                       </div>
@@ -218,39 +216,41 @@ const benchmarks = [
       </section>
 
       <!-- BENCHMARKS & PERFORMANCE MATRIX -->
-      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8">
+      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-t border-white/10">
         <div class="max-w-5xl mx-auto space-y-12">
           <div class="text-center space-y-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 border border-purple-200/80 px-3 py-1 rounded-full">
+            <span class="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
               Performance Benchmarks
             </span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               In-Browser vs Cloud-Hosted Editors
             </h2>
-            <p class="text-base text-slate-600 max-w-2xl mx-auto">
+            <p class="text-base text-slate-400 max-w-2xl mx-auto">
               Real-world operational differences between a local AST editor and traditional cloud SaaS platforms.
             </p>
           </div>
 
-          <div class="overflow-x-auto rounded-3xl border border-purple-100 shadow-sm bg-white">
-            <table class="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr class="bg-purple-50/70 text-slate-900 border-b border-purple-100">
-                  <th class="p-4 sm:p-5 font-bold">Metric / Architecture</th>
-                  <th class="p-4 sm:p-5 font-extrabold text-purple-700 bg-purple-100/50">Visual Style Editor</th>
-                  <th class="p-4 sm:p-5 font-semibold text-slate-600">Traditional Cloud SaaS Builders</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-purple-100/60">
-                {benchmarks.map((b) => (
-                  <tr class="hover:bg-purple-50/30 transition-colors">
-                    <td class="p-4 sm:p-5 font-semibold text-slate-900">{b.metric}</td>
-                    <td class="p-4 sm:p-5 font-bold text-purple-800 bg-purple-50/40">{b.vse}</td>
-                    <td class="p-4 sm:p-5 text-slate-600">{b.cloud}</td>
+          <div class="doppelrand-shell overflow-x-auto">
+            <div class="doppelrand-core p-4 sm:p-6">
+              <table class="w-full text-left text-xs sm:text-sm font-mono">
+                <thead>
+                  <tr class="border-b border-white/10 text-slate-400">
+                    <th class="p-4 sm:p-5 font-bold">Metric / Architecture</th>
+                    <th class="p-4 sm:p-5 font-extrabold text-cyan-400 bg-cyan-950/40 rounded-t-lg">Visual Style Editor</th>
+                    <th class="p-4 sm:p-5 font-semibold text-slate-400">Traditional Cloud SaaS Builders</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                  {benchmarks.map((b) => (
+                    <tr class="hover:bg-white/5 transition-colors">
+                      <td class="p-4 sm:p-5 font-semibold text-white">{b.metric}</td>
+                      <td class="p-4 sm:p-5 font-bold text-cyan-300 bg-cyan-950/20">{b.vse}</td>
+                      <td class="p-4 sm:p-5 text-slate-400">{b.cloud}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

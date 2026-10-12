@@ -188,10 +188,10 @@ export default function EditorStudio() {
       const saved = localStorage.getItem("vse_left_panel_width");
       if (saved) {
         const parsed = parseInt(saved, 10);
-        if (!isNaN(parsed) && parsed >= 220 && parsed <= 550) return parsed;
+        if (!isNaN(parsed) && parsed >= 200 && parsed <= 500) return parsed;
       }
     }
-    return 320;
+    return 260;
   });
 
   const [rightSidebarWidth, setRightSidebarWidth] = useState<number>(() => {
@@ -199,10 +199,10 @@ export default function EditorStudio() {
       const saved = localStorage.getItem("vse_right_panel_width");
       if (saved) {
         const parsed = parseInt(saved, 10);
-        if (!isNaN(parsed) && parsed >= 260 && parsed <= 600) return parsed;
+        if (!isNaN(parsed) && parsed >= 240 && parsed <= 550) return parsed;
       }
     }
-    return 320;
+    return 290;
   });
 
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
@@ -1546,7 +1546,10 @@ export default function EditorStudio() {
         zoom={zoom}
         onZoomIn={() => setZoom((z) => Math.min(Number((z + 0.1).toFixed(2)), 2))}
         onZoomOut={() => setZoom((z) => Math.max(Number((z - 0.1).toFixed(2)), 0.25))}
-        onZoomReset={() => setZoom(1)}
+        onZoomReset={() => {
+          setZoom(1);
+          setPanOffset({ x: 0, y: 0 });
+        }}
         onOpenShortcuts={() => setShortcutsOpen(true)}
         isDimensionsHUDHidden={isDimensionsCapsuleHidden}
         onToggleDimensionsHUD={handleToggleDimensionsCapsule}
