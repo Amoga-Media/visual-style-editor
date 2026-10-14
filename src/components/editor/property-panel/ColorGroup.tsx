@@ -17,6 +17,7 @@ interface ColorGroupProps {
 
 import type { ViewportMode } from "../Toolbar";
 import { getResponsivePropertyInfo } from "@/lib/dom/responsive-style-engine";
+import { useChangeSetStore } from "@/store/change-set-store";
 
 export default function ColorGroup({
   element,
@@ -26,6 +27,7 @@ export default function ColorGroup({
   viewport = "desktop",
   onEdit,
 }: ColorGroupProps) {
+  const edits = useChangeSetStore((s) => s.edits);
   const [currentColor, setCurrentColor] = useState<string>("#000000");
   const baselineColorRef = useRef<string>("");
   const prevElementRef = useRef<Element | null>(null);
@@ -45,7 +47,7 @@ export default function ColorGroup({
     }
     setCurrentColor(raw || (property === "background-color" ? "transparent" : "#000000"));
     if (isNew) baselineColorRef.current = raw || (property === "background-color" ? "transparent" : "#000000");
-  }, [element, property, theme, viewport, structuralPath]);
+  }, [element, property, theme, viewport, structuralPath, edits]);
 
   if (!element || !structuralPath) return null;
 

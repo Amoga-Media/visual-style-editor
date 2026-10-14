@@ -144,7 +144,7 @@ export default function Toolbar({
   }
 
   return (
-    <header className="h-13 bg-white/95 dark:bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-[#222226] flex items-center justify-between px-3 sm:px-4 z-30 select-none text-slate-800 dark:text-white transition-colors shrink-0">
+    <header className="h-13 bg-white/95 dark:bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-[#222226] flex items-center justify-between px-3 sm:px-4 z-40 select-none text-slate-800 dark:text-white transition-colors shrink-0">
       {/* ZONE 1: Left Brand, Page Selector, Undo/Redo */}
       <div className="flex items-center gap-2 min-w-0">
         {fileName && onToggleLeftSidebar && (

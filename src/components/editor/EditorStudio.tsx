@@ -66,7 +66,7 @@ export function serializeCleanDocument(doc: Document): string {
   docClone.querySelectorAll("[data-vse-broken-handled]").forEach((el) => {
     el.removeAttribute("data-vse-broken-handled");
   });
-  docClone.querySelectorAll("[data-vse-hovered], [data-vse-selected], [data-vse-drop-target], [data-vse-drag-over], [data-vse-move-token], [data-vse-viewport], [data-vse-path]").forEach((el) => {
+  docClone.querySelectorAll("[data-vse-hovered], [data-vse-selected], [data-vse-drop-target], [data-vse-drag-over], [data-vse-move-token], [data-vse-viewport], [data-vse-path], [data-vse-insert-id]").forEach((el) => {
     el.removeAttribute("data-vse-hovered");
     el.removeAttribute("data-vse-selected");
     el.removeAttribute("data-vse-drop-target");
@@ -74,6 +74,7 @@ export function serializeCleanDocument(doc: Document): string {
     el.removeAttribute("data-vse-move-token");
     el.removeAttribute("data-vse-viewport");
     el.removeAttribute("data-vse-path");
+    el.removeAttribute("data-vse-insert-id");
   });
 
   // 3. Ensure responsive stylesheet contains clean standalone media queries
@@ -186,6 +187,15 @@ export default function EditorStudio() {
   const [isResizingArtboard, setIsResizingArtboard] = useState(false);
   const versionIdRef = useRef(0);
   const projectConfig = useWorkspaceStore((s) => s.projectConfig);
+
+  const isAnyModalOpen = Boolean(
+    reviewOpen ||
+    exportOpen ||
+    historyOpen ||
+    shortcutsOpen ||
+    settingsModalOpen ||
+    configModalOpen
+  );
 
   // Resizable Sidebars Width State
   const [leftSidebarWidth, setLeftSidebarWidth] = useState<number>(() => {
@@ -735,6 +745,15 @@ export default function EditorStudio() {
     select(path);
   }
 
+  // Auto-deselect if selected element gets removed from DOM (e.g. via undo/revert)
+  useEffect(() => {
+    if (selectedEl && !selectedEl.isConnected) {
+      setSelectedEl(null);
+      setSelectedPath(null);
+      select(null);
+    }
+  }, [edits, selectedEl, select]);
+
   function handleEdit(record: EditRecord) {
     useUndoStore.getState().pushHistory(useChangeSetStore.getState().edits);
     recordEdit(record);
@@ -864,6 +883,8 @@ export default function EditorStudio() {
     const doc = el.ownerDocument || document;
     const wrapper = doc.createElement("div");
     wrapper.className = "flex flex-col";
+    const insertId = `vse-ins-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    wrapper.setAttribute("data-vse-insert-id", insertId);
 
     parent.insertBefore(wrapper, el);
     wrapper.appendChild(el);
@@ -874,6 +895,7 @@ export default function EditorStudio() {
       structuralPath: path,
       position: "before",
       snippet: `<div class="flex flex-col">${(el as HTMLElement).outerHTML}</div>`,
+      insertId,
       timestamp: new Date().toISOString(),
     });
 
@@ -954,6 +976,9 @@ export default function EditorStudio() {
     const newChild = temp.firstElementChild;
     if (!newChild) return;
 
+    const insertId = `vse-ins-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    newChild.setAttribute("data-vse-insert-id", insertId);
+
     if (position === "inside") {
       target.appendChild(newChild);
     } else if (position === "before" && target.parentElement && target.tagName.toLowerCase() !== "body") {
@@ -978,6 +1003,7 @@ export default function EditorStudio() {
       insertedPath,
       parentPath,
       siblingIndex,
+      insertId,
       timestamp: new Date().toISOString(),
     });
 
@@ -1804,7 +1830,7 @@ export default function EditorStudio() {
         {openFile && leftSidebarOpen && uiPanelsVisible && (
           <aside
             style={{ width: `${leftSidebarWidth}px` }}
-            className="border-r border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl animate-in slide-in-from-left-4 duration-200 relative"
+            className="border-r border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-30 overflow-hidden shadow-2xl animate-in slide-in-from-left-4 duration-200 relative"
           >
             {/* Tab Header */}
             {/* Tab Header */}
@@ -1901,7 +1927,7 @@ export default function EditorStudio() {
         {openFile && leftSidebarOpen && uiPanelsVisible && (
           <div
             onPointerDown={handleLeftResizeStart}
-            className="w-1.5 hover:w-2.5 bg-transparent hover:bg-[#0099ff]/40 active:bg-[#0099ff] cursor-col-resize z-30 transition-colors group shrink-0 relative flex items-center justify-center -ml-1 select-none touch-none"
+            className="w-1.5 hover:w-2.5 bg-transparent hover:bg-[#0099ff]/40 active:bg-[#0099ff] cursor-col-resize z-31 transition-colors group shrink-0 relative flex items-center justify-center -ml-1 select-none touch-none"
             title="Drag to resize left panel"
           >
             <div className="w-0.5 h-10 bg-slate-300 dark:bg-[#333333] group-hover:bg-[#0099ff] rounded-full transition-colors" />
@@ -2260,6 +2286,7 @@ export default function EditorStudio() {
           zoom={zoom}
           panOffset={panOffset}
           viewport={propertyViewport}
+          isModalOpen={isAnyModalOpen}
           onEdit={handleEdit}
           onBatchEdit={handleBatchEdit}
           onMoveElement={handleMoveElement}
@@ -2275,7 +2302,7 @@ export default function EditorStudio() {
         {openFile && uiPanelsVisible && (
           <div
             onPointerDown={handleRightResizeStart}
-            className="w-1.5 hover:w-2.5 bg-transparent hover:bg-[#0099ff]/40 active:bg-[#0099ff] cursor-col-resize z-30 transition-colors group shrink-0 relative flex items-center justify-center -mr-1 select-none touch-none"
+            className="w-1.5 hover:w-2.5 bg-transparent hover:bg-[#0099ff]/40 active:bg-[#0099ff] cursor-col-resize z-31 transition-colors group shrink-0 relative flex items-center justify-center -mr-1 select-none touch-none"
             title="Drag to resize property panel"
           >
             <div className="w-0.5 h-10 bg-slate-300 dark:bg-[#333333] group-hover:bg-[#0099ff] rounded-full transition-colors" />
@@ -2291,7 +2318,7 @@ export default function EditorStudio() {
         {openFile && uiPanelsVisible && (
           <aside
             style={{ width: `${rightSidebarWidth}px` }}
-            className="border-l border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl"
+            className="border-l border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-30 overflow-hidden shadow-2xl"
           >
             <div className="flex-1 overflow-y-auto">
               <ErrorBoundary>

@@ -54,4 +54,22 @@ describe("ColorPicker and Transparency Engine", () => {
     expect(formatHex(black!)).toBe("#000000");
     expect(formatHex(white!)).toBe("#ffffff");
   });
+
+  it("calculates 8-digit hex for colors with opacity less than 1", () => {
+    const rgb = toRgb({ mode: "hsv", h: 210, s: 1, v: 1, alpha: 0.8 });
+    const hex = formatHex(rgb!);
+    const aHex = Math.round(0.8 * 255).toString(16).padStart(2, "0");
+    const hex8 = `${hex}${aHex}`;
+    expect(hex8).toMatch(/^#[0-9a-f]{8}$/i);
+    const parsed = parseColor(hex8);
+    expect(parsed?.alpha).toBeCloseTo(0.8, 1);
+  });
+
+  it("correctly handles rgba opacity in gradient stop strings", () => {
+    const gradStr = "linear-gradient(135deg, rgba(0, 242, 254, 0.5) 0%, rgba(79, 172, 254, 0.8) 100%)";
+    const stop1Parsed = parseColor("rgba(0, 242, 254, 0.5)");
+    const stop2Parsed = parseColor("rgba(79, 172, 254, 0.8)");
+    expect(stop1Parsed?.alpha).toBe(0.5);
+    expect(stop2Parsed?.alpha).toBe(0.8);
+  });
 });

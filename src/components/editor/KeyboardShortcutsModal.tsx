@@ -28,7 +28,7 @@ export default function KeyboardShortcutsModal({ onClose }: KeyboardShortcutsMod
   const isMac = typeof navigator !== "undefined" && navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-150">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-150">
       <div className="bg-[#141414] border border-[#262626] rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 transition-colors">
         <div className="flex items-center justify-between border-b border-[#262626] pb-4">
           <div className="flex items-center gap-2.5">

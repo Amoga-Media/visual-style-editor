@@ -83,7 +83,7 @@ export default function ProjectConfigModal({
   const cssFonts = projectConfig.customStyles?.extractedTheme?.fonts || [];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 select-none">
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 select-none">
       <div className="w-full max-w-2xl bg-white dark:bg-[#141416] border border-slate-200 dark:border-[#28282c] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 text-slate-800 dark:text-zinc-200 text-xs">
         {/* Header */}
         <div className="p-4 border-b border-slate-200 dark:border-[#262626] flex items-center justify-between bg-slate-50/50 dark:bg-[#18181c]">

@@ -44,6 +44,8 @@ import {
   Scissors,
 } from "lucide-react";
 
+import { useChangeSetStore } from "@/store/change-set-store";
+
 interface PropertyPanelProps {
   element: Element | null;
   structuralPath: string | null;
@@ -72,6 +74,7 @@ export default function PropertyPanel({
   onMoveDown,
 }: PropertyPanelProps) {
   const [showAll, setShowAll] = useState(false);
+  const editsLength = useChangeSetStore((s) => s.edits.length);
 
   if (!element || !structuralPath) {
     return (
@@ -91,7 +94,7 @@ export default function PropertyPanel({
   const showColors = showAll || visiblePanels.textColor || visiblePanels.backgroundColor;
 
   return (
-    <div key={`${structuralPath}-${viewport}`} className="text-slate-800 dark:text-zinc-200 bg-white dark:bg-[#141414] transition-colors pb-20">
+    <div key={`${structuralPath}-${viewport}-${editsLength}`} className="text-slate-800 dark:text-zinc-200 bg-white dark:bg-[#141414] transition-colors pb-20">
       {/* Selected Element Header with Type Badge and Contextual Filter Mode */}
       <div className="p-3 bg-slate-50 dark:bg-[#090909] flex flex-col gap-2 border-b border-slate-200 dark:border-[#262626]">
         <div className="flex items-center justify-between gap-2">

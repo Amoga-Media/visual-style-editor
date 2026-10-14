@@ -102,7 +102,7 @@ export default function ReviewModal({ iframeDocument, onSave, onClose, onDiscard
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-in fade-in duration-150">
       <div className="bg-[#141414] border border-[#262626] rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden transition-colors">
         {/* Modal Header */}
         <div className="p-4 border-b border-[#262626] flex items-center justify-between bg-[#1c1c1c]/50">

@@ -138,4 +138,28 @@ describe("Element Selection & Property Panel Rendering", () => {
     expect(htmlZoomed).toBeDefined();
     iframe.remove();
   });
+
+  it("suppresses SelectionOverlay completely when isModalOpen is true", () => {
+    const iframe = document.createElement("iframe");
+    document.body.appendChild(iframe);
+
+    const div = document.createElement("div");
+    div.style.width = "300px";
+    div.style.height = "150px";
+
+    const html = renderToString(
+      <SelectionOverlay
+        iframe={iframe}
+        hoveredElement={div}
+        selectedElement={div}
+        structuralPath="html>body>div"
+        theme={mockTheme}
+        zoom={1}
+        isModalOpen={true}
+      />
+    );
+
+    expect(html).toBe("");
+    iframe.remove();
+  });
 });

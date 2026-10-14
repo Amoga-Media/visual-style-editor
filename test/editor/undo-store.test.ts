@@ -229,4 +229,107 @@ describe("useUndoStore", () => {
     styleTag = document.getElementById("vse-responsive-styles");
     expect(styleTag?.textContent).toContain("font-size: 16px !important;");
   });
+
+  it("handles solid-to-gradient background undo and redo cleanly", () => {
+    document.body.innerHTML = `<div id="card" style="background-color: rgb(59, 130, 246);">Card</div>`;
+    const el = document.getElementById("card") as HTMLElement;
+
+    const gradEdit: EditRecord = {
+      kind: "style",
+      structuralPath: "#card",
+      property: "background-color",
+      styleProperty: "background-image",
+      oldStyleValue: "rgb(59, 130, 246)",
+      newStyleValue: "linear-gradient(135deg, rgb(0, 242, 254) 0%, rgb(79, 172, 254) 100%)",
+      viewport: "desktop",
+      timestamp: "2026-01-01T00:00:00.000Z",
+    };
+
+    useUndoStore.getState().pushHistory([]);
+    useChangeSetStore.setState({ edits: [gradEdit] });
+    reconcileDom([], [gradEdit], document);
+
+    expect(el.style.backgroundImage).toContain("linear-gradient");
+    expect(el.style.backgroundColor).toBe("");
+
+    // Undo: must restore background-color and remove background-image
+    useUndoStore.getState().undo(document);
+    expect(el.style.backgroundImage).toBe("");
+    expect(el.style.backgroundColor).toBe("rgb(59, 130, 246)");
+
+    // Redo: must re-apply gradient and remove background-color
+    useUndoStore.getState().redo(document);
+    expect(el.style.backgroundImage).toContain("linear-gradient");
+    expect(el.style.backgroundColor).toBe("");
+  });
+
+  it("handles text gradient undo and redo cleanly", () => {
+    document.body.innerHTML = `<h1 id="title" style="color: rgb(255, 255, 255);">Heading</h1>`;
+    const el = document.getElementById("title") as HTMLElement;
+
+    const textGradEdit: EditRecord = {
+      kind: "style",
+      structuralPath: "#title",
+      property: "text-color",
+      styleProperty: "background-image",
+      oldStyleValue: "rgb(255, 255, 255)",
+      newStyleValue: "linear-gradient(135deg, #f72585 0%, #4cc9f0 100%)",
+      viewport: "desktop",
+      timestamp: "2026-01-01T00:00:00.000Z",
+    };
+
+    useUndoStore.getState().pushHistory([]);
+    useChangeSetStore.setState({ edits: [textGradEdit] });
+    reconcileDom([], [textGradEdit], document);
+
+    expect(el.style.backgroundImage).toContain("linear-gradient");
+    expect(el.style.getPropertyValue("color")).toBe("transparent");
+
+    // Undo: must restore solid color and clean up clip / text-fill-color
+    useUndoStore.getState().undo(document);
+    expect(el.style.backgroundImage).toBe("");
+    expect(el.style.getPropertyValue("color")).toBe("rgb(255, 255, 255)");
+
+    // Redo: must re-apply gradient text
+    useUndoStore.getState().redo(document);
+    expect(el.style.backgroundImage).toContain("linear-gradient");
+    expect(el.style.getPropertyValue("color")).toBe("transparent");
+  });
+
+  it("safely undos and redos insert without deleting parent container", () => {
+    document.body.innerHTML = `<main id="container"><p id="existing">Paragraph</p></main>`;
+    const container = document.getElementById("container") as HTMLElement;
+
+    const insertEdit: EditRecord = {
+      kind: "insert",
+      structuralPath: "#container",
+      position: "inside",
+      snippet: `<button class="btn">Click me</button>`,
+      insertedPath: "#container > button:nth-child(2)",
+      parentPath: "#container",
+      insertId: "vse-ins-test-123",
+      timestamp: "2026-01-01T00:00:00.000Z",
+    };
+
+    // First apply insert
+    useUndoStore.getState().pushHistory([]);
+    useChangeSetStore.setState({ edits: [insertEdit] });
+    reconcileDom([], [insertEdit], document);
+
+    const insertedBtn = document.querySelector('[data-vse-insert-id="vse-ins-test-123"]');
+    expect(insertedBtn).not.toBeNull();
+    expect(container.children.length).toBe(2);
+
+    // Undo: should remove inserted button but KEEP container and existing paragraph intact!
+    useUndoStore.getState().undo(document);
+    expect(document.querySelector('[data-vse-insert-id="vse-ins-test-123"]')).toBeNull();
+    expect(document.getElementById("container")).not.toBeNull();
+    expect(document.getElementById("existing")).not.toBeNull();
+    expect(container.children.length).toBe(1);
+
+    // Redo: should re-insert button
+    useUndoStore.getState().redo(document);
+    expect(document.querySelector('[data-vse-insert-id="vse-ins-test-123"]')).not.toBeNull();
+    expect(container.children.length).toBe(2);
+  });
 });

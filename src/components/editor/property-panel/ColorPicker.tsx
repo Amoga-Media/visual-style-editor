@@ -465,6 +465,39 @@ export default function ColorPicker({
     pushRecentColor(presetGradient);
   }
 
+  // Interactive Opacity Handlers (0% - 100%)
+  function handleAlphaInputChange(val: string) {
+    setAlphaInput(val);
+    const cleaned = val.replace("%", "").trim();
+    const num = parseFloat(cleaned);
+    if (!isNaN(num)) {
+      const clamped = Math.max(0, Math.min(100, num));
+      const nextAlpha = Number((clamped / 100).toFixed(2));
+      emitColor(
+        currentHsvRef.current.hue,
+        currentHsvRef.current.sat,
+        currentHsvRef.current.val,
+        nextAlpha,
+        false
+      );
+    }
+  }
+
+  function commitAlphaInput() {
+    const cleaned = alphaInput.replace("%", "").trim();
+    const num = parseFloat(cleaned);
+    const clamped = isNaN(num) ? 100 : Math.max(0, Math.min(100, num));
+    const nextAlpha = Number((clamped / 100).toFixed(2));
+    setAlphaInput(`${Math.round(clamped)}%`);
+    emitColor(
+      currentHsvRef.current.hue,
+      currentHsvRef.current.sat,
+      currentHsvRef.current.val,
+      nextAlpha,
+      true
+    );
+  }
+
   // Close Popover when clicking outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -586,6 +619,25 @@ export default function ColorPicker({
           placeholder="#000000, transparent, or linear-gradient(...)"
           aria-label="Color string value"
         />
+
+        {/* Opacity Control Input */}
+        <div
+          className="w-16 bg-[#141414] border border-[#262626] focus-within:border-[#0099ff] focus-within:ring-1 focus-within:ring-[#0099ff] rounded-lg px-1.5 py-1.5 flex items-center shrink-0"
+          title="Color opacity percentage (0% - 100%)"
+        >
+          <input
+            type="text"
+            value={alphaInput}
+            onChange={(e) => handleAlphaInputChange(e.target.value)}
+            onBlur={() => commitAlphaInput()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitAlphaInput();
+            }}
+            aria-label="Color opacity percentage"
+            className="w-full bg-transparent text-xs text-zinc-200 font-mono text-center outline-none"
+            placeholder="100%"
+          />
+        </div>
       </div>
 
       {/* Popover Color Picker Window with Solid & Gradient Tabs */}
@@ -955,8 +1007,21 @@ export default function ColorPicker({
               className="flex-1 bg-[#1c1c1c] border border-[#262626] text-zinc-200 font-mono text-center py-1.5 px-2 rounded-xl outline-none focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] truncate"
             />
 
-            <div className="w-16 bg-[#1c1c1c] border border-[#262626] text-zinc-200 font-mono text-center py-1.5 px-2 rounded-xl">
-              {alphaInput}
+            <div
+              className="w-16 bg-[#1c1c1c] border border-[#262626] focus-within:border-[#0099ff] focus-within:ring-1 focus-within:ring-[#0099ff] rounded-xl py-1.5 px-2 flex items-center shrink-0"
+              title="Color opacity percentage (0% - 100%)"
+            >
+              <input
+                type="text"
+                value={alphaInput}
+                onChange={(e) => handleAlphaInputChange(e.target.value)}
+                onBlur={() => commitAlphaInput()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") commitAlphaInput();
+                }}
+                aria-label="Color opacity percentage"
+                className="w-full bg-transparent text-xs text-zinc-200 font-mono text-center outline-none"
+              />
             </div>
           </div>
 

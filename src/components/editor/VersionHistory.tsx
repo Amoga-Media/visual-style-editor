@@ -9,7 +9,7 @@ interface VersionHistoryProps {
 
 export default function VersionHistory({ entries, onDownload, onClose }: VersionHistoryProps) {
   return (
-    <div className="fixed top-16 right-4 bg-[#141414] border border-[#262626] rounded-2xl p-4 w-80 shadow-2xl z-50 text-zinc-200 animate-in fade-in slide-in-from-top-2 duration-150 transition-colors">
+    <div className="fixed top-16 right-4 bg-[#141414] border border-[#262626] rounded-2xl p-4 w-80 shadow-2xl z-[100] text-zinc-200 animate-in fade-in slide-in-from-top-2 duration-150 transition-colors">
       <div className="flex justify-between items-center mb-3 pb-2 border-b border-[#262626]">
         <div className="flex items-center gap-1.5 text-xs font-bold text-white">
           <History className="w-3.5 h-3.5 text-[#0099ff]" />

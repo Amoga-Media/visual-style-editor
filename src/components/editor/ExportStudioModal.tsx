@@ -233,7 +233,7 @@ export default function ExportStudioModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center p-3 sm:p-6 z-50 animate-in fade-in duration-150 select-none">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center p-3 sm:p-6 z-[100] animate-in fade-in duration-150 select-none">
       <div className="bg-[#0f0f11] border border-[#262626] rounded-3xl w-full max-w-6xl h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="h-14 px-5 border-b border-[#262626] flex items-center justify-between bg-[#141417]/80 shrink-0">

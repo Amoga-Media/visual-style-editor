@@ -126,6 +126,7 @@ export interface InsertEditRecord {
   insertedPath?: string;
   parentPath?: string;
   siblingIndex?: number;
+  insertId?: string;
   property?: string;
   timestamp: string; // ISO 8601
 }

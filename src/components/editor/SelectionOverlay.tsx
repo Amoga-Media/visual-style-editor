@@ -38,6 +38,7 @@ interface SelectionOverlayProps {
   zoom?: number;
   panOffset?: { x: number; y: number };
   viewport?: ViewportMode;
+  isModalOpen?: boolean;
   onEdit?: (record: EditRecord) => void;
   onBatchEdit?: (records: EditRecord[]) => void;
   onMoveElement?: (sourceEl: HTMLElement, targetEl: HTMLElement, position: "before" | "after" | "inside") => void;
@@ -111,6 +112,7 @@ export default function SelectionOverlay({
   zoom = 1,
   panOffset,
   viewport = "desktop",
+  isModalOpen = false,
   onEdit,
   onBatchEdit,
   onMoveElement,
@@ -713,6 +715,10 @@ export default function SelectionOverlay({
     window.addEventListener("pointerup", onPointerUp);
   }
 
+  if (isModalOpen) {
+    return null;
+  }
+
   return (
     <>
       {hoverRect && hoveredElement !== selectedElement && !dropTargetInfo && (
@@ -726,7 +732,7 @@ export default function SelectionOverlay({
             border: "2px solid #3b82f6",
             pointerEvents: "none",
             boxSizing: "border-box",
-            zIndex: 9998,
+            zIndex: 14,
             transform: "translateZ(0)",
             willChange: "transform",
             contain: "layout paint",
@@ -746,7 +752,7 @@ export default function SelectionOverlay({
             boxShadow: isAbsolute ? "0 0 10px rgba(99, 102, 241, 0.35)" : undefined,
             pointerEvents: "none",
             boxSizing: "border-box",
-            zIndex: 9999,
+            zIndex: 15,
             transform: "translateZ(0)",
             willChange: "transform",
           }}
@@ -760,7 +766,7 @@ export default function SelectionOverlay({
                 top: selectedRect.top < 100 ? selectedRect.height + 6 : -34,
                 left: -2,
                 pointerEvents: "auto",
-                zIndex: 10001,
+                zIndex: 20,
               }}
               className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-slate-900/95 dark:bg-[#18181b]/95 backdrop-blur-md text-white border border-slate-700/80 dark:border-[#333]/90 shadow-xl select-none"
             >
@@ -982,7 +988,7 @@ export default function SelectionOverlay({
                 whiteSpace: "nowrap",
                 pointerEvents: "none",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
-                zIndex: 10003,
+                zIndex: 22,
               }}
             >
               Scale: {scaleValue.toFixed(2)}× ({Math.round(scaleValue * 100)}%)
@@ -1008,7 +1014,7 @@ export default function SelectionOverlay({
                 whiteSpace: "nowrap",
                 pointerEvents: "none",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
-                zIndex: 10001,
+                zIndex: 22,
               }}
             >
               X: {dragCoords.x}px &nbsp;|&nbsp; Y: {dragCoords.y}px
@@ -1030,7 +1036,7 @@ export default function SelectionOverlay({
                 cursor: h.cursor,
                 pointerEvents: "auto",
                 boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
-                zIndex: 10002,
+                zIndex: 21,
                 ...h.style,
               }}
               title={`Resize (${h.id.toUpperCase()})`}
@@ -1056,7 +1062,7 @@ export default function SelectionOverlay({
                 whiteSpace: "nowrap",
                 pointerEvents: "none",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
-                zIndex: 10003,
+                zIndex: 22,
               }}
             >
               {resizeDimensions.width} × {resizeDimensions.height} px
@@ -1077,7 +1083,7 @@ export default function SelectionOverlay({
             backgroundColor: "#6366f1",
             borderRadius: "2px",
             pointerEvents: "none",
-            zIndex: 10005,
+            zIndex: 25,
             boxShadow: "0 0 8px #6366f1",
           }}
         >
@@ -1117,7 +1123,7 @@ export default function SelectionOverlay({
                 borderRadius: "8px",
                 pointerEvents: "none",
                 boxSizing: "border-box",
-                zIndex: 10000,
+                zIndex: 20,
                 boxShadow: "0 0 12px rgba(0, 153, 255, 0.3)",
               }}
             >
@@ -1150,7 +1156,7 @@ export default function SelectionOverlay({
                 backgroundColor: "#0099ff",
                 borderRadius: "2px",
                 pointerEvents: "none",
-                zIndex: 10000,
+                zIndex: 20,
                 boxShadow: "0 0 8px #0099ff",
               }}
             >
@@ -1182,7 +1188,7 @@ export default function SelectionOverlay({
                 backgroundColor: "#0099ff",
                 borderRadius: "2px",
                 pointerEvents: "none",
-                zIndex: 10000,
+                zIndex: 20,
                 boxShadow: "0 0 8px #0099ff",
               }}
             >
