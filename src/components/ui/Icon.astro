@@ -1,0 +1,409 @@
+---
+interface Props {
+  name: string;
+  class?: string;
+  size?: number | string;
+  strokeWidth?: number | string;
+}
+
+const {
+  name,
+  class: className = "w-6 h-6",
+  size,
+  strokeWidth = 2,
+} = Astro.props;
+
+const style = size ? `width: ${typeof size === 'number' ? `${size}px` : size}; height: ${typeof size === 'number' ? `${size}px` : size};` : undefined;
+---
+
+{/* Zero Telemetry & Privacy Shield */}
+{name === "shield" || name === "privacy" || name === "zero-telemetry" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <path d="m9 12 2 2 4-4" />
+  </svg>
+) : null}
+
+{/* Local First & Hard Drive */}
+{name === "hard-drive" || name === "local-first" || name === "disk" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="20" height="14" x="2" y="5" rx="2.5" />
+    <path d="M2 13h20" />
+    <circle cx="6.5" cy="16.5" r="1.25" fill="currentColor" />
+    <circle cx="10.5" cy="16.5" r="1.25" fill="currentColor" />
+  </svg>
+) : null}
+
+{/* AST Splicer & Code Integrity */}
+{name === "ast" || name === "code-integrity" || name === "splicer" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m7 7-4 5 4 5" />
+    <path d="m17 7 4 5-4 5" />
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 3v3" />
+    <path d="M12 18v3" />
+    <path d="M3 12h3" />
+    <path d="M18 12h3" />
+  </svg>
+) : null}
+
+{/* Honest Open Source & Community Heart/Star */}
+{name === "open-source" || name === "honest" || name === "sparkles" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m12 3-1.91 5.89a2 2 0 0 1-1.2 1.2L3 12l5.89 1.91a2 2 0 0 1 1.2 1.2L12 21l1.91-5.89a2 2 0 0 1 1.2-1.2L21 12l-5.89-1.91a2 2 0 0 1-1.2-1.2z" />
+    <path d="M19 5v4" />
+    <path d="M17 7h4" />
+  </svg>
+) : null}
+
+{/* Cloud Off / Air Gapped */}
+{name === "cloud-off" || name === "air-gapped" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m2 2 20 20" />
+    <path d="M5.782 5.782A7 7 0 0 0 4 10a5 5 0 0 0 2 9.6h11m4-4.2A5 5 0 0 0 18 10a7 7 0 0 0-8.4-5.3" />
+    <path d="M12 10v.01" />
+  </svg>
+) : null}
+
+{/* Wi-Fi Off / 100% Offline */}
+{name === "wifi-off" || name === "offline" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <line x1="2" x2="22" y1="2" y2="22" />
+    <path d="M8.5 16.5a5 5 0 0 1 7 0" />
+    <path d="M5 12.5a10 10 0 0 1 5.5-2.7" />
+    <path d="M19 12.5a10 10 0 0 0-4.5-2.7" />
+    <path d="M2 8.5a15 15 0 0 1 7.2-2.3" />
+    <path d="M22 8.5a15 15 0 0 0-7.2-2.3" />
+    <circle cx="12" cy="20" r="1.2" fill="currentColor" />
+  </svg>
+) : null}
+
+{/* Code / Templates */}
+{name === "code" || name === "templates" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="16 18 22 12 16 6" />
+    <polyline points="8 6 2 12 8 18" />
+  </svg>
+) : null}
+
+{/* Lock */}
+{name === "lock" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="16" height="11" x="4" y="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+) : null}
+
+{/* Unlock */}
+{name === "unlock" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="16" height="11" x="4" y="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+  </svg>
+) : null}
+
+{/* CPU Engine */}
+{name === "cpu" || name === "engine-cpu" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="16" height="16" x="4" y="4" rx="2" />
+    <rect width="6" height="6" x="9" y="9" rx="1" />
+    <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" />
+  </svg>
+) : null}
+
+{/* Tailwind / Styling Engine */}
+{name === "tailwind" || name === "engine-tailwind" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z" />
+    <path d="m15 5 4 4" />
+  </svg>
+) : null}
+
+{/* Color Palette / OKLCH Lab */}
+{name === "palette" || name === "color-lab" || name === "engine-color" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="13.5" cy="6.5" r="1.5" fill="currentColor" />
+    <circle cx="17.5" cy="10.5" r="1.5" fill="currentColor" />
+    <circle cx="8.5" cy="7.5" r="1.5" fill="currentColor" />
+    <circle cx="6.5" cy="12.5" r="1.5" fill="currentColor" />
+    <path d="M12 2C6.5 2 2 6.5 2 12c0 3.6 1.9 6.7 4.8 8.4.8.5 1.8.1 2.1-.8.2-.7.8-1.2 1.6-1.2h1.5c4.4 0 8-3.6 8-8 0-4.7-3.6-8.4-8-8.4z" />
+  </svg>
+) : null}
+
+{/* 60 FPS Gauge / Speed */}
+{name === "gauge" || name === "speed" || name === "engine-fps" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m12 14 4-4" />
+    <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+    <circle cx="12" cy="14" r="2" />
+  </svg>
+) : null}
+
+{/* Zap / Realtime */}
+{name === "zap" || name === "realtime" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </svg>
+) : null}
+
+{/* Checkmark */}
+{name === "check" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+) : null}
+
+{/* Arrow Right */}
+{name === "arrow-right" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M5 12h14" />
+    <path d="m12 5 7 7-7 7" />
+  </svg>
+) : null}
+
+{/* Template Categories */}
+{name === "category-landing" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+  </svg>
+) : null}
+
+{name === "category-saas" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="18" height="18" x="3" y="3" rx="2" />
+    <path d="M3 9h18" />
+    <path d="M9 21V9" />
+    <path d="m13 15 2-2 3 3" />
+  </svg>
+) : null}
+
+{name === "category-portfolio" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="18" height="18" x="3" y="3" rx="2" />
+    <circle cx="9" cy="9" r="2" />
+    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+  </svg>
+) : null}
+
+{name === "category-blog" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+    <path d="M6 6h10" />
+    <path d="M6 10h10" />
+    <path d="M6 14h6" />
+  </svg>
+) : null}
+
+{name === "category-component" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M7 2h10" />
+    <path d="M5 6h14" />
+    <rect width="18" height="12" x="3" y="10" rx="2" />
+    <path d="M8 15h2" />
+    <path d="M14 15h2" />
+  </svg>
+) : null}
+
+{/* Support & Community Icons */}
+{name === "bug" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="8" height="14" x="8" y="6" rx="4" />
+    <path d="m19 7-3 2" />
+    <path d="m5 7 3 2" />
+    <path d="m19 19-3-2" />
+    <path d="m5 19 3-2" />
+    <path d="M20 13h-4" />
+    <path d="M4 13h4" />
+    <path d="m10 4 1 2" />
+    <path d="m14 4-1 2" />
+  </svg>
+) : null}
+
+{name === "lightbulb" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+    <path d="M9 18h6" />
+    <path d="M10 22h4" />
+  </svg>
+) : null}
+
+{name === "heart" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+  </svg>
+) : null}
+
+{name === "github" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+    <path d="M9 18c-4.51 2-5-2-7-2" />
+  </svg>
+) : null}
+
+{/* Hardware Specs & Metrics */}
+{name === "ram" || name === "memory" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z" />
+    <path d="M6 9v6" />
+    <path d="M10 9v6" />
+    <path d="M14 9v6" />
+    <path d="M18 9v6" />
+    <path d="M6 19v2" />
+    <path d="M10 19v2" />
+    <path d="M14 19v2" />
+    <path d="M18 19v2" />
+  </svg>
+) : null}
+
+{name === "gpu" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="20" height="12" x="2" y="6" rx="2" />
+    <circle cx="8" cy="12" r="2.5" />
+    <circle cx="16" cy="12" r="2.5" />
+    <path d="M6 18v2M18 18v2M2 10h2M2 14h2" />
+  </svg>
+) : null}
+
+{name === "storage" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <ellipse cx="12" cy="5" rx="9" ry="3" />
+    <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" />
+    <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3" />
+  </svg>
+) : null}
+
+{/* Browser Icons */}
+{name === "browser-chrome" || name === "Chrome" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="4" />
+    <line x1="21.17" x2="12" y1="8" y2="8" />
+    <line x1="3.95" x2="8.54" y1="6.06" y2="14" />
+    <line x1="10.88" x2="15.46" y1="21.94" y2="14" />
+  </svg>
+) : null}
+
+{name === "browser-edge" || name === "Edge" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M22 12c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2c2.5 0 4.8 1 6.5 2.6" />
+    <path d="M12 6c3.3 0 6 2.7 6 6a6 6 0 0 1-6 6c-4 0-7-3-7-6.5C5 8.5 8 6 12 6Z" />
+  </svg>
+) : null}
+
+{name === "browser-brave" || name === "Brave" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 2 4 7v5c0 5.5 3.5 10.7 8 12 4.5-1.3 8-6.5 8-12V7l-8-5Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+) : null}
+
+{name === "browser-arc" || name === "Arc" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="18" height="18" x="3" y="3" rx="4" />
+    <path d="M8 3v18" />
+    <path d="M8 8h13" />
+  </svg>
+) : null}
+
+{name === "browser-opera" || name === "Opera" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <ellipse cx="12" cy="12" rx="4" ry="7" />
+  </svg>
+) : null}
+
+{name === "browser-firefox" || name === "Firefox" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 6a6 6 0 0 1 6 6c0 3.3-2.7 6-6 6a6 6 0 0 1-4-10.5" />
+    <path d="M14 10a2 2 0 1 0-2 2" />
+  </svg>
+) : null}
+
+{name === "browser-safari" || name === "Safari" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+  </svg>
+) : null}
+
+{name === "browser-mobile" || name === "Mobile" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="14" height="20" x="5" y="2" rx="3" />
+    <path d="M12 18h.01" />
+  </svg>
+) : null}
+
+{name === "browser-webkit" || name === "WebKit" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+) : null}
+
+{/* Timeline Step Icons */}
+{name === "step-folder" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
+    <path d="M12 11v6" />
+    <path d="m9 14 3-3 3 3" />
+  </svg>
+) : null}
+
+{name === "step-ast" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="5" r="3" />
+    <circle cx="6" cy="18" r="3" />
+    <circle cx="18" cy="18" r="3" />
+    <path d="M12 8v4" />
+    <path d="m10 13-3 2.5" />
+    <path d="m14 13 3 2.5" />
+  </svg>
+) : null}
+
+{name === "step-canvas" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect width="20" height="14" x="2" y="3" rx="2" />
+    <path d="M2 7h20" />
+    <path d="M8 21h8" />
+    <path d="M12 17v4" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+) : null}
+
+{name === "step-sliders" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <line x1="4" x2="4" y1="21" y2="14" />
+    <line x1="4" x2="4" y1="10" y2="3" />
+    <line x1="12" x2="12" y1="21" y2="12" />
+    <line x1="12" x2="12" y1="8" y2="3" />
+    <line x1="20" x2="20" y1="21" y2="16" />
+    <line x1="20" x2="20" y1="12" y2="3" />
+    <line x1="1" x2="7" y1="14" y2="14" />
+    <line x1="9" x2="15" y1="8" y2="8" />
+    <line x1="17" x2="23" y1="16" y2="16" />
+  </svg>
+) : null}
+
+{name === "step-splice" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="6" cy="6" r="3" />
+    <circle cx="6" cy="18" r="3" />
+    <line x1="20" x2="8.12" y1="4" y2="15.88" />
+    <line x1="14.47" x2="20" y1="14.48" y2="20" />
+    <line x1="8.12" x2="12" y1="8.12" y2="12" />
+  </svg>
+) : null}
+
+{name === "step-save" ? (
+  <svg class={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+    <polyline points="17 21 17 13 7 13 7 21" />
+    <polyline points="7 3 7 8 15 8" />
+    <path d="m9 17 2 2 4-4" />
+  </svg>
+) : null}

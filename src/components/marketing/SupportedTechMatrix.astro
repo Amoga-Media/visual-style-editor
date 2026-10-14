@@ -1,0 +1,172 @@
+---
+import Icon from "@/components/ui/Icon.astro";
+
+interface TechCategory {
+  title: string;
+  badge: string;
+  iconName: string;
+  capsuleTheme: string;
+  pillClass: string;
+  statusClass: string;
+  dotBg: string;
+  description: string;
+  items: {
+    name: string;
+    detail: string;
+    pill: string;
+  }[];
+}
+
+const categories: TechCategory[] = [
+  {
+    title: "Tailwind CSS Architecture",
+    badge: "v3 & v4 Unified",
+    iconName: "tailwind",
+    capsuleTheme: "cyan",
+    pillClass: "bg-sky-50 text-sky-800 border-sky-300 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-500/40",
+    statusClass: "text-sky-700 dark:text-sky-300",
+    dotBg: "#0284c7",
+    description: "Full bidirectional utility mapping and modern CSS variable architecture without arbitrary string spaghetti.",
+    items: [
+      { name: "Tailwind v4 @theme", detail: "Direct CSS variable token synthesis", pill: "v4.x Native" },
+      { name: "Tailwind v3 Configs", detail: "Classic theme utilities & config objects", pill: "v3.x Classic" },
+      { name: "Responsive Variants", detail: "Visual toggles for sm:, md:, lg:, xl: breakpoints", pill: "Responsive" },
+      { name: "State Modifiers", detail: "Interactive hover:, focus:, active:, dark: states", pill: "Interactive" },
+    ],
+  },
+  {
+    title: "Template & File Formats",
+    badge: "6 Formats Supported",
+    iconName: "code",
+    capsuleTheme: "violet",
+    pillClass: "bg-purple-50 text-purple-800 border-purple-300 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40",
+    statusClass: "text-purple-700 dark:text-purple-300",
+    dotBg: "#7e22ce",
+    description: "Drop standard HTML files or export surgically formatted markup into popular template languages.",
+    items: [
+      { name: "HTML5 (.html, .htm)", detail: "Bit-for-bit DOCTYPE & metadata preservation", pill: "Direct Read/Write" },
+      { name: "Astro Components", detail: "Preserves frontmatter fences and JSX templates", pill: "Static Island" },
+      { name: "Blade & Twig Templates", detail: "Leaves {{ tags }} and server directives intact", pill: "Server-side" },
+      { name: "Vue & React Markup", detail: "Clean class / className syntax translation", pill: "Componentized" },
+    ],
+  },
+  {
+    title: "Color Science & Gamut",
+    badge: "Perceptually Uniform",
+    iconName: "palette",
+    capsuleTheme: "lime",
+    pillClass: "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/40",
+    statusClass: "text-emerald-700 dark:text-emerald-400",
+    dotBg: "#15803d",
+    description: "Next-generation color spaces that prevent murky muddy mid-tones and automate accessibility.",
+    items: [
+      { name: "OKLCH Color Space", detail: "Perceptual uniform lightness across hue shifts", pill: "Wide Spectrum" },
+      { name: "Display P3 Gamut", detail: "Vibrant high-saturation tones for Apple retina screens", pill: "Wide Gamut" },
+      { name: "WCAG Contrast Engine", detail: "Instant AA & AAA readability compliance tests", pill: "Accessibility" },
+      { name: "Harmonic Palette Generator", detail: "9-step tonal scales (50 to 900) automatically", pill: "9 Steps" },
+    ],
+  },
+  {
+    title: "Parse5 AST Splicing Engine",
+    badge: "0 Comment Loss",
+    iconName: "ast",
+    capsuleTheme: "amber",
+    pillClass: "bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-500/40",
+    statusClass: "text-amber-800 dark:text-amber-300",
+    dotBg: "#b45309",
+    description: "Non-destructive surgical byte splicing. Only your intended class attributes are altered.",
+    items: [
+      { name: "Byte-Offset Tracking", detail: "Parse5 source location exact start & end indices", pill: "<2ms Slice" },
+      { name: "Comment Preservation", detail: "Never strips developer comments or conditional tags", pill: "100% Intact" },
+      { name: "Indentation Integrity", detail: "Maintains existing tabs, spaces, and formatting", pill: "Preserved" },
+      { name: "Zero Re-serialization", detail: "Never turns entire HTML into generic soup", pill: "Surgical" },
+    ],
+  },
+];
+---
+
+<section class="section py-20 border-t relative overflow-hidden" style="background: var(--canvas-subtle); border-color: var(--border);">
+  <!-- Background radial subtle grid -->
+  <div class="absolute inset-0 pointer-events-none opacity-20" style="background-image: radial-gradient(var(--ink-4) 1px, transparent 1px); background-size: 24px 24px;" aria-hidden="true"></div>
+
+  <div class="section-inner relative z-10">
+    <div class="section-header text-center max-w-5xl lg:max-w-6xl mx-auto mb-16" data-reveal="fade-up">
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase border mb-3 select-none bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-500/40"
+      >
+        <span class="w-2 h-2 rounded-full bg-sky-600 dark:bg-sky-400 animate-ping"></span>
+        Zero Vendor Lock-In
+      </div>
+      <h2 class="text-display text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-[1.08]" style="color: var(--ink-1);">
+        Supported Tech & Framework Matrix
+      </h2>
+      <p class="text-body text-base sm:text-lg max-w-3xl mx-auto mt-3" style="color: var(--ink-2);">
+        Works seamlessly with modern web standards, design token architectures, and battle-tested server templates.
+      </p>
+    </div>
+
+    <!-- 4-Column Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-reveal-group>
+      {categories.map((cat, idx) => (
+        <div
+          class="tile p-6 flex flex-col justify-between rounded-3xl border transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl group"
+          data-reveal-item
+          style={`background: var(--surface-1); border-color: var(--border); box-shadow: var(--shadow-md); transition-delay: ${idx * 60}ms;`}
+        >
+          <div>
+            <!-- Top pill and icon -->
+            <div class="flex items-center justify-between mb-4">
+              <div class={`frosted-icon-capsule ${cat.capsuleTheme} w-11 h-11 shadow-sm`}>
+                <Icon name={cat.iconName} class="w-5 h-5" />
+              </div>
+              <span
+                class={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold tracking-tight uppercase border ${cat.pillClass}`}
+              >
+                {cat.badge}
+              </span>
+            </div>
+
+            <!-- Title & description -->
+            <h3 class="text-lg font-bold tracking-tight mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" style="color: var(--ink-1);">
+              {cat.title}
+            </h3>
+            <p class="text-xs leading-relaxed mb-6" style="color: var(--ink-2);">
+              {cat.description}
+            </p>
+
+            <!-- Items list -->
+            <div class="space-y-3 pt-3 border-t" style="border-color: var(--border);">
+              {cat.items.map((item) => (
+                <div class="flex items-start justify-between gap-2 p-2 rounded-xl transition-colors hover:bg-black/5 dark:hover:bg-white/5">
+                  <div class="space-y-0.5">
+                    <p class="text-xs font-semibold" style="color: var(--ink-1); letter-spacing: -0.01em;">
+                      {item.name}
+                    </p>
+                    <p class="text-[11px]" style="color: var(--ink-2);">
+                      {item.detail}
+                    </p>
+                  </div>
+                  <span
+                    class="shrink-0 text-[9px] font-mono font-medium px-2 py-0.5 rounded-md border mt-0.5"
+                    style={`background: var(--surface-2); border-color: var(--border); color: var(--ink-2);`}
+                  >
+                    {item.pill}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- Bottom check note -->
+          <div class="mt-6 pt-3 border-t flex items-center justify-between text-[11px] font-mono" style="border-color: var(--border); color: var(--ink-2);">
+            <span>Engine Status</span>
+            <span class={`flex items-center gap-1.5 font-bold ${cat.statusClass}`}>
+              <span class="w-1.5 h-1.5 rounded-full" style={`background-color: ${cat.dotBg};`}></span>
+              100% Compatible
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

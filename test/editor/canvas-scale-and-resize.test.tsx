@@ -58,7 +58,7 @@ describe("Canvas Scale, Gutter & Artboard Resizing", () => {
 
     // Select starter template to enter the canvas workspace
     const templateButton = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("AI SaaS Landing Page")
+      b.textContent?.includes("Developer Profile & Stack")
     );
     await act(async () => {
       templateButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -101,7 +101,7 @@ describe("Canvas Scale, Gutter & Artboard Resizing", () => {
 
     // Select starter template
     const templateButton = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("AI SaaS Landing Page")
+      b.textContent?.includes("Developer Profile & Stack")
     );
     await act(async () => {
       templateButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -161,7 +161,7 @@ describe("Canvas Scale, Gutter & Artboard Resizing", () => {
 
     // Enter project via template
     const templateButton = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("AI SaaS Landing Page")
+      b.textContent?.includes("Developer Profile & Stack")
     );
     await act(async () => {
       templateButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -181,7 +181,7 @@ describe("Canvas Scale, Gutter & Artboard Resizing", () => {
     // Verify workspace is reset and DropZone is shown
     expect(useWorkspaceStore.getState().files.length).toBe(0);
     expect(container.querySelector("iframe")).toBeNull();
-    expect(container.textContent).toContain("Drop HTML pages & project files");
+    expect(container.textContent).toContain("Drop HTML files");
 
     await act(async () => {
       root.unmount();

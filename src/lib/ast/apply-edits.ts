@@ -403,6 +403,20 @@ export function applyEditsClientSide(
     }
   }
 
+  // Auto-embed Tailwind CDN in <head> if any class edits add Tailwind utility classes
+  const hasAddedTailwindClasses = edits.some((e) => e.kind === "class" && e.newClassList && e.newClassList.length > 0);
+  if (hasAddedTailwindClasses && !html.includes("tailwindcss.com") && !html.includes("tailwind")) {
+    const headEl = elementChildren(htmlEl).find((el) => el.tagName === "head") as Element | undefined;
+    if (headEl && headEl.sourceCodeLocation?.endTag) {
+      const insertAt = headEl.sourceCodeLocation.endTag.startOffset;
+      splices.push({
+        startOffset: insertAt,
+        endOffset: insertAt,
+        replacement: '  <script src="https://cdn.tailwindcss.com"></script>\n',
+      });
+    }
+  }
+
   // Idempotent Responsive Stylesheet Persistence
   let responsiveCss = options?.responsiveCss !== undefined ? options.responsiveCss : generateResponsiveCssString();
   if (!responsiveCss || responsiveCss.trim().length === 0) {

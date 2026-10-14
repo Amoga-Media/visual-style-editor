@@ -14,12 +14,12 @@ describe("EditorStudio integration", () => {
     });
 
     // Verify DropZone is rendered
-    expect(container.textContent).toContain("Drop HTML pages & project files");
-    expect(container.textContent).toContain("AI SaaS Landing Page");
+    expect(container.textContent).toContain("Drop HTML files");
+    expect(container.textContent).toContain("Developer Profile & Stack");
 
     // Click the first starter template
     const templateButton = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("AI SaaS Landing Page")
+      b.textContent?.includes("Developer Profile & Stack")
     );
     expect(templateButton).toBeDefined();
 
@@ -28,8 +28,8 @@ describe("EditorStudio integration", () => {
     });
 
     // Verify EditorStudio rendered toolbar, layers, and preview frame
-    expect(container.textContent).toContain("Visual Studio");
-    expect(container.textContent).toContain("saas-landing.html");
+    expect(container.textContent).toContain("VSE");
+    expect(container.textContent).toContain("developer-card.html");
     expect(container.querySelector("iframe")).not.toBeNull();
 
     // Clean up

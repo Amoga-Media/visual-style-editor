@@ -4,6 +4,7 @@ import type { ViewportMode } from "../Toolbar";
 import { readCurrentValue } from "@/lib/dom/computed-style";
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
 import { getResponsivePropertyInfo } from "@/lib/dom/responsive-style-engine";
+import { useChangeSetStore } from "@/store/change-set-store";
 import ValueInput from "./ValueInput";
 import BoxModelVisualizer from "./BoxModelVisualizer";
 import { ChevronDown, ChevronRight, Sliders, Lock, Unlock, Space } from "lucide-react";
@@ -197,6 +198,7 @@ function getMaxHeightSliderMax(unit: Unit, parentHeight: number): number {
 }
 
 export default function LayoutGroup({ element, structuralPath, theme, viewport = "desktop", onEdit }: LayoutGroupProps) {
+  const edits = useChangeSetStore((s) => s.edits);
   const [width, setWidth] = useState<AxisValue>({ amount: 0, unit: "px" });
   const [height, setHeight] = useState<AxisValue>({ amount: 0, unit: "px" });
   const [lockAspect, setLockAspect] = useState<boolean>(false);
@@ -309,7 +311,7 @@ export default function LayoutGroup({ element, structuralPath, theme, viewport =
     setMarL(mlVal);
     const isMarUniform = mtVal.amount === mrVal.amount && mtVal.amount === mbVal.amount && mtVal.amount === mlVal.amount && mtVal.unit === mrVal.unit;
     setLinkedMargin(isMarUniform);
-  }, [element, theme, viewport, structuralPath]);
+  }, [element, theme, viewport, structuralPath, edits]);
 
   if (!element || !structuralPath) return null;
 

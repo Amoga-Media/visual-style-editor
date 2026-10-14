@@ -7,108 +7,129 @@ import CtaBanner from "@/components/marketing/CtaBanner.astro";
 const terms = [
   {
     id: "acceptance",
-    title: "1. Acceptance of Terms",
-    content: "By accessing, loading, or using Visual Style Editor (the 'Application'), you agree to be bound by these Terms of Service ('Terms'). Visual Style Editor is an open-source, client-side web application distributed under the MIT License. If you do not agree to these terms, do not use the application."
+    num: "01",
+    title: "Acceptance of Terms",
+    content: "By accessing, loading, or using Visual Style Editor (the 'Application'), you agree to be bound by these Terms of Service ('Terms'). Visual Style Editor is an open-source, client-side web application distributed under the terms of the MIT License. If you do not agree to these terms, do not use the application."
   },
   {
     id: "ip-ownership",
-    title: "2. Absolute User IP & Code Ownership",
-    content: "You retain 100% exclusive intellectual property ownership of all files, HTML documents, Tailwind CSS configurations, styles, graphics, copy, and code that you create, import, edit, or export using Visual Style Editor. We assert zero claim, license, or copyright over your work. What you build is entirely yours, whether for personal, educational, or commercial production."
+    num: "02",
+    title: "100% User Code & IP Ownership",
+    content: "You retain exclusive, absolute intellectual property ownership of all files, HTML documents, Tailwind CSS configurations, styles, graphics, copy, and code that you create, import, edit, or export using Visual Style Editor. We assert zero claim, license, or copyright over your work. What you build is entirely yours, whether for personal, educational, or commercial production."
   },
   {
     id: "local-saving",
-    title: "3. Local File System & Backup Recommendations",
-    content: "Visual Style Editor interacts directly with your local files using the browser's File System Access API. Although we employ surgical AST splicing and automatic 2-second debounced local storage crash recovery, software bugs, browser memory exhaustion, or power failures can occur. We strongly advise that you keep your project directories under Git version control or maintain regular backups before performing batch edits."
+    num: "03",
+    title: "Local File System & Data Integrity",
+    content: "Visual Style Editor interacts directly with your local files using the browser's File System Access API. Although we employ surgical AST splicing and automatic debounced local crash-recovery snapshots, software bugs, browser memory exhaustion, or unexpected operating system interruptions can occur. We strongly recommend keeping your project repositories under Git version control or maintaining regular backups before performing batch edits."
   },
   {
     id: "mit-license",
-    title: "4. MIT Open Source License Terms",
+    num: "04",
+    title: "MIT Open Source License",
     content: "The Visual Style Editor application itself is licensed under the MIT License. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files, to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software."
   },
   {
     id: "disclaimer",
-    title: "5. Disclaimer of Warranties",
+    num: "05",
+    title: "Disclaimer of Warranties",
     content: "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
   },
   {
     id: "browser-support",
-    title: "6. Browser Support & Web Standards",
-    content: "Certain capabilities — including direct file overwriting and directory tree synchronization — depend on modern Web APIs (specifically the File System Access API) which are supported primarily in Chromium-based browsers (Google Chrome, Microsoft Edge, Brave, Opera, Arc). Users accessing the application via non-supporting browsers can use one-click HTML downloads as an alternative."
+    num: "06",
+    title: "Browser Compatibility & Web Standards",
+    content: "Certain capabilities — including direct in-place file saves and directory tree synchronization — depend on modern Web APIs (specifically the Chromium File System Access API) which are supported primarily in Chromium-based browsers (Google Chrome, Microsoft Edge, Brave, Opera, Arc). On non-supporting browsers such as Firefox and Safari, users can use the one-click HTML download mechanism to save their work without limitations."
   },
   {
     id: "governing",
-    title: "7. Community Governance & Contact",
-    content: "These Terms are governed by principles of the open-source software community. All feedback, bug reports, and legal inquiries should be directed to the official project repository on GitHub. These terms were last updated on September 30, 2026."
+    num: "07",
+    title: "Open Source Governance & Inquiries",
+    content: "These Terms are governed by the principles of the open-source software community. All feedback, bug reports, and community contributions are conducted openly via our public GitHub repository. This agreement was last updated in October 2026."
   }
 ];
 ---
 
 <BaseLayout
   title="Terms of Service — Visual Style Editor"
-  description="Read the terms of service governing the use of Visual Style Editor, an open-source MIT-licensed client-side web application."
-  theme="dark"
-  showPixelCanvas={true}
+  description="Read the open-source terms of service governing the use of Visual Style Editor under the MIT License."
 >
-  <div class="relative min-h-screen flex flex-col bg-[#060608] text-slate-100 overflow-hidden">
-    <Navbar />
+  <div class="flex flex-col min-h-[100dvh]">
+    <Navbar activePage="terms" />
 
-    <main class="flex-1">
-      <!-- HERO SECTION -->
-      <section class="pt-16 pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-8">
-        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-          Developer-Friendly Terms • MIT License
+    <main id="main-content" class="flex-1">
+
+      <!-- Header -->
+      <section class="relative overflow-hidden pt-8 sm:pt-12 md:pt-14 pb-12 sm:pb-14 px-4 sm:px-6 lg:px-8">
+        {/* Vibrant Multi-Layered Ambient Studio Aura & Grid Texture */}
+        <div class="hero-ambient-glow" aria-hidden="true">
+          <div class="hero-glow-orb magenta"></div>
+          <div class="hero-grid-pattern"></div>
         </div>
 
-        <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-[1.15]">
-          Terms of Service: <br class="hidden sm:inline" />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
-            Fair, clear, and open.
-          </span>
-        </h1>
-
-        <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-          Open-source terms designed to protect developer freedom, guarantee code ownership, and ensure a collaborative web.
-        </p>
-      </section>
-
-      <!-- TERMS DOCUMENT CONTENT -->
-      <section class="pb-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <div class="doppelrand-shell spotlight-card">
-          <div class="doppelrand-core p-7 sm:p-12 space-y-10">
-            <!-- Table of Contents Pill Bar -->
-            <div class="p-5 rounded-2xl bg-[#0a0c12] border border-white/5 space-y-2">
-              <span class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Quick Navigation:</span>
-              <div class="flex flex-wrap gap-2 text-xs font-mono">
-                {terms.map((t) => (
-                  <a href={`#${t.id}`} class="text-slate-400 hover:text-cyan-300 transition-colors">
-                    {t.title.split(". ")[1]} &bull;
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <!-- Sections -->
-            <div class="space-y-10 divide-y divide-white/5">
-              {terms.map((sec, idx) => (
-                <div id={sec.id} class={idx > 0 ? "pt-8 space-y-3" : "space-y-3"}>
-                  <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                    {sec.title}
-                  </h2>
-                  <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
-                    {sec.content}
-                  </p>
-                </div>
-              ))}
-            </div>
+        <div class="max-w-3xl mx-auto text-center space-y-4 relative z-10">
+          <div
+            class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none mx-auto shadow-sm backdrop-blur-xl bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
+          >
+            <span class="w-2 h-2 rounded-full bg-purple-600 dark:bg-purple-400 animate-pulse"></span>
+            <span>Open Source · MIT License</span>
+          </div>
+          <h1 class="text-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08]">
+            Terms of Service
+          </h1>
+          <p class="text-body text-base sm:text-lg mx-auto text-balance" style="color: var(--ink-2);">
+            Simple, honest terms designed to protect developer freedom, guarantee complete code ownership, and ensure a collaborative web.
+          </p>
+          <div class="text-mono font-medium" style="color: var(--ink-3); font-size: 0.75rem; padding-top: 0.5rem;">
+            Effective Date: October 2026 • Free Forever
           </div>
         </div>
       </section>
 
-      <!-- CTA BANNER -->
+      <!-- Terms Content -->
+      <section class="section" style="padding-top: 0; padding-bottom: 5rem;">
+        <div class="max-w-3xl mx-auto">
+          <!-- Table of contents pill list -->
+          <div class="card p-4 sm:p-5 mb-8">
+            <div class="text-label mb-3" style="color: var(--ink-3);">Document Sections</div>
+            <div class="flex flex-wrap gap-2 text-xs">
+              {terms.map((t) => (
+                <a
+                  href={`#${t.id}`}
+                  class="px-2.5 py-1 rounded-md transition-colors"
+                  style="background: var(--surface-2); border: 1px solid var(--border); color: var(--ink-2);"
+                >
+                  <span class="font-mono text-[10px]" style="color: var(--ink-3);">{t.num}</span> {t.title}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <!-- Section Cards -->
+          <div class="space-y-6">
+            {terms.map((sec) => (
+              <article id={sec.id} class="card p-6 sm:p-8 scroll-mt-24">
+                <div class="flex items-baseline gap-3 mb-3">
+                  <span class="text-mono text-xs font-bold" style="color: var(--ink-3);">{sec.num}</span>
+                  <h2 class="text-title text-base sm:text-lg">
+                    {sec.title}
+                  </h2>
+                </div>
+                <p class="text-body text-sm sm:text-base leading-relaxed" style="color: var(--ink-2);">
+                  {sec.content}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Banner -->
       <CtaBanner
-        headline="Ready to start crafting your next project?"
-        subheadline="Launch the studio and start styling your HTML and Tailwind components visually."
+        title="Your code is completely yours."
+        subtitle="No licenses, no cloud lock-in, and zero restrictions on commercial work."
+        primaryLabel="Launch the editor"
+        primaryHref="/editor"
       />
     </main>
 

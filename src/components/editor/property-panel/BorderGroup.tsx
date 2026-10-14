@@ -4,6 +4,7 @@ import type { ViewportMode } from "../Toolbar";
 import { readCurrentValue } from "@/lib/dom/computed-style";
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
 import { getResponsivePropertyInfo } from "@/lib/dom/responsive-style-engine";
+import { useChangeSetStore } from "@/store/change-set-store";
 import ValueInput from "./ValueInput";
 import { Lock, Unlock, Square, Circle } from "lucide-react";
 import ColorPicker from "./ColorPicker";
@@ -70,6 +71,7 @@ export default function BorderGroup({
   viewport = "desktop",
   onEdit,
 }: BorderGroupProps) {
+  const edits = useChangeSetStore((s) => s.edits);
   const [borderColor, setBorderColor] = useState<string>("#e2e8f0");
   const [borderWidth, setBorderWidth] = useState<AxisValue>({ amount: 0, unit: "px" });
   const [borderRadius, setBorderRadius] = useState<AxisValue>({ amount: 0, unit: "px" });
@@ -127,7 +129,7 @@ export default function BorderGroup({
 
     const style = getVal("border-style") || "solid";
     setBorderStyle(style);
-  }, [element, theme, viewport, structuralPath]);
+  }, [element, theme, viewport, structuralPath, edits]);
 
   if (!element || !structuralPath) return null;
 
@@ -138,6 +140,21 @@ export default function BorderGroup({
 
   function commitBorderColor(val: string) {
     setBorderColor(val);
+    if (!borderStyle || borderStyle === "none") {
+      setBorderStyle("solid");
+      applyLiveStyle(element!, "border-style", "solid", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(
+        element!,
+        structuralPath!,
+        "border-style",
+        "solid",
+        theme,
+        onEdit,
+        undefined,
+        undefined,
+        viewport
+      );
+    }
     commitStyleChange(
       element!,
       structuralPath!,
@@ -205,6 +222,23 @@ export default function BorderGroup({
     setBorderR(valObj);
     setBorderB(valObj);
     setBorderL(valObj);
+
+    if (amount > 0 && (!borderStyle || borderStyle === "none")) {
+      setBorderStyle("solid");
+      applyLiveStyle(element!, "border-style", "solid", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(
+        element!,
+        structuralPath!,
+        "border-style",
+        "solid",
+        theme,
+        onEdit,
+        undefined,
+        undefined,
+        viewport
+      );
+    }
+
     commitStyleChange(
       element!,
       structuralPath!,
@@ -229,6 +263,22 @@ export default function BorderGroup({
     if (side === "right") setBorderR(valObj);
     if (side === "bottom") setBorderB(valObj);
     if (side === "left") setBorderL(valObj);
+
+    if (amount > 0 && (!borderStyle || borderStyle === "none")) {
+      setBorderStyle("solid");
+      applyLiveStyle(element!, "border-style", "solid", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(
+        element!,
+        structuralPath!,
+        "border-style",
+        "solid",
+        theme,
+        onEdit,
+        undefined,
+        undefined,
+        viewport
+      );
+    }
 
     commitStyleChange(
       element!,

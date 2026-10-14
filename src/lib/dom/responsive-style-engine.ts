@@ -46,6 +46,28 @@ export function resetResponsivePropertyForViewport(
 }
 
 /**
+  * Completely removes a property from the responsive registry across specified or all viewports.
+  */
+export function removeResponsiveProperty(
+  structuralPath: string,
+  cssProperty: string,
+  viewport: "desktop" | "tablet" | "mobile" = "desktop",
+  doc?: Document | null
+): void {
+  const pathMap = responsiveRegistry.get(structuralPath);
+  if (!pathMap) return;
+  const current = pathMap.get(cssProperty);
+  if (!current) return;
+  delete current[viewport];
+  if (!current.desktop && !current.tablet && !current.mobile) {
+    pathMap.delete(cssProperty);
+  }
+  if (doc) {
+    syncResponsiveStylesheet(doc);
+  }
+}
+
+/**
  * Returns the effective value and inheritance state for a given property and viewport.
  */
 export function getResponsivePropertyInfo(

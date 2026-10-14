@@ -3,42 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Creative Portfolio Grid</title>
+  <title>Creative Studio Portfolio Grid</title>
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-[#09090b] text-white min-h-screen py-16 px-6">
-  <div class="max-w-5xl mx-auto space-y-12">
-    <header class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-8">
-      <div class="space-y-2">
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Selected Works</h1>
-        <p class="text-zinc-400 text-sm">Explorations in digital craft, interactive front-ends, and motion systems.</p>
+<body class="bg-[#09090b] text-zinc-100 min-h-screen py-20 px-6 font-sans antialiased">
+  <div class="max-w-6xl mx-auto space-y-16">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-zinc-800">
+      <div class="space-y-3">
+        <span class="text-xs font-mono font-bold tracking-widest text-purple-400 uppercase">
+          Selected Works • 2024–2026
+        </span>
+        <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-white">
+          Digital artifacts & interaction design
+        </h1>
       </div>
-      <div class="text-xs font-mono text-zinc-500">
-        2024 &mdash; 2026 ARCHIVE
-      </div>
-    </header>
+      <p class="text-sm font-mono text-zinc-400 max-w-xs">
+        Crafting high-precision interfaces with tactile physics and editorial restraint.
+      </p>
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <article class="p-6 rounded-2xl bg-[#111116] border border-white/[0.08] space-y-4 group cursor-pointer hover:border-white/20 transition-all">
-        <div class="h-56 rounded-xl bg-gradient-to-tr from-sky-950 via-slate-900 to-indigo-950 flex items-center justify-center p-6 border border-white/5">
-          <span class="text-sky-400 font-mono text-sm tracking-wider uppercase font-semibold">Project One</span>
+    <!-- Portfolio Project Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Project 1 -->
+      <article class="group rounded-3xl bg-zinc-900 border border-zinc-800 overflow-hidden hover:border-purple-500/50 transition-all duration-300">
+        <div class="h-64 bg-gradient-to-tr from-purple-900/40 via-zinc-900 to-zinc-800 p-8 flex flex-col justify-between relative overflow-hidden">
+          <span class="text-xs font-mono font-bold text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full w-fit border border-purple-500/20">
+            Case Study • FinTech
+          </span>
+          <div class="text-right">
+            <span class="text-4xl font-black font-mono text-white/20 group-hover:text-purple-400/40 transition-colors">01</span>
+          </div>
         </div>
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-white group-hover:text-[#0084FF] transition-colors">Spatial Canvas Engine</h2>
-          <span class="text-xs font-mono text-zinc-400">WebGPU &bull; React</span>
+        <div class="p-8 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-white group-hover:text-purple-400 transition-colors">Aetheria Quantum Wallet</h2>
+            <span class="text-xs font-mono text-zinc-400">2026</span>
+          </div>
+          <p class="text-sm text-zinc-400 leading-relaxed">
+            Multi-signature asset management workstation built with WebGL acceleration and local-first cryptographic storage.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-2 text-xs font-mono text-zinc-300">
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">Tailwind v4</span>
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">GSAP Core</span>
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">TypeScript</span>
+          </div>
         </div>
-        <p class="text-xs text-zinc-400 leading-relaxed">High-performance infinite 2D/3D pan-and-zoom rendering architecture.</p>
       </article>
 
-      <article class="p-6 rounded-2xl bg-[#111116] border border-white/[0.08] space-y-4 group cursor-pointer hover:border-white/20 transition-all">
-        <div class="h-56 rounded-xl bg-gradient-to-tr from-rose-950 via-slate-900 to-purple-950 flex items-center justify-center p-6 border border-white/5">
-          <span class="text-rose-400 font-mono text-sm tracking-wider uppercase font-semibold">Project Two</span>
+      <!-- Project 2 -->
+      <article class="group rounded-3xl bg-zinc-900 border border-zinc-800 overflow-hidden hover:border-sky-500/50 transition-all duration-300">
+        <div class="h-64 bg-gradient-to-tr from-sky-900/40 via-zinc-900 to-zinc-800 p-8 flex flex-col justify-between relative overflow-hidden">
+          <span class="text-xs font-mono font-bold text-sky-400 bg-sky-500/10 px-3 py-1 rounded-full w-fit border border-sky-500/20">
+            Design System • Studio
+          </span>
+          <div class="text-right">
+            <span class="text-4xl font-black font-mono text-white/20 group-hover:text-sky-400/40 transition-colors">02</span>
+          </div>
         </div>
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-white group-hover:text-rose-400 transition-colors">Kinetic Type Foundry</h2>
-          <span class="text-xs font-mono text-zinc-400">GSAP &bull; SVG</span>
+        <div class="p-8 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-white group-hover:text-sky-400 transition-colors">Nordic Kinetic Design System</h2>
+            <span class="text-xs font-mono text-zinc-400">2025</span>
+          </div>
+          <p class="text-sm text-zinc-400 leading-relaxed">
+            Scalable token architecture powering 40+ brand microsites with automated WCAG AAA validation and responsive fluid scaling.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-2 text-xs font-mono text-zinc-300">
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">OKLCH Gamut</span>
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">Lenis RAF</span>
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">Astro 5</span>
+          </div>
         </div>
-        <p class="text-xs text-zinc-400 leading-relaxed">Variable font motion choreography and parametric text destruction.</p>
+      </article>
+
+      <!-- Project 3 -->
+      <article class="group rounded-3xl bg-zinc-900 border border-zinc-800 overflow-hidden hover:border-emerald-500/50 transition-all duration-300">
+        <div class="h-64 bg-gradient-to-tr from-emerald-900/40 via-zinc-900 to-zinc-800 p-8 flex flex-col justify-between relative overflow-hidden">
+          <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full w-fit border border-emerald-500/20">
+            Developer Tool • AST
+          </span>
+          <div class="text-right">
+            <span class="text-4xl font-black font-mono text-white/20 group-hover:text-emerald-400/40 transition-colors">03</span>
+          </div>
+        </div>
+        <div class="p-8 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-white group-hover:text-emerald-400 transition-colors">ByteSplicer Compiler</h2>
+            <span class="text-xs font-mono text-zinc-400">2025</span>
+          </div>
+          <p class="text-sm text-zinc-400 leading-relaxed">
+            In-memory character coordinate transformation engine preserving adjacent HTML template tags without DOM re-serialization.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-2 text-xs font-mono text-zinc-300">
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">Parse5</span>
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">File System API</span>
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">Vitest</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Project 4 -->
+      <article class="group rounded-3xl bg-zinc-900 border border-zinc-800 overflow-hidden hover:border-amber-500/50 transition-all duration-300">
+        <div class="h-64 bg-gradient-to-tr from-amber-900/40 via-zinc-900 to-zinc-800 p-8 flex flex-col justify-between relative overflow-hidden">
+          <span class="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full w-fit border border-amber-500/20">
+            Media & Sound • WebAudio
+          </span>
+          <div class="text-right">
+            <span class="text-4xl font-black font-mono text-white/20 group-hover:text-amber-400/40 transition-colors">04</span>
+          </div>
+        </div>
+        <div class="p-8 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-white group-hover:text-amber-400 transition-colors">Spectra Audio Synthesizer</h2>
+            <span class="text-xs font-mono text-zinc-400">2024</span>
+          </div>
+          <p class="text-sm text-zinc-400 leading-relaxed">
+            Spatial audio playground with tactile rotary dials and harmonic frequency visualizers running at steady 60 FPS.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-2 text-xs font-mono text-zinc-300">
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">WebAudio API</span>
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">Canvas 2D</span>
+            <span class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700/60">Zustand</span>
+          </div>
+        </div>
       </article>
     </div>
   </div>

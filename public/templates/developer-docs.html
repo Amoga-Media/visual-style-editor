@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer API & AST Documentation</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-[#09090b] text-zinc-100 min-h-screen p-6 sm:p-12 font-sans antialiased">
+  <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
+    <!-- Left Navigation Sticky Sidebar -->
+    <aside class="lg:col-span-3 space-y-6">
+      <div class="space-y-1">
+        <span class="text-xs font-mono font-bold uppercase tracking-wider text-purple-400">API Documentation</span>
+        <h2 class="text-xl font-bold text-white">VSE Compiler SDK</h2>
+      </div>
+
+      <nav class="space-y-1 text-xs font-mono">
+        <a href="#" class="block px-3 py-2 rounded-xl bg-purple-500/10 text-purple-300 font-bold border border-purple-500/20">POST /splice-classes</a>
+        <a href="#" class="block px-3 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">GET /ast-location-map</a>
+        <a href="#" class="block px-3 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">POST /parse5-validate</a>
+        <a href="#" class="block px-3 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">GET /oklch-harmonize</a>
+      </nav>
+
+      <div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2 text-xs">
+        <span class="font-bold text-white font-mono">Client-Side Runtime</span>
+        <p class="text-zinc-400 leading-relaxed">No API keys required. All endpoints execute within client WASM/JS memory.</p>
+      </div>
+    </aside>
+
+    <!-- Main Docs Content -->
+    <main class="lg:col-span-9 space-y-8">
+      <div class="space-y-3 pb-6 border-b border-zinc-800">
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
+            POST
+          </span>
+          <span class="text-sm font-mono text-zinc-300">/v1/splice-classes</span>
+        </div>
+        <h1 class="text-3xl font-black text-white">Surgically Splice Class Attributes</h1>
+        <p class="text-sm text-zinc-400 leading-relaxed">
+          Locates the precise start and end character offsets of a node's class attribute and splices replacement classes without re-serializing adjacent DOM elements.
+        </p>
+      </div>
+
+      <!-- Request Body Code Box -->
+      <div class="space-y-3">
+        <span class="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Example Request (TypeScript)</span>
+        <div class="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 font-mono text-xs text-zinc-300 space-y-2 overflow-x-auto shadow-inner">
+          <div class="text-purple-400">import &#123; spliceClasses &#125; from '@vse/ast-core';</div>
+          <div class="pt-2 text-zinc-500">// Returns updated string without touching adjacent comments</div>
+          <div>const modifiedHtml = spliceClasses(rawHtml, &#123;</div>
+          <div class="pl-4">targetNodeId: 'hero-title-node',</div>
+          <div class="pl-4">newClasses: 'text-5xl font-black text-purple-400',</div>
+          <div class="pl-4">preserveIndentation: true,</div>
+          <div>&#125;);</div>
+        </div>
+      </div>
+
+      <!-- Parameters Table -->
+      <div class="space-y-3">
+        <span class="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Input Parameters</span>
+        <div class="border border-zinc-800 rounded-2xl overflow-hidden font-mono text-xs">
+          <table class="w-full text-left">
+            <thead class="bg-zinc-900 border-b border-zinc-800 text-zinc-400">
+              <tr>
+                <th class="p-3.5">Param</th>
+                <th class="p-3.5">Type</th>
+                <th class="p-3.5">Description</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-800 text-zinc-300">
+              <tr>
+                <td class="p-3.5 font-bold text-purple-400">rawHtml</td>
+                <td class="p-3.5 text-zinc-500">string</td>
+                <td class="p-3.5">The complete original HTML document string.</td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-bold text-purple-400">newClasses</td>
+                <td class="p-3.5 text-zinc-500">string</td>
+                <td class="p-3.5">The synthesized idiomatic Tailwind utility class string.</td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-bold text-purple-400">preserveIndentation</td>
+                <td class="p-3.5 text-zinc-500">boolean</td>
+                <td class="p-3.5">Preserves leading tabs, spaces, and line wraps. Defaults to true.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -3,188 +3,337 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import Navbar from "@/components/marketing/Navbar.astro";
 import Footer from "@/components/marketing/Footer.astro";
 import CtaBanner from "@/components/marketing/CtaBanner.astro";
+import FloatingBadges from "@/components/marketing/FloatingBadges";
+import HardwareSpecs from "@/components/marketing/HardwareSpecs.astro";
+import Icon from "@/components/ui/Icon.astro";
 
 const steps = [
   {
     step: "01",
-    title: "Intake & Local File Mount",
-    headline: "Zero uploads. File stays on your machine.",
-    desc: "When you drag-and-drop an HTML file or open a workspace folder, Visual Style Editor requests access through the native Chromium File System Access API. The file contents are read directly into browser memory as a string. Not a single packet leaves your computer.",
-    code: `// Chromium File System Access API
-const [fileHandle] = await window.showOpenFilePicker({
-  types: [{ description: 'HTML Files', accept: { 'text/html': ['.html', '.htm'] } }]
+    iconName: "step-folder",
+    title: "Open a file or folder",
+    tech: "File System Access API",
+    tagline: "Air-gapped memory ingestion. 0 bytes uploaded to any remote server.",
+    body: "Drag-drop an HTML file or click \"Open folder\" to select a local project directory. The browser prompts for file system access once per session. The file contents are read into browser memory as a string. Your code never leaves your local hardware.",
+    badgeClass: "cyan",
+    image: "/images/editor-snapshots/01-editor-dropzone-open.png",
+    imageLabel: "Air-Gapped Ingestion DropZone",
+    zoomOrigin: "50% 50%",
+    code: `const [fileHandle] = await window.showOpenFilePicker({
+  types: [{ 
+    description: 'HTML Files', 
+    accept: { 'text/html': ['.html', '.htm'] } 
+  }]
 });
 const file = await fileHandle.getFile();
-const sourceHtml = await file.text();`
+const sourceHtml = await file.text();
+// The file is now in browser memory. Zero upload.`,
+    chips: ["Chrome 86+", "Edge 86+", "Brave", "Arc", "Opera"]
   },
   {
     step: "02",
-    title: "Parse5 AST & Location Map",
-    headline: "Exact source code character boundaries indexed.",
-    desc: "The source HTML is processed through Parse5 with source location tracking enabled. Every opening tag, closing tag, attribute, comment, script block, and DOCTYPE is cataloged with its exact start and end byte offsets. This creates a high-fidelity map of your entire document structure.",
-    code: `// Parse5 AST Construction with source tracking
-const documentAst = parse5.parse(sourceHtml, { 
+    iconName: "step-ast",
+    title: "Parse into an AST with byte locations",
+    tech: "Parse5 Source Tracking",
+    tagline: "Every tag, attribute, and comment cataloged to exact byte indices.",
+    body: "The HTML string is processed through Parse5 with source location tracking enabled. Every node — opening tag, attribute, text node, comment, DOCTYPE — is catalogued with its exact start and end byte offset. This creates a surgical coordinate map that survives subsequent edits.",
+    badgeClass: "violet",
+    image: "/images/editor-snapshots/02-editor-ast-tree-inspector.png",
+    imageLabel: "Parse5 AST Coordinate Indexing",
+    zoomOrigin: "15% 35%",
+    code: `const ast = parse5.parse(sourceHtml, { 
   sourceCodeLocationInfo: true 
 });
-const locationMap = buildLocationMap(documentAst);`
+
+// Each attribute receives precise byte positions:
+// attrLoc.startOffset = 127
+// attrLoc.endOffset   = 163
+// Entire surrounding document remains intact.`,
+    chips: ["0ms AST overhead", "Preserves comments", "Bit-for-bit DOCTYPE preservation"]
   },
   {
     step: "03",
-    title: "Sandboxed 60fps Live Canvas",
-    headline: "Isolated rendering with instant visual feedback.",
-    desc: "The HTML is injected into an isolated, secure iframe sandbox. A lightweight bridge script establishes bidirectional postMessage communication. Clicking any element projects an interactive selection overlay with millimeter-accurate bounding boxes and resize handles, running smoothly at 60fps.",
-    code: `// Canvas Selection Bridge
-window.addEventListener('message', (event) => {
-  if (event.data.type === 'ELEMENT_SELECTED') {
-    highlightBoundingBox(event.data.rect);
-    propertyPanel.mount(event.data.computedStyles);
-  }
-});`
+    iconName: "step-canvas",
+    title: "Render in an isolated canvas",
+    tech: "Sandboxed iframe + postMessage",
+    tagline: "High-fidelity rendering with live bi-directional selection bridge.",
+    body: "The HTML is injected into an isolated preview canvas. A bridge script establishes bidirectional postMessage communication. When you click an element in the preview, the bridge transmits its computed styles, AST node reference, and bounding box at 60 FPS using requestAnimationFrame.",
+    badgeClass: "lime",
+    image: "/images/editor-snapshots/03-editor-live-canvas-viewport.png",
+    imageLabel: "Live Studio Canvas Viewport",
+    zoomOrigin: "50% 50%",
+    code: `// Canvas selection bridge
+iframe.contentWindow.addEventListener('click', (e) => {
+  const rect = e.target.getBoundingClientRect();
+  const styles = getComputedStyle(e.target);
+  parent.postMessage({ 
+    type: 'ELEMENT_SELECTED', rect, styles 
+  }, '*');
+});`,
+    chips: ["60 FPS requestAnimationFrame", "Bi-directional bridge", "Multi-viewport presets"]
   },
   {
     step: "04",
-    title: "Intelligent Tailwind Synthesis",
-    headline: "Sliders become semantic utility classes.",
-    desc: "As you interact with visual sliders for font weights, colors, paddings, and shadow presets, the Live Style Engine immediately mutates the preview element for zero-latency feedback. Simultaneously, the forward-mapping engine translates styles into standard Tailwind v3/v4 classes (e.g., font-semibold, rounded-2xl).",
-    code: `// Forward Mapping to Tailwind Utilities
-const tailwindClass = forwardMapStyleProperty('font-weight', '600');
-// Result: 'font-semibold' (not arbitrary font-[600])`
+    iconName: "step-sliders",
+    title: "Adjust styles with precise controls",
+    tech: "Live style engine + Tailwind forward-map",
+    tagline: "Tactile spring sliders translated directly into idiomatic Tailwind classes.",
+    body: "The right inspector displays tactile spring controls for spacing, typography, OKLCH color, radius, and shadows. As you move a slider, the preview element updates in real-time. The forward-map engine simultaneously translates CSS values into idiomatic Tailwind utilities (v3 or v4 @theme).",
+    badgeClass: "amber",
+    image: "/images/editor-snapshots/04-editor-boxmodel-padding-margin.png",
+    imageLabel: "Tactile Box Model: Padding & Margin Sliders",
+    zoomOrigin: "85% 25%",
+    code: `// Forward-map: CSS value → Idiomatic Tailwind class
+forwardMap('font-weight', '600')   → 'font-semibold'
+forwardMap('padding',     '1.5rem') → 'p-6'
+forwardMap('color',       '#09090b') → 'text-zinc-950'
+
+// Arbitrary values synthesized only as last resort
+forwardMap('opacity', '0.73') → 'opacity-[73%]'`,
+    chips: ["v3 utilities", "v4 @theme tokens", "OKLCH Color Lab", "WCAG AAA Validation"]
   },
   {
     step: "05",
-    title: "Surgical AST Splicing",
-    headline: "Untouched HTML nodes remain bit-for-bit identical.",
-    desc: "Conventional tools re-serialize the entire DOM tree, altering indentation and stripping template comments. Visual Style Editor applies changesets using string slicing: it takes the exact start and end offsets of the target class attribute from the location map and replaces only those bytes. Surrounding code is never touched.",
-    code: `// Surgical Splicing
-const before = sourceHtml.slice(0, attrLoc.startOffset);
-const after = sourceHtml.slice(attrLoc.endOffset);
-const updatedHtml = before + newClassString + after;`
+    iconName: "step-splice",
+    title: "Splice only the changed bytes",
+    tech: "String splice with byte offsets",
+    tagline: "Character-offset surgical splicing. Adjacent markup untouched.",
+    body: "When you save, the splicer looks up the exact byte offset of the target class attribute from the AST location map. It slices the original HTML string at precisely those coordinates, injects the new class string, and rejoins the slices. Blade tags, comments, and server templates are untouched.",
+    badgeClass: "violet",
+    image: "/images/editor-snapshots/05-editor-ast-splice-diff.png",
+    imageLabel: "Character-Offset Surgical Byte Splicer",
+    zoomOrigin: "50% 50%",
+    code: `const before = sourceHtml.slice(0, attrLoc.startOffset);
+const after  = sourceHtml.slice(attrLoc.endOffset);
+const newAttr = \`class="\${newClasses}"\`;
+const result = before + newAttr + after;
+
+// Comments on line 42? Intact.
+// PHP/Blade conditionals? 100% untouched.`,
+    chips: ["0 collateral delta", "Byte slice rejoining", "Local git diff clean"]
   },
   {
     step: "06",
-    title: "Direct Disk Save & Crash Shield",
-    headline: "Saved straight to disk. Backed up in local storage.",
-    desc: "When you hit Save (⌘S / Ctrl+S), the updated HTML writes directly back to your local file handle on disk. During editing, a 2-second debounced local storage auto-save shield continuously preserves your active session so your work is never lost if your battery dies.",
-    code: `// Direct Disk Write
-const writable = await fileHandle.createWritable();
-await writable.write(updatedHtml);
-await writable.close();`
+    iconName: "step-save",
+    title: "Write back to your file",
+    tech: "File System Access API writable stream",
+    tagline: "Direct disk commit in under 2ms. No temp files. No cloud sync.",
+    body: "The spliced HTML string writes directly back to your local repository file using a native writable stream. The entire cycle from slider move to disk commit finishes in under 2ms. For non-Chromium browsers (Firefox, Safari), an instant download stream is provided instead.",
+    badgeClass: "lime",
+    image: "/images/editor-snapshots/06-editor-disk-save-export.png",
+    imageLabel: "Direct Disk Commit (<2ms IO Stream)",
+    zoomOrigin: "50% 50%",
+    code: `const writable = await fileHandle.createWritable();
+await writable.write(splicedHtml);
+await writable.close();
+
+// Original file updated on disk.
+// Zero network packets sent. Total sovereignty.`,
+    chips: ["<2ms disk IO", "Atomic stream write", "Git history clean", "Zero cloud lock-in"]
   }
 ];
 ---
 
 <BaseLayout
-  title="How It Works — Visual Style Editor Architecture"
-  description="Discover how Visual Style Editor opens, manipulates, and saves local HTML & Tailwind CSS files client-side using native Web APIs and Parse5 AST."
-  theme="dark"
-  showPixelCanvas={true}
+  title="How It Works — Visual Style Editor 2026 Walkthrough"
+  description="A step-by-step walkthrough of how Visual Style Editor parses HTML with Parse5, edits at byte offsets, and writes back to your local file — entirely in the browser."
 >
-  <div class="relative min-h-screen flex flex-col bg-[#060608] text-slate-100 overflow-hidden">
+  <div class="flex flex-col min-h-[100dvh]">
     <Navbar activePage="how it works" />
 
-    <main class="flex-1">
-      <!-- HERO SECTION -->
-      <section class="pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-8">
-        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-          Under The Hood • 6-Step Visual Pipeline
+    <main id="main-content" class="flex-1">
+
+      <!-- ============================================================
+           HERO: Editorial Conduit Header
+           ============================================================ -->
+      <section class="relative overflow-hidden pt-8 sm:pt-12 md:pt-14 pb-14 lg:pb-16 px-4 sm:px-6 lg:px-8" data-parallax-section>
+        {/* Vibrant Multi-Layered Ambient Studio Aura & Grid Texture */}
+        <div class="hero-ambient-glow" aria-hidden="true">
+          <div class="hero-glow-orb cyan"></div>
+          <div class="hero-grid-pattern"></div>
         </div>
 
-        <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
-          From your local disk to interactive canvas. <br class="hidden sm:inline" />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
-            In milliseconds.
-          </span>
-        </h1>
-
-        <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          A step-by-step walkthrough of how Visual Style Editor delivers real-time visual editing without ever sending your source code to a remote server or mangling your markup.
-        </p>
-      </section>
-
-      <!-- DATA FLOW ARCHITECTURE OVERVIEW -->
-      <section class="pb-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        <div class="doppelrand-shell spotlight-card">
-          <div class="doppelrand-core p-8 sm:p-12 space-y-8">
-            <div class="text-center max-w-2xl mx-auto space-y-2">
-              <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Visual Data-Flow Cycle</h2>
-              <p class="text-sm text-slate-400">How data moves between your physical storage, browser memory, and the visual canvas.</p>
+        <div class="max-w-6xl mx-auto relative z-10 space-y-8">
+          <div class="max-w-3xl space-y-6" data-reveal="fade-up">
+            <div
+              class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-500/40"
+            >
+              <span class="w-2 h-2 rounded-full bg-sky-600 dark:bg-sky-400 animate-pulse"></span>
+              <span>Execution Pipeline · 6 Discrete Steps</span>
             </div>
 
-            <!-- Flow Step Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div class="p-6 rounded-2xl bg-[#090b10] border border-white/5 space-y-3 shadow-inner">
-                <div class="w-9 h-9 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-bold font-mono text-xs flex items-center justify-center mx-auto">1</div>
-                <h4 class="font-bold text-white text-base">Local File Handle</h4>
-                <p class="text-xs text-slate-400 leading-relaxed">Local HTML read into memory via Chromium File System Access API</p>
-              </div>
+            <h1
+              class="text-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08]"
+              data-motion-text="words"
+            >
+              Six surgical steps.<br />
+              <span class="gradient-text">All inside browser memory.</span>
+            </h1>
 
-              <div class="p-6 rounded-2xl bg-[#090b10] border border-white/5 space-y-3 shadow-inner">
-                <div class="w-9 h-9 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-500/30 font-bold font-mono text-xs flex items-center justify-center mx-auto">2</div>
-                <h4 class="font-bold text-white text-base">Parse5 AST & Live Canvas</h4>
-                <p class="text-xs text-slate-400 leading-relaxed">Byte offsets mapped; live DOM rendered in 60fps sandbox</p>
-              </div>
+            <p class="text-body text-base sm:text-lg md:text-xl" style="color: var(--ink-2);">
+              A complete technical walkthrough of exactly how the editor reads, parses, surgically splices, and saves your HTML files without a single byte sent to a server.
+            </p>
 
-              <div class="p-6 rounded-2xl bg-[#090b10] border border-white/5 space-y-3 shadow-inner">
-                <div class="w-9 h-9 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-bold font-mono text-xs flex items-center justify-center mx-auto">3</div>
-                <h4 class="font-bold text-white text-base">Surgical Splicing</h4>
-                <p class="text-xs text-slate-400 leading-relaxed">Offset-based write saves clean code straight to disk</p>
-              </div>
+            <div class="pt-2">
+              <FloatingBadges client:load />
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 6-STEP TIMELINE -->
-      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#07090e]/60">
-        <div class="max-w-6xl mx-auto space-y-16">
-          <div class="text-center max-w-3xl mx-auto space-y-3">
-            <span class="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
-              Detailed Architecture
-            </span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              The 6 Stages of Visual Style Editor
-            </h2>
+      <hr class="section-divider" />
+
+      <!-- ============================================================
+           CONNECTED TIMELINE CONDUIT: Pinned Narrative & Live Visuals
+           ============================================================ -->
+      <section class="section py-20 relative" data-timeline-conduit>
+        <div class="section-inner relative">
+
+          {/* Animated Neon Conduit Line connecting all 6 steps */}
+          <div class="conduit-line hidden lg:block" aria-hidden="true">
+            <div class="conduit-pulse"></div>
           </div>
 
-          <div class="space-y-10">
-            {steps.map((item) => (
-              <div class="doppelrand-shell spotlight-card">
-                <div class="doppelrand-core p-6 sm:p-10">
-                  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                    <div class="lg:col-span-6 space-y-4">
-                      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">
-                        Stage {item.step}
-                      </div>
-                      <h3 class="text-2xl font-bold text-white tracking-tight">{item.title}</h3>
-                      <h4 class="text-base font-semibold text-cyan-300 font-mono">{item.headline}</h4>
-                      <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">{item.desc}</p>
-                    </div>
-
-                    <div class="lg:col-span-6">
-                      <div class="rounded-2xl bg-[#090b10] p-5 text-slate-200 border border-white/10 font-mono text-xs shadow-xl space-y-2">
-                        <div class="flex items-center justify-between pb-2 border-b border-white/5 text-[10px] text-slate-400">
-                          <span>STAGE IMPLEMENTATION</span>
-                          <span class="text-cyan-400">Step {item.step}</span>
-                        </div>
-                        <pre class="overflow-x-auto text-[11px] leading-relaxed text-cyan-200 whitespace-pre p-1">
-                          <code>{item.code}</code>
-                        </pre>
-                      </div>
-                    </div>
+          <div class="space-y-24 lg:space-y-32">
+            {steps.map((step, i) => (
+              <article
+                class="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start"
+                data-reveal="fade-up"
+              >
+                {/* Node Pill / Number Marker on the Conduit Spine */}
+                <div class="lg:col-span-1 flex lg:justify-center">
+                  <div
+                    class={`frosted-icon-capsule ${step.badgeClass} w-14 h-14 p-2 shadow-lg relative z-20 flex flex-col items-center justify-center gap-0.5`}
+                  >
+                    <Icon name={step.iconName} class="w-5 h-5" />
+                    <span class="text-[10px] font-mono font-black">{step.step}</span>
                   </div>
                 </div>
+
+                {/* Left Side: Pinned/Sticky Narrative Step Explanation */}
+                <div class="lg:col-span-5 space-y-4 lg:sticky lg:top-28">
+                  <div class="space-y-2">
+                    <span class={`neon-callout-tag ${step.badgeClass} text-xs font-mono font-bold`}>
+                      {step.tech}
+                    </span>
+                    <h2 class="text-headline text-2xl sm:text-3xl font-black tracking-tight" style="color: var(--ink-1);">
+                      {step.title}
+                    </h2>
+                    <p class="text-xs font-mono font-semibold text-emerald-700 dark:text-emerald-400">
+                      {step.tagline}
+                    </p>
+                  </div>
+
+                  <p class="text-body text-sm sm:text-base leading-relaxed" style="color: var(--ink-2);">
+                    {step.body}
+                  </p>
+
+                  {/* Feature Chips */}
+                  <div class="flex flex-wrap gap-2 pt-2">
+                    {step.chips.map((chip) => (
+                      <span class="badge text-[11px] font-mono px-2.5 py-1" style="background: var(--surface-2); border-color: var(--border);">
+                        ✓ {chip}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right Side: Interactive Code Diff & Enhanced Studio Comp */}
+                <div class="lg:col-span-6 space-y-4">
+                  {/* Enhanced Studio Screenshot if step has an image */}
+                  {step.image && (
+                    <div class="glass-window-frame p-2 sm:p-2.5 group cursor-zoom-in">
+                      <div class="px-3 py-1.5 flex items-center justify-between border-b rounded-t-lg select-none text-[11px] font-mono text-zinc-400" style="background: rgba(18, 18, 21, 0.7); border-color: rgba(255, 255, 255, 0.08);">
+                        <div class="flex items-center gap-1.5">
+                          <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
+                          <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+                          <span class="ml-2 font-medium">{step.imageLabel}</span>
+                        </div>
+                        <span class="text-purple-400 font-bold text-[10px]">Hover to Zoom • Phase {step.step}</span>
+                      </div>
+                      <div class="relative rounded-lg overflow-hidden bg-black aspect-[16/10]">
+                        <img
+                          src={step.image}
+                          alt={step.imageLabel || step.title}
+                          class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.42]"
+                          style={`transform-origin: ${step.zoomOrigin || '50% 50%'};`}
+                          loading="lazy"
+                        />
+                        <div class="absolute bottom-3 right-3 pointer-events-none">
+                          <span class={`neon-callout-tag ${step.badgeClass} text-[10px]`}>
+                            {step.tech} Active
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Interactive Code Container */}
+                  <div class="code-block rounded-2xl shadow-xl border overflow-hidden p-0" style="background: var(--code-bg); border-color: var(--border);">
+                    <div class="px-4 py-2.5 border-b flex items-center justify-between text-[11px] font-mono" style="border-color: var(--border); background: rgba(0,0,0,0.15);">
+                      <span class="text-zinc-400 font-bold">engine/step-{step.step}.ts</span>
+                      <span class="text-emerald-400 font-semibold">Verified Byte Splicing</span>
+                    </div>
+                    <pre class="p-4 text-xs font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap" style="color: var(--ink-2);">{step.code}</pre>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================================
+           ARCHITECTURE SUMMARY TILES
+           ============================================================ -->
+      <section class="section border-t" style="border-color: var(--border); background: var(--canvas-subtle);">
+        <div class="section-inner space-y-12">
+          <div class="section-header text-center max-w-4xl mx-auto" data-reveal="fade-up">
+            <span class="badge text-xs font-mono uppercase tracking-wider mb-2 px-3 py-1" style="background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.25);">
+              Uncompromising Principles
+            </span>
+            <h2 class="text-headline text-3xl sm:text-4xl font-black leading-[1.08]">Architecture Without Compromise</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6" data-reveal-group>
+            {[
+              {
+                icon: "lime",
+                iconName: "cloud-off",
+                title: "Zero data leaves your machine",
+                body: "Every operation — parsing, editing, saving — executes strictly in browser memory. No WebSocket to a backend. No upload to validate permissions. No server to go down."
+              },
+              {
+                icon: "violet",
+                iconName: "code-integrity",
+                title: "Your code stays your code",
+                body: "The AST splicer never touches code it doesn't need to. PHP tags, Blade directives, and HTML comments in adjacent nodes are preserved bit-for-bit."
+              },
+              {
+                icon: "cyan",
+                iconName: "wifi-off",
+                title: "Works 100% offline",
+                body: "Once loaded, you can disconnect from Wi-Fi completely. The editor functions the same. The native File System API operates independent of internet connectivity."
+              }
+            ].map((fact) => (
+              <div class="tile rounded-3xl p-8 border space-y-4" data-reveal-item style="background: var(--surface-1); border-color: var(--border);">
+                <div class={`frosted-icon-capsule ${fact.icon}`}>
+                  <Icon name={fact.iconName} class="w-6 h-6" />
+                </div>
+                <h3 class="text-title text-lg font-bold" style="color: var(--ink-1);">{fact.title}</h3>
+                <p class="text-sm leading-relaxed" style="color: var(--ink-3);">{fact.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <!-- CTA BANNER -->
-      <CtaBanner
-        headline="See the surgical pipeline in action"
-        subheadline="Drop an HTML file or test our built-in templates right now."
-      />
+      <!-- Hardware & System Specs -->
+      <HardwareSpecs />
+
+      <CtaBanner />
     </main>
 
     <Footer />

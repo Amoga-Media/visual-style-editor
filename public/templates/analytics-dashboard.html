@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Analytics Studio Dashboard</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-[#09090b] text-white min-h-screen p-6 sm:p-10 font-sans antialiased">
+  <div class="max-w-6xl mx-auto space-y-8">
+    <!-- Dashboard Top Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-800">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs font-mono uppercase tracking-wider text-zinc-400">Production Node US-East</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black text-white mt-1">Real-time Telemetry & Traffic</h1>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <button class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-xs font-mono text-zinc-300">
+          Last 24 Hours ▼
+        </button>
+        <button class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white shadow-lg shadow-purple-600/20">
+          Export Metrics
+        </button>
+      </div>
+    </div>
+
+    <!-- 4 Key Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 space-y-2">
+        <div class="flex items-center justify-between text-xs font-mono text-zinc-400">
+          <span>Total Ingested Events</span>
+          <span class="text-emerald-400 font-bold">+18.4%</span>
+        </div>
+        <p class="text-3xl font-black font-mono text-white">4,289,120</p>
+        <p class="text-[11px] text-zinc-500 font-mono">Normalized DOM byte nodes</p>
+      </div>
+
+      <div class="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 space-y-2">
+        <div class="flex items-center justify-between text-xs font-mono text-zinc-400">
+          <span>Average Slice Latency</span>
+          <span class="text-emerald-400 font-bold">-32%</span>
+        </div>
+        <p class="text-3xl font-black font-mono text-sky-400">1.84 ms</p>
+        <p class="text-[11px] text-zinc-500 font-mono">P99 in-memory compilation</p>
+      </div>
+
+      <div class="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 space-y-2">
+        <div class="flex items-center justify-between text-xs font-mono text-zinc-400">
+          <span>Active Studio Sessions</span>
+          <span class="text-purple-400 font-bold">100% Local</span>
+        </div>
+        <p class="text-3xl font-black font-mono text-purple-400">1,402</p>
+        <p class="text-[11px] text-zinc-500 font-mono">Air-gapped client devices</p>
+      </div>
+
+      <div class="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 space-y-2">
+        <div class="flex items-center justify-between text-xs font-mono text-zinc-400">
+          <span>AST Splicer Errors</span>
+          <span class="text-emerald-400 font-bold">0.00%</span>
+        </div>
+        <p class="text-3xl font-black font-mono text-emerald-400">0</p>
+        <p class="text-[11px] text-zinc-500 font-mono">Zero comment collisions</p>
+      </div>
+    </div>
+
+    <!-- Chart Visualization Section -->
+    <div class="p-8 rounded-3xl bg-zinc-900 border border-zinc-800 space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-white">Throughput Progression</h2>
+          <p class="text-xs text-zinc-400">Byte-level modification frequency across working tree</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-mono">
+          <span class="flex items-center gap-1.5 text-purple-400">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> AST Slices
+          </span>
+          <span class="flex items-center gap-1.5 text-sky-400 ml-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> Disk Commits
+          </span>
+        </div>
+      </div>
+
+      <!-- Stylized Bar Chart -->
+      <div class="h-48 flex items-end gap-2 pt-8 border-b border-zinc-800/80 pb-2">
+        <div class="flex-1 bg-purple-500/20 hover:bg-purple-500/40 rounded-t h-[40%] transition-all"></div>
+        <div class="flex-1 bg-purple-500/20 hover:bg-purple-500/40 rounded-t h-[65%] transition-all"></div>
+        <div class="flex-1 bg-purple-500/20 hover:bg-purple-500/40 rounded-t h-[50%] transition-all"></div>
+        <div class="flex-1 bg-purple-500/20 hover:bg-purple-500/40 rounded-t h-[85%] transition-all"></div>
+        <div class="flex-1 bg-gradient-to-t from-purple-500 to-sky-400 rounded-t h-[100%] transition-all"></div>
+        <div class="flex-1 bg-purple-500/20 hover:bg-purple-500/40 rounded-t h-[75%] transition-all"></div>
+        <div class="flex-1 bg-purple-500/20 hover:bg-purple-500/40 rounded-t h-[90%] transition-all"></div>
+        <div class="flex-1 bg-purple-500/20 hover:bg-purple-500/40 rounded-t h-[60%] transition-all"></div>
+      </div>
+      <div class="flex justify-between text-[10px] font-mono text-zinc-500">
+        <span>00:00</span>
+        <span>04:00</span>
+        <span>08:00</span>
+        <span>12:00</span>
+        <span>16:00</span>
+        <span>20:00</span>
+        <span>Live</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

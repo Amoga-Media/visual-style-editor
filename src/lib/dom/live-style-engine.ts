@@ -160,8 +160,8 @@ export function formatCssValue(property: string, value: string, side?: string): 
     const deg = value.endsWith("deg") ? value : `${value}deg`;
     return { prop: "rotate", val: deg };
   }
-  if (property === "scale") {
-    return { prop: "scale", val: value };
+  if ((property === "background-color" || property === "background") && value.includes("gradient")) {
+    return { prop: "background-image", val: value };
   }
   return { prop: cssProp, val: value };
 }
@@ -191,11 +191,36 @@ export function applyLiveStyle(
     }
   }
 
-  // 2. If modifying text-color on gradient text that has -webkit-text-fill-color: transparent, override fill color
+  // 1b. If modifying background with gradient or solid
+  if (property === "background-color" || cssProp === "background-color" || cssProp === "background-image") {
+    if (value.includes("gradient")) {
+      element.style.setProperty("background-image", value, "important");
+      element.style.removeProperty("background-color");
+    } else {
+      element.style.removeProperty("background-image");
+      element.style.setProperty("background-color", formattedVal, "important");
+    }
+  }
+
+  // 2. If modifying text-color on gradient text or solid text
   if (property === "text-color" || cssProp === "color") {
-    try {
-      element.style.setProperty("-webkit-text-fill-color", formattedVal, "important");
-    } catch {}
+    if (value.includes("gradient")) {
+      element.style.setProperty("background-image", value, "important");
+      element.style.setProperty("-webkit-background-clip", "text", "important");
+      element.style.setProperty("background-clip", "text", "important");
+      element.style.setProperty("-webkit-text-fill-color", "transparent", "important");
+      element.style.setProperty("color", "transparent", "important");
+    } else {
+      if (element.style.backgroundClip === "text" || (element.style as any).webkitBackgroundClip === "text") {
+        element.style.removeProperty("background-image");
+        element.style.removeProperty("-webkit-background-clip");
+        element.style.removeProperty("background-clip");
+      }
+      try {
+        element.style.setProperty("-webkit-text-fill-color", formattedVal, "important");
+        element.style.setProperty("color", formattedVal, "important");
+      } catch {}
+    }
   }
 
   // 3. If modifying font-family, auto load Google Font if needed
@@ -329,9 +354,32 @@ export function commitStyleChange(
 
   // Always keep/apply desktop inline style on element with high priority so the live visual preview never resets or flashes
   if (isStyleableElement(element)) {
-    element.style.setProperty(targetProp, formattedVal, "important");
-    if (property === "text-color" || targetProp === "color") {
-      element.style.setProperty("-webkit-text-fill-color", formattedVal, "important");
+    if (property === "background-color" || targetProp === "background-color" || targetProp === "background-image") {
+      if (value.includes("gradient")) {
+        element.style.setProperty("background-image", value, "important");
+        element.style.removeProperty("background-color");
+      } else {
+        element.style.removeProperty("background-image");
+        element.style.setProperty("background-color", formattedVal, "important");
+      }
+    } else if (property === "text-color" || targetProp === "color") {
+      if (value.includes("gradient")) {
+        element.style.setProperty("background-image", value, "important");
+        element.style.setProperty("-webkit-background-clip", "text", "important");
+        element.style.setProperty("background-clip", "text", "important");
+        element.style.setProperty("-webkit-text-fill-color", "transparent", "important");
+        element.style.setProperty("color", "transparent", "important");
+      } else {
+        if (element.style.backgroundClip === "text" || (element.style as any).webkitBackgroundClip === "text") {
+          element.style.removeProperty("background-image");
+          element.style.removeProperty("-webkit-background-clip");
+          element.style.removeProperty("background-clip");
+        }
+        element.style.setProperty("-webkit-text-fill-color", formattedVal, "important");
+        element.style.setProperty("color", formattedVal, "important");
+      }
+    } else {
+      element.style.setProperty(targetProp, formattedVal, "important");
     }
   }
 

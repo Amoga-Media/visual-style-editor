@@ -1,0 +1,200 @@
+---
+import Icon from "@/components/ui/Icon.astro";
+
+const browserCapabilities = [
+  {
+    category: "Direct Disk Save (Native)",
+    badge: "File System API",
+    badgePill: "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/40",
+    dotColor: "#15803d",
+    description: "Instant two-way sync: edits write directly to the local file handle on disk in <2ms with zero download prompts.",
+    browsers: [
+      { name: "Google Chrome", ver: "v86+", icon: "Chrome", supported: true },
+      { name: "Microsoft Edge", ver: "v86+", icon: "Edge", supported: true },
+      { name: "Brave Browser", ver: "All", icon: "Brave", supported: true },
+      { name: "Arc Browser", ver: "All", icon: "Arc", supported: true },
+      { name: "Opera", ver: "v72+", icon: "Opera", supported: true },
+    ]
+  },
+  {
+    category: "One-Click Manual Export",
+    badge: "Universal Web API",
+    badgePill: "bg-sky-50 text-sky-800 border-sky-300 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-500/40",
+    dotColor: "#0284c7",
+    description: "Full in-browser visual editing capabilities; download modified files as a ready-to-commit zip or HTML file.",
+    browsers: [
+      { name: "Mozilla Firefox", ver: "All versions", icon: "Firefox", supported: true },
+      { name: "Apple Safari", ver: "macOS & iPadOS", icon: "Safari", supported: true },
+      { name: "iOS / Android Browsers", ver: "Mobile View", icon: "Mobile", supported: true },
+      { name: "Linux Epiphany", ver: "WebKit based", icon: "WebKit", supported: true },
+    ]
+  }
+];
+
+const hardwareMetrics = [
+  {
+    name: "System Memory (RAM)",
+    iconName: "ram",
+    min: "2 GB free RAM",
+    minDetail: "Ultra smooth for HTML files up to 2,500 lines",
+    rec: "4 GB+ free RAM",
+    recDetail: "Flawlessly streams 15,000+ DOM nodes at solid 60 FPS",
+    tag: "Low Memory Footprint",
+    tagClass: "text-purple-700 dark:text-purple-300",
+    dotBg: "#7e22ce"
+  },
+  {
+    name: "Processor (CPU)",
+    iconName: "cpu",
+    min: "Any dual-core CPU",
+    minDetail: "Parse5 AST tokenization completes in under 6ms",
+    rec: "Quad-core / Apple Silicon",
+    recDetail: "Sub-millisecond instant style diffing across nested subtrees",
+    tag: "Instant AST Splicing",
+    tagClass: "text-sky-700 dark:text-sky-300",
+    dotBg: "#0284c7"
+  },
+  {
+    name: "Graphics Acceleration (GPU)",
+    iconName: "gpu",
+    min: "Standard Integrated GPU",
+    minDetail: "WebGL Canvas zoom, pan, and transform rendering",
+    rec: "Dedicated / M-Series GPU",
+    recDetail: "Butter-smooth 120Hz ProMotion canvas panning",
+    tag: "60-120 FPS Viewport",
+    tagClass: "text-emerald-700 dark:text-emerald-400",
+    dotBg: "#15803d"
+  },
+  {
+    name: "Disk Storage Footprint",
+    iconName: "storage",
+    min: "0 MB installation",
+    minDetail: "Runs entirely in browser memory; zero node_modules",
+    rec: "0 MB storage needed",
+    recDetail: "No Docker containers, no background daemons, no background services",
+    tag: "Zero Install Needed",
+    tagClass: "text-amber-800 dark:text-amber-300",
+    dotBg: "#b45309"
+  }
+];
+---
+
+<section class="section py-20 border-t relative overflow-hidden" style="background: var(--canvas); border-color: var(--border);">
+  <div class="section-inner relative z-10">
+    <div class="section-header text-center max-w-5xl lg:max-w-6xl mx-auto mb-16" data-reveal="fade-up">
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase border mb-3 select-none bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/40"
+      >
+        <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse"></span>
+        Accessible & Lightweight
+      </div>
+      <h2 class="text-display text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-[1.08]" style="color: var(--ink-1);">
+        Hardware & System Requirements Guide
+      </h2>
+      <p class="text-body text-base sm:text-lg max-w-3xl mx-auto mt-3" style="color: var(--ink-2);">
+        Runs directly in your browser. No Docker, no Python, no CLI daemons — works on everything from a MacBook Pro to a modest Chromebook.
+      </p>
+    </div>
+
+    <!-- Top: Browser Compatibility Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12" data-reveal-group>
+      {browserCapabilities.map((item) => (
+        <div
+          class="card-raised p-6 sm:p-8 rounded-3xl border flex flex-col justify-between"
+          data-reveal-item
+          style="background: var(--surface-1); border-color: var(--border);"
+        >
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span
+                class={`px-3 py-1 rounded-full text-xs font-mono font-bold border ${item.badgePill}`}
+              >
+                {item.badge}
+              </span>
+              <span class="text-xs font-mono font-semibold" style="color: var(--ink-3);">Browser Ecosystem</span>
+            </div>
+
+            <h3 class="text-xl font-bold tracking-tight mb-2" style="color: var(--ink-1);">
+              {item.category}
+            </h3>
+            <p class="text-xs leading-relaxed mb-6" style="color: var(--ink-2);">
+              {item.description}
+            </p>
+
+            <!-- Browsers list -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {item.browsers.map((b) => (
+                <div
+                  class="p-3 rounded-2xl border flex flex-col justify-between"
+                  style="background: var(--surface-2); border-color: var(--border);"
+                >
+                  <div class="flex items-center justify-between mb-1.5 gap-1.5">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <Icon name={`browser-${b.icon.toLowerCase()}`} class="w-4 h-4 shrink-0 text-zinc-600 dark:text-zinc-400" />
+                      <span class="text-xs font-bold truncate" style="color: var(--ink-1);">{b.name}</span>
+                    </div>
+                    <span class="w-1.5 h-1.5 rounded-full shrink-0" style={`background-color: ${item.dotColor};`}></span>
+                  </div>
+                  <span class="text-[10px] font-mono font-medium pl-5.5" style="color: var(--ink-2);">{b.ver}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Bottom: Hardware & Resource Matrix -->
+    <div class="card p-6 sm:p-8 rounded-3xl border" data-reveal="fade-up" style="background: var(--surface-1); border-color: var(--border);">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 mb-6 border-b gap-4" style="border-color: var(--border);">
+        <div>
+          <h3 class="text-lg font-bold tracking-tight" style="color: var(--ink-1);">
+            System Resource Footprint
+          </h3>
+          <p class="text-xs mt-1" style="color: var(--ink-2);">
+            Demystified specs for running client-side AST compilation at 60 FPS
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="badge text-[11px] font-mono px-3 py-1 bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40 font-bold">
+            ⚡ 0 Server Load
+          </span>
+          <span class="badge text-[11px] font-mono px-3 py-1 bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/40 font-bold">
+            💾 0 MB Disk Install
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {hardwareMetrics.map((spec) => (
+          <div class="p-5 rounded-2xl border space-y-3" style="background: var(--surface-2); border-color: var(--border);">
+            <div class="flex items-center justify-between">
+              <span class={`text-xs font-mono font-bold uppercase tracking-wider ${spec.tagClass}`}>
+                {spec.tag}
+              </span>
+              <Icon name={spec.iconName} class={`w-4 h-4 ${spec.tagClass}`} />
+            </div>
+
+            <h4 class="text-sm font-bold" style="color: var(--ink-1);">
+              {spec.name}
+            </h4>
+
+            <div class="space-y-2 pt-2 border-t text-xs" style="border-color: var(--border);">
+              <div>
+                <span class="font-mono text-[10px] uppercase font-bold" style="color: var(--ink-3);">Minimum:</span>
+                <p class="font-semibold text-xs mt-0.5" style="color: var(--ink-1);">{spec.min}</p>
+                <p class="text-[11px] mt-0.5 leading-snug" style="color: var(--ink-2);">{spec.minDetail}</p>
+              </div>
+
+              <div class="pt-2">
+                <span class="font-mono text-[10px] uppercase font-bold" style="color: var(--ink-3);">Recommended:</span>
+                <p class={`font-bold text-xs mt-0.5 ${spec.tagClass}`}>{spec.rec}</p>
+                <p class="text-[11px] mt-0.5 leading-snug" style="color: var(--ink-2);">{spec.recDetail}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

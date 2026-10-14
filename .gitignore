@@ -8,7 +8,10 @@ dist/
 !.env.example
 .DS_Store
 Thumbs.db
+desktop.ini
+*.tmp
+temp_*
+coverage/
 .playwright-mcp/
-
 .vercel
-.env*
+

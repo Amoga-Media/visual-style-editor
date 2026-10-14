@@ -3,69 +3,131 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SaaS Pricing Table</title>
+  <title>SaaS 3-Tier Modern Pricing</title>
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-[#09090b] text-white min-h-screen py-16 px-6 flex flex-col justify-center">
-  <div class="max-w-5xl mx-auto w-full space-y-12">
-    <div class="text-center space-y-3">
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Simple, predictable pricing</h2>
-      <p class="text-zinc-400 text-sm max-w-md mx-auto">Choose the tier that fits your stage of growth. No hidden platform fees.</p>
+<body class="bg-zinc-950 text-white min-h-screen py-16 px-6 font-sans antialiased flex flex-col justify-center">
+  <div class="max-w-6xl mx-auto w-full space-y-12">
+    <!-- Header -->
+    <div class="text-center space-y-4 max-w-2xl mx-auto">
+      <span class="px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+        Transparent Pricing
+      </span>
+      <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-white">
+        Simple plans for modern teams
+      </h1>
+      <p class="text-zinc-400 text-base leading-relaxed">
+        Full source code access. No hidden usage seat fees. Switch between monthly and annual anytime.
+      </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-      <!-- Tier 1 -->
-      <div class="p-8 rounded-2xl bg-[#111115] border border-white/[0.08] flex flex-col justify-between space-y-6">
+    <!-- Pricing Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+      <!-- Starter Card -->
+      <div class="p-8 rounded-3xl bg-zinc-900/60 border border-zinc-800 flex flex-col justify-between space-y-8 shadow-xl">
         <div class="space-y-4">
-          <div class="text-sm font-semibold text-zinc-400">Starter</div>
-          <div class="text-4xl font-extrabold text-white">$0 <span class="text-xs text-zinc-500 font-normal">/ month</span></div>
-          <p class="text-xs text-zinc-400">Ideal for side projects and individual designers tinkering with ideas.</p>
-          <ul class="text-xs text-zinc-300 space-y-2 pt-2">
-            <li class="flex items-center gap-2">&check; Up to 5 export files</li>
-            <li class="flex items-center gap-2">&check; Standard Tailwind classes</li>
-            <li class="flex items-center gap-2">&check; Community forum support</li>
+          <div class="space-y-1">
+            <h2 class="text-xl font-bold text-white">Starter</h2>
+            <p class="text-xs text-zinc-400">For indie hackers and solo creators.</p>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span class="text-4xl font-black font-mono text-white">$0</span>
+            <span class="text-xs text-zinc-400 font-mono">/ forever</span>
+          </div>
+          <ul class="space-y-3 pt-4 border-t border-zinc-800/80 text-xs font-mono text-zinc-300">
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>100% In-Browser AST Splicer</span>
+            </li>
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>Direct File System Access</span>
+            </li>
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>Tailwind CSS v3 & v4 tokens</span>
+            </li>
+            <li class="flex items-center gap-2.5 text-zinc-500">
+              <span>✕</span>
+              <span>Cloud team sync</span>
+            </li>
           </ul>
         </div>
-        <button class="w-full py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white font-semibold text-xs transition-colors cursor-pointer">
-          Start for Free
+        <button class="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs border border-zinc-700 cursor-pointer transition-colors">
+          Download Free
         </button>
       </div>
 
-      <!-- Tier 2 (Highlighted) -->
-      <div class="p-8 rounded-2xl bg-gradient-to-b from-[#181824] to-[#12121a] border-2 border-[#0084FF] flex flex-col justify-between space-y-6 shadow-2xl shadow-[#0084FF]/20 relative">
-        <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#0084FF] text-white text-[10px] font-bold uppercase tracking-wider">
+      <!-- Pro / Popular Card (Highlighted with Gradient Border) -->
+      <div class="p-8 rounded-3xl bg-gradient-to-b from-purple-950/40 via-zinc-900 to-zinc-900 border-2 border-purple-500 flex flex-col justify-between space-y-8 shadow-2xl relative">
+        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[10px] font-mono font-bold uppercase tracking-wider shadow-md">
           Most Popular
         </div>
         <div class="space-y-4">
-          <div class="text-sm font-semibold text-[#0084FF]">Professional</div>
-          <div class="text-4xl font-extrabold text-white">$29 <span class="text-xs text-zinc-500 font-normal">/ month</span></div>
-          <p class="text-xs text-zinc-400">Everything needed for agencies and full-time freelance engineers.</p>
-          <ul class="text-xs text-zinc-200 space-y-2 pt-2">
-            <li class="flex items-center gap-2">&check; Unlimited file saves</li>
-            <li class="flex items-center gap-2">&check; React & Astro JSX exports</li>
-            <li class="flex items-center gap-2">&check; Custom CSS & OKLCH color palettes</li>
-            <li class="flex items-center gap-2">&check; Priority developer assistance</li>
+          <div class="space-y-1">
+            <h2 class="text-xl font-bold text-white">Studio Pro</h2>
+            <p class="text-xs text-purple-300">For creative studios and agencies.</p>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span class="text-4xl font-black font-mono text-white">$29</span>
+            <span class="text-xs text-zinc-400 font-mono">/ month</span>
+          </div>
+          <ul class="space-y-3 pt-4 border-t border-zinc-800/80 text-xs font-mono text-zinc-200">
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>Unlimited local projects</span>
+            </li>
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>OKLCH 9-Step Tonal Harmonizer</span>
+            </li>
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>Multi-device preview simulation</span>
+            </li>
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>Automated WCAG AAA contrast audits</span>
+            </li>
           </ul>
         </div>
-        <button class="w-full py-2.5 rounded-xl bg-[#0084FF] hover:bg-[#0074E0] text-white font-semibold text-xs shadow-md shadow-[#0084FF]/30 transition-all cursor-pointer">
-          Upgrade to Pro
+        <button class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-500/25 cursor-pointer transition-transform hover:scale-[1.02]">
+          Start 14-Day Free Trial
         </button>
       </div>
 
-      <!-- Tier 3 -->
-      <div class="p-8 rounded-2xl bg-[#111115] border border-white/[0.08] flex flex-col justify-between space-y-6">
+      <!-- Enterprise Card -->
+      <div class="p-8 rounded-3xl bg-zinc-900/60 border border-zinc-800 flex flex-col justify-between space-y-8 shadow-xl">
         <div class="space-y-4">
-          <div class="text-sm font-semibold text-zinc-400">Enterprise</div>
-          <div class="text-4xl font-extrabold text-white">$99 <span class="text-xs text-zinc-500 font-normal">/ month</span></div>
-          <p class="text-xs text-zinc-400">For large software organizations requiring customized tooling workflows.</p>
-          <ul class="text-xs text-zinc-300 space-y-2 pt-2">
-            <li class="flex items-center gap-2">&check; Shared design tokens</li>
-            <li class="flex items-center gap-2">&check; Custom Tailwind plugins support</li>
-            <li class="flex items-center gap-2">&check; Dedicated Slack channel</li>
+          <div class="space-y-1">
+            <h2 class="text-xl font-bold text-white">Enterprise</h2>
+            <p class="text-xs text-zinc-400">For enterprise engineering orgs.</p>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span class="text-4xl font-black font-mono text-white">$99</span>
+            <span class="text-xs text-zinc-400 font-mono">/ month</span>
+          </div>
+          <ul class="space-y-3 pt-4 border-t border-zinc-800/80 text-xs font-mono text-zinc-300">
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>Custom Design System Tokens</span>
+            </li>
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>Dedicated Air-Gapped Deployment</span>
+            </li>
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>Custom AST location map plugins</span>
+            </li>
+            <li class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>24/7 Priority SLA engineering support</span>
+            </li>
           </ul>
         </div>
-        <button class="w-full py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white font-semibold text-xs transition-colors cursor-pointer">
-          Contact Team
+        <button class="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs border border-zinc-700 cursor-pointer transition-colors">
+          Contact Enterprise Sales
         </button>
       </div>
     </div>

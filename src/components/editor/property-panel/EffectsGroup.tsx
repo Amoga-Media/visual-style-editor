@@ -5,6 +5,7 @@ import { Sparkles, SunMedium, MousePointer, RotateCw, ZoomIn, Eye } from "lucide
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
 import { readCurrentValue } from "@/lib/dom/computed-style";
 import { getResponsivePropertyInfo } from "@/lib/dom/responsive-style-engine";
+import { useChangeSetStore } from "@/store/change-set-store";
 import ValueInput from "./ValueInput";
 
 interface EffectsGroupProps {
@@ -49,6 +50,7 @@ export default function EffectsGroup({
   viewport = "desktop",
   onEdit,
 }: EffectsGroupProps) {
+  const edits = useChangeSetStore((s) => s.edits);
   const [activeShadow, setActiveShadow] = useState("None");
   const [opacity, setOpacity] = useState(100);
   const [activeBlur, setActiveBlur] = useState("none");
@@ -75,7 +77,7 @@ export default function EffectsGroup({
 
     const rawOp = getVal("opacity");
     const op = rawOp ? parseFloat(rawOp) : parseFloat(computed.opacity);
-    setOpacity(isNaN(op) ? 100 : Math.round(op * 100));
+    setOpacity(isNaN(op) ? 100 : Number((op * 100).toFixed(1)));
 
     const cur = getVal("cursor") || computed.cursor || "default";
     setActiveCursor(cur);
@@ -84,11 +86,11 @@ export default function EffectsGroup({
     setActiveBlur(blur);
 
     const rot = parseFloat(getVal("rotate")) || 0;
-    setRotate(rot);
+    setRotate(Number(rot.toFixed(1)));
 
     const sc = parseFloat(getVal("scale")) || 1;
-    setScale(Math.round(sc * 100));
-  }, [element, theme, viewport, structuralPath]);
+    setScale(Number((sc * 100).toFixed(1)));
+  }, [element, theme, viewport, structuralPath, edits]);
 
   if (!element || !structuralPath) return null;
 
@@ -204,7 +206,7 @@ export default function EffectsGroup({
             unit="%"
             min={0}
             max={100}
-            step={5}
+            step={0.1}
             allowedUnits={["%"]}
             property="opacity"
             element={element}
@@ -217,7 +219,7 @@ export default function EffectsGroup({
           type="range"
           min={0}
           max={100}
-          step={5}
+          step={0.5}
           value={opacity}
           onChange={(e) => handleOpacityChange(parseFloat(e.target.value))}
           onPointerUp={() => handleOpacityCommit(opacity)}
@@ -284,7 +286,7 @@ export default function EffectsGroup({
             unit="deg"
             min={-180}
             max={180}
-            step={1}
+            step={0.1}
             allowedUnits={["deg"]}
             property="rotate"
             element={element}
@@ -297,7 +299,7 @@ export default function EffectsGroup({
           type="range"
           min={-180}
           max={180}
-          step={1}
+          step={0.5}
           value={rotate}
           onChange={(e) => handleRotateChange(parseFloat(e.target.value))}
           onPointerUp={() => handleRotateCommit(rotate)}
@@ -317,7 +319,7 @@ export default function EffectsGroup({
             unit="%"
             min={10}
             max={500}
-            step={5}
+            step={0.1}
             allowedUnits={["%"]}
             property="scale"
             element={element}
@@ -330,7 +332,7 @@ export default function EffectsGroup({
           type="range"
           min={10}
           max={300}
-          step={5}
+          step={0.5}
           value={scale}
           onChange={(e) => handleScaleChange(parseFloat(e.target.value))}
           onPointerUp={() => handleScaleCommit(scale)}

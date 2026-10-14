@@ -5,6 +5,7 @@ import { Move, Pin, Layers, Eye, EyeOff, Scissors } from "lucide-react";
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
 import { readCurrentValue } from "@/lib/dom/computed-style";
 import { getResponsivePropertyInfo } from "@/lib/dom/responsive-style-engine";
+import { useChangeSetStore } from "@/store/change-set-store";
 import ValueInput from "./ValueInput";
 
 interface PositionGroupProps {
@@ -77,6 +78,7 @@ export default function PositionGroup({
   viewport = "desktop",
   onEdit,
 }: PositionGroupProps) {
+  const edits = useChangeSetStore((s) => s.edits);
   const [position, setPosition] = useState("static");
   const [zIndex, setZIndex] = useState("auto");
   const [overflow, setOverflow] = useState("visible");
@@ -118,7 +120,7 @@ export default function PositionGroup({
 
     const rawL = getVal("left");
     setLeft(parseInsetValue(rawL));
-  }, [element, theme, viewport, structuralPath]);
+  }, [element, theme, viewport, structuralPath, edits]);
 
   if (!element || !structuralPath) return null;
 

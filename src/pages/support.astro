@@ -2,216 +2,142 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Navbar from "@/components/marketing/Navbar.astro";
 import Footer from "@/components/marketing/Footer.astro";
-import CtaBanner from "@/components/marketing/CtaBanner.astro";
+import Icon from "@/components/ui/Icon.astro";
 
-const supportOptions = [
+const supportLinks = [
   {
-    icon: "☕",
-    title: "Buy us a Coffee",
-    desc: "A quick, one-time donation on Ko-fi to fuel late-night coding sessions and serverless domain infrastructure.",
-    cta: "Donate on Ko-fi",
-    href: "https://ko-fi.com",
-    badge: "One-Time Tip"
-  },
-  {
-    icon: "💖",
-    title: "GitHub Sponsors",
-    desc: "Support our ongoing open-source engineering with a monthly sponsorship tier on GitHub.",
-    cta: "Become a Sponsor",
-    href: "https://github.com/sponsors",
-    badge: "Monthly Supporter"
-  },
-  {
-    icon: "⭐",
-    title: "Star on GitHub",
-    desc: "Give our repository a star on GitHub. It directly increases our visibility in the frontend developer ecosystem.",
-    cta: "Star Repository",
+    theme: "violet",
+    iconName: "bug",
+    title: "Report a bug",
+    body: "Found something broken? Open an issue on GitHub with what you did, what you expected, and what happened instead.",
+    cta: "Open GitHub issues",
     href: "https://github.com",
-    badge: "100% Free"
+    external: true,
   },
   {
-    icon: "📢",
-    title: "Share with Peers",
-    desc: "Tweet, post on LinkedIn, or share in your developer communities (Reddit, Discord, Hacker News).",
-    cta: "Share Visual Style Editor",
-    href: "https://twitter.com/intent/tweet?text=Check%20out%20Visual%20Style%20Editor%20%E2%80%94%20a%20free%2C%20in-browser%20visual%20editor%20for%20HTML%20and%20Tailwind%20CSS!&url=https://visualstyleeditor.com",
-    badge: "Community Growth"
-  }
+    theme: "cyan",
+    iconName: "lightbulb",
+    title: "Request a feature",
+    body: "Describe what you're trying to do and why the current tool doesn't quite get there. We read everything.",
+    cta: "GitHub discussions",
+    href: "https://github.com",
+    external: true,
+  },
+  {
+    theme: "amber",
+    iconName: "heart",
+    title: "Support the project",
+    body: "No subscription, no paywalls. But if this tool saves you time, Ko-fi or GitHub Sponsors help keep it maintained.",
+    cta: "Ko-fi / GitHub Sponsors",
+    href: "https://ko-fi.com",
+    external: true,
+  },
 ];
 
-const tiers = [
+const faqs = [
   {
-    name: "Supporter",
-    price: "$5",
-    freq: "/month",
-    desc: "Helps cover our domain name, SSL certs, and continuous integration runners.",
-    perks: ["Sponsor badge on GitHub", "Special Supporter role in Discord", "Our eternal gratitude"]
+    q: "Why can't I save files directly on Firefox or Safari?",
+    a: "The File System Access API is currently only supported in Chromium-based browsers (Chrome, Edge, Brave, Arc). On Firefox and Safari, you can still use the editor — you'll get a download button instead of direct disk save."
   },
   {
-    name: "Backer",
-    price: "$20",
-    freq: "/month",
-    desc: "Directly funds engineering time for new features like AST extensions and template creation.",
-    perks: ["All Supporter perks", "Priority feature request voting", "Name listed on Support Hall of Fame", "Early access to experimental builds"]
+    q: "The editor isn't detecting my Tailwind v4 @theme variables.",
+    a: "Make sure your CSS file uses the @theme {} block syntax and is linked from the HTML file you opened. The detector looks for @theme in the document's associated stylesheets."
   },
   {
-    name: "Enterprise Champion",
-    price: "$100",
-    freq: "/month",
-    desc: "For digital agencies and studios using Visual Style Editor for commercial client production.",
-    perks: ["All Backer perks", "Company logo with link on our homepage & repo", "Direct 1-on-1 support channel", "Custom starter template integration"]
-  }
+    q: "I opened a folder but some components aren't showing up.",
+    a: "The editor resolves relative paths from the HTML file's location. If a component's source is outside that folder, it may not resolve. Try opening the outermost project folder."
+  },
+  {
+    q: "Does it work with React/Vue/Svelte component files?",
+    a: "Currently, it works with HTML files and Tailwind utility classes. Component file formats (.jsx, .vue, .svelte) aren't supported yet — it's on the roadmap."
+  },
 ];
 ---
 
 <BaseLayout
-  title="Support & Sponsorship — Visual Style Editor"
-  description="Visual Style Editor is 100% free with no login and zero telemetry. Help us keep it free forever through donations, sponsorships, or sharing."
-  theme="dark"
-  showPixelCanvas={true}
+  title="Support — Visual Style Editor"
+  description="Get help with Visual Style Editor, report bugs, request features, or support the project."
 >
-  <div class="relative min-h-screen flex flex-col bg-[#060608] text-slate-100 overflow-hidden">
+  <div class="flex flex-col min-h-[100dvh]">
     <Navbar activePage="support" />
 
-    <main class="flex-1">
-      <!-- HERO SECTION -->
-      <section class="pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-8">
-        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-          100% Free & Open Source Forever
+    <main id="main-content" class="flex-1">
+
+      <!-- Header -->
+      <section class="relative overflow-hidden pt-8 sm:pt-12 md:pt-14 pb-12 sm:pb-14 px-4 sm:px-6 lg:px-8">
+        {/* Vibrant Multi-Layered Ambient Studio Aura & Grid Texture */}
+        <div class="hero-ambient-glow" aria-hidden="true">
+          <div class="hero-glow-orb cyan"></div>
+          <div class="hero-grid-pattern"></div>
         </div>
 
-        <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
-          Help us keep web tools <br class="hidden sm:inline" />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
-            free, private, and open.
-          </span>
-        </h1>
-
-        <p class="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-          Visual Style Editor has zero venture funding, zero subscriptions, and zero paywalled features. If our tool saves you hours of development work, here is how you can support our mission.
-        </p>
-      </section>
-
-      <!-- 4 SIMPLE WAYS TO SUPPORT -->
-      <section class="pb-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {supportOptions.map((opt) => (
-            <div class="doppelrand-shell spotlight-card">
-              <div class="doppelrand-core p-7 sm:p-8 flex flex-col justify-between space-y-6 h-full">
-                <div class="space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="text-3xl">{opt.icon}</span>
-                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">
-                      {opt.badge}
-                    </span>
-                  </div>
-
-                  <h3 class="text-xl font-bold text-white tracking-tight">{opt.title}</h3>
-                  <p class="text-sm text-slate-300 leading-relaxed font-sans">{opt.desc}</p>
-                </div>
-
-                <a
-                  href={opt.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-full text-xs font-bold text-black bg-gradient-to-r from-cyan-400 to-sky-300 hover:brightness-110 shadow-md shadow-cyan-500/20 active:scale-98 transition-all"
-                >
-                  <span>{opt.cta}</span>
-                  <span class="text-xs">↗</span>
-                </a>
-              </div>
+        <div class="max-w-6xl mx-auto relative z-10">
+          <div class="max-w-3xl space-y-4 reveal">
+            <div
+              class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-500/40"
+            >
+              <span class="w-2 h-2 rounded-full bg-sky-600 dark:bg-sky-400 animate-pulse"></span>
+              <span>Community & Assistance</span>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <!-- SPONSORSHIP TIERS -->
-      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#07090e]/60">
-        <div class="max-w-6xl mx-auto space-y-12">
-          <div class="text-center max-w-2xl mx-auto space-y-3">
-            <span class="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
-              Sponsorship Tiers
-            </span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Fuel Continued Development
-            </h2>
-            <p class="text-sm sm:text-base text-slate-400">
-              For individuals, teams, and agencies who rely on Visual Style Editor daily.
+            <h1 class="text-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08]">
+              Support & Community
+            </h1>
+            <p class="text-body text-base sm:text-lg" style="color: var(--ink-2);">
+              We're an open-source team. GitHub Issues and Discussions are the fastest ways to get answers, report bugs, or request features.
             </p>
           </div>
+        </div>
+      </section>
 
+      <hr class="section-divider" />
+
+      <!-- Support options: 3-column, no icons -->
+      <section class="section">
+        <div class="section-inner">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {tiers.map((t, idx) => (
-              <div class={`doppelrand-shell spotlight-card ${idx === 1 ? 'ring-2 ring-cyan-400/50' : ''}`}>
-                <div class="doppelrand-core p-7 sm:p-8 flex flex-col justify-between space-y-6 h-full">
-                  <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                      <h3 class="text-lg font-bold text-white">{t.name}</h3>
-                      {idx === 1 && (
-                        <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/30">
-                          Recommended
-                        </span>
-                      )}
-                    </div>
-
-                    <div class="flex items-baseline gap-1">
-                      <span class="text-4xl font-extrabold text-white">{t.price}</span>
-                      <span class="text-xs font-mono text-slate-400">{t.freq}</span>
-                    </div>
-
-                    <p class="text-xs text-slate-300 leading-relaxed font-sans">{t.desc}</p>
-
-                    <div class="pt-4 border-t border-white/10 space-y-2">
-                      <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Included Perks:</span>
-                      <ul class="space-y-2 text-xs text-slate-300">
-                        {t.perks.map((p) => (
-                          <li class="flex items-center gap-2">
-                            <span class="text-cyan-400 font-bold">✓</span>
-                            <span>{p}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <a
-                    href="https://github.com/sponsors"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class={`inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-full text-xs font-bold ${
-                      idx === 1
-                        ? "text-black bg-gradient-to-r from-cyan-400 to-sky-300 shadow-md shadow-cyan-500/25 hover:brightness-110"
-                        : "text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10"
-                    } transition-all`}
-                  >
-                    <span>Sponsor this Tier</span>
-                    <span class="text-xs">↗</span>
-                  </a>
+            {supportLinks.map((link, i) => (
+              <div class={`tile rounded-3xl p-8 border reveal reveal-stagger-${i + 1} space-y-4`} style="background: var(--surface-1); border-color: var(--border);">
+                <div class={`frosted-icon-capsule ${link.theme}`}>
+                  <Icon name={link.iconName} class="w-6 h-6" />
                 </div>
+                <h2 class="text-title text-xl font-bold" style="color: var(--ink-1);">{link.title}</h2>
+                <p class="text-sm leading-relaxed" style="color: var(--ink-3);">{link.body}</p>
+                <a
+                  href={link.href}
+                  target={link.external ? "_blank" : undefined}
+                  rel={link.external ? "noopener noreferrer" : undefined}
+                  class="btn btn-ghost text-sm inline-flex items-center gap-1.5 pt-2"
+                >
+                  <span>{link.cta}</span>
+                  {link.external && (
+                    <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  )}
+                </a>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <!-- TRANSPARENCY DECLARATION -->
-      <section class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <div class="doppelrand-shell spotlight-card text-center">
-          <div class="doppelrand-core p-8 sm:p-10 space-y-3">
-            <h3 class="text-xl font-bold text-white">Ethical Financial Transparency</h3>
-            <p class="text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
-              100% of sponsorship income is dedicated strictly to domain renewals, software signing certificates, continuous testing pipelines, and maintaining free public templates. We will never sell your data or gate features.
-            </p>
+      <!-- FAQ -->
+      <section class="section border-t" style="border-color: var(--border); background: var(--canvas-subtle);">
+        <div class="section-inner">
+          <div class="section-header reveal">
+            <h2 class="text-headline">Common issues</h2>
+          </div>
+          <div class="max-w-2xl space-y-0 reveal">
+            {faqs.map((faq, i) => (
+              <div class="py-6" style={`border-bottom: 1px solid var(--border);${i === 0 ? 'border-top: 1px solid var(--border);' : ''}`}>
+                <h3 class="text-sm font-semibold mb-2" style="color: var(--ink-1); letter-spacing: -0.01em;">{faq.q}</h3>
+                <p class="text-sm leading-relaxed" style="color: var(--ink-3);">{faq.a}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <!-- CTA BANNER -->
-      <CtaBanner
-        headline="Ready to build something amazing today?"
-        subheadline="Jump right into the editor and start crafting your website."
-      />
     </main>
 
     <Footer />

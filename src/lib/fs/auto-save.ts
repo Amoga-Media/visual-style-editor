@@ -71,3 +71,18 @@ export function listAutoSaveKeys(): string[] {
     return [];
   }
 }
+
+/** Clears all auto-save snapshot entries from localStorage. Returns the count cleared. */
+export function clearAllAutoSaves(): number {
+  // Clear all pending in-memory debounce timers
+  timers.forEach((t) => clearTimeout(t));
+  timers.clear();
+
+  try {
+    const keys = Object.keys(localStorage).filter((k) => k.startsWith(PREFIX));
+    keys.forEach((k) => localStorage.removeItem(k));
+    return keys.length;
+  } catch {
+    return 0;
+  }
+}

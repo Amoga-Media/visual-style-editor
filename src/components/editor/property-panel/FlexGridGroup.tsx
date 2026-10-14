@@ -5,6 +5,7 @@ import { LayoutGrid, Rows, Columns, AlignHorizontalJustifyStart, AlignHorizontal
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
 import { readCurrentValue } from "@/lib/dom/computed-style";
 import { getResponsivePropertyInfo } from "@/lib/dom/responsive-style-engine";
+import { useChangeSetStore } from "@/store/change-set-store";
 import ValueInput from "./ValueInput";
 
 interface FlexGridGroupProps {
@@ -52,6 +53,7 @@ export default function FlexGridGroup({
   viewport = "desktop",
   onEdit,
 }: FlexGridGroupProps) {
+  const edits = useChangeSetStore((s) => s.edits);
   const [display, setDisplay] = useState(() => (element ? (element as HTMLElement).style?.display || "block" : "block"));
   const [flexDirection, setFlexDirection] = useState(() => (element ? (element as HTMLElement).style?.flexDirection || "row" : "row"));
   const [flexWrap, setFlexWrap] = useState("nowrap");
@@ -90,7 +92,7 @@ export default function FlexGridGroup({
     const rawGap = getVal("gap") || computed.gap;
     const parsedGap = parseGapValue(rawGap);
     setGap(parsedGap);
-  }, [element, theme, viewport, structuralPath]);
+  }, [element, theme, viewport, structuralPath, edits]);
 
   if (!element || !structuralPath) return null;
 

@@ -460,7 +460,7 @@ function attachSelectionAndDragListeners(
   };
 
   const handleDblClick = (e: MouseEvent) => {
-    if (useSettingsStore.getState().canvasMode === "interact") {
+    if (useSettingsStore.getState().canvasMode === "interact" || !useSettingsStore.getState().inlineTextEditEnabled) {
       return;
     }
     const isDeep = e.ctrlKey || e.metaKey;
@@ -546,6 +546,23 @@ function attachSelectionAndDragListeners(
 
     target.addEventListener("keydown", onKeyDown);
     target.addEventListener("blur", onBlur);
+  };
+
+  const handleDragStart = (e: DragEvent) => {
+    const target = e.target as Element | null;
+    if (target && target.nodeType === Node.ELEMENT_NODE) {
+      (window as any).__draggedLayerElement = target;
+      if (e.dataTransfer) {
+        e.dataTransfer.setData("application/x-visual-editor-element", target.tagName);
+        e.dataTransfer.setData("text/plain", target.outerHTML || "");
+        e.dataTransfer.effectAllowed = "move";
+      }
+    }
+  };
+
+  const handleDragEnd = () => {
+    (window as any).__draggedLayerElement = null;
+    onDragOverTarget?.(null);
   };
 
   const handleDragEnter = (e: DragEvent) => {
@@ -636,6 +653,8 @@ function attachSelectionAndDragListeners(
   doc.addEventListener("click", handleClick, true);
   doc.addEventListener("dblclick", handleDblClick, true);
 
+  doc.addEventListener("dragstart", handleDragStart, true);
+  doc.addEventListener("dragend", handleDragEnd, true);
   doc.addEventListener("dragenter", handleDragEnter, true);
   doc.addEventListener("dragover", handleDragOver, true);
   doc.addEventListener("dragleave", handleDragLeave, true);
@@ -654,6 +673,8 @@ function attachSelectionAndDragListeners(
     doc.removeEventListener("click", handleClick, true);
     doc.removeEventListener("dblclick", handleDblClick, true);
 
+    doc.removeEventListener("dragstart", handleDragStart, true);
+    doc.removeEventListener("dragend", handleDragEnd, true);
     doc.removeEventListener("dragenter", handleDragEnter, true);
     doc.removeEventListener("dragover", handleDragOver, true);
     doc.removeEventListener("dragleave", handleDragLeave, true);

@@ -57,8 +57,6 @@ const Accordion = React.forwardRef<
 })
 Accordion.displayName = "Accordion"
 
-
-
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
@@ -66,9 +64,14 @@ const AccordionItem = React.forwardRef<
   <AccordionPrimitive.Item
     ref={ref}
     className={cn(
-      "doppelrand-shell spotlight-card transition-all rounded-2xl overflow-hidden",
+      "border rounded-xl overflow-hidden transition-all duration-200",
       className
     )}
+    style={{
+      backgroundColor: "var(--surface-1)",
+      borderColor: "var(--border)",
+      boxShadow: "var(--shadow-sm)",
+    }}
     {...props}
   />
 ))
@@ -78,17 +81,20 @@ const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header className="flex">
+  <AccordionPrimitive.Header className="flex m-0">
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "doppelrand-core flex flex-1 items-center justify-between p-5 sm:p-6 text-left font-semibold text-white transition-all hover:text-cyan-300 text-sm sm:text-base [&[data-state=open]>svg]:rotate-180",
+        "flex flex-1 items-center justify-between p-4 sm:p-5 text-left font-medium transition-colors text-sm sm:text-base [&[data-state=open]>svg]:rotate-180 cursor-pointer select-none",
         className
       )}
+      style={{
+        color: "var(--ink-1)",
+      }}
       {...props}
     >
       <span>{children}</span>
-      <ChevronDown className="h-4 w-4 shrink-0 text-cyan-400 transition-transform duration-300" />
+      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" style={{ color: "var(--ink-3)" }} />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ))
@@ -100,10 +106,17 @@ const AccordionContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <AccordionPrimitive.Content
     ref={ref}
-    className="overflow-hidden text-xs sm:text-sm text-slate-300 transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+    className="overflow-hidden text-xs sm:text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+    style={{ color: "var(--ink-2)" }}
     {...props}
   >
-    <div className={cn("px-6 pb-6 pt-2 font-sans leading-relaxed bg-[#0c0e14]", className)}>
+    <div
+      className={cn("px-4 sm:px-5 pb-5 pt-2 font-sans leading-relaxed border-t", className)}
+      style={{
+        borderColor: "var(--border)",
+        backgroundColor: "var(--surface-2)",
+      }}
+    >
       {children}
     </div>
   </AccordionPrimitive.Content>
@@ -139,4 +152,3 @@ export function AccordionDemo() {
 }
 
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
-

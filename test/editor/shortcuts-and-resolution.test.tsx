@@ -167,7 +167,7 @@ describe("EditorStudio Keyboard Shortcuts Integration", () => {
 
     // Select starter template to enter studio
     const templateButton = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("AI SaaS Landing Page")
+      b.textContent?.includes("Developer Profile & Stack")
     );
     await act(async () => {
       templateButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));

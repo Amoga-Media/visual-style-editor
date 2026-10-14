@@ -1,23 +1,21 @@
 ---
 import '../styles/global.css';
-import PixelCanvas from '../components/effects/PixelCanvas.astro';
+import 'lenis/dist/lenis.css';
+import 'sonner/dist/styles.css';
+import ToastProvider from '@/components/ui/ToastProvider';
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
   canonicalURL?: string;
-  theme?: "light" | "dark";
-  showPixelCanvas?: boolean;
 }
 
 const {
-  title = "Visual Style Editor | Next-Gen Visual HTML & Tailwind CSS Studio",
-  description = "A powerful, 100% in-browser visual design studio for HTML & Tailwind CSS. Drop components, tune design tokens visually, edit typography & colors live, and export production-ready code with zero lock-in.",
+  title = "Visual Style Editor — In-browser Tailwind CSS & HTML editor",
+  description = "A visual editor for HTML and Tailwind CSS that runs entirely in your browser. Drop a file, tweak styles visually, and save changes directly to disk. Zero backend. Zero telemetry. MIT licensed.",
   image = "/og-image.png",
   canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : "https://visualstyleeditor.com",
-  theme = "dark",
-  showPixelCanvas = true,
 } = Astro.props;
 
 const jsonLd = {
@@ -35,35 +33,48 @@ const jsonLd = {
   },
   "featureList": [
     "In-Browser AST Parsing & Splicing",
-    "Tailwind CSS v3 and v4 Intelligent Token Mapping",
-    "Real-Time 60fps Visual Style Studio",
-    "Double-Click Inline Live Text Editing",
-    "Direct File System Access API Disk Sync",
-    "Interactive Diff Review & Version History"
+    "Tailwind CSS v3 and v4 Token Mapping",
+    "Real-Time Visual Style Studio",
+    "Double-Click Inline Text Editing",
+    "File System Access API Disk Sync",
+    "Diff Review & Version History"
   ]
 };
 ---
 
 <!doctype html>
-<html lang="en" class="dark scroll-smooth">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- Google Fonts: Plus Jakarta Sans, Geist, JetBrains Mono -->
+    <!-- Zero-FOUC theme script: runs before paint (Default: Dark/Black theme) -->
+    <script is:inline>
+      (function() {
+        var stored = localStorage.getItem('vse_theme');
+        var isLight = stored === 'light';
+        if (isLight) {
+          document.documentElement.classList.remove('dark');
+        } else {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+
+    <!-- Geist + Geist Mono via Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Primary Meta Tags -->
+    <!-- Primary Meta -->
     <title>{title}</title>
     <meta name="title" content={title} />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
@@ -77,24 +88,33 @@ const jsonLd = {
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={image} />
 
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD -->
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
-  <body class="min-h-[100dvh] bg-[#060608] text-slate-100 antialiased selection:bg-cyan-500 selection:text-black flex flex-col font-sans relative overflow-x-hidden">
-    {showPixelCanvas && <PixelCanvas density={35} interactive={true} />}
-    
+  <body class="min-h-[100dvh] antialiased flex flex-col relative overflow-x-clip" style="background-color: var(--canvas); color: var(--ink-1);">
+    <!-- Noise texture overlay: fixed, pointer-events-none (GPU-safe) -->
+    <div class="noise-overlay" aria-hidden="true"></div>
+
+    <!-- Skip to content (keyboard accessibility) -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] btn btn-primary">
+      Skip to content
+    </a>
+
     <div class="relative z-10 flex flex-col min-h-screen">
       <slot />
     </div>
 
-    <!-- Spotlight cursor tracking & entrance initializer -->
-    <script>
-      import { initMotion, setupSpotlightCards } from '../lib/motion';
+    <ToastProvider client:load />
 
-      document.addEventListener('DOMContentLoaded', () => {
-        initMotion();
-        setupSpotlightCards('.spotlight-card');
-      });
+    <!-- 2026 Awwwards GSAP & Lenis Smooth Motion Engine -->
+    <script>
+      import { initMotionSystem } from '@/lib/motion/motion-engine';
+      // Initialize after DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => initMotionSystem());
+      } else {
+        initMotionSystem();
+      }
     </script>
   </body>
 </html>

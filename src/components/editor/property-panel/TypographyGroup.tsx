@@ -5,6 +5,7 @@ import { readCurrentValue } from "@/lib/dom/computed-style";
 import { applyLiveStyle, commitStyleChange, isStyleableElement } from "@/lib/dom/live-style-engine";
 import { getResponsivePropertyInfo, resetResponsivePropertyForViewport, syncResponsiveStylesheet } from "@/lib/dom/responsive-style-engine";
 import { POPULAR_FONTS, loadFontInDocument, cleanFontFamilyName, getFontFamilyCssValue, type FontOption } from "@/lib/fonts/google-fonts";
+import { useChangeSetStore } from "@/store/change-set-store";
 import ValueInput from "./ValueInput";
 import InlineTextEditor from "../InlineTextEditor";
 import {
@@ -103,6 +104,7 @@ export default function TypographyGroup({
   viewport = "desktop",
   onEdit,
 }: TypographyGroupProps) {
+  const edits = useChangeSetStore((s) => s.edits);
   const [fontFamily, setFontFamily] = useState<string>("Inter");
   const [fontSize, setFontSize] = useState<LengthValue>({ amount: 16, unit: "px" });
   const [lineHeight, setLineHeight] = useState<LengthValue>({ amount: 24, unit: "px" });
@@ -182,7 +184,7 @@ export default function TypographyGroup({
     const rawTD = (computed.textDecorationLine || computed.textDecoration || "none") as TextDecorationValue;
     setTextDecoration(rawTD.includes("underline") ? "underline" : rawTD.includes("line-through") ? "line-through" : "none");
     if (isNew) baselineTextDecorationRef.current = rawTD;
-  }, [element, theme, viewport, structuralPath]);
+  }, [element, theme, viewport, structuralPath, edits]);
 
   // Outside click to close font dropdown
   useEffect(() => {

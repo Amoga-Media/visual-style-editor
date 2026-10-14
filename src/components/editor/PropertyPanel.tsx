@@ -17,7 +17,6 @@ import AdvancedCssGroup from "./property-panel/AdvancedCssGroup";
 import ClassesGroup from "./property-panel/ClassesGroup";
 import DocumentInspector from "./property-panel/DocumentInspector";
 import ShadowPresetsGroup from "./property-panel/ShadowPresetsGroup";
-import AnimationBuilderGroup from "./property-panel/AnimationBuilderGroup";
 import InlineTextEditor from "./InlineTextEditor";
 import { classifyElement } from "@/lib/dom/element-classifier";
 import {
@@ -259,8 +258,6 @@ export default function PropertyPanel({
         </>
       )}
 
-      {/* CSS Animations & Transitions */}
-      <AnimationBuilderGroup element={element} structuralPath={structuralPath} theme={theme} viewport={viewport} onEdit={onEdit} defaultOpen={false} />
 
       {/* Position & Layering */}
       {(showAll || visiblePanels.positionLayering) && (

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { EditRecord, ThemeMap } from "@/types";
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
 import { Code2, Plus, Trash2, Sparkles, Sliders, ChevronDown, ChevronRight } from "lucide-react";
+import { useChangeSetStore } from "@/store/change-set-store";
 
 interface AdvancedCssGroupProps {
   element: Element | null;
@@ -64,14 +65,14 @@ interface FilterControlDef {
 }
 
 const FILTER_CONTROLS: FilterControlDef[] = [
-  { name: "blur", label: "Blur", min: 0, max: 40, step: 1, unit: "px", defaultVal: 0 },
-  { name: "grayscale", label: "Grayscale", min: 0, max: 100, step: 1, unit: "%", defaultVal: 0 },
-  { name: "brightness", label: "Brightness", min: 0, max: 200, step: 5, unit: "%", defaultVal: 100 },
-  { name: "contrast", label: "Contrast", min: 0, max: 200, step: 5, unit: "%", defaultVal: 100 },
-  { name: "saturate", label: "Saturate", min: 0, max: 200, step: 5, unit: "%", defaultVal: 100 },
-  { name: "sepia", label: "Sepia", min: 0, max: 100, step: 1, unit: "%", defaultVal: 0 },
-  { name: "invert", label: "Invert", min: 0, max: 100, step: 1, unit: "%", defaultVal: 0 },
-  { name: "hue-rotate", label: "Hue Rotate", min: 0, max: 360, step: 5, unit: "deg", defaultVal: 0 },
+  { name: "blur", label: "Blur", min: 0, max: 40, step: 0.1, unit: "px", defaultVal: 0 },
+  { name: "grayscale", label: "Grayscale", min: 0, max: 100, step: 0.1, unit: "%", defaultVal: 0 },
+  { name: "brightness", label: "Brightness", min: 0, max: 200, step: 0.1, unit: "%", defaultVal: 100 },
+  { name: "contrast", label: "Contrast", min: 0, max: 200, step: 0.1, unit: "%", defaultVal: 100 },
+  { name: "saturate", label: "Saturate", min: 0, max: 200, step: 0.1, unit: "%", defaultVal: 100 },
+  { name: "sepia", label: "Sepia", min: 0, max: 100, step: 0.1, unit: "%", defaultVal: 0 },
+  { name: "invert", label: "Invert", min: 0, max: 100, step: 0.1, unit: "%", defaultVal: 0 },
+  { name: "hue-rotate", label: "Hue Rotate", min: 0, max: 360, step: 0.5, unit: "deg", defaultVal: 0 },
 ];
 
 export default function AdvancedCssGroup({
@@ -80,6 +81,7 @@ export default function AdvancedCssGroup({
   theme,
   onEdit,
 }: AdvancedCssGroupProps) {
+  const edits = useChangeSetStore((s) => s.edits);
   const [targetFilterProp, setTargetFilterProp] = useState<"filter" | "backdrop-filter">("filter");
   const [filterValues, setFilterValues] = useState<Record<string, number>>({});
   const [showSliders, setShowSliders] = useState(true);
@@ -99,7 +101,7 @@ export default function AdvancedCssGroup({
       values[ctrl.name] = parsed[ctrl.name]?.amount ?? ctrl.defaultVal;
     }
     setFilterValues(values);
-  }, [element, targetFilterProp, structuralPath]);
+  }, [element, targetFilterProp, structuralPath, edits]);
 
   if (!element || !structuralPath) return null;
 
@@ -201,18 +203,34 @@ export default function AdvancedCssGroup({
             </div>
           </div>
 
-          {/* Sliders Grid */}
+          {/* Sliders Grid with Paired Direct Decimal Numeric Inputs */}
           <div className="space-y-2.5 pt-1">
             {FILTER_CONTROLS.map((ctrl) => {
               const currentVal = filterValues[ctrl.name] ?? ctrl.defaultVal;
               return (
                 <div key={ctrl.name} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs text-zinc-300 font-mono">
-                    <span className="font-sans text-zinc-400">{ctrl.label}</span>
-                    <span className="text-[11px] text-[#0099ff] font-medium">
-                      {currentVal}
-                      {ctrl.unit}
-                    </span>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-sans text-slate-600 dark:text-zinc-400 font-medium">{ctrl.label}</span>
+                    <div className="flex items-center gap-1 font-mono">
+                      <input
+                        type="number"
+                        min={ctrl.min}
+                        max={ctrl.max}
+                        step={ctrl.step}
+                        value={currentVal}
+                        aria-label={`${ctrl.label} value`}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (!isNaN(val)) {
+                            handleFilterSliderChange(ctrl.name, val, false);
+                          }
+                        }}
+                        className="w-16 bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded px-1.5 py-0.5 text-right font-mono text-[11px] text-[#0099ff] focus:border-[#0099ff] outline-none"
+                      />
+                      <span className="text-[10px] text-slate-400 dark:text-zinc-500 w-5">
+                        {ctrl.unit}
+                      </span>
+                    </div>
                   </div>
                   <input
                     type="range"
@@ -220,9 +238,10 @@ export default function AdvancedCssGroup({
                     max={ctrl.max}
                     step={ctrl.step}
                     value={currentVal}
+                    aria-label={`${ctrl.label} slider`}
                     onChange={(e) => handleFilterSliderChange(ctrl.name, parseFloat(e.target.value), true)}
                     onPointerUp={(e) => handleFilterSliderChange(ctrl.name, parseFloat((e.target as HTMLInputElement).value), false)}
-                    className="w-full accent-[#0099ff] cursor-pointer h-1.5 bg-[#262626] rounded-lg"
+                    className="w-full accent-[#0099ff] cursor-pointer h-1.5 bg-slate-200 dark:bg-[#262626] rounded-lg"
                   />
                 </div>
               );

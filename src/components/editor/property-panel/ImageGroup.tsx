@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { EditRecord, ThemeMap } from "@/types";
 import { applyLiveStyle, commitStyleChange } from "@/lib/dom/live-style-engine";
 import type { ViewportMode } from "@/components/editor/Toolbar";
-import { Image, Upload, Video, Sparkles, Film, Play, Volume2, VolumeX, RotateCcw, Youtube } from "lucide-react";
+import { Image, Upload, Video, Sparkles, Film, Play, Volume2, VolumeX, RotateCcw, Youtube, Crop, Crosshair, Move } from "lucide-react";
+import { useChangeSetStore } from "@/store/change-set-store";
+import { computeStructuralPath } from "@/lib/ast/structural-path";
+import { domAdapter } from "@/lib/dom/dom-adapter";
 
 interface ImageGroupProps {
   element: Element | null;
@@ -23,12 +26,10 @@ const SAMPLE_PRESETS = [
 function formatVideoEmbedUrl(url: string): string {
   const trimmed = url.trim();
   if (!trimmed) return "";
-  // YouTube watch / shorts / youtu.be
   const ytMatch = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/i);
   if (ytMatch && ytMatch[1]) {
     return `https://www.youtube.com/embed/${ytMatch[1]}`;
   }
-  // Vimeo URL
   const vimeoMatch = trimmed.match(/vimeo\.com\/(\d+)/i);
   if (vimeoMatch && vimeoMatch[1]) {
     return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
@@ -36,11 +37,51 @@ function formatVideoEmbedUrl(url: string): string {
   return trimmed;
 }
 
+function parseObjectPosition(pos: string): { x: number; y: number } {
+  if (!pos) return { x: 50, y: 50 };
+  const trimmed = pos.trim().toLowerCase();
+  if (trimmed === "center") return { x: 50, y: 50 };
+  if (trimmed === "top") return { x: 50, y: 0 };
+  if (trimmed === "bottom") return { x: 50, y: 100 };
+  if (trimmed === "left") return { x: 0, y: 50 };
+  if (trimmed === "right") return { x: 100, y: 50 };
+
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 1) {
+    const val = parseFloat(parts[0]);
+    return { x: isNaN(val) ? 50 : val, y: 50 };
+  }
+  if (parts.length >= 2) {
+    let x = 50;
+    let y = 50;
+    if (parts[0] === "left") x = 0;
+    else if (parts[0] === "right") x = 100;
+    else if (parts[0] === "center") x = 50;
+    else {
+      const parsedX = parseFloat(parts[0]);
+      if (!isNaN(parsedX)) x = parsedX;
+    }
+
+    if (parts[1] === "top") y = 0;
+    else if (parts[1] === "bottom") y = 100;
+    else if (parts[1] === "center") y = 50;
+    else {
+      const parsedY = parseFloat(parts[1]);
+      if (!isNaN(parsedY)) y = parsedY;
+    }
+    return { x, y };
+  }
+  return { x: 50, y: 50 };
+}
+
 export default function ImageGroup({ element, structuralPath, theme, viewport = "desktop", onEdit }: ImageGroupProps) {
   const [src, setSrc] = useState("");
   const [alt, setAlt] = useState("");
   const [objectFit, setObjectFit] = useState("cover");
   const [objectPosition, setObjectPosition] = useState("center");
+  const [posX, setPosX] = useState(50);
+  const [posY, setPosY] = useState(50);
+  const edits = useChangeSetStore((s) => s.edits);
 
   // Video specific attributes
   const [autoplay, setAutoplay] = useState(false);
@@ -93,9 +134,12 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
 
     const fit = (element as HTMLElement).style?.objectFit || "cover";
     setObjectFit(fit);
-    const pos = (element as HTMLElement).style?.objectPosition || "center";
+    const pos = (element as HTMLElement).style?.objectPosition || "50% 50%";
     setObjectPosition(pos);
-  }, [element]);
+    const parsedPos = parseObjectPosition(pos);
+    setPosX(parsedPos.x);
+    setPosY(parsedPos.y);
+  }, [element, edits]);
 
   if (!element || !structuralPath) return null;
   const tag = element.tagName.toLowerCase();
@@ -106,8 +150,15 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
 
   function commitAttribute(name: string, value: string) {
     if (!element) return;
-    const target = element.tagName.toLowerCase() === "picture" ? (element.querySelector("img") || element) : element;
+    const isPicture = element.tagName.toLowerCase() === "picture";
+    const target = (isPicture || (!isVideo && element.querySelector("img") !== null))
+      ? (element.querySelector("img") || element)
+      : element;
+    const targetPath = target === element ? structuralPath! : computeStructuralPath(target, domAdapter);
     const old = target.getAttribute(name) || "";
+    const normalizedNew = value || "";
+    if (old === normalizedNew) return;
+
     if (value !== undefined && value !== null && value !== "") {
       target.setAttribute(name, value);
     } else {
@@ -115,7 +166,7 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
     }
     onEdit?.({
       kind: "attribute",
-      structuralPath: structuralPath!,
+      structuralPath: targetPath,
       property: name,
       attributeName: name,
       oldValue: old,
@@ -128,7 +179,10 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
     if (!element) return;
     const target = (tag === "video" ? element : element.querySelector("video")) as HTMLVideoElement | null;
     if (!target) return;
-    const old = target.hasAttribute(name) ? "" : undefined;
+    const hasAttr = target.hasAttribute(name);
+    if (hasAttr === enable) return;
+
+    const old = hasAttr ? "" : undefined;
     if (enable) {
       target.setAttribute(name, "");
       if (name === "autoplay") target.setAttribute("playsinline", "");
@@ -218,6 +272,54 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
     setObjectFit(fit);
     applyLiveStyle(element!, "object-fit" as any, fit, theme, undefined, viewport, structuralPath!);
     commitStyleChange(element!, structuralPath!, "object-fit" as any, fit, theme, onEdit, undefined, undefined, viewport);
+  }
+
+  function handlePositionChange(newX: number, newY: number, commit: boolean = true) {
+    const clampedX = Math.max(0, Math.min(100, Number(newX.toFixed(1))));
+    const clampedY = Math.max(0, Math.min(100, Number(newY.toFixed(1))));
+    setPosX(clampedX);
+    setPosY(clampedY);
+    const posVal = `${clampedX}% ${clampedY}%`;
+    setObjectPosition(posVal);
+
+    const currentInlineFit = (element as HTMLElement).style?.objectFit;
+    if (!currentInlineFit || (objectFit !== "cover" && objectFit !== "scale-down" && objectFit !== "contain")) {
+      setObjectFit("cover");
+      applyLiveStyle(element!, "object-fit" as any, "cover", theme, undefined, viewport, structuralPath!);
+      commitStyleChange(element!, structuralPath!, "object-fit" as any, "cover", theme, onEdit, undefined, undefined, viewport);
+    }
+
+    applyLiveStyle(element!, "object-position" as any, posVal, theme, undefined, viewport, structuralPath!);
+    if (commit) {
+      commitStyleChange(element!, structuralPath!, "object-position" as any, posVal, theme, onEdit, undefined, undefined, viewport);
+    }
+  }
+
+  function handlePointerDownCropPad(e: React.PointerEvent<HTMLDivElement>) {
+    e.preventDefault();
+    const pad = e.currentTarget;
+    const rect = pad.getBoundingClientRect();
+
+    function updateFromPointer(clientX: number, clientY: number, commit: boolean) {
+      const rawX = ((clientX - rect.left) / rect.width) * 100;
+      const rawY = ((clientY - rect.top) / rect.height) * 100;
+      handlePositionChange(rawX, rawY, commit);
+    }
+
+    updateFromPointer(e.clientX, e.clientY, false);
+
+    function onPointerMove(moveEvent: PointerEvent) {
+      updateFromPointer(moveEvent.clientX, moveEvent.clientY, false);
+    }
+
+    function onPointerUp(upEvent: PointerEvent) {
+      updateFromPointer(upEvent.clientX, upEvent.clientY, true);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+    }
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
   }
 
   return (
@@ -415,9 +517,19 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
         </div>
       )}
 
-      {/* Object Fit & Position */}
-      <div className="space-y-2">
-        <label className="text-[11px] text-slate-600 dark:text-zinc-400 block font-medium">Object Fit &amp; Framing</label>
+      {/* Object Fit & Framing */}
+      <div className="space-y-3 pt-1 border-t border-slate-200 dark:border-[#262626]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-700 dark:text-zinc-300 font-medium">
+            <Crop className="w-3.5 h-3.5 text-[#0099ff]" />
+            <span>Object Fit &amp; Crop Framing</span>
+          </div>
+          <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
+            {posX}% {posY}%
+          </span>
+        </div>
+
+        {/* Fit Mode Switcher */}
         <div className="grid grid-cols-4 gap-1">
           {["cover", "contain", "fill", "scale-down"].map((fit) => (
             <button
@@ -434,6 +546,165 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
               {fit}
             </button>
           ))}
+        </div>
+
+        {/* Framing & Crop Presets */}
+        <div className="space-y-1.5">
+          <label className="text-[10px] text-slate-500 dark:text-zinc-400 block font-medium">
+            Quick Framing (Crop Alignment)
+          </label>
+          <div className="grid grid-cols-5 gap-1">
+            {[
+              { label: "Top", x: 50, y: 0, desc: "Show upper part, crop bottom" },
+              { label: "Center", x: 50, y: 50, desc: "Center crop" },
+              { label: "Bottom", x: 50, y: 100, desc: "Show lower part, crop top" },
+              { label: "Left", x: 0, y: 50, desc: "Left crop" },
+              { label: "Right", x: 100, y: 50, desc: "Right crop" },
+            ].map((preset) => {
+              const isMatch = Math.abs(posX - preset.x) < 2 && Math.abs(posY - preset.y) < 2;
+              return (
+                <button
+                  key={preset.label}
+                  type="button"
+                  title={preset.desc}
+                  onClick={() => handlePositionChange(preset.x, preset.y, true)}
+                  className={`py-1 px-1 text-[10px] font-medium rounded-lg border transition-all cursor-pointer truncate ${
+                    isMatch
+                      ? "bg-[#0099ff] text-white border-[#0099ff] shadow-xs font-semibold"
+                      : "bg-slate-50 dark:bg-[#141414] border-slate-200 dark:border-[#262626] text-slate-700 dark:text-zinc-300 hover:border-slate-300 dark:hover:border-zinc-700"
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 2D Interactive Crop & Pan Pad */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-zinc-400">
+            <span className="flex items-center gap-1 font-medium">
+              <Crosshair className="w-3 h-3 text-[#0099ff]" />
+              <span>Interactive 2D Pan Pad</span>
+            </span>
+            <span className="text-[9px] text-slate-400 dark:text-zinc-500">Drag target to pan</span>
+          </div>
+          <div
+            onPointerDown={handlePointerDownCropPad}
+            className="relative w-full h-28 rounded-xl border border-slate-200 dark:border-[#262626] bg-slate-100 dark:bg-[#141414] overflow-hidden cursor-crosshair select-none shadow-inner group"
+            title="Click or drag anywhere to position image framing"
+          >
+            {/* Background Thumbnail if available */}
+            {src && !isVideo && (
+              <img
+                src={src}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-40 group-hover:opacity-60 transition-opacity"
+                style={{ objectPosition: `${posX}% ${posY}%` }}
+              />
+            )}
+
+            {/* Grid overlay lines */}
+            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-20">
+              <div className="border-r border-b border-black dark:border-white" />
+              <div className="border-r border-b border-black dark:border-white" />
+              <div className="border-b border-black dark:border-white" />
+              <div className="border-r border-b border-black dark:border-white" />
+              <div className="border-r border-b border-black dark:border-white" />
+              <div className="border-b border-black dark:border-white" />
+              <div className="border-r border-black dark:border-white" />
+              <div className="border-r border-black dark:border-white" />
+              <div />
+            </div>
+
+            {/* Focal Point Crosshair Target */}
+            <div
+              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform"
+              style={{ left: `${posX}%`, top: `${posY}%` }}
+            >
+              <div className="w-5 h-5 rounded-full border-2 border-[#0099ff] bg-[#0099ff]/30 shadow-lg flex items-center justify-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-white shadow-xs" />
+              </div>
+            </div>
+
+            {/* Live Indicator Pill */}
+            <div className="absolute bottom-1 right-1.5 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[9px] font-mono text-white pointer-events-none">
+              X:{posX}% Y:{posY}%
+            </div>
+          </div>
+        </div>
+
+        {/* Paired Sliders with Direct Number Inputs */}
+        <div className="space-y-2 pt-1">
+          {/* Horizontal Pan X */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">Pan X (Horizontal)</span>
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  value={posX}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val)) handlePositionChange(val, posY, true);
+                  }}
+                  className="w-14 bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded px-1.5 py-0.5 text-right font-mono text-[11px] text-slate-800 dark:text-zinc-200 focus:border-[#0099ff] outline-none"
+                />
+                <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">%</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={0.5}
+              value={posX}
+              onChange={(e) => handlePositionChange(parseFloat(e.target.value), posY, false)}
+              onPointerUp={(e) => handlePositionChange(parseFloat((e.target as HTMLInputElement).value), posY, true)}
+              className="w-full accent-[#0099ff] cursor-pointer h-1.5 bg-slate-200 dark:bg-[#262626] rounded-lg"
+            />
+          </div>
+
+          {/* Vertical Pan Y (Controls Top / Bottom crop) */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">Pan Y (Vertical Crop)</span>
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  value={posY}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val)) handlePositionChange(posX, val, true);
+                  }}
+                  className="w-14 bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded px-1.5 py-0.5 text-right font-mono text-[11px] text-slate-800 dark:text-zinc-200 focus:border-[#0099ff] outline-none"
+                />
+                <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">%</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={0.5}
+              value={posY}
+              onChange={(e) => handlePositionChange(posX, parseFloat(e.target.value), false)}
+              onPointerUp={(e) => handlePositionChange(posX, parseFloat((e.target as HTMLInputElement).value), true)}
+              className="w-full accent-[#0099ff] cursor-pointer h-1.5 bg-slate-200 dark:bg-[#262626] rounded-lg"
+            />
+            <div className="flex justify-between text-[9px] text-slate-400 dark:text-zinc-500 font-mono px-0.5">
+              <span>0% (Top visible)</span>
+              <span>50% (Center)</span>
+              <span>100% (Bottom visible)</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

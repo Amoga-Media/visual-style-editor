@@ -7,108 +7,129 @@ import CtaBanner from "@/components/marketing/CtaBanner.astro";
 const sections = [
   {
     id: "zero-collection",
-    title: "1. The Zero-Collection Guarantee",
-    content: "Visual Style Editor operates on a fundamental principle of data sovereignty: we cannot leak, sell, or compromise your data because we never collect it in the first place. When you open this application, all code processing, HTML parsing, AST manipulation, and live preview rendering occur entirely in your local browser sandbox via JavaScript. No telemetry packets, canvas analytics, keystroke logs, or document contents are ever transmitted to any remote server."
+    num: "01",
+    title: "Zero-Collection Architecture",
+    content: "Visual Style Editor operates on a fundamental principle of data sovereignty: we cannot leak, sell, or compromise your work because we never collect it in the first place. When you run this application, all code processing, HTML parsing, AST manipulation, and live preview rendering occur entirely in your local browser sandbox via client-side JavaScript. No telemetry packets, canvas analytics, keystroke logs, or document contents are ever transmitted to any remote server."
   },
   {
     id: "local-storage",
-    title: "2. Use of Browser LocalStorage",
-    content: "To provide a seamless workflow, Visual Style Editor utilizes your browser's native localStorage API solely on your local device. The data stored includes: (a) 'vse_theme' to remember your preference for light or dark mode; (b) 'vse_ui_scale' to preserve your chosen interface scale; and (c) 'vse_autosave_*' keys which store a debounced 2-second local backup of your open document to protect you against unexpected browser crashes or power interruptions. This data remains strictly in your browser and is never uploaded or synchronized to the cloud."
+    num: "02",
+    title: "Use of Browser Local Storage",
+    content: "To provide a resilient workflow, Visual Style Editor utilizes your browser's native localStorage API solely on your local device. This stores your theme preference ('dark' or 'light'), your chosen interface scale, and debounced 2-second crash-recovery snapshots to protect you against accidental tab closures or browser restarts. This data never leaves your device and can be cleared at any time via browser settings."
   },
   {
     id: "filesystem-api",
-    title: "3. File System Access API & User Permissions",
-    content: "When you choose to open a file or directory from your computer, Visual Style Editor uses the standardized Chromium File System Access API (such as window.showOpenFilePicker and window.showDirectoryPicker). Access to files or directories requires explicit, user-initiated permission granted through your browser's security dialog. The editor interacts only with the specific files you authorize and writes modifications back to your disk only when you trigger a save action."
+    num: "03",
+    title: "File System Access API & Permissions",
+    content: "When you choose to open a file or directory from your computer, Visual Style Editor uses the standardized Chromium File System Access API (such as window.showOpenFilePicker and window.showDirectoryPicker). Access to files or directories requires explicit, user-initiated permission granted through your browser's native security prompt. The editor interacts only with the specific files you authorize and writes modifications back to your disk only when you trigger a save action."
   },
   {
     id: "analytics-trackers",
-    title: "4. Complete Absence of Analytics & Trackers",
-    content: "We do not embed Google Analytics, Mixpanel, Hotjar, Meta Pixel, or any third-party advertising or telemetry trackers. We believe web development tools should be private sanctuaries for creative and commercial engineering. When you test client code or private startup designs in Visual Style Editor, you can be 100% confident that no third party is monitoring your work."
+    num: "04",
+    title: "Complete Absence of Analytics & Trackers",
+    content: "We do not embed Google Analytics, Mixpanel, PostHog, Hotjar, Meta Pixel, or any third-party advertising or telemetry trackers. We believe developer tools should be private sanctuaries for creative and commercial engineering. When you build client deliverables or proprietary products in Visual Style Editor, you can be 100% confident that no third party is monitoring your work."
   },
   {
     id: "external-services",
-    title: "5. Third-Party Links & External Services",
-    content: "Our website contains links to external platforms including GitHub (for source code and sponsorship) and Ko-fi (for voluntary community donations). If you choose to visit these external websites or contribute via their platforms, any information you provide is subject to their respective privacy policies and terms of service. We encourage you to review their policies."
+    num: "05",
+    title: "External Links & Third-Party Platforms",
+    content: "Our website contains links to external platforms including GitHub (for source code and sponsorship) and Ko-fi (for voluntary community donations). If you choose to visit these external platforms or contribute through them, any information you provide is subject to their respective privacy policies and terms of service."
   },
   {
     id: "gdpr-ccpa",
-    title: "6. Global Privacy Compliance (GDPR, CCPA, COPPA)",
-    content: "Because Visual Style Editor does not collect, process, retain, or share Personally Identifiable Information (PII), we comply with the European Union General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), and international privacy frameworks by design. There are no user accounts to delete, no marketing databases to unsubscribe from, and no data profiling mechanisms."
+    num: "06",
+    title: "Global Privacy Compliance",
+    content: "Because Visual Style Editor does not collect, process, retain, or share Personally Identifiable Information (PII), we comply with the European Union General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), and international privacy frameworks by architectural default. There are no user accounts to delete, no marketing databases to unsubscribe from, and no data profiling mechanisms."
   },
   {
     id: "contact",
-    title: "7. Inquiries & Contact",
-    content: "If you have questions regarding this Privacy Policy, our open-source codebase, or our client-side architecture, please submit an issue on our public GitHub repository. This privacy policy was last updated on September 30, 2026."
+    num: "07",
+    title: "Inquiries & Verification",
+    content: "Visual Style Editor is open source. You can inspect every line of source code, verify network requests in your browser DevTools Network tab, and build the project locally from source. If you have questions regarding our architecture or this policy, please open an issue or discussion on our GitHub repository."
   }
 ];
 ---
 
 <BaseLayout
   title="Privacy Policy — Visual Style Editor"
-  description="Read our comprehensive zero-telemetry privacy policy. Learn why Visual Style Editor never collects, stores, transmits, or monetizes your data."
-  theme="dark"
-  showPixelCanvas={true}
+  description="Visual Style Editor runs 100% in your browser. Zero telemetry, zero analytics, zero servers. Read our privacy policy."
 >
-  <div class="relative min-h-screen flex flex-col bg-[#060608] text-slate-100 overflow-hidden">
-    <Navbar />
+  <div class="flex flex-col min-h-[100dvh]">
+    <Navbar activePage="privacy" />
 
-    <main class="flex-1">
-      <!-- HERO SECTION -->
-      <section class="pt-16 pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-8">
-        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          Privacy by Architecture • Zero Telemetry
+    <main id="main-content" class="flex-1">
+
+      <!-- Header -->
+      <section class="relative overflow-hidden pt-8 sm:pt-12 md:pt-14 pb-12 sm:pb-14 px-4 sm:px-6 lg:px-8">
+        {/* Vibrant Multi-Layered Ambient Studio Aura & Grid Texture */}
+        <div class="hero-ambient-glow" aria-hidden="true">
+          <div class="hero-glow-orb"></div>
+          <div class="hero-grid-pattern"></div>
         </div>
 
-        <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-[1.15]">
-          Radical Transparency: <br class="hidden sm:inline" />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
-            We do not collect your data.
-          </span>
-        </h1>
-
-        <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
-          Because Visual Style Editor operates 100% client-side in your browser, we do not operate user tracking databases, session recorders, or backend servers.
-        </p>
-      </section>
-
-      <!-- POLICY DOCUMENT CONTENT -->
-      <section class="pb-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <div class="doppelrand-shell spotlight-card">
-          <div class="doppelrand-core p-7 sm:p-12 space-y-10">
-            <!-- Table of Contents Pill Bar -->
-            <div class="p-5 rounded-2xl bg-[#0a0c12] border border-white/5 space-y-2">
-              <span class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Quick Navigation:</span>
-              <div class="flex flex-wrap gap-2 text-xs font-mono">
-                {sections.map((s) => (
-                  <a href={`#${s.id}`} class="text-slate-400 hover:text-cyan-300 transition-colors">
-                    {s.title.split(". ")[1]} &bull;
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <!-- Sections -->
-            <div class="space-y-10 divide-y divide-white/5">
-              {sections.map((sec, idx) => (
-                <div id={sec.id} class={idx > 0 ? "pt-8 space-y-3" : "space-y-3"}>
-                  <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                    {sec.title}
-                  </h2>
-                  <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
-                    {sec.content}
-                  </p>
-                </div>
-              ))}
-            </div>
+        <div class="max-w-3xl mx-auto text-center space-y-4 relative z-10">
+          <div
+            class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none mx-auto shadow-sm backdrop-blur-xl bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/40"
+          >
+            <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse"></span>
+            <span>Zero Telemetry · 100% Local First</span>
+          </div>
+          <h1 class="text-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08]">
+            Privacy Policy
+          </h1>
+          <p class="text-body text-base sm:text-lg mx-auto text-balance" style="color: var(--ink-2);">
+            We don't collect your data, track your code, or run analytics servers. Visual Style Editor is designed so privacy is an architectural guarantee, not just a promise.
+          </p>
+          <div class="text-mono font-medium" style="color: var(--ink-3); font-size: 0.75rem; padding-top: 0.5rem;">
+            Effective Date: October 2026 • MIT Licensed
           </div>
         </div>
       </section>
 
-      <!-- CTA BANNER -->
+      <!-- Document Content -->
+      <section class="section" style="padding-top: 0; padding-bottom: 5rem;">
+        <div class="max-w-3xl mx-auto">
+          <!-- Table of contents pill list -->
+          <div class="card p-4 sm:p-5 mb-8">
+            <div class="text-label mb-3" style="color: var(--ink-3);">Document Sections</div>
+            <div class="flex flex-wrap gap-2 text-xs">
+              {sections.map((s) => (
+                <a
+                  href={`#${s.id}`}
+                  class="px-2.5 py-1 rounded-md transition-colors"
+                  style="background: var(--surface-2); border: 1px solid var(--border); color: var(--ink-2);"
+                >
+                  <span class="font-mono text-[10px]" style="color: var(--ink-3);">{s.num}</span> {s.title}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <!-- Section Cards -->
+          <div class="space-y-6">
+            {sections.map((sec) => (
+              <article id={sec.id} class="card p-6 sm:p-8 scroll-mt-24">
+                <div class="flex items-baseline gap-3 mb-3">
+                  <span class="text-mono text-xs font-bold" style="color: var(--ink-3);">{sec.num}</span>
+                  <h2 class="text-title text-base sm:text-lg">
+                    {sec.title}
+                  </h2>
+                </div>
+                <p class="text-body text-sm sm:text-base leading-relaxed" style="color: var(--ink-2);">
+                  {sec.content}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Banner -->
       <CtaBanner
-        headline="Experience true software privacy"
-        subheadline="Launch the studio and edit your code locally with peace of mind."
+        title="Software that respects your workspace."
+        subtitle="No accounts, no telemetry, no tracking. Drop your file and start editing."
+        primaryLabel="Launch the editor"
+        primaryHref="/editor"
       />
     </main>
 

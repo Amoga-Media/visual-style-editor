@@ -6,21 +6,65 @@
   <title>Technical Article Layout</title>
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-[#09090b] text-zinc-100 min-h-screen py-16 px-6">
-  <article class="max-w-2xl mx-auto space-y-8">
-    <div class="space-y-3">
-      <div class="flex items-center gap-2 text-xs font-mono text-[#0084FF]">
-        <span>ENGINEERING ARCHITECTURE</span>
-        <span>&bull;</span>
-        <span>OCTOBER 2026</span>
+<body class="bg-[#09090b] text-zinc-200 min-h-screen py-16 px-6 font-sans antialiased">
+  <article class="max-w-3xl mx-auto space-y-10">
+    <!-- Meta and Tags -->
+    <div class="space-y-4 border-b border-zinc-800 pb-8">
+      <div class="flex items-center gap-3 text-xs font-mono">
+        <span class="px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/30">Architecture</span>
+        <span class="text-zinc-500">•</span>
+        <span class="text-zinc-400">8 min read</span>
+        <span class="text-zinc-500">•</span>
+        <span class="text-zinc-400">Oct 2026</span>
       </div>
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Surgical In-Browser AST Mutation with Parse5</h1>
-      <p class="text-zinc-400 text-sm">How to patch HTML source files in real time without destroying comments or indentation.</p>
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+        Why Byte-Offset AST Splicing Outperforms Full DOM Serialization
+      </h1>
+      <p class="text-base sm:text-lg text-zinc-400 leading-relaxed">
+        An engineering retrospective on building a non-destructive in-browser HTML editor that leaves your original comments and template tags intact.
+      </p>
+      <!-- Author card -->
+      <div class="flex items-center gap-3 pt-2">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-sky-500 flex items-center justify-center font-bold text-xs text-white">
+          VS
+        </div>
+        <div>
+          <p class="text-xs font-bold text-white">Valentin Sorokin</p>
+          <p class="text-[11px] text-zinc-500 font-mono">Lead Compiler Architect</p>
+        </div>
+      </div>
     </div>
-    <div class="prose prose-invert text-zinc-300 text-sm leading-relaxed space-y-4 border-t border-white/[0.08] pt-6">
-      <p>Modern browser tooling enables extraordinary workflows that once required full node.js backend clusters. By leveraging client-side Web Workers and memory-efficient AST representation, editors can now achieve instant feedback.</p>
-      <blockquote class="border-l-2 border-[#0084FF] pl-4 italic text-zinc-400">Pristine source preservation is the hallmark of any professional-grade code editor.</blockquote>
-      <p>By computing precise byte offsets, we can replace only the classList tokens or inline style declarations without reformatting or re-serializing the entire document tree.</p>
+
+    <!-- Body content -->
+    <div class="space-y-6 text-sm sm:text-base text-zinc-300 leading-relaxed">
+      <p>
+        Visual website editors typically share a fatal architectural flaw: they parse your markup into an internal tree structure, execute mutations, and then serialize the document back into a string using generic serializers like <code class="text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded font-mono text-xs">innerHTML</code>.
+      </p>
+
+      <!-- Highlight Callout Box -->
+      <div class="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2">
+        <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">Key Principle</p>
+        <p class="text-sm font-semibold text-white">
+          Never mutate code you did not touch. If the user edited a button's padding, adjacent comments, indentation, and template tags must remain bit-for-bit identical on disk.
+        </p>
+      </div>
+
+      <h2 class="text-2xl font-bold text-white pt-4">The Parse5 Source Location Solution</h2>
+      <p>
+        Parse5 provides exact character offsets for every token when configured with <code class="text-sky-400 bg-sky-500/10 px-1.5 py-0.5 rounded font-mono text-xs">sourceCodeLocationInfo: true</code>. This allows us to calculate exact byte ranges for attributes:
+      </p>
+
+      <!-- Code Snippet -->
+      <div class="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 font-mono text-xs text-zinc-300 space-y-2 overflow-x-auto shadow-inner">
+        <div class="text-zinc-500">// Surgical string slicing at exact coordinate offsets:</div>
+        <div>const before = html.slice(0, attrLoc.startOffset);</div>
+        <div>const after = html.slice(attrLoc.endOffset);</div>
+        <div class="text-emerald-400 font-bold">return before + `class="${newClasses}"` + after;</div>
+      </div>
+
+      <p>
+        By operating strictly on character offsets, server templates (Blade, PHP, Twig) and HTML comments are never subjected to DOM tree normalization.
+      </p>
     </div>
   </article>
 </body>

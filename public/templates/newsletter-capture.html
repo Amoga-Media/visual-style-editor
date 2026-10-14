@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editorial Newsletter & Lead Capture</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-[#09090b] text-white min-h-screen py-20 px-6 font-sans antialiased flex flex-col justify-center items-center">
+  <div class="max-w-2xl mx-auto w-full p-8 sm:p-12 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-2xl space-y-8 text-center relative overflow-hidden">
+    <!-- Ambient top glow -->
+    <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-purple-500/10 blur-3xl pointer-events-none"></div>
+
+    <div class="space-y-3 relative z-10">
+      <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/30">
+        Weekly Dispatch
+      </span>
+      <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white">
+        Architectural notes for visual builders
+      </h1>
+      <p class="text-zinc-400 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
+        Deep dives on OKLCH perceptual color math, AST location indexing, browser File System APIs, and high-performance WebGL canvas rendering.
+      </p>
+    </div>
+
+    <!-- Capture Form -->
+    <form class="space-y-3 max-w-md mx-auto relative z-10" onsubmit="event.preventDefault()">
+      <div class="flex flex-col sm:flex-row gap-2">
+        <input
+          type="email"
+          placeholder="developer@company.com"
+          class="flex-1 px-4 py-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-white text-xs font-mono outline-none focus:border-purple-500 transition-colors placeholder:text-zinc-600"
+          required
+        />
+        <button
+          type="submit"
+          class="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/25 transition-transform hover:scale-105 active:scale-95 cursor-pointer shrink-0"
+        >
+          Subscribe
+        </button>
+      </div>
+      <p class="text-[11px] font-mono text-zinc-500">
+        No spam. No analytics beacons. Unsubscribe in one click anytime.
+      </p>
+    </form>
+
+    <!-- Social Proof Micro Badge -->
+    <div class="pt-6 border-t border-zinc-800/80 flex items-center justify-center gap-3 text-xs text-zinc-400 font-mono relative z-10">
+      <div class="flex -space-x-2">
+        <div class="w-7 h-7 rounded-full bg-purple-500/30 border-2 border-zinc-900 flex items-center justify-center text-[10px] font-bold text-purple-300">A</div>
+        <div class="w-7 h-7 rounded-full bg-sky-500/30 border-2 border-zinc-900 flex items-center justify-center text-[10px] font-bold text-sky-300">B</div>
+        <div class="w-7 h-7 rounded-full bg-emerald-500/30 border-2 border-zinc-900 flex items-center justify-center text-[10px] font-bold text-emerald-300">C</div>
+      </div>
+      <span>Read by 4,800+ frontend engineers worldwide</span>
+    </div>
+  </div>
+</body>
+</html>

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { EditRecord } from "@/types";
 import { useChangeSetStore } from "./change-set-store";
 import { resolveElementByStructuralPath } from "../lib/dom/resolve-live-path";
-import { setResponsiveStyle, syncResponsiveStylesheet } from "../lib/dom/responsive-style-engine";
+import { setResponsiveStyle, removeResponsiveProperty, syncResponsiveStylesheet } from "../lib/dom/responsive-style-engine";
 
 export function findLiveElement(root: Document, path: string): Element | null {
   if (!root || !path) return null;
@@ -49,6 +49,32 @@ export function findLiveElement(root: Document, path: string): Element | null {
 
   return null;
 }
+
+const PROPERTY_TO_CSS_MAP: Record<string, string> = {
+  "text-color": "color",
+  "background-color": "background-color",
+  "backdrop-blur": "backdrop-filter",
+  "font-family": "font-family",
+  "font-size": "font-size",
+  "font-weight": "font-weight",
+  "line-height": "line-height",
+  "letter-spacing": "letter-spacing",
+  "text-align": "text-align",
+  "border-width": "border-width",
+  "border-color": "border-color",
+  "border-style": "border-style",
+  "border-radius": "border-radius",
+  display: "display",
+  "justify-content": "justify-content",
+  "align-items": "align-items",
+  "flex-direction": "flex-direction",
+  "flex-wrap": "flex-wrap",
+  gap: "gap",
+  "box-shadow": "box-shadow",
+  opacity: "opacity",
+  rotate: "rotate",
+  scale: "scale",
+};
 
 export function reconcileDom(from: EditRecord[], to: EditRecord[], iframeDocument: Document | null): void {
   if (!iframeDocument) return;
@@ -220,6 +246,14 @@ export function reconcileDom(from: EditRecord[], to: EditRecord[], iframeDocumen
       if (target) {
         if (target.kind === "class") {
           el.className = target.newClassList.join(" ");
+          if (target.property && "style" in el) {
+            const cssProp = PROPERTY_TO_CSS_MAP[target.property] || target.property;
+            (el as HTMLElement).style.removeProperty(cssProp);
+            if (cssProp === "color") {
+              try { (el as HTMLElement).style.removeProperty("-webkit-text-fill-color"); } catch {}
+            }
+            removeResponsiveProperty(target.structuralPath, cssProp, "desktop");
+          }
         } else if (target.kind === "style") {
           const vp = target.viewport || "desktop";
           const targetProp = target.property || target.styleProperty;
@@ -244,6 +278,14 @@ export function reconcileDom(from: EditRecord[], to: EditRecord[], iframeDocumen
       } else if (source) {
         if (source.kind === "class") {
           el.className = source.oldClassList.join(" ");
+          if (source.property && "style" in el) {
+            const cssProp = PROPERTY_TO_CSS_MAP[source.property] || source.property;
+            (el as HTMLElement).style.removeProperty(cssProp);
+            if (cssProp === "color") {
+              try { (el as HTMLElement).style.removeProperty("-webkit-text-fill-color"); } catch {}
+            }
+            removeResponsiveProperty(source.structuralPath, cssProp, "desktop");
+          }
         } else if (source.kind === "style") {
           const vp = source.viewport || "desktop";
           const sourceProp = source.property || source.styleProperty;

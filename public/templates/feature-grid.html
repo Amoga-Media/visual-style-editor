@@ -3,35 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4-Column Feature Section</title>
+  <title>4-Column Modern Feature Grid</title>
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-[#09090b] text-white min-h-screen py-16 px-6 flex items-center justify-center">
-  <div class="max-w-6xl mx-auto space-y-12">
-    <div class="text-center space-y-3">
-      <h2 class="text-3xl font-extrabold tracking-tight">Core Capabilities</h2>
-      <p class="text-zinc-400 text-sm max-w-lg mx-auto">Everything front-end engineers need to craft high-conversion experiences.</p>
+<body class="bg-zinc-950 text-white min-h-screen py-16 px-6 font-sans antialiased flex flex-col justify-center">
+  <div class="max-w-6xl mx-auto w-full space-y-12">
+    <!-- Header -->
+    <div class="text-center space-y-4 max-w-2xl mx-auto">
+      <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/30">
+        System Architecture
+      </span>
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white">
+        Engineered for zero friction
+      </h1>
+      <p class="text-zinc-400 text-sm sm:text-base leading-relaxed">
+        Everything you need to craft high-conversion web experiences without proprietary subscriptions.
+      </p>
     </div>
+
+    <!-- 4-Column Card Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="p-6 rounded-xl bg-[#111115] border border-white/[0.08] space-y-3">
-        <div class="w-9 h-9 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold text-sm">01</div>
-        <h3 class="text-sm font-semibold text-white">Instant Preview</h3>
-        <p class="text-xs text-zinc-400 leading-relaxed">Changes render at 60fps directly within isolated sandboxed iframes.</p>
+      <!-- Card 1 -->
+      <div class="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 space-y-4 hover:border-purple-500/40 transition-colors shadow-lg">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 font-mono font-bold text-lg">
+          AST
+        </div>
+        <h3 class="text-base font-bold text-white">Byte Splicer</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Surgically targets and modifies only the exact bytes you touched, leaving comments intact.
+        </p>
+        <span class="inline-block text-[10px] font-mono font-bold text-purple-400">0ms Latency →</span>
       </div>
-      <div class="p-6 rounded-xl bg-[#111115] border border-white/[0.08] space-y-3">
-        <div class="w-9 h-9 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-sm">02</div>
-        <h3 class="text-sm font-semibold text-white">Tailwind v4 Native</h3>
-        <p class="text-xs text-zinc-400 leading-relaxed">CSS variables, custom color palettes, and container queries supported.</p>
+
+      <!-- Card 2 -->
+      <div class="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 space-y-4 hover:border-sky-500/40 transition-colors shadow-lg">
+        <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 font-mono font-bold text-lg">
+          OKL
+        </div>
+        <h3 class="text-base font-bold text-white">OKLCH Science</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Perceptually uniform lightness curves prevent muddy mid-tones across the visible spectrum.
+        </p>
+        <span class="inline-block text-[10px] font-mono font-bold text-sky-400">WCAG AAA →</span>
       </div>
-      <div class="p-6 rounded-xl bg-[#111115] border border-white/[0.08] space-y-3">
-        <div class="w-9 h-9 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold text-sm">03</div>
-        <h3 class="text-sm font-semibold text-white">Direct Disk Saves</h3>
-        <p class="text-xs text-zinc-400 leading-relaxed">Save straight to your local hard drive with the File System Access API.</p>
+
+      <!-- Card 3 -->
+      <div class="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 space-y-4 hover:border-emerald-500/40 transition-colors shadow-lg">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-mono font-bold text-lg">
+          FSA
+        </div>
+        <h3 class="text-base font-bold text-white">Direct Disk Sync</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Saves straight back to your local repository file handle via native browser writable streams.
+        </p>
+        <span class="inline-block text-[10px] font-mono font-bold text-emerald-400">&lt;2ms Disk IO →</span>
       </div>
-      <div class="p-6 rounded-xl bg-[#111115] border border-white/[0.08] space-y-3">
-        <div class="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-sm">04</div>
-        <h3 class="text-sm font-semibold text-white">Offline Ready</h3>
-        <p class="text-xs text-zinc-400 leading-relaxed">100% functional without an internet connection once assets are loaded.</p>
+
+      <!-- Card 4 -->
+      <div class="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 space-y-4 hover:border-amber-500/40 transition-colors shadow-lg">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-mono font-bold text-lg">
+          TW4
+        </div>
+        <h3 class="text-base font-bold text-white">Tailwind v4 Native</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Auto-detects @theme CSS variables and translates visual sliders into idiomatic classes.
+        </p>
+        <span class="inline-block text-[10px] font-mono font-bold text-amber-400">Zero Arbitrary →</span>
       </div>
     </div>
   </div>

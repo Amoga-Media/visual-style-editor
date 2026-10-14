@@ -118,6 +118,16 @@ export function readCurrentValue(
 
   // 1. Check explicit inline styles on the HTML element first (highest specificity)
   if (isStyleableElement(el)) {
+    if (property === "background-color") {
+      const bgImg = el.style.getPropertyValue("background-image");
+      if (bgImg && bgImg.includes("gradient")) return bgImg;
+    }
+    if (property === "text-color") {
+      const bgImg = el.style.getPropertyValue("background-image");
+      const clip = el.style.getPropertyValue("background-clip") || el.style.getPropertyValue("-webkit-background-clip");
+      if (bgImg && bgImg.includes("gradient") && clip.includes("text")) return bgImg;
+    }
+
     const cssProp = property === "text-color" ? "color" : property;
     const inline = el.style.getPropertyValue(cssProp);
     if (inline) return inline;
@@ -172,6 +182,8 @@ export function readCurrentValue(
   const computed = win.getComputedStyle(el);
 
   switch (property) {
+    case "display":
+      return (el as HTMLElement).style?.display || computed.display || "block";
     case "width":
       return computed.width;
     case "height":
@@ -256,6 +268,12 @@ export function readCurrentValue(
       return computed.color;
     case "background-color":
       return computed.backgroundColor;
+    case "flex-direction":
+      return (el as HTMLElement).style?.flexDirection || computed.flexDirection || "row";
+    case "justify-content":
+      return (el as HTMLElement).style?.justifyContent || computed.justifyContent || "normal";
+    case "align-items":
+      return (el as HTMLElement).style?.alignItems || computed.alignItems || "normal";
     case "opacity":
       return computed.opacity || "1";
     case "gap":

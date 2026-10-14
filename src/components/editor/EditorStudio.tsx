@@ -26,9 +26,11 @@ import Breadcrumbs from "./Breadcrumbs";
 import LayersTree from "./LayersTree";
 import BasicComponents from "./BasicComponents";
 import ComponentBlocks from "./ComponentBlocks";
+import InsertPanel from "./InsertPanel";
 import PagesPanel from "./PagesPanel";
 import ProjectConfigModal from "./ProjectConfigModal";
 import KeyboardShortcutsModal from "./KeyboardShortcutsModal";
+import SettingsModal, { type SettingsTabId } from "./SettingsModal";
 import ExportStudioModal from "./ExportStudioModal";
 import DevicePresetDropdown from "./DevicePresetDropdown";
 import ErrorBoundary from "./ErrorBoundary";
@@ -47,6 +49,15 @@ export function serializeCleanDocument(doc: Document): string {
   if (helperStyle) helperStyle.remove();
   const tailwindRuntime = docClone.getElementById("vse-tailwind-runtime");
   if (tailwindRuntime) tailwindRuntime.remove();
+
+  // If document uses Tailwind utility classes and lacks Tailwind CDN, inject clean standalone CDN script
+  const hasTailwindClasses = Boolean(docClone.querySelector('[class*="bg-"], [class*="text-"], [class*="shadow-"], [class*="p-"], [class*="m-"], [class*="rounded-"], [class*="border-"]'));
+  const hasTailwindScript = Boolean(docClone.querySelector('script[src*="tailwind"], link[href*="tailwind"]'));
+  if (hasTailwindClasses && !hasTailwindScript && docClone.head) {
+    const twScript = docClone.createElement("script");
+    twScript.src = "https://cdn.tailwindcss.com";
+    docClone.head.appendChild(twScript);
+  }
 
   // 2. Remove temporary editor-injected markers and attributes
   docClone.querySelectorAll("[contenteditable]").forEach((el) => {
@@ -143,9 +154,19 @@ export default function EditorStudio() {
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
-  const [leftSidebarTab, setLeftSidebarTab] = useState<"pages" | "layers" | "primitives" | "templates">("pages");
+  const [leftSidebarTab, setLeftSidebarTab] = useState<"pages" | "layers" | "library">("pages");
   const [zoom, setZoom] = useState(1);
+  const [isSpaceDown, setIsSpaceDown] = useState(false);
+  const isSpaceDownRef = useRef(false);
+  const [isPanning, setIsPanning] = useState(false);
+  const isPanningRef = useRef(false);
+  const panStartRef = useRef<{ clientX: number; clientY: number; scrollLeft: number; scrollTop: number; isSpace?: boolean } | null>(null);
+  const canvasRef = useRef<HTMLDivElement | null>(null);
+  const artboardWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [settingsModalTab, setSettingsModalTab] = useState<SettingsTabId>("appearance");
   const [uiPanelsVisible, setUiPanelsVisible] = useState(true);
   const [activePreset, setActivePreset] = useState<DevicePreset>(() => getDefaultPreset("desktop"));
   const [customDimensions, setCustomDimensions] = useState<{ width: number; height: number } | null>(null);
@@ -158,25 +179,9 @@ export default function EditorStudio() {
     }
     return null;
   });
-  const [isDimensionsCapsuleHidden, setIsDimensionsCapsuleHidden] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("vse_dimensions_hidden") === "true";
-    }
-    return false;
-  });
   const [isDraggingCapsule, setIsDraggingCapsule] = useState(false);
   const capsuleContainerRef = useRef<HTMLDivElement | null>(null);
   const capsuleDragStartRef = useRef<{ startX: number; startY: number; initX: number; initY: number } | null>(null);
-  const [canvasGutter, setCanvasGutter] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("vse_canvas_gutter");
-      if (saved !== null) {
-        const parsed = parseInt(saved, 10);
-        if (!isNaN(parsed) && parsed >= 0 && parsed <= 200) return parsed;
-      }
-    }
-    return 0; // Default 0: Eliminate black space outside the canvas
-  });
   const [gutterToast, setGutterToast] = useState<string | null>(null);
   const [isResizingArtboard, setIsResizingArtboard] = useState(false);
   const versionIdRef = useRef(0);
@@ -343,14 +348,20 @@ export default function EditorStudio() {
     } catch {}
   }
 
+  const showDimensionsHUD = useSettingsStore((s) => s.showDimensionsHUD);
+  const setShowDimensionsHUD = useSettingsStore((s) => s.setShowDimensionsHUD);
+  const canvasGutter = useSettingsStore((s) => s.canvasGutter);
+  const setCanvasGutter = useSettingsStore((s) => s.setCanvasGutter);
+  const showDotGrid = useSettingsStore((s) => s.showDotGrid);
+  const autoSaveEnabled = useSettingsStore((s) => s.autoSaveEnabled);
+  const canvasMode = useSettingsStore((s) => s.canvasMode);
+  const uiScale = useSettingsStore((s) => s.uiScale);
+  const increaseUiScale = useSettingsStore((s) => s.increaseUiScale);
+  const decreaseUiScale = useSettingsStore((s) => s.decreaseUiScale);
+  const resetUiScale = useSettingsStore((s) => s.resetUiScale);
+
   function handleToggleDimensionsCapsule() {
-    setIsDimensionsCapsuleHidden((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem("vse_dimensions_hidden", String(next));
-      } catch {}
-      return next;
-    });
+    setShowDimensionsHUD(!showDimensionsHUD);
   }
 
   const hover = useSelectionStore((s) => s.hover);
@@ -358,11 +369,13 @@ export default function EditorStudio() {
   const edits = useChangeSetStore((s) => s.edits);
   const recordEdit = useChangeSetStore((s) => s.recordEdit);
   const clearEdits = useChangeSetStore((s) => s.clear);
-  const canvasMode = useSettingsStore((s) => s.canvasMode);
-  const uiScale = useSettingsStore((s) => s.uiScale);
-  const increaseUiScale = useSettingsStore((s) => s.increaseUiScale);
-  const decreaseUiScale = useSettingsStore((s) => s.decreaseUiScale);
-  const resetUiScale = useSettingsStore((s) => s.resetUiScale);
+  const appTheme = useSettingsStore((s) => s.appTheme);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.toggle("dark", appTheme === "dark");
+    }
+  }, [appTheme]);
 
   // Auto-restore persisted workspace session on initial mount
   useEffect(() => {
@@ -416,11 +429,12 @@ export default function EditorStudio() {
   // Auto-Save active document to localStorage on edits
   useEffect(() => {
     if (!openFile || !iframeEl?.contentDocument || edits.length === 0) return;
+    if (!autoSaveEnabled) return;
     try {
       const cleanHtml = serializeCleanDocument(iframeEl.contentDocument);
       autoSave(openFile.name, cleanHtml);
     } catch {}
-  }, [edits, openFile, iframeEl]);
+  }, [edits, openFile, iframeEl, autoSaveEnabled]);
 
   // Save active document state on beforeunload
   useEffect(() => {
@@ -886,12 +900,20 @@ export default function EditorStudio() {
       sourceEl.setAttribute("data-vse-move-token", moveToken);
     }
 
-    if (position === "inside") {
+    if (position === "inside" || targetTag === "body" || targetTag === "html") {
       targetEl.appendChild(sourceEl);
     } else if (position === "before") {
-      targetEl.parentElement?.insertBefore(sourceEl, targetEl);
+      if (targetEl.parentElement) {
+        targetEl.parentElement.insertBefore(sourceEl, targetEl);
+      } else {
+        targetEl.appendChild(sourceEl);
+      }
     } else {
-      targetEl.parentElement?.insertBefore(sourceEl, targetEl.nextSibling);
+      if (targetEl.parentElement) {
+        targetEl.parentElement.insertBefore(sourceEl, targetEl.nextSibling);
+      } else {
+        targetEl.appendChild(sourceEl);
+      }
     }
 
     const newParent = sourceEl.parentElement;
@@ -1156,26 +1178,14 @@ export default function EditorStudio() {
           targetEl.blur();
           return;
         }
-        if (exportOpen) {
-          setExportOpen(false);
-          return;
-        }
-        if (configModalOpen) {
-          setConfigModalOpen(false);
-          return;
-        }
-        if (reviewOpen) {
-          setReviewOpen(false);
-          return;
-        }
-        if (shortcutsOpen) {
-          setShortcutsOpen(false);
-          return;
-        }
-        if (historyOpen) {
-          setHistoryOpen(false);
-          return;
-        }
+        let modalClosed = false;
+        setExportOpen((o) => { if (o) modalClosed = true; return false; });
+        setConfigModalOpen((o) => { if (o) modalClosed = true; return false; });
+        setReviewOpen((o) => { if (o) modalClosed = true; return false; });
+        setShortcutsOpen((o) => { if (o) modalClosed = true; return false; });
+        setSettingsModalOpen((o) => { if (o) modalClosed = true; return false; });
+        setHistoryOpen((o) => { if (o) modalClosed = true; return false; });
+        if (modalClosed) return;
         setSelectedEl(null);
         setSelectedPath(null);
         select(null);
@@ -1206,6 +1216,14 @@ export default function EditorStudio() {
       if (isModifier && e.key.toLowerCase() === "k" && !isTyping) {
         e.preventDefault();
         setShortcutsOpen((o) => !o);
+        return;
+      }
+
+      // Studio Settings via Ctrl + , (or Cmd + ,)
+      if (isModifier && (e.key === "," || e.code === "Comma") && !isTyping) {
+        e.preventDefault();
+        setSettingsModalTab("appearance");
+        setSettingsModalOpen((o) => !o);
         return;
       }
 
@@ -1332,12 +1350,6 @@ export default function EditorStudio() {
   // Effective viewport for the property panel: in "all" mode, default to "desktop" editing
   const [activeEditViewport, setActiveEditViewport] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
-  // Canvas pan state
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const isPanningRef = useRef(false);
-  const panStartRef = useRef({ x: 0, y: 0, ox: 0, oy: 0 });
-  const canvasRef = useRef<HTMLDivElement>(null);
-
   // The viewport the property panel should use
   const effectiveCategory = customDimensions
     ? getCategoryForWidth(customDimensions.width)
@@ -1369,7 +1381,51 @@ export default function EditorStudio() {
     ? 844
     : 900;
 
-  // Ctrl+Scroll Canvas Zoom handler & Ctrl+Shift+Scroll Empty Space (Gutter) handler
+  // Zoom-towards-point engine (Figma-style zoom anchored to cursor or center)
+  const zoomTowardsPoint = (
+    nextZoomOrFn: number | ((prev: number) => number),
+    clientX?: number,
+    clientY?: number
+  ) => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      setZoom((z) => {
+        const val = typeof nextZoomOrFn === "function" ? nextZoomOrFn(z) : nextZoomOrFn;
+        return Math.min(Math.max(Number(val.toFixed(2)), 0.25), 3);
+      });
+      return;
+    }
+
+    setZoom((prevZoom) => {
+      const targetZoom = typeof nextZoomOrFn === "function" ? nextZoomOrFn(prevZoom) : nextZoomOrFn;
+      const clampedZoom = Math.min(Math.max(Number(targetZoom.toFixed(2)), 0.25), 3);
+      if (clampedZoom === prevZoom) return prevZoom;
+
+      const canvasRect = canvas.getBoundingClientRect();
+      const pointerX = clientX !== undefined ? clientX : canvasRect.left + canvasRect.width / 2;
+      const pointerY = clientY !== undefined ? clientY : canvasRect.top + canvasRect.height / 2;
+
+      // Anchor to artboard if available, else canvas
+      const artboardEl = artboardWrapperRef.current;
+      const anchorRect = artboardEl ? artboardEl.getBoundingClientRect() : canvasRect;
+
+      const distFromAnchorX = pointerX - anchorRect.left;
+      const distFromAnchorY = pointerY - anchorRect.top;
+
+      const scaleRatio = clampedZoom / prevZoom;
+      const deltaScrollX = distFromAnchorX * (scaleRatio - 1);
+      const deltaScrollY = distFromAnchorY * (scaleRatio - 1);
+
+      requestAnimationFrame(() => {
+        canvas.scrollLeft = Math.max(0, canvas.scrollLeft + deltaScrollX);
+        canvas.scrollTop = Math.max(0, canvas.scrollTop + deltaScrollY);
+      });
+
+      return clampedZoom;
+    });
+  };
+
+  // Ctrl+Scroll Canvas Zoom towards cursor & Ctrl+Shift+Scroll Empty Space (Gutter) handler
   useEffect(() => {
     let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -1380,37 +1436,61 @@ export default function EditorStudio() {
         if (e.shiftKey) {
           // Ctrl + Shift + Scroll: Adjust black empty space around the canvas
           const deltaGutter = e.deltaY > 0 ? 8 : -8;
-          setCanvasGutter((prev) => {
-            const next = Math.max(0, Math.min(160, prev + deltaGutter));
-            try {
-              localStorage.setItem("vse_canvas_gutter", next.toString());
-            } catch {}
-            setGutterToast(next === 0 ? "Empty Space: 0px (Flush Edge-to-Edge)" : `Empty Space: ${next}px`);
-            if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => setGutterToast(null), 1500);
-            return next;
-          });
+          const current = useSettingsStore.getState().canvasGutter;
+          const next = Math.max(0, Math.min(160, current + deltaGutter));
+          setCanvasGutter(next);
+          setGutterToast(next === 0 ? "Empty Space: 0px (Flush Edge-to-Edge)" : `Empty Space: ${next}px`);
+          if (toastTimer) clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => setGutterToast(null), 1500);
         } else {
-          // Ctrl + Scroll: Zoom canvas workspace in / out
-          const delta = e.deltaY > 0 ? -0.05 : 0.05;
-          setZoom((z) => Math.min(Math.max(Number((z + delta).toFixed(2)), 0.25), 3));
+          // Ctrl + Scroll: Zoom canvas workspace towards mouse cursor
+          const delta = e.deltaY > 0 ? -0.1 : 0.1;
+          zoomTowardsPoint((z) => Number((z + delta).toFixed(2)), e.clientX, e.clientY);
         }
       }
     }
 
     window.addEventListener("wheel", handleWheel, { passive: false });
-    const iframeDoc = iframeEl?.contentDocument;
-    const iframeWin = iframeEl?.contentWindow;
-    iframeDoc?.addEventListener("wheel", handleWheel, { passive: false });
-    iframeWin?.addEventListener("wheel", handleWheel, { passive: false });
+
+    function handleIframeWheel(e: WheelEvent) {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const iframeRect = iframeEl?.getBoundingClientRect();
+        const clientX = (iframeRect?.left ?? 0) + e.clientX;
+        const clientY = (iframeRect?.top ?? 0) + e.clientY;
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        zoomTowardsPoint((z) => Number((z + delta).toFixed(2)), clientX, clientY);
+      }
+    }
+
+    function attachIframeWheel() {
+      try {
+        const doc = iframeEl?.contentDocument;
+        const win = iframeEl?.contentWindow;
+        if (doc) {
+          doc.removeEventListener("wheel", handleIframeWheel);
+          doc.addEventListener("wheel", handleIframeWheel, { passive: false });
+        }
+        if (win) {
+          win.removeEventListener("wheel", handleIframeWheel);
+          win.addEventListener("wheel", handleIframeWheel, { passive: false });
+        }
+      } catch {}
+    }
+
+    attachIframeWheel();
+    iframeEl?.addEventListener("load", attachIframeWheel);
 
     return () => {
       if (toastTimer) clearTimeout(toastTimer);
       window.removeEventListener("wheel", handleWheel);
-      iframeDoc?.removeEventListener("wheel", handleWheel);
-      iframeWin?.removeEventListener("wheel", handleWheel);
+      iframeEl?.removeEventListener("load", attachIframeWheel);
+      try {
+        iframeEl?.contentDocument?.removeEventListener("wheel", handleIframeWheel);
+        iframeEl?.contentWindow?.removeEventListener("wheel", handleIframeWheel);
+      } catch {}
     };
-  }, [iframeEl]);
+  }, [iframeEl, loadToken, openFile]);
 
   // Interactive Artboard Drag-to-Resize Handler
   function handleArtboardResizeStart(
@@ -1476,35 +1556,157 @@ export default function EditorStudio() {
     window.addEventListener("pointercancel", handlePointerUp);
   }
 
+  // Keyboard Space key detection for Space + Drag panning
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.code === "Space" && !e.repeat) {
+        const active = (document.activeElement || iframeEl?.contentDocument?.activeElement) as HTMLElement | null;
+        const isEditing =
+          active &&
+          (active.tagName === "INPUT" ||
+            active.tagName === "TEXTAREA" ||
+            active.isContentEditable ||
+            active.getAttribute("contenteditable") === "true");
+        if (!isEditing) {
+          e.preventDefault();
+          setIsSpaceDown(true);
+          isSpaceDownRef.current = true;
+        }
+      }
+    }
+
+    function handleKeyUp(e: KeyboardEvent) {
+      if (e.code === "Space") {
+        setIsSpaceDown(false);
+        isSpaceDownRef.current = false;
+        if (isPanningRef.current && panStartRef.current?.isSpace) {
+          isPanningRef.current = false;
+          setIsPanning(false);
+          panStartRef.current = null;
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    function attachIframeKey() {
+      try {
+        const win = iframeEl?.contentWindow;
+        if (win) {
+          win.removeEventListener("keydown", handleKeyDown);
+          win.removeEventListener("keyup", handleKeyUp);
+          win.addEventListener("keydown", handleKeyDown);
+          win.addEventListener("keyup", handleKeyUp);
+        }
+      } catch {}
+    }
+
+    attachIframeKey();
+    iframeEl?.addEventListener("load", attachIframeKey);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      iframeEl?.removeEventListener("load", attachIframeKey);
+      try {
+        iframeEl?.contentWindow?.removeEventListener("keydown", handleKeyDown);
+        iframeEl?.contentWindow?.removeEventListener("keyup", handleKeyUp);
+      } catch {}
+    };
+  }, [iframeEl]);
+
   // Middle-click / Space+drag pan handler
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    function handleDown(e: PointerEvent) {
-      if (e.button === 1 || (e.button === 0 && e.target === canvas)) {
+
+    function handlePointerDown(e: MouseEvent | PointerEvent) {
+      const isMiddleClick = e.button === 1;
+      const isSpaceDrag = e.button === 0 && isSpaceDownRef.current;
+
+      if (isMiddleClick || isSpaceDrag) {
+        e.preventDefault();
+        e.stopPropagation();
+
         isPanningRef.current = true;
-        panStartRef.current = { x: e.clientX, y: e.clientY, ox: panOffset.x, oy: panOffset.y };
-        canvas!.setPointerCapture(e.pointerId);
+        setIsPanning(true);
+        panStartRef.current = {
+          clientX: e.clientX,
+          clientY: e.clientY,
+          scrollLeft: canvas?.scrollLeft ?? 0,
+          scrollTop: canvas?.scrollTop ?? 0,
+          isSpace: isSpaceDrag,
+        };
       }
     }
-    function handleMove(e: PointerEvent) {
-      if (!isPanningRef.current) return;
-      const dx = e.clientX - panStartRef.current.x;
-      const dy = e.clientY - panStartRef.current.y;
-      setPanOffset({ x: panStartRef.current.ox + dx, y: panStartRef.current.oy + dy });
+
+    function handlePointerMove(e: MouseEvent | PointerEvent) {
+      if (!isPanningRef.current || !panStartRef.current || !canvas) return;
+      e.preventDefault();
+      const dx = e.clientX - panStartRef.current.clientX;
+      const dy = e.clientY - panStartRef.current.clientY;
+
+      canvas.scrollLeft = panStartRef.current.scrollLeft - dx;
+      canvas.scrollTop = panStartRef.current.scrollTop - dy;
     }
-    function handleUp() {
-      isPanningRef.current = false;
+
+    function handlePointerUp() {
+      if (isPanningRef.current) {
+        isPanningRef.current = false;
+        setIsPanning(false);
+        panStartRef.current = null;
+      }
     }
-    canvas.addEventListener("pointerdown", handleDown);
-    canvas.addEventListener("pointermove", handleMove);
-    canvas.addEventListener("pointerup", handleUp);
+
+    function handleAuxClick(e: MouseEvent) {
+      if (e.button === 1) e.preventDefault();
+    }
+
+    window.addEventListener("pointerdown", handlePointerDown as any, { capture: true });
+    window.addEventListener("pointermove", handlePointerMove as any, { capture: true, passive: false });
+    window.addEventListener("pointerup", handlePointerUp as any, { capture: true });
+    window.addEventListener("pointercancel", handlePointerUp as any, { capture: true });
+    window.addEventListener("auxclick", handleAuxClick, { capture: true });
+
+    function attachIframePointer() {
+      try {
+        const doc = iframeEl?.contentDocument;
+        if (doc) {
+          doc.removeEventListener("pointerdown", handlePointerDown as any, { capture: true });
+          doc.removeEventListener("pointermove", handlePointerMove as any, { capture: true });
+          doc.removeEventListener("pointerup", handlePointerUp as any, { capture: true });
+          doc.removeEventListener("auxclick", handleAuxClick, { capture: true });
+
+          doc.addEventListener("pointerdown", handlePointerDown as any, { capture: true });
+          doc.addEventListener("pointermove", handlePointerMove as any, { capture: true, passive: false });
+          doc.addEventListener("pointerup", handlePointerUp as any, { capture: true });
+          doc.addEventListener("auxclick", handleAuxClick, { capture: true });
+        }
+      } catch {}
+    }
+
+    attachIframePointer();
+    iframeEl?.addEventListener("load", attachIframePointer);
+
     return () => {
-      canvas.removeEventListener("pointerdown", handleDown);
-      canvas.removeEventListener("pointermove", handleMove);
-      canvas.removeEventListener("pointerup", handleUp);
+      window.removeEventListener("pointerdown", handlePointerDown as any, { capture: true });
+      window.removeEventListener("pointermove", handlePointerMove as any, { capture: true });
+      window.removeEventListener("pointerup", handlePointerUp as any, { capture: true });
+      window.removeEventListener("pointercancel", handlePointerUp as any, { capture: true });
+      window.removeEventListener("auxclick", handleAuxClick, { capture: true });
+      iframeEl?.removeEventListener("load", attachIframePointer);
+      try {
+        const doc = iframeEl?.contentDocument;
+        if (doc) {
+          doc.removeEventListener("pointerdown", handlePointerDown as any, { capture: true });
+          doc.removeEventListener("pointermove", handlePointerMove as any, { capture: true });
+          doc.removeEventListener("pointerup", handlePointerUp as any, { capture: true });
+          doc.removeEventListener("auxclick", handleAuxClick, { capture: true });
+        }
+      } catch {}
     };
-  }, [panOffset]);
+  }, [iframeEl]);
 
   // Synchronize active viewport mode with the preview iframe document element for live style isolation
   useEffect(() => {
@@ -1544,14 +1746,22 @@ export default function EditorStudio() {
         leftSidebarOpen={leftSidebarOpen}
         onToggleLeftSidebar={() => setLeftSidebarOpen((o) => !o)}
         zoom={zoom}
-        onZoomIn={() => setZoom((z) => Math.min(Number((z + 0.1).toFixed(2)), 2))}
-        onZoomOut={() => setZoom((z) => Math.max(Number((z - 0.1).toFixed(2)), 0.25))}
+        onZoomIn={() => zoomTowardsPoint((z) => Number((z + 0.1).toFixed(2)))}
+        onZoomOut={() => zoomTowardsPoint((z) => Number((z - 0.1).toFixed(2)))}
         onZoomReset={() => {
           setZoom(1);
           setPanOffset({ x: 0, y: 0 });
+          if (canvasRef.current) {
+            canvasRef.current.scrollTop = 0;
+            canvasRef.current.scrollLeft = 0;
+          }
         }}
         onOpenShortcuts={() => setShortcutsOpen(true)}
-        isDimensionsHUDHidden={isDimensionsCapsuleHidden}
+        onOpenSettings={() => {
+          setSettingsModalTab("appearance");
+          setSettingsModalOpen(true);
+        }}
+        isDimensionsHUDHidden={!showDimensionsHUD}
         onToggleDimensionsHUD={handleToggleDimensionsCapsule}
       />
 
@@ -1597,8 +1807,9 @@ export default function EditorStudio() {
             className="border-r border-slate-200 dark:border-[#262626] bg-white dark:bg-[#141414] flex flex-col shrink-0 z-20 overflow-hidden shadow-2xl animate-in slide-in-from-left-4 duration-200 relative"
           >
             {/* Tab Header */}
+            {/* Tab Header */}
             <div className="flex items-center justify-between px-2 py-1.5 border-b border-slate-200 dark:border-[#262626] bg-slate-50 dark:bg-[#090909] gap-1">
-              <div className="flex-1 grid grid-cols-4 gap-0.5 bg-slate-200/70 dark:bg-[#141414] p-0.5 rounded-lg border border-slate-300/60 dark:border-[#262626]">
+              <div className="flex-1 grid grid-cols-3 gap-0.5 bg-slate-200/70 dark:bg-[#141414] p-0.5 rounded-lg border border-slate-300/60 dark:border-[#262626]">
                 <button
                   type="button"
                   onClick={() => setLeftSidebarTab("pages")}
@@ -1610,7 +1821,7 @@ export default function EditorStudio() {
                   }`}
                   title="Pages (Multi-page workspace)"
                 >
-                  <Files className="w-3 h-3 shrink-0" />
+                  <Files className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">Pages</span>
                 </button>
                 <button
@@ -1624,36 +1835,22 @@ export default function EditorStudio() {
                   }`}
                   title="Layers (DOM Tree)"
                 >
-                  <Layers className="w-3 h-3 shrink-0" />
+                  <Layers className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">Layers</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setLeftSidebarTab("primitives")}
-                  aria-label="Primitives tab"
+                  onClick={() => setLeftSidebarTab("library")}
+                  aria-label="Components & Blocks Library tab"
                   className={`py-1 rounded-md text-[11px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer truncate ${
-                    leftSidebarTab === "primitives"
+                    leftSidebarTab === "library"
                       ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] dark:text-white shadow-2xs"
                       : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
                   }`}
-                  title="Primitives (HTML elements)"
+                  title="Library (Elements & Blocks)"
                 >
-                  <PlusSquare className="w-3 h-3 shrink-0" />
-                  <span className="truncate">Prims</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLeftSidebarTab("templates")}
-                  aria-label="Templates tab"
-                  className={`py-1 rounded-md text-[11px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer truncate ${
-                    leftSidebarTab === "templates"
-                      ? "bg-white dark:bg-[#1c1c1c] text-[#0099ff] dark:text-white shadow-2xs"
-                      : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
-                  }`}
-                  title="Templates (UI Component Blocks)"
-                >
-                  <Sparkles className="w-3 h-3 shrink-0" />
-                  <span className="truncate">Blocks</span>
+                  <PlusSquare className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Library</span>
                 </button>
               </div>
 
@@ -1690,13 +1887,11 @@ export default function EditorStudio() {
                   onMoveUp={handleMoveUp}
                   onMoveDown={handleMoveDown}
                 />
-              ) : leftSidebarTab === "primitives" ? (
-                <BasicComponents
-                  onInsert={handleInsertPrimitive}
+              ) : (
+                <InsertPanel
+                  onInsertElement={(snippet, position) => handleInsertPrimitive(snippet, position)}
                   selectedElement={selectedEl}
                 />
-              ) : (
-                <ComponentBlocks onInsertBlock={handleInsertBlock} />
               )}
             </ErrorBoundary>
           </aside>
@@ -1731,23 +1926,44 @@ export default function EditorStudio() {
 
           <div
             ref={canvasRef}
-            className="flex-1 relative flex items-center justify-center canvas-dot-grid overflow-auto transition-all duration-150"
+            className={`flex-1 relative canvas-dot-grid ${
+              showDotGrid ? "canvas-grid-dots" : "canvas-plain"
+            } overflow-auto transition-colors`}
             style={{
               padding: `${canvasGutter}px`,
-              cursor: isPanningRef.current ? "grabbing" : undefined,
+              cursor: isPanning ? "grabbing" : isSpaceDown ? "grab" : undefined,
             }}
           >
+            {/* Transparent Grab/Grabbing Shield during Space or Panning */}
+            {(isPanning || isSpaceDown) && (
+              <div
+                className={`fixed inset-0 z-50 pointer-events-auto select-none ${
+                  isPanning ? "cursor-grabbing" : "cursor-grab"
+                }`}
+                style={{ backgroundColor: "transparent" }}
+              />
+            )}
+
             {openFile ? (
               <div
+                className="min-w-full min-h-full flex"
                 style={{
-                  transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
-                  transformOrigin: "center center",
+                  padding: `${Math.max(24, canvasGutter)}px`,
+                  width: "max-content",
+                  height: "max-content",
+                  boxSizing: "border-box",
                 }}
-                className="w-full h-full flex items-center justify-center"
               >
                 {viewport === "all" ? (
                   /* ========== Multi-Viewport: 3 Artboards Side-by-Side ========== */
-                  <div className="flex items-start gap-8 px-4">
+                  <div
+                    ref={artboardWrapperRef}
+                    className="m-auto flex items-start gap-8 px-4"
+                    style={{
+                      transform: `scale(${zoom})`,
+                      transformOrigin: "top center",
+                    }}
+                  >
                     {(["desktop", "tablet", "mobile"] as const).map((vp) => {
                       const vpWidth = vp === "desktop" ? "1200px" : vp === "tablet" ? "768px" : "375px";
                       const vpLabel = vp === "desktop" ? "Desktop" : vp === "tablet" ? "Tablet" : "Phone";
@@ -1810,10 +2026,13 @@ export default function EditorStudio() {
                   </div>
                 ) : (
                   /* ========== Single Viewport ========== */
-                  <div className="w-full h-full flex items-center justify-center relative">
+                  <div
+                    ref={artboardWrapperRef}
+                    className="m-auto relative flex flex-col items-center"
+                  >
                     {/* Ephemeral Canvas Gutter / Empty Space Toast */}
                     {gutterToast && (
-                      <div className="absolute top-3 right-4 z-40 px-3 py-1.5 rounded-full bg-slate-900/95 dark:bg-[#1c1c1c]/95 text-white text-xs font-mono font-medium shadow-2xl border border-white/20 backdrop-blur-md flex items-center gap-2 animate-in fade-in zoom-in-95 pointer-events-none">
+                      <div className="fixed top-14 right-6 z-40 px-3 py-1.5 rounded-full bg-slate-900/95 dark:bg-[#1c1c1c]/95 text-white text-xs font-mono font-medium shadow-2xl border border-white/20 backdrop-blur-md flex items-center gap-2 animate-in fade-in zoom-in-95 pointer-events-none">
                         <Maximize2 className="w-3.5 h-3.5 text-[#0099ff]" />
                         <span>{gutterToast}</span>
                       </div>
@@ -1821,14 +2040,14 @@ export default function EditorStudio() {
 
                     {/* Live Artboard Resizing Dimensions Pill */}
                     {isResizingArtboard && (
-                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 px-3 py-1.5 rounded-full bg-slate-900/95 dark:bg-[#1c1c1c]/95 text-white text-xs font-mono font-semibold shadow-2xl border border-[#0099ff]/50 backdrop-blur-md flex items-center gap-2 animate-in fade-in zoom-in-95 pointer-events-none">
+                      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 px-3 py-1.5 rounded-full bg-slate-900/95 dark:bg-[#1c1c1c]/95 text-white text-xs font-mono font-semibold shadow-2xl border border-[#0099ff]/50 backdrop-blur-md flex items-center gap-2 animate-in fade-in zoom-in-95 pointer-events-none">
                         <Scaling className="w-3.5 h-3.5 text-[#0099ff]" />
                         <span>{currentWidth} × {currentHeight} px</span>
                       </div>
                     )}
 
                     {/* Floating Device Preset HUD Capsule */}
-                    {!isDimensionsCapsuleHidden ? (
+                    {showDimensionsHUD ? (
                       <div
                         ref={capsuleContainerRef}
                         style={
@@ -1844,7 +2063,7 @@ export default function EditorStudio() {
                         className={
                           dimensionsCapsulePos
                             ? "pointer-events-auto select-none"
-                            : "absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto"
+                            : "mb-3 z-30 pointer-events-auto"
                         }
                       >
                         <DevicePresetDropdown
@@ -1867,7 +2086,7 @@ export default function EditorStudio() {
                         onClick={handleToggleDimensionsCapsule}
                         title="Show Dimensions Dropdown"
                         aria-label="Show Dimensions Dropdown"
-                        className="absolute top-3 right-4 z-30 px-3 py-1.5 rounded-full bg-white/95 dark:bg-[#141414]/95 hover:bg-slate-50 dark:hover:bg-[#1a1a1a] border border-slate-200 dark:border-[#262626] text-[11px] font-mono text-slate-700 dark:text-zinc-300 shadow-lg backdrop-blur-md flex items-center gap-1.5 transition-all cursor-pointer group hover:border-[#0099ff]/50 active:scale-95"
+                        className="fixed top-14 right-6 z-30 px-3 py-1.5 rounded-full bg-white/95 dark:bg-[#141414]/95 hover:bg-slate-50 dark:hover:bg-[#1a1a1a] border border-slate-200 dark:border-[#262626] text-[11px] font-mono text-slate-700 dark:text-zinc-300 shadow-lg backdrop-blur-md flex items-center gap-1.5 transition-all cursor-pointer group hover:border-[#0099ff]/50 active:scale-95"
                       >
                         <Eye className="w-3.5 h-3.5 text-[#0099ff]" />
                         <span className="font-semibold text-slate-800 dark:text-zinc-200">Dimensions</span>
@@ -1878,113 +2097,137 @@ export default function EditorStudio() {
                       /* Desktop Fluid (Fill 100%): Seamless edge-to-edge canvas with zero wasted border */
                       <div
                         style={{
-                          transform: "translateZ(0)",
-                          willChange: "transform",
-                          contain: "layout paint",
+                          width: `${Math.round((canvasRef.current ? canvasRef.current.clientWidth - Math.max(48, canvasGutter * 2) : 1200) * zoom)}px`,
+                          height: `${Math.round((canvasRef.current ? canvasRef.current.clientHeight - Math.max(48, canvasGutter * 2) : 800) * zoom)}px`,
+                          minWidth: "800px",
+                          position: "relative",
                         }}
-                        className="w-full h-full bg-white relative flex flex-col overflow-hidden rounded-none border-0 shadow-none"
                       >
-                        <div className="flex-1 w-full h-full relative overflow-hidden">
-                          <PreviewFrame
-                            key={loadToken}
-                            html={openFile.content}
-                            customCss={projectConfig.customStyles?.rawContent}
-                            onIframeReady={setIframeEl}
-                            onHoverElement={handleHoverElement}
-                            onSelectElement={handleSelectElement}
-                            onDragOverTarget={setDropTargetInfo}
-                            onDropOnTarget={handleDropOnTarget}
-                            onMoveLayerOnTarget={handleMoveElement}
-                            onTextEdit={handleDirectTextEdit}
-                          />
+                        <div
+                          style={{
+                            width: `${canvasRef.current ? canvasRef.current.clientWidth - Math.max(48, canvasGutter * 2) : 1200}px`,
+                            height: `${canvasRef.current ? canvasRef.current.clientHeight - Math.max(48, canvasGutter * 2) : 800}px`,
+                            transform: `scale(${zoom})`,
+                            transformOrigin: "top left",
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                          }}
+                          className="bg-white relative flex flex-col overflow-hidden rounded-xl border border-slate-200 dark:border-[#262626] shadow-xl"
+                        >
+                          <div className="flex-1 w-full h-full relative overflow-hidden">
+                            <PreviewFrame
+                              key={loadToken}
+                              html={openFile.content}
+                              customCss={projectConfig.customStyles?.rawContent}
+                              onIframeReady={setIframeEl}
+                              onHoverElement={handleHoverElement}
+                              onSelectElement={handleSelectElement}
+                              onDragOverTarget={setDropTargetInfo}
+                              onDropOnTarget={handleDropOnTarget}
+                              onMoveLayerOnTarget={handleMoveElement}
+                              onTextEdit={handleDirectTextEdit}
+                            />
+                          </div>
                         </div>
                       </div>
                     ) : (
-                      /* Resizable Artboard (Desktop Preset, Tablet, Mobile, or Custom Resized) */
+                      /* Scaled Artboard (Desktop Preset, Tablet, Mobile, or Custom Resized) */
                       <div
                         style={{
-                          width: `${currentWidth}px`,
-                          height: `${currentHeight}px`,
-                          transform: "translateZ(0)",
-                          willChange: "transform",
-                          contain: "layout paint",
+                          width: `${Math.round(currentWidth * zoom)}px`,
+                          height: `${Math.round(currentHeight * zoom)}px`,
+                          position: "relative",
+                          flexShrink: 0,
                         }}
-                        className={`bg-white relative flex flex-col shadow-2xl transition-all ${
-                          isResizingArtboard ? "transition-none" : "duration-200"
-                        } ${
-                          effectiveCategory === "desktop"
-                            ? "rounded-xl border border-slate-200/80 dark:border-[#262626] overflow-hidden shrink-0"
-                            : effectiveCategory === "tablet"
-                            ? "rounded-2xl border-[8px] border-slate-900 dark:border-[#1c1c1c] overflow-hidden shrink-0"
-                            : "rounded-[2.5rem] border-[10px] border-slate-900 dark:border-[#1c1c1c] overflow-hidden shrink-0"
-                        }`}
                       >
-                        {/* Phone Notch/Speaker */}
-                        {effectiveCategory === "mobile" && (
-                          <div className="w-full bg-white flex justify-center pt-2 pb-1 z-10 shrink-0">
-                            <div className="w-24 h-4 bg-[#141414] rounded-full flex items-center justify-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-[#262626]"></div>
-                              <div className="w-10 h-1.5 rounded-full bg-[#262626]"></div>
+                        <div
+                          style={{
+                            width: `${currentWidth}px`,
+                            height: `${currentHeight}px`,
+                            transform: `scale(${zoom})`,
+                            transformOrigin: "top left",
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                          }}
+                          className={`bg-white relative flex flex-col shadow-2xl transition-all ${
+                            isResizingArtboard ? "transition-none" : "duration-200"
+                          } ${
+                            effectiveCategory === "desktop"
+                              ? "rounded-xl border border-slate-200/80 dark:border-[#262626] overflow-hidden"
+                              : effectiveCategory === "tablet"
+                              ? "rounded-2xl border-[8px] border-slate-900 dark:border-[#1c1c1c] overflow-hidden"
+                              : "rounded-[2.5rem] border-[10px] border-slate-900 dark:border-[#1c1c1c] overflow-hidden"
+                          }`}
+                        >
+                          {/* Phone Notch/Speaker */}
+                          {effectiveCategory === "mobile" && (
+                            <div className="w-full bg-white flex justify-center pt-2 pb-1 z-10 shrink-0">
+                              <div className="w-24 h-4 bg-[#141414] rounded-full flex items-center justify-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-[#262626]"></div>
+                                <div className="w-10 h-1.5 rounded-full bg-[#262626]"></div>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex-1 w-full h-full relative overflow-hidden">
+                            <PreviewFrame
+                              key={loadToken}
+                              html={openFile.content}
+                              customCss={projectConfig.customStyles?.rawContent}
+                              onIframeReady={setIframeEl}
+                              onHoverElement={handleHoverElement}
+                              onSelectElement={handleSelectElement}
+                              onDragOverTarget={setDropTargetInfo}
+                              onDropOnTarget={handleDropOnTarget}
+                              onMoveLayerOnTarget={handleMoveElement}
+                              onTextEdit={handleDirectTextEdit}
+                            />
+                          </div>
+
+                          {/* Phone Home Bar */}
+                          {effectiveCategory === "mobile" && (
+                            <div className="w-full bg-white py-1 flex justify-center z-10 shrink-0">
+                              <div className="w-28 h-1 bg-black/40 rounded-full"></div>
+                            </div>
+                          )}
+
+                          {/* Interactive Drag-to-Resize Handles on Artboard Frame */}
+                          {/* Right Drag Handle (Width) */}
+                          <div
+                            onPointerDown={(e) => handleArtboardResizeStart(e, "width")}
+                            className="absolute -right-3 top-0 bottom-0 w-6 flex items-center justify-center cursor-ew-resize z-30 group select-none touch-none"
+                            title="Drag to resize artboard width (Double click for fluid 100%)"
+                            onDoubleClick={() => {
+                              setActivePreset(DEVICE_PRESETS.find((p) => p.id === "desktop-fill") || activePreset);
+                              setCustomDimensions(null);
+                            }}
+                          >
+                            <div className="w-1.5 h-12 rounded-full bg-slate-400/40 dark:bg-zinc-600/40 group-hover:bg-[#0099ff] group-active:bg-[#0099ff] transition-colors shadow-sm flex items-center justify-center">
+                              <div className="w-0.5 h-6 bg-white/70 rounded-full" />
                             </div>
                           </div>
-                        )}
 
-                        <div className="flex-1 w-full h-full relative overflow-hidden">
-                          <PreviewFrame
-                            key={loadToken}
-                            html={openFile.content}
-                            customCss={projectConfig.customStyles?.rawContent}
-                            onIframeReady={setIframeEl}
-                            onHoverElement={handleHoverElement}
-                            onSelectElement={handleSelectElement}
-                            onDragOverTarget={setDropTargetInfo}
-                            onDropOnTarget={handleDropOnTarget}
-                            onMoveLayerOnTarget={handleMoveElement}
-                            onTextEdit={handleDirectTextEdit}
-                          />
-                        </div>
-
-                        {/* Phone Home Bar */}
-                        {effectiveCategory === "mobile" && (
-                          <div className="w-full bg-white py-1 flex justify-center z-10 shrink-0">
-                            <div className="w-28 h-1 bg-black/40 rounded-full"></div>
+                          {/* Bottom Drag Handle (Height) */}
+                          <div
+                            onPointerDown={(e) => handleArtboardResizeStart(e, "height")}
+                            className="absolute left-0 right-0 -bottom-3 h-6 flex items-center justify-center cursor-ns-resize z-30 group select-none touch-none"
+                            title="Drag to resize artboard height"
+                          >
+                            <div className="h-1.5 w-12 rounded-full bg-slate-400/40 dark:bg-zinc-600/40 group-hover:bg-[#0099ff] group-active:bg-[#0099ff] transition-colors shadow-sm flex items-center justify-center">
+                              <div className="h-0.5 w-6 bg-white/70 rounded-full" />
+                            </div>
                           </div>
-                        )}
 
-                        {/* Interactive Drag-to-Resize Handles on Artboard Frame */}
-                        {/* Right Drag Handle (Width) */}
-                        <div
-                          onPointerDown={(e) => handleArtboardResizeStart(e, "width")}
-                          className="absolute -right-3 top-0 bottom-0 w-6 flex items-center justify-center cursor-ew-resize z-30 group select-none touch-none"
-                          title="Drag to resize artboard width (Double click for fluid 100%)"
-                          onDoubleClick={() => {
-                            setActivePreset(DEVICE_PRESETS.find((p) => p.id === "desktop-fill") || activePreset);
-                            setCustomDimensions(null);
-                          }}
-                        >
-                          <div className="w-1.5 h-12 rounded-full bg-slate-400/40 dark:bg-zinc-600/40 group-hover:bg-[#0099ff] group-active:bg-[#0099ff] transition-colors shadow-sm flex items-center justify-center">
-                            <div className="w-0.5 h-6 bg-white/70 rounded-full" />
+                          {/* Bottom-Right Corner Drag Handle (Width + Height) */}
+                          <div
+                            onPointerDown={(e) => handleArtboardResizeStart(e, "corner")}
+                            className="absolute -right-3 -bottom-3 w-6 h-6 flex items-center justify-center cursor-nwse-resize z-30 group select-none touch-none"
+                            title="Drag to resize width & height"
+                          >
+                            <div className="w-3.5 h-3.5 rounded-sm border-r-2 border-b-2 border-slate-400/60 dark:border-zinc-500/60 group-hover:border-[#0099ff] group-active:border-[#0099ff] transition-colors" />
                           </div>
-                        </div>
-
-                        {/* Bottom Drag Handle (Height) */}
-                        <div
-                          onPointerDown={(e) => handleArtboardResizeStart(e, "height")}
-                          className="absolute left-0 right-0 -bottom-3 h-6 flex items-center justify-center cursor-ns-resize z-30 group select-none touch-none"
-                          title="Drag to resize artboard height"
-                        >
-                          <div className="h-1.5 w-12 rounded-full bg-slate-400/40 dark:bg-zinc-600/40 group-hover:bg-[#0099ff] group-active:bg-[#0099ff] transition-colors shadow-sm flex items-center justify-center">
-                            <div className="h-0.5 w-6 bg-white/70 rounded-full" />
-                          </div>
-                        </div>
-
-                        {/* Bottom-Right Corner Drag Handle (Width + Height) */}
-                        <div
-                          onPointerDown={(e) => handleArtboardResizeStart(e, "corner")}
-                          className="absolute -right-3 -bottom-3 w-6 h-6 flex items-center justify-center cursor-nwse-resize z-30 group select-none touch-none"
-                          title="Drag to resize width & height"
-                        >
-                          <div className="w-3.5 h-3.5 rounded-sm border-r-2 border-b-2 border-slate-400/60 dark:border-zinc-500/60 group-hover:border-[#0099ff] group-active:border-[#0099ff] transition-colors" />
                         </div>
                       </div>
                     )}
@@ -2124,6 +2367,20 @@ export default function EditorStudio() {
       {shortcutsOpen && (
         <KeyboardShortcutsModal onClose={() => setShortcutsOpen(false)} />
       )}
+
+      {/* Studio Settings Modal */}
+      <SettingsModal
+        isOpen={settingsModalOpen}
+        onClose={() => setSettingsModalOpen(false)}
+        initialTab={settingsModalTab}
+        uiPanelsVisible={uiPanelsVisible}
+        onToggleUiPanels={() => setUiPanelsVisible((v) => !v)}
+        zoom={zoom}
+        onZoomReset={() => {
+          setZoom(1);
+          setPanOffset({ x: 0, y: 0 });
+        }}
+      />
 
       {/* Project Config & Custom Styles Modal */}
       <ProjectConfigModal

@@ -749,7 +749,6 @@ export default function SelectionOverlay({
             zIndex: 9999,
             transform: "translateZ(0)",
             willChange: "transform",
-            contain: "layout paint",
           }}
         >
           {/* Contextual Floating Action HUD (Fitts's Law + Immediate Feedback) */}
@@ -758,7 +757,7 @@ export default function SelectionOverlay({
               data-testid="canvas-action-hud"
               style={{
                 position: "absolute",
-                top: selectedRect.top < 40 ? selectedRect.height + 6 : -34,
+                top: selectedRect.top < 100 ? selectedRect.height + 6 : -34,
                 left: -2,
                 pointerEvents: "auto",
                 zIndex: 10001,

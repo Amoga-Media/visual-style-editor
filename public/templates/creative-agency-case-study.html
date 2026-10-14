@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creative Agency Case Study</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen py-20 px-6 font-sans antialiased">
+  <article class="max-w-5xl mx-auto space-y-16">
+    <!-- Meta Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-6 text-xs font-mono">
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/30">
+          Studio Monolith
+        </span>
+        <span class="text-zinc-500">•</span>
+        <span class="text-zinc-400">Tokyo / London</span>
+      </div>
+      <div class="flex items-center gap-4 text-zinc-400">
+        <span>Client: Kinetic Vision Corp</span>
+        <span>Timeline: 6 Weeks</span>
+        <span>Year: 2026</span>
+      </div>
+    </div>
+
+    <!-- Oversized Agency Headline -->
+    <div class="space-y-6">
+      <h1 class="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] text-white">
+        Designing an ultra-tactile brand system for the autonomous spatial web.
+      </h1>
+      <p class="text-zinc-400 text-lg sm:text-xl max-w-3xl leading-relaxed">
+        How we eliminated 400ms interaction latency by migrating from bloated legacy CSS builders to an in-memory surgical AST compiler with OKLCH dynamic gamuts.
+      </p>
+    </div>
+
+    <!-- Deliverables Pills -->
+    <div class="flex flex-wrap gap-2.5 pt-2">
+      <span class="px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300">Brand Identity</span>
+      <span class="px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300">Design System Tokens</span>
+      <span class="px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300">Awwwards 60 FPS Micro-Interactions</span>
+      <span class="px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300">Tailwind v4 Pipeline</span>
+    </div>
+
+    <!-- 2-Column Challenge vs Solution Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8">
+      <div class="p-8 rounded-3xl bg-zinc-900/60 border border-zinc-800 space-y-4">
+        <span class="text-xs font-mono font-bold text-red-400 uppercase tracking-wider">The Challenge</span>
+        <h2 class="text-2xl font-bold text-white">Cloud Builder Bloat & Lost Edits</h2>
+        <p class="text-sm text-zinc-400 leading-relaxed">
+          The team relied on proprietary cloud platforms where exported CSS bundles ballooned to 2.4 MB. Designers made tweaks in DevTools that were instantly wiped out upon refreshing, creating a tedious loop of manual copy-paste tickets.
+        </p>
+      </div>
+
+      <div class="p-8 rounded-3xl bg-zinc-900/60 border border-zinc-800 space-y-4">
+        <span class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">The Solution</span>
+        <h2 class="text-2xl font-bold text-white">Local-First Splicing & Direct Git Sync</h2>
+        <p class="text-sm text-zinc-400 leading-relaxed">
+          We deployed Visual Style Editor directly across their repository. Designers now adjust padding, spring curves, and typography visually with live sliders, committing atomic diffs straight into the git repo in under 2ms.
+        </p>
+      </div>
+    </div>
+
+    <!-- Client Testimonial Banner -->
+    <div class="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-purple-950/40 to-zinc-900 border border-purple-500/30 space-y-4">
+      <p class="text-lg sm:text-xl font-bold text-white leading-relaxed italic">
+        "Our design and engineering loops went from 3 days of Jira review tickets down to real-time 15-minute pairing sessions. It feels like magic."
+      </p>
+      <div class="flex items-center gap-3 pt-2">
+        <div class="w-10 h-10 rounded-full bg-purple-500/30 border border-purple-400/40 flex items-center justify-center font-bold text-sm text-purple-300">
+          KT
+        </div>
+        <div>
+          <p class="text-sm font-bold text-white">Kenji Takahashi</p>
+          <p class="text-xs text-zinc-400 font-mono">VP of Product Design, Kinetic Vision</p>
+        </div>
+      </div>
+    </div>
+  </article>
+</body>
+</html>

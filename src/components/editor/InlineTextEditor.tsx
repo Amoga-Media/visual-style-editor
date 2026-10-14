@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { EditRecord } from "@/types";
 import { Edit3, Check } from "lucide-react";
+import { useChangeSetStore } from "@/store/change-set-store";
 
 interface InlineTextEditorProps {
   element: Element | null;
@@ -16,17 +17,19 @@ export default function InlineTextEditor({
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState("");
   const [baselineText, setBaselineText] = useState("");
+  const edits = useChangeSetStore((s) => s.edits);
 
   useEffect(() => {
     if (!element) {
       setIsEditing(false);
       return;
     }
-    const currentText = element.textContent || "";
-    setText(currentText);
-    setBaselineText(currentText);
-    setIsEditing(false);
-  }, [element]);
+    if (!isEditing) {
+      const currentText = element.textContent || "";
+      setText(currentText);
+      setBaselineText(currentText);
+    }
+  }, [element, edits, isEditing]);
 
   if (!element || !structuralPath) return null;
 
@@ -60,7 +63,7 @@ export default function InlineTextEditor({
   return (
     <div className="pb-3.5 space-y-2 border-b border-slate-200 dark:border-[#262626]">
       <div className="flex items-center justify-between">
-        <div className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+        <div className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
           <Edit3 className="w-3.5 h-3.5 text-[#0099ff]" />
           <span>Content Copy</span>
         </div>
@@ -101,16 +104,16 @@ export default function InlineTextEditor({
               handleCommit();
             }
           }}
-          className="w-full bg-[#141414] border border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] rounded-lg p-2 text-xs text-zinc-200 focus:outline-none"
+          className="w-full bg-white dark:bg-[#141414] border border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] rounded-lg p-2 text-xs text-slate-800 dark:text-zinc-200 focus:outline-none"
           autoFocus
         />
       ) : (
         <div
           onDoubleClick={() => setIsEditing(true)}
-          className="text-xs text-zinc-300 bg-[#141414] border border-[#262626] rounded-lg p-2.5 truncate max-h-20 overflow-hidden cursor-pointer hover:border-zinc-700 transition-colors"
+          className="text-xs text-slate-700 dark:text-zinc-300 bg-slate-50 dark:bg-[#141414] border border-slate-200 dark:border-[#262626] rounded-lg p-2.5 truncate max-h-20 overflow-hidden cursor-pointer hover:border-slate-300 dark:hover:border-zinc-700 transition-colors"
           title="Double click to edit"
         >
-          {text || <span className="italic text-zinc-500">Empty text</span>}
+          {text || <span className="italic text-slate-400 dark:text-zinc-500">Empty text</span>}
         </div>
       )}
     </div>

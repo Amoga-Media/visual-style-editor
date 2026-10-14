@@ -34,6 +34,7 @@ import {
   LogOut,
   Heart,
   MoreHorizontal,
+  Settings,
 } from "lucide-react";
 import GpuStatusBadge from "./GpuStatusBadge";
 
@@ -62,6 +63,7 @@ interface ToolbarProps {
   onZoomOut?: () => void;
   onZoomReset?: () => void;
   onOpenShortcuts?: () => void;
+  onOpenSettings?: () => void;
   isDimensionsHUDHidden?: boolean;
   onToggleDimensionsHUD?: () => void;
 }
@@ -88,6 +90,7 @@ export default function Toolbar({
   onZoomOut,
   onZoomReset,
   onOpenShortcuts,
+  onOpenSettings,
   isDimensionsHUDHidden = false,
   onToggleDimensionsHUD,
 }: ToolbarProps) {
@@ -160,14 +163,21 @@ export default function Toolbar({
           </button>
         )}
 
-        <div className="flex items-center gap-2 font-bold text-xs tracking-tight text-slate-900 dark:text-white shrink-0">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#0099ff] via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 fill-white/20" />
+        <a
+          href="/"
+          className="flex items-center gap-2 font-bold text-xs tracking-tight shrink-0 focus:outline-none hover:opacity-85 transition-opacity"
+          title="Back to home"
+        >
+          <div
+            className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold tracking-tighter select-none"
+            style={{ background: "var(--ink-1)", color: "var(--accent-fg)", fontFamily: "var(--font-mono)" }}
+          >
+            VSE
           </div>
-          <span className="hidden lg:inline font-bold tracking-wide text-xs uppercase text-slate-900 dark:text-white">
-            Visual Studio
+          <span className="hidden sm:inline font-semibold tracking-tight text-xs" style={{ color: "var(--ink-1)" }}>
+            Visual Style Editor
           </span>
-        </div>
+        </a>
 
         {/* Multi-Page Selector Dropdown */}
         {fileName && (
@@ -480,10 +490,16 @@ export default function Toolbar({
               <button
                 type="button"
                 onClick={onOpenExport}
-                className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#0084FF] to-blue-600 hover:from-[#0074E0] hover:to-blue-700 text-white font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-md shadow-[#0084FF]/20 shrink-0"
+                className="px-3.5 py-1.5 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0 border"
+                style={{
+                  background: "var(--accent)",
+                  color: "var(--accent-fg)",
+                  borderColor: "var(--accent)",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+                }}
                 title="Open Export Studio"
               >
-                <Sparkles className="w-3.5 h-3.5 fill-white/20" />
+                <Code className="w-3.5 h-3.5" />
                 <span>Export</span>
               </button>
             )}
@@ -630,6 +646,26 @@ export default function Toolbar({
                     </button>
                   )}
 
+                  {/* Studio Settings */}
+                  {onOpenSettings && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onOpenSettings();
+                        setMoreMenuOpen(false);
+                      }}
+                      className="w-full px-2.5 py-1.5 rounded-lg text-left flex items-center justify-between text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-[#1c1c1e] transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Settings className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Studio Settings</span>
+                      </div>
+                      <kbd className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 bg-slate-200/50 dark:bg-[#18181c] px-1.5 py-0.5 rounded">
+                        Ctrl+,
+                      </kbd>
+                    </button>
+                  )}
+
                   <div className="pt-1 border-t border-slate-200 dark:border-[#28282c] flex items-center justify-between px-1">
                     <GpuStatusBadge />
                     <a
@@ -646,6 +682,19 @@ export default function Toolbar({
               )}
             </div>
           </>
+        )}
+
+        {/* Dedicated Studio Settings Button — Always visible in Toolbar */}
+        {onOpenSettings && (
+          <button
+            type="button"
+            onClick={onOpenSettings}
+            className="p-1.5 rounded-lg bg-slate-100 dark:bg-[#18181c] hover:bg-slate-200 dark:hover:bg-[#222228] border border-slate-200 dark:border-[#28282d] text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
+            title="Studio Settings (Ctrl + ,)"
+            aria-label="Open Studio Settings"
+          >
+            <Settings className="w-4 h-4 text-slate-600 dark:text-zinc-400" />
+          </button>
         )}
       </div>
     </header>

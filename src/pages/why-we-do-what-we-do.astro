@@ -3,166 +3,135 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import Navbar from "@/components/marketing/Navbar.astro";
 import Footer from "@/components/marketing/Footer.astro";
 import CtaBanner from "@/components/marketing/CtaBanner.astro";
-
-const pillars = [
-  {
-    num: "I",
-    title: "Code Belongs On Your Machine, Not in Someone Else's Cloud",
-    quote: "When your code is locked in a SaaS database, you don't own your website. You are merely renting it.",
-    desc: "Over the last decade, modern web development software was systematically converted into centralized SaaS subscriptions. Tools that once lived on your operating system now demand monthly fees, lock your source code in proprietary cloud databases, and disable exports if your payment fails. We believe in software sovereignty: your files must reside on your physical drive, version-controlled by Git, accessible offline, and safe from corporate shutdown."
-  },
-  {
-    num: "II",
-    title: "Clean Standards > Proprietary Frameworks",
-    quote: "A tool that generates messy, proprietary markup is not helping you. It is creating technical debt.",
-    desc: "Traditional visual builders generate thousands of lines of unreadable CSS class soup, inject runtime helper scripts, and pollute your HTML with proprietary data attributes. Visual Style Editor was founded on the uncompromising rule of AST cleanliness. When you style visually, we produce idiomatic, human-readable Tailwind CSS utility classes and clean HTML5. If you open your code in VS Code tomorrow, it looks like it was handcrafted by a senior frontend engineer."
-  },
-  {
-    num: "III",
-    title: "Privacy is Non-Negotiable",
-    quote: "Creative work requires a sanctuary. We have zero interest in watching over your shoulder.",
-    desc: "Most cloud design platforms record every mouse movement, track every color swatch you inspect, and upload your client assets to corporate data centers. Visual Style Editor is radically local-first. We operate with zero telemetry, zero analytics tracking, and zero cloud databases. We don't want to know who your clients are, what products you are prototyping, or how often you design. What happens in your browser stays on your machine."
-  },
-  {
-    num: "IV",
-    title: "Zero Latency: Speed as a Creative Medium",
-    quote: "Creative intuition is fragile. A 300ms server delay breaks the flow state.",
-    desc: "When you drag a slider to adjust letter spacing or test a color harmony, waiting for an API response to serialize and re-render kills creative velocity. By running Parse5 and our Live Style Engine directly in the browser's JavaScript runtime, Visual Style Editor achieves instantaneous sub-16ms updates at 60 frames per second. Visual design should move at the exact speed of human thought."
-  },
-  {
-    num: "V",
-    title: "Eradicating the Rent-Seeking Tollbooth",
-    quote: "Foundational developer tools should empower humanity to build, not extract monthly toll fees.",
-    desc: "Charging developers and designers $20 to $50 per month to edit local text files is an extraction scheme. We believe the open web was built on free, open-source building blocks like Linux, Git, HTML, and Tailwind. Visual Style Editor is released under the MIT license and will remain completely free forever. Supported by voluntary community sponsors, we exist to give creators power, not invoice them."
-  }
-];
-
-const contrasts = [
-  {
-    category: "File Storage",
-    saas: "Stored in proprietary cloud database. Requires constant internet.",
-    vse: "Directly on your local hard drive. 100% offline capable."
-  },
-  {
-    category: "Cost & Licensing",
-    saas: "$19–$49/month per seat. Features locked behind paywalls.",
-    vse: "100% Free Forever. MIT Open Source with zero paywalls."
-  },
-  {
-    category: "Markup Quality",
-    saas: "Bloated HTML, proprietary CSS classes, injected runtime JS.",
-    vse: "Surgical AST edits, idiomatic Tailwind classes, zero bloat."
-  },
-  {
-    category: "Account & Data Privacy",
-    saas: "Requires account, email, credit card, and tracks user telemetry.",
-    vse: "Zero account, zero tracking, zero cookies, zero telemetry."
-  },
-  {
-    category: "Code Portability",
-    saas: "Hard to migrate. Exported code is difficult to maintain in Git.",
-    vse: "Git-native. Every save is ready to commit, push, and deploy."
-  }
-];
+import Icon from "@/components/ui/Icon.astro";
 ---
 
 <BaseLayout
-  title="Why We Do What We Do — The Manifesto | Visual Style Editor"
-  description="Why web development tools shouldn't hold your source code hostage. The 5 pillars of local-first web sovereignty and why we reject the SaaS subscription model."
-  theme="dark"
-  showPixelCanvas={true}
+  title="Why we built this — Visual Style Editor"
+  description="An honest account of why Visual Style Editor exists: the frustration with losing work, paying for lock-in, and not owning your own code."
 >
-  <div class="relative min-h-screen flex flex-col bg-[#060608] text-slate-100 overflow-hidden">
-    <Navbar activePage="why" />
+  <div class="flex flex-col min-h-[100dvh]">
+    <Navbar activePage="why we do it" />
 
-    <main class="flex-1">
-      <!-- HERO SECTION -->
-      <section class="pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-8">
-        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-          The Manifesto • Developer Sovereignty
+    <main id="main-content" class="flex-1">
+
+      <!-- Editorial header -->
+      <section class="relative overflow-hidden pt-8 sm:pt-12 md:pt-14 pb-12 sm:pb-14 px-4 sm:px-6 lg:px-8">
+        {/* Vibrant Multi-Layered Ambient Studio Aura & Grid Texture */}
+        <div class="hero-ambient-glow" aria-hidden="true">
+          <div class="hero-glow-orb magenta"></div>
+          <div class="hero-grid-pattern"></div>
         </div>
 
-        <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
-          Code belongs on your machine, <br class="hidden sm:inline" />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
-            not in someone else's cloud.
-          </span>
-        </h1>
-
-        <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          We believe the software you use to design and edit the web should be as durable, private, and free as the open standards it is built upon. Here is our philosophical foundation.
-        </p>
+        <div class="max-w-6xl mx-auto relative z-10">
+          <div class="max-w-3xl space-y-4 reveal">
+            <div
+              class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
+            >
+              <span class="w-2 h-2 rounded-full bg-pink-600 dark:bg-pink-400 animate-pulse"></span>
+              <span>Engineering Ethics & Philosophy</span>
+            </div>
+            <h1 class="text-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08]">
+              Why we built this.
+            </h1>
+            <p class="text-body text-base sm:text-lg" style="color: var(--ink-2);">
+              An honest account of why Visual Style Editor exists: the frustration with losing work, paying for lock-in, and not owning your own code.
+            </p>
+          </div>
+        </div>
       </section>
 
-      <!-- 5 PILLARS SECTION -->
-      <section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-12">
-        {pillars.map((pillar) => (
-          <div class="doppelrand-shell spotlight-card">
-            <div class="doppelrand-core p-8 sm:p-12 space-y-6">
-              <div class="flex items-center gap-4">
-                <span class="w-10 h-10 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-mono font-bold text-sm flex items-center justify-center">
-                  {pillar.num}
-                </span>
-                <h3 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                  {pillar.title}
-                </h3>
+      <hr class="section-divider" />
+
+      <!-- Long-form editorial content -->
+      <section class="section">
+        <div class="section-inner">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+            <!-- Sticky sidebar date -->
+            <div class="lg:col-span-3 reveal">
+              <div class="lg:sticky" style="top: 6rem;">
+                <p class="text-label">Published</p>
+                <p class="text-sm mt-1" style="color: var(--ink-3); font-family: var(--font-mono);">January 2025</p>
+                <div class="mt-6 space-y-3">
+                  <p class="text-label">Filed under</p>
+                  <div class="flex flex-wrap gap-2">
+                    <span class="badge">philosophy</span>
+                    <span class="badge">open source</span>
+                    <span class="badge">tooling</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Editorial body -->
+            <article class="lg:col-span-7 space-y-8 reveal reveal-stagger-1" style="max-width: 64ch;">
+
+              <div class="space-y-5">
+                <h2 class="text-headline" style="font-size: 1.5rem;">Because the alternative was paying $39/month to not own your own HTML.</h2>
+                <p class="text-body">
+                  That's the honest version. We were building sites for clients using Tailwind CSS and running into the same wall every time: there was no good tool for visual editing that didn't either require a cloud subscription or throw away your code quality.
+                </p>
+                <p class="text-body">
+                  Chrome DevTools was fine for quick experiments, but changes vanished on reload. Webflow was powerful, but it held the code in its own database, stripped comments, and exported markup that looked nothing like something a developer would write. Figma produced design files, not actual HTML. None of these solved the actual problem: <em>I have an HTML file on my disk, and I want to edit it visually without losing anything.</em>
+                </p>
               </div>
 
-              <blockquote class="pl-4 border-l-2 border-cyan-500/40 text-base sm:text-lg italic text-cyan-200/90 font-serif">
-                "{pillar.quote}"
-              </blockquote>
+              <hr style="border: none; border-top: 1px solid var(--border);" />
 
-              <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
-                {pillar.desc}
-              </p>
-            </div>
-          </div>
-        ))}
-      </section>
+              <div class="space-y-5">
+                <h2 class="text-headline" style="font-size: 1.5rem;">Developer tools shouldn't extract rent.</h2>
+                <p class="text-body">
+                  There's a category of software that charges you to access tools that don't depend on any server infrastructure. Tools that are, at their core, just processing you're paying a subscription to run on your own machine via their interface.
+                </p>
+                <p class="text-body">
+                  We don't want to build that kind of company. The AST splicer, the OKLCH color engine, the Tailwind class mapper — none of this requires a server. There's no reason it should cost money. There's no reason your code should leave your machine. So we made it free and we kept everything local.
+                </p>
+              </div>
 
-      <!-- CONTRAST TABLE -->
-      <section class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#07090e]/60">
-        <div class="max-w-5xl mx-auto space-y-12">
-          <div class="text-center space-y-3">
-            <span class="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
-              Clear Differentiation
-            </span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              The Contrast: Traditional SaaS vs Local-First Studio
-            </h2>
-          </div>
+              <hr style="border: none; border-top: 1px solid var(--border);" />
 
-          <div class="doppelrand-shell overflow-x-auto">
-            <div class="doppelrand-core p-4 sm:p-6">
-              <table class="w-full text-left text-xs sm:text-sm font-mono">
-                <thead>
-                  <tr class="border-b border-white/10 text-slate-400">
-                    <th class="p-4 font-bold">Category</th>
-                    <th class="p-4 text-cyan-400 font-bold bg-cyan-950/40 rounded-t-lg">Visual Style Editor</th>
-                    <th class="p-4 text-slate-400 font-bold">Closed SaaS Site Builders</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-white/5">
-                  {contrasts.map((c) => (
-                    <tr class="hover:bg-white/5 transition-colors">
-                      <td class="p-4 font-semibold text-white">{c.category}</td>
-                      <td class="p-4 text-cyan-300 font-medium bg-cyan-950/20">{c.vse}</td>
-                      <td class="p-4 text-slate-400">{c.saas}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+              <div class="space-y-5">
+                <h2 class="text-headline" style="font-size: 1.5rem;">We build it because we use it.</h2>
+                <p class="text-body">
+                  This isn't a side project maintained out of obligation. It's a tool we reach for when we're building things. That means when something is slow, or the output isn't idiomatic, or a feature is missing — we notice immediately. Features get added when we hit friction.
+                </p>
+                <p class="text-body">
+                  The backlog exists because other developers sent bug reports that turned into feature requests. If something is broken or missing for you, open an issue. We read them.
+                </p>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid var(--border);" />
+
+              <div class="space-y-5">
+                <h2 class="text-headline" style="font-size: 1.5rem;">What this isn't.</h2>
+                <p class="text-body">
+                  It's not a Webflow replacement. It's not trying to be a full site builder. It doesn't handle content management, hosting, deployment, or team collaboration. It's a precision tool for a specific job: editing the visual output of HTML and Tailwind files that live on your local machine.
+                </p>
+                <p class="text-body">
+                  If that's the job you need done, it's the right tool. If you need something else, we'd rather be honest about that than oversell scope.
+                </p>
+              </div>
+
+              <!-- CTA within editorial — inline, not a full banner -->
+              <div class="card p-6 reveal rounded-3xl border space-y-4" style="background: var(--surface-1); border-color: var(--border);">
+                <div class="frosted-icon-capsule violet">
+                  <Icon name="sparkles" class="w-6 h-6" />
+                </div>
+                <div>
+                  <p class="text-base font-bold" style="color: var(--ink-1);">Try it on a real project.</p>
+                  <p class="text-sm mt-1 leading-relaxed" style="color: var(--ink-3);">Open any HTML file and spend 10 minutes with the inspector. That's the fastest way to understand what it is and isn't.</p>
+                </div>
+                <a href="/editor" class="btn btn-primary mt-2 text-sm inline-flex items-center gap-2">
+                  <span>Open the editor</span>
+                  <Icon name="arrow-right" class="w-4 h-4" />
+                </a>
+              </div>
+            </article>
           </div>
         </div>
       </section>
 
-      <!-- CTA BANNER -->
-      <CtaBanner
-        headline="Take back your developer autonomy"
-        subheadline="Zero subscriptions. Zero telemetry. Start designing on your local files right now."
-      />
     </main>
 
     <Footer />
