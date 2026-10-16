@@ -15,6 +15,9 @@
 7. [Memory, Knowledge & Web Scraping](#7-memory-knowledge--web-scraping)
 8. [AI Image Generation, Editing & Outpainting](#8-ai-image-generation-editing--outpainting)
 9. [Icons, App Store Optimization & Toast Notifications](#9-icons-app-store-optimization--toast-notifications)
+10. [Vercel Ecosystem, React Architecture & Deployment](#10-vercel-ecosystem-react-architecture--deployment)
+11. [Search Engine Optimization (SEO) & GEO](#11-search-engine-optimization-seo--geo)
+12. [Writing, Documentation & Prose Guidelines](#12-writing-documentation--prose-guidelines)
 
 ---
 
@@ -32,6 +35,7 @@ Use these skills whenever building, shaping, reviewing, or redesigning web inter
 | **`design-principles-and-laws`** | [`.agents/skills/design-principles-and-laws/SKILL.md`](file:///.agents/skills/design-principles-and-laws/SKILL.md) | Applying formal UX laws and cognitive psychology: Hick's Law, Fitts's Law, Miller's Law, Gestalt grouping, concentric curvature, and the 60-30-10 color rule. |
 | **`web-design-guidelines`** | [`.agents/skills/web-design-guidelines/SKILL.md`](file:///.agents/skills/web-design-guidelines/SKILL.md) | Checking compliance with Web Interface Guidelines, accessibility standards (WCAG), keyboard navigation, and responsive typography scales. |
 | **`web-design-reviewer`** | [`.agents/skills/web-design-reviewer/SKILL.md`](file:///.agents/skills/web-design-reviewer/SKILL.md) | Visually reviewing local or deployed sites, finding layout breakages, margin inconsistencies, and fixing them at the source code level. |
+| **`premium-frontend-ui`** | [`.agents/skills/premium-frontend-ui/SKILL.md`](file:///.agents/skills/premium-frontend-ui/SKILL.md) | Crafting immersive, high-performance web experiences with advanced motion, typography, and architectural craftsmanship. |
 | **`reui`** | [`.agents/skills/reui/SKILL.md`](file:///.agents/skills/reui/SKILL.md) | Discovering, installing, and assembling ReUI registry components (data-grids, kanbans, filter panels, motion icons). |
 
 ---
@@ -164,6 +168,47 @@ Use these skills when discovering vector icons across 200+ icon sets, packaging 
 | **`ios-icon-gen`** | [`.agents/skills/ios-icon-gen/SKILL.md`](file:///.agents/skills/ios-icon-gen/SKILL.md) | Generating production-ready iOS/macOS PNG imagesets (1x, 2x, 3x) for Xcode asset catalogs from Apple SF Symbols or Iconify open-source collections. |
 | **`app-icon-optimization`** | [`.agents/skills/app-icon-optimization/SKILL.md`](file:///.agents/skills/app-icon-optimization/SKILL.md) | Auditing, designing, and A/B testing mobile app icons to maximize tap-through rate (TTR) and App Store search/browse conversion (small size legibility & contrast). |
 | **`ask-sonner`** | [`.agents/skills/ask-sonner/SKILL.md`](file:///.agents/skills/ask-sonner/SKILL.md) | Authoritative reference for Emil Kowalski's Sonner React toast library; setup, single `<Toaster />` mounting, promise toasts, theme sync, and z-index fixes. |
+
+---
+
+## 10. Vercel Ecosystem, React Architecture & Deployment
+
+Use these skills for deploying projects to Vercel, scaling React component architectures, integrating React 19 View Transitions, and optimizing compute costs.
+
+| Skill | Path | Best Used When... |
+| :--- | :--- | :--- |
+| **`vercel-composition-patterns`** | [`.agents/skills/vercel-composition-patterns/SKILL.md`](file:///.agents/skills/vercel-composition-patterns/SKILL.md) | Scalable React composition patterns, compound components, render props, context providers, and React 19 architecture. |
+| **`deploy-to-vercel`** | [`.agents/skills/deploy-to-vercel/SKILL.md`](file:///.agents/skills/deploy-to-vercel/SKILL.md) | Deploying web apps and websites to Vercel, generating live preview deployments and production releases. |
+| **`vercel-react-best-practices`** | [`.agents/skills/vercel-react-best-practices/SKILL.md`](file:///.agents/skills/vercel-react-best-practices/SKILL.md) | Vercel Engineering performance optimization guidelines for React/Next.js data fetching, rendering, and bundle size. |
+| **`vercel-react-native-skills`** | [`.agents/skills/vercel-react-native-skills/SKILL.md`](file:///.agents/skills/vercel-react-native-skills/SKILL.md) | React Native and Expo best practices for performant mobile apps, list virtualization, and native platform APIs. |
+| **`vercel-react-view-transitions`** | [`.agents/skills/vercel-react-view-transitions/SKILL.md`](file:///.agents/skills/vercel-react-view-transitions/SKILL.md) | Building fluid animations using React's View Transition API (`<ViewTransition>`, `addTransitionType`, and transition pseudo-elements). |
+| **`vercel-cli-with-tokens`** | [`.agents/skills/vercel-cli-with-tokens/SKILL.md`](file:///.agents/skills/vercel-cli-with-tokens/SKILL.md) | Managing Vercel CLI deployments and configurations using access tokens rather than interactive browser login. |
+| **`vercel-optimize`** | [`.agents/skills/vercel-optimize/SKILL.md`](file:///.agents/skills/vercel-optimize/SKILL.md) | Reducing Vercel hosting bills, optimizing Edge and Serverless functions, Fluid compute, and Core Web Vitals. |
+
+---
+
+## 11. Search Engine Optimization (SEO) & GEO
+
+Use these skills for technical SEO audits, Generative Engine Optimization (AI search indexing), structured JSON-LD schemas, and programmatic landing pages.
+
+| Skill | Path | Best Used When... |
+| :--- | :--- | :--- |
+| **`seo`** | [`.agents/skills/seo/SKILL.md`](file:///.agents/skills/seo/SKILL.md) | Comprehensive multi-industry SEO analysis: technical crawlability, Core Web Vitals, schema markup, and GEO (AI search engine visibility). |
+| **`seo-audit`** | [`.agents/skills/seo-audit/SKILL.md`](file:///.agents/skills/seo-audit/SKILL.md) | Full diagnostic on-page and technical SEO audit, ranking drop triage, and meta tag optimization. |
+| **`seo-geo`** | [`.agents/skills/seo-geo/SKILL.md`](file:///.agents/skills/seo-geo/SKILL.md) | Generative Engine Optimization for AI search engines (ChatGPT, Perplexity, Gemini, Copilot, Claude) and traditional Google search. |
+| **`firecrawl-seo-audit`** | [`.agents/skills/firecrawl-seo-audit/SKILL.md`](file:///.agents/skills/firecrawl-seo-audit/SKILL.md) | Automated website SEO audit using Firecrawl scraping for metadata, heading hierarchy, and competitor comparison. |
+| **`programmatic-seo`** | [`.agents/skills/programmatic-seo/SKILL.md`](file:///.agents/skills/programmatic-seo/SKILL.md) | Building data-driven, template-based SEO landing pages and directories at scale. |
+| **`web-quality-seo`** | [`.agents/skills/web-quality-seo/SKILL.md`](file:///.agents/skills/web-quality-seo/SKILL.md) | Search engine visibility and ranking optimization from Addy Osmani's web-quality standards. |
+
+---
+
+## 12. Writing, Documentation & Prose Guidelines
+
+Use this skill when authoring user-facing prose, product copy, documentation, or style audits.
+
+| Skill | Path | Best Used When... |
+| :--- | :--- | :--- |
+| **`writing-guidelines`** | [`.agents/skills/writing-guidelines/SKILL.md`](file:///.agents/skills/writing-guidelines/SKILL.md) | Reviewing docs, marketing prose, and UX copy against professional writing guidelines for clarity, tone, and brevity. |
 
 ---
 
