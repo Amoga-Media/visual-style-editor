@@ -282,8 +282,7 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
     const posVal = `${clampedX}% ${clampedY}%`;
     setObjectPosition(posVal);
 
-    const currentInlineFit = (element as HTMLElement).style?.objectFit;
-    if (!currentInlineFit || (objectFit !== "cover" && objectFit !== "scale-down" && objectFit !== "contain")) {
+    if (objectFit !== "cover") {
       setObjectFit("cover");
       applyLiveStyle(element!, "object-fit" as any, "cover", theme, undefined, viewport, structuralPath!);
       commitStyleChange(element!, structuralPath!, "object-fit" as any, "cover", theme, onEdit, undefined, undefined, viewport);
@@ -508,6 +507,7 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
           <input
             type="text"
             value={alt}
+            aria-label="Alt Text"
             onChange={(e) => setAlt(e.target.value)}
             onBlur={() => commitAttribute("alt", alt)}
             onKeyDown={(e) => e.key === "Enter" && commitAttribute("alt", alt)}
@@ -648,6 +648,7 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
                   max={100}
                   step={0.1}
                   value={posX}
+                  aria-label="Pan X value"
                   onChange={(e) => {
                     const val = parseFloat(e.target.value);
                     if (!isNaN(val)) handlePositionChange(val, posY, true);
@@ -663,6 +664,7 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
               max={100}
               step={0.5}
               value={posX}
+              aria-label="Pan X slider"
               onChange={(e) => handlePositionChange(parseFloat(e.target.value), posY, false)}
               onPointerUp={(e) => handlePositionChange(parseFloat((e.target as HTMLInputElement).value), posY, true)}
               className="w-full accent-[#0099ff] cursor-pointer h-1.5 bg-slate-200 dark:bg-[#262626] rounded-lg"
@@ -680,6 +682,7 @@ export default function ImageGroup({ element, structuralPath, theme, viewport = 
                   max={100}
                   step={0.1}
                   value={posY}
+                  aria-label="Pan Y value"
                   onChange={(e) => {
                     const val = parseFloat(e.target.value);
                     if (!isNaN(val)) handlePositionChange(posX, val, true);

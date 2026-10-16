@@ -1,0 +1,93 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Navbar from "@/components/marketing/Navbar.astro";
+import Footer from "@/components/marketing/Footer.astro";
+import ContactFormInteractive from "@/components/marketing/ContactFormInteractive";
+import Icon from "@/components/ui/Icon.astro";
+
+const contactPageSchema = {
+  "@type": "ContactPage",
+  "@id": "https://visualstyleeditor.com/contact#contact",
+  "name": "Contact Us — Visual Style Editor Engineering & Feedback Hub",
+  "description": "Send inquiries, request new features, report bugs, or partner with the team behind Visual Style Editor.",
+  "mainEntity": {
+    "@type": "Organization",
+    "@id": "https://visualstyleeditor.com/#organization",
+    "name": "Visual Style Editor / Amoga Media",
+    "email": "support@visualstyleeditor.com",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "technical support",
+      "email": "support@visualstyleeditor.com",
+      "availableLanguage": ["English"]
+    }
+  }
+};
+
+const breadcrumbs = [
+  { name: "Home", item: "https://visualstyleeditor.com/" },
+  { name: "Contact", item: "https://visualstyleeditor.com/contact" }
+];
+---
+
+<BaseLayout
+  title="Contact Us — Send Inquiries, Feature Requests & Bug Reports"
+  description="Connect directly with the creators of Visual Style Editor. Submit inquiries, suggest features, report bugs, or share feedback with zero friction."
+  breadcrumbs={breadcrumbs}
+  customEntities={[contactPageSchema]}
+>
+  <div class="flex flex-col min-h-[100dvh]">
+    <Navbar activePage="contact" />
+
+    <main id="main-content" class="flex-1">
+
+      <!-- ============================================================
+           HERO: Welcoming Direct Engineering Contact Header
+           ============================================================ -->
+      <section class="relative overflow-hidden pt-8 sm:pt-12 md:pt-14 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8">
+        <div class="hero-ambient-glow" aria-hidden="true">
+          <div class="hero-glow-orb violet"></div>
+          <div class="hero-grid-pattern"></div>
+        </div>
+
+        <div class="max-w-4xl mx-auto relative z-10 text-center space-y-6" data-reveal="fade-up">
+          <div
+            class="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl mx-auto bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
+          >
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+            <span>✦ We Read Every Single Message</span>
+          </div>
+
+          <h1
+            class="text-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.12]"
+            data-motion-text="words"
+          >
+            Contact the creators. <br />
+            <span class="gradient-text">We're here for developers.</span>
+          </h1>
+
+          <p class="text-body text-sm sm:text-base md:text-lg max-w-2xl mx-auto" style="color: var(--ink-2);">
+            Have an idea for a feature? Encountered a parser edge-case? Want to explore an integration or share feedback? Talk directly to the engineers building Visual Style Editor.
+          </p>
+
+          <!-- AEO Direct Answer Block -->
+          <div data-aeo-answer class="text-xs sm:text-sm p-4 rounded-2xl max-w-3xl mx-auto text-left bg-purple-500/10 border border-purple-500/20 text-purple-900 dark:text-purple-200">
+            <p><strong>Direct Answer:</strong> You can contact the Visual Style Editor team by emailing <code class="font-bold">support@visualstyleeditor.com</code>, submitting a bug report on GitHub Issues, joining community roadmap discussions, or using the interactive contact form below for feature requests, bug reports, and general inquiries.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           INTERACTIVE CONTACT HUB FORM
+           ============================================================ -->
+      <section class="section pb-24 relative px-4 sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto">
+          <ContactFormInteractive client:load />
+        </div>
+      </section>
+
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

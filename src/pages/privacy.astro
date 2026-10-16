@@ -6,53 +6,220 @@ import CtaBanner from "@/components/marketing/CtaBanner.astro";
 
 const sections = [
   {
-    id: "zero-collection",
+    id: "editor-vs-website",
     num: "01",
-    title: "Zero-Collection Architecture",
-    content: "Visual Style Editor operates on a fundamental principle of data sovereignty: we cannot leak, sell, or compromise your work because we never collect it in the first place. When you run this application, all code processing, HTML parsing, AST manipulation, and live preview rendering occur entirely in your local browser sandbox via client-side JavaScript. No telemetry packets, canvas analytics, keystroke logs, or document contents are ever transmitted to any remote server."
+    tag: "Architectural Guarantee",
+    title: "Local-First Editor Sandbox vs. Marketing Web Application",
+    paragraphs: [
+      "Visual Style Editor operates with a clear, dual-boundary architecture to ensure maximum developer confidentiality while supporting our public web platform:",
+      "1. In-Browser Editor Sandbox (Your Code & Files): When you use the Visual Style Editor workspace (including loading HTML templates, inspecting DOM trees, tweaking Tailwind CSS classes, and modifying styles), all processing occurs 100% locally on your machine via client-side WebAssembly, AST parsers, and JavaScript. The Chromium File System Access API reads and writes directly to your local disk upon your explicit authorization. Your proprietary source code, HTML markup, stylesheets, assets, and project files are NEVER uploaded, stored, or transmitted to our servers, Google, PostHog, or any third party.",
+      "2. Marketing & Informational Web Pages: When you visit our public marketing pages (such as our homepage, documentation, starter templates, and guides), our website uses industry-standard cookies, product analytics (PostHog), and third-party advertising partners (Google Ads) to measure website traffic, monitor performance, and deliver relevant promotions as disclosed below."
+    ],
+    callout: {
+      type: "success",
+      badge: "Absolute Code Sovereignty",
+      title: "Your Source Code Never Leaves Your Computer",
+      text: "We have architected Visual Style Editor so that we do not have a backend database storing user code. Everything you edit in the studio remains entirely inside your browser memory and on your local disk."
+    }
   },
   {
-    id: "local-storage",
+    id: "google-ads-disclosure",
     num: "02",
-    title: "Use of Browser Local Storage",
-    content: "To provide a resilient workflow, Visual Style Editor utilizes your browser's native localStorage API solely on your local device. This stores your theme preference ('dark' or 'light'), your chosen interface scale, and debounced 2-second crash-recovery snapshots to protect you against accidental tab closures or browser restarts. This data never leaves your device and can be cleared at any time via browser settings."
+    tag: "Mandatory Google Disclosure",
+    title: "Third-Party Advertising Vendors & Google Ads Disclosure",
+    paragraphs: [
+      "We run Google Ads campaigns to promote Visual Style Editor across the web. In compliance with Google's mandatory Terms of Service and European and international advertising regulations, we provide the following explicit disclosures:",
+      "• Third-Party Vendor Disclosure: Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to your web app or other websites across the Internet.",
+      "• Google's Use of Advertising Cookies: Google's use of advertising cookies enables it and its partners to serve ads to your users based on their visit to your sites and/or other sites on the Internet.",
+      "Google and its advertising partners may employ conversion tracking pixels, remarketing tags, and advertising cookies (such as _gcl_au, _ga, IDE, and test_cookie) on our marketing pages to measure ad interaction, evaluate promotional effectiveness, calculate return on ad spend, and serve targeted ads relevant to your interests."
+    ],
+    callout: {
+      type: "info",
+      badge: "Transparency",
+      title: "Google Ads & Conversion Measurement",
+      text: "Advertising cookies allow Google and certified ad networks to understand how visitors discover Visual Style Editor, which campaigns convert, and how to improve campaign relevance without accessing or reading your local code projects."
+    }
   },
   {
-    id: "filesystem-api",
+    id: "advertising-opt-out",
     num: "03",
-    title: "File System Access API & Permissions",
-    content: "When you choose to open a file or directory from your computer, Visual Style Editor uses the standardized Chromium File System Access API (such as window.showOpenFilePicker and window.showDirectoryPicker). Access to files or directories requires explicit, user-initiated permission granted through your browser's native security prompt. The editor interacts only with the specific files you authorize and writes modifications back to your disk only when you trigger a save action."
+    tag: "User Choice & Controls",
+    title: "Personalized Advertising Opt-Out Disclosures",
+    paragraphs: [
+      "We strongly believe in giving you complete control over your advertising preferences and data privacy. You can opt out of personalized advertising, remarketing, and third-party advertising cookies at any time through any of the following official mechanisms:",
+      "1. Google Ads Settings: You can opt out of personalized Google advertising and manage the demographic and interest categories associated with your Google account by visiting Google's Ads Settings.",
+      "2. Digital Advertising Alliance (DAA): You can opt out of participating third-party vendors' and ad networks' use of cookies for interest-based advertising by visiting www.aboutads.info.",
+      "3. Network Advertising Initiative (NAI): You can opt out of behavioral targeting across dozens of member ad networks through the NAI Consumer Opt-Out tool.",
+      "4. European Interactive Digital Advertising Alliance (EDAA): Visitors residing in the European Union and the UK can exercise their advertising choices via Your Online Choices.",
+      "5. Browser & Extension Controls: Most modern web browsers allow you to block third-party cookies, clear existing cookies, or enable Global Privacy Control (GPC) / Do Not Track (DNT) signals."
+    ],
+    links: [
+      {
+        label: "Google Ads Settings (adssettings.google.com)",
+        url: "https://adssettings.google.com",
+        desc: "Opt out of personalized Google Ads across Google Search, YouTube, and Partner websites."
+      },
+      {
+        label: "Digital Advertising Alliance (www.aboutads.info)",
+        url: "https://www.aboutads.info/choices",
+        desc: "Opt out of third-party advertising cookies across multi-vendor networks."
+      },
+      {
+        label: "Network Advertising Initiative (optout.networkadvertising.org)",
+        url: "https://optout.networkadvertising.org",
+        desc: "Comprehensive consumer opt-out tool for participating ad-tech platforms."
+      },
+      {
+        label: "Your Online Choices (EDAA for EU/UK)",
+        url: "https://www.youronlinechoices.eu",
+        desc: "European interactive digital advertising preference manager."
+      }
+    ]
   },
   {
-    id: "analytics-trackers",
+    id: "posthog-analytics",
     num: "04",
-    title: "Complete Absence of Analytics & Trackers",
-    content: "We do not embed Google Analytics, Mixpanel, PostHog, Hotjar, Meta Pixel, or any third-party advertising or telemetry trackers. We believe developer tools should be private sanctuaries for creative and commercial engineering. When you build client deliverables or proprietary products in Visual Style Editor, you can be 100% confident that no third party is monitoring your work."
+    tag: "Product Analytics",
+    title: "Product Analytics & PostHog Telemetry",
+    paragraphs: [
+      "To continuously optimize user experience, diagnose frontend UI bugs, and evaluate which features and starter templates developers find most valuable, we use PostHog analytics (via the official posthog-js library).",
+      "PostHog collects pseudonymous event telemetry when you browse our public website. These telemetry events include page views, referring domains, approximate session duration, UI button interactions (e.g., clicking 'Open Editor' or selecting a starter template), screen viewport dimensions, browser type, and operating system.",
+      "PostHog uses first-party cookies or browser localStorage (prefixed with ph_) solely to distinguish distinct user sessions. PostHog does NOT collect, inspect, or process the HTML or Tailwind code you edit inside the editor. We do not sell or trade your PostHog analytics data to third-party data brokers."
+    ],
+    callout: {
+      type: "neutral",
+      badge: "Privacy-Preserving Telemetry",
+      title: "Why We Use PostHog",
+      text: "PostHog helps us understand aggregated usage patterns (like mobile responsiveness, browser compatibility issues, and broken page links) without compromising user privacy or inspecting proprietary code."
+    }
   },
   {
-    id: "external-services",
+    id: "data-collection-details",
     num: "05",
-    title: "External Links & Third-Party Platforms",
-    content: "Our website contains links to external platforms including GitHub (for source code and sponsorship) and Ko-fi (for voluntary community donations). If you choose to visit these external platforms or contribute through them, any information you provide is subject to their respective privacy policies and terms of service."
+    tag: "Full Disclosure",
+    title: "Data Collection Details: What We Collect & Why",
+    paragraphs: [
+      "In accordance with modern privacy standards, we provide a complete inventory of user data collected through our public website and the legal bases/purposes for doing so:"
+    ],
+    subsections: [
+      {
+        subtitle: "A. Categories of Data We Collect",
+        items: [
+          "Usage Data & Interaction Telemetry: Pages visited, click events, navigation paths, starter template selections, scroll depth, referrer URLs, and timestamps.",
+          "Device & Technical Data: Internet Protocol (IP) address (processed for geolocation, security diagnostics, and fraud detection), browser vendor and version, operating system, device model, language preferences, and screen resolution.",
+          "Contact & Communication Details: If you submit an inquiry, request technical support, or report a bug, we collect your name, email address, and the written contents of your correspondence.",
+          "Local Browser Storage: Client-side preferences stored in browser localStorage (e.g., dark/light theme setting 'vse_theme', zoom scale, and debounced 2-second crash-recovery snapshots)."
+        ]
+      },
+      {
+        subtitle: "B. Why We Collect This Data (Purposes & Legal Bases)",
+        items: [
+          "Service Delivery & User Experience: To render responsive layouts, remember interface preferences, and provide seamless browser performance.",
+          "Product Analytics & Diagnostics: To detect and resolve UI bugs, verify browser API support, and improve editor performance across platforms.",
+          "Advertising Measurement & Conversion Attribution: To measure Google Ads campaign efficacy, quantify user acquisition, prevent fraudulent ad clicks, and verify conversions.",
+          "Security & Infrastructure Protection: To mitigate distributed denial-of-service (DDoS) attacks, detect automated malicious bots, and protect our services.",
+          "Customer Service & Communication: To answer user inquiries, troubleshoot reported issues, and maintain transparent open-source communication."
+        ]
+      }
+    ]
   },
   {
-    id: "gdpr-ccpa",
+    id: "data-sharing-security",
     num: "06",
-    title: "Global Privacy Compliance",
-    content: "Because Visual Style Editor does not collect, process, retain, or share Personally Identifiable Information (PII), we comply with the European Union General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), and international privacy frameworks by architectural default. There are no user accounts to delete, no marketing databases to unsubscribe from, and no data profiling mechanisms."
+    tag: "Providers & Safeguards",
+    title: "Data Sharing & Technical Security Safeguards",
+    paragraphs: [
+      "We share data only with trusted third-party service providers who assist us in operating our web application, delivering content, analyzing telemetry, and measuring ad campaigns:",
+      "• Advertising Providers: Google LLC (Google Ads, conversion measurement, and remarketing infrastructure).",
+      "• Analytics Infrastructure: PostHog Inc. (product analytics and event logging).",
+      "• Edge Hosting & CDN Infrastructure: Cloud hosting and content delivery network providers (such as Cloudflare, Vercel, or GitHub Pages) that route network requests, provide DDoS protection, and cache static assets globally.",
+      "• Community Sponsorship: External platforms including GitHub and Ko-fi for voluntary community contributions (subject to their respective privacy terms).",
+      "• Legal Compliance: We may disclose personal data if required by law, subpoena, warrant, or court order to comply with legal processes or protect our rights and property."
+    ],
+    callout: {
+      type: "success",
+      badge: "Security Standard",
+      title: "How We Secure Your Data",
+      text: "All website traffic is encrypted in transit using Transport Layer Security (TLS 1.3 / HTTPS). Our local-first architecture ensures that your actual source code never leaves your computer and is never stored on external databases. We enforce strict least-privilege administrative access controls across all service accounts."
+    }
   },
   {
-    id: "contact",
+    id: "cookies-and-storage",
     num: "07",
-    title: "Inquiries & Verification",
-    content: "Visual Style Editor is open source. You can inspect every line of source code, verify network requests in your browser DevTools Network tab, and build the project locally from source. If you have questions regarding our architecture or this policy, please open an issue or discussion on our GitHub repository."
+    tag: "Cookie Inventory",
+    title: "Cookies, Local Storage & Tracking Technologies",
+    paragraphs: [
+      "Cookies are small text files placed on your device by websites that you visit. We utilize three distinct categories of cookies and local storage tokens:",
+      "1. Essential & Functional Storage: Browser localStorage items (e.g., 'vse_theme', editor scale preference, and debounced crash-recovery buffers) required for the core visual studio to function locally on your machine.",
+      "2. Product Analytics Cookies: PostHog session identifiers ('ph_*') used to track session flows, measure aggregate page views, and identify frontend errors.",
+      "3. Advertising & Marketing Cookies: Google Ads cookies ('_gcl_au', '_ga', 'IDE', etc.) used by Google to track ad clicks, calculate conversion rates, and prevent ad fraud.",
+      "You can manage, restrict, or delete cookies at any time through your browser's security settings. If you disable cookies entirely, the local editor will still function, though marketing preferences and session history may not persist."
+    ]
+  },
+  {
+    id: "global-privacy-rights",
+    num: "08",
+    tag: "GDPR · CCPA · International",
+    title: "Global Privacy Rights (GDPR, CCPA/CPRA, CalOPPA)",
+    paragraphs: [
+      "Depending on your geographic location (including the European Economic Area, United Kingdom, and California), you possess specific legal rights regarding your personal information under applicable privacy legislation:",
+      "• Right of Access & Portability: You have the right to request confirmation of whether we process personal data relating to you and to receive a portable copy of that data.",
+      "• Right to Rectification: You may request the correction of inaccurate or incomplete personal information.",
+      "• Right to Erasure ('Right to Be Forgotten'): You may request the deletion of your personal data held in our analytics or communication records.",
+      "• Right to Opt-Out of Sale / Sharing (CCPA / CPRA): We do NOT sell your personal information for monetary value. California residents may opt out of the sharing of personal information for cross-context behavioral advertising using the opt-out links provided in Section 03.",
+      "• Right to Non-Discrimination: We will never discriminate against you, deny services, or alter product quality for exercising your privacy rights."
+    ]
+  },
+  {
+    id: "children-privacy",
+    num: "09",
+    tag: "COPPA Compliance",
+    title: "Children's Privacy Protection",
+    paragraphs: [
+      "Visual Style Editor is designed for developers, designers, and web creators. We do not knowingly target, solicit, or collect personal information from children under the age of 13 (or under 16 in the European Union).",
+      "If we become aware that personal information from a child under the relevant age has been collected inadvertently through website interactions, we will take immediate steps to delete the information from our records. Parents or guardians may contact us to request removal."
+    ]
+  },
+  {
+    id: "policy-updates-contact",
+    num: "10",
+    tag: "Updates & Contact",
+    title: "Policy Updates, Verification & Contact Information",
+    paragraphs: [
+      "We may update this Privacy Policy from time to time to reflect operational, legal, or regulatory changes, including adjustments to Google Ads policies or analytics tools. We will indicate the 'Effective Date' at the top of this document.",
+      "Visual Style Editor is built for the open web and published by Amoga Media. If you have questions, feedback, or requests regarding this Privacy Policy or wish to exercise your legal privacy rights, please contact us:"
+    ],
+    contactInfo: {
+      email: "privacy@visualstyleeditor.com",
+      company: "Amoga Media",
+      supportUrl: "https://amogamedia.com",
+      githubUrl: "https://github.com"
+    }
   }
+];
+
+const privacySchema = {
+  "@type": "WebPage",
+  "@id": "https://visualstyleeditor.com/privacy#webpage",
+  "name": "Privacy Policy — Visual Style Editor",
+  "description": "Comprehensive Privacy Policy for Visual Style Editor. Disclosures on local-first AST code security, PostHog telemetry, and Google Ads compliance.",
+  "inLanguage": "en-US",
+  "publisher": {
+    "@id": "https://visualstyleeditor.com/#organization"
+  }
+};
+
+const breadcrumbs = [
+  { name: "Home", item: "https://visualstyleeditor.com/" },
+  { name: "Privacy Policy", item: "https://visualstyleeditor.com/privacy" }
 ];
 ---
 
 <BaseLayout
   title="Privacy Policy — Visual Style Editor"
-  description="Visual Style Editor runs 100% in your browser. Zero telemetry, zero analytics, zero servers. Read our privacy policy."
+  description="Comprehensive Privacy Policy for Visual Style Editor. Full transparency on Google Ads compliance, PostHog analytics, local-first code security, and data protection."
+  breadcrumbs={breadcrumbs}
+  customEntities={[privacySchema]}
 >
   <div class="flex flex-col min-h-[100dvh]">
     <Navbar activePage="privacy" />
@@ -69,34 +236,35 @@ const sections = [
 
         <div class="max-w-3xl mx-auto text-center space-y-4 relative z-10">
           <div
-            class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none mx-auto shadow-sm backdrop-blur-xl bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/40"
+            class="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider border select-none mx-auto shadow-sm backdrop-blur-xl bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/40"
           >
-            <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse"></span>
-            <span>Zero Telemetry · 100% Local First</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse shrink-0"></span>
+            <span class="truncate">Google Ads Compliant · PostHog Analytics · 100% Local Code</span>
           </div>
-          <h1 class="text-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08]">
+          <h1 class="text-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.12] sm:leading-[1.08]">
             Privacy Policy
           </h1>
-          <p class="text-body text-base sm:text-lg mx-auto text-balance" style="color: var(--ink-2);">
-            We don't collect your data, track your code, or run analytics servers. Visual Style Editor is designed so privacy is an architectural guarantee, not just a promise.
+          <p class="text-body text-sm sm:text-base md:text-lg mx-auto text-balance px-1 sm:px-0" style="color: var(--ink-2);">
+            Transparent, unambiguous privacy disclosures. Learn how our local-first editor protects your source code and how we handle web analytics and advertising in compliance with Google's Terms of Service.
           </p>
           <div class="text-mono font-medium" style="color: var(--ink-3); font-size: 0.75rem; padding-top: 0.5rem;">
-            Effective Date: October 2026 • MIT Licensed
+            Effective Date: October 2026 • Published by Amoga Media • MIT Licensed Core
           </div>
         </div>
       </section>
 
       <!-- Document Content -->
       <section class="section" style="padding-top: 0; padding-bottom: 5rem;">
-        <div class="max-w-3xl mx-auto">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6">
+
           <!-- Table of contents pill list -->
           <div class="card p-4 sm:p-5 mb-8">
-            <div class="text-label mb-3" style="color: var(--ink-3);">Document Sections</div>
+            <div class="text-label mb-3" style="color: var(--ink-3);">Table of Contents</div>
             <div class="flex flex-wrap gap-2 text-xs">
               {sections.map((s) => (
                 <a
                   href={`#${s.id}`}
-                  class="px-2.5 py-1 rounded-md transition-colors"
+                  class="px-2.5 py-1 rounded-md transition-colors hover:border-purple-500/60"
                   style="background: var(--surface-2); border: 1px solid var(--border); color: var(--ink-2);"
                 >
                   <span class="font-mono text-[10px]" style="color: var(--ink-3);">{s.num}</span> {s.title}
@@ -106,28 +274,133 @@ const sections = [
           </div>
 
           <!-- Section Cards -->
-          <div class="space-y-6">
+          <div class="space-y-8">
             {sections.map((sec) => (
-              <article id={sec.id} class="card p-6 sm:p-8 scroll-mt-24">
-                <div class="flex items-baseline gap-3 mb-3">
-                  <span class="text-mono text-xs font-bold" style="color: var(--ink-3);">{sec.num}</span>
-                  <h2 class="text-title text-base sm:text-lg">
-                    {sec.title}
-                  </h2>
+              <article id={sec.id} class="card p-6 sm:p-8 scroll-mt-24 space-y-5">
+                <!-- Header with section number and badge -->
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style="border-color: var(--border);">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-mono text-xs font-bold px-2 py-0.5 rounded bg-black/5 dark:bg-white/10" style="color: var(--ink-1);">
+                      {sec.num}
+                    </span>
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-purple-600 dark:text-purple-400 font-semibold">
+                      {sec.tag}
+                    </span>
+                  </div>
                 </div>
-                <p class="text-body text-sm sm:text-base leading-relaxed" style="color: var(--ink-2);">
-                  {sec.content}
-                </p>
+
+                <h2 class="text-title text-lg sm:text-xl font-bold tracking-tight" style="color: var(--ink-1);">
+                  {sec.title}
+                </h2>
+
+                <!-- Paragraphs -->
+                <div class="space-y-3.5 text-sm sm:text-base leading-relaxed" style="color: var(--ink-2);">
+                  {sec.paragraphs.map((p) => (
+                    <p>{p}</p>
+                  ))}
+                </div>
+
+                <!-- Structured subsections if present -->
+                {sec.subsections && (
+                  <div class="space-y-4 pt-2">
+                    {sec.subsections.map((sub) => (
+                      <div class="p-4 rounded-xl space-y-2.5" style="background: var(--surface-2); border: 1px solid var(--border);">
+                        <h3 class="text-sm font-bold font-mono uppercase tracking-wide" style="color: var(--ink-1);">
+                          {sub.subtitle}
+                        </h3>
+                        <ul class="space-y-2 text-xs sm:text-sm" style="color: var(--ink-2);">
+                          {sub.items?.map((item) => (
+                            <li class="flex items-start gap-2.5">
+                              <span class="text-purple-500 font-bold shrink-0 mt-0.5">›</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <!-- Highlight Callout Box -->
+                {sec.callout && (
+                  <div
+                    class={`p-4 sm:p-5 rounded-xl border space-y-1.5 ${
+                      sec.callout.type === 'success'
+                        ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-900 dark:text-emerald-200'
+                        : sec.callout.type === 'info'
+                        ? 'bg-sky-500/5 border-sky-500/20 text-sky-900 dark:text-sky-200'
+                        : 'bg-purple-500/5 border-purple-500/20 text-purple-900 dark:text-purple-200'
+                    }`}
+                  >
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-black/5 dark:bg-white/10">
+                        {sec.callout.badge}
+                      </span>
+                      <span class="text-xs sm:text-sm font-semibold">{sec.callout.title}</span>
+                    </div>
+                    <p class="text-xs sm:text-sm leading-relaxed opacity-90">
+                      {sec.callout.text}
+                    </p>
+                  </div>
+                )}
+
+                <!-- Links Grid (Opt-Outs & External Resources) -->
+                {sec.links && (
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    {sec.links.map((link) => (
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="p-3.5 rounded-xl border flex flex-col justify-between group transition-all duration-150 hover:border-purple-500/50 hover:shadow-sm"
+                        style="background: var(--surface-2); border-color: var(--border);"
+                      >
+                        <div class="space-y-1">
+                          <div class="flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400 group-hover:underline">
+                            <span>{link.label}</span>
+                            <svg class="w-3.5 h-3.5 opacity-60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </div>
+                          <p class="text-xs leading-relaxed" style="color: var(--ink-3);">
+                            {link.desc}
+                          </p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                <!-- Contact Info block for Section 10 -->
+                {sec.contactInfo && (
+                  <div class="p-4 sm:p-5 rounded-xl border space-y-3" style="background: var(--surface-2); border-color: var(--border);">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                      <div>
+                        <div class="text-label" style="color: var(--ink-3);">Privacy & Legal Inquiries</div>
+                        <a href={`mailto:${sec.contactInfo.email}`} class="font-mono text-purple-600 dark:text-purple-400 font-bold hover:underline">
+                          {sec.contactInfo.email}
+                        </a>
+                      </div>
+                      <div>
+                        <div class="text-label" style="color: var(--ink-3);">Publishing Organization</div>
+                        <a href={sec.contactInfo.supportUrl} target="_blank" rel="noopener noreferrer" class="font-semibold hover:underline" style="color: var(--ink-1);">
+                          {sec.contactInfo.company}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </article>
             ))}
           </div>
+
         </div>
       </section>
 
       <!-- CTA Banner -->
       <CtaBanner
-        title="Software that respects your workspace."
-        subtitle="No accounts, no telemetry, no tracking. Drop your file and start editing."
+        title="Experience private, local-first web styling."
+        subtitle="100% browser-based AST editing. Zero server storage of your source code."
         primaryLabel="Launch the editor"
         primaryHref="/editor"
       />

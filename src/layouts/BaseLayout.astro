@@ -3,24 +3,30 @@ import '../styles/global.css';
 import 'lenis/dist/lenis.css';
 import 'sonner/dist/styles.css';
 import ToastProvider from '@/components/ui/ToastProvider';
+import PostHog from '@/components/analytics/PostHog.astro';
+import { generateBaseGraph, type BreadcrumbItem } from '@/lib/seo/schema-generator';
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
   canonicalURL?: string;
+  breadcrumbs?: BreadcrumbItem[];
+  customEntities?: Record<string, any>[];
 }
 
 const {
   title = "Visual Style Editor — In-browser Tailwind CSS & HTML editor",
-  description = "A visual editor for HTML and Tailwind CSS that runs entirely in your browser. Drop a file, tweak styles visually, and save changes directly to disk. Zero backend. Zero telemetry. MIT licensed.",
+  description = "A visual editor for HTML and Tailwind CSS that runs entirely in your browser. Drop a file, tweak styles visually, and save changes directly to disk. Zero cloud backend. 100% local code processing. MIT licensed.",
   image = "/og-image.png",
   canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : "https://visualstyleeditor.com",
+  breadcrumbs = [],
+  customEntities = [],
 } = Astro.props;
 
-const jsonLd = {
-  "@context": "https://schema.org",
+const defaultSoftwareEntity = {
   "@type": "WebApplication",
+  "@id": `${canonicalURL}#webapp`,
   "name": "Visual Style Editor",
   "url": canonicalURL,
   "description": description,
@@ -40,6 +46,16 @@ const jsonLd = {
     "Diff Review & Version History"
   ]
 };
+
+const activeCustomEntities = customEntities.length > 0 ? customEntities : [defaultSoftwareEntity];
+
+const jsonLd = generateBaseGraph({
+  canonicalUrl: canonicalURL,
+  title,
+  description,
+  breadcrumbs,
+  customEntities: activeCustomEntities
+});
 ---
 
 <!doctype html>
@@ -72,9 +88,12 @@ const jsonLd = {
     <title>{title}</title>
     <meta name="title" content={title} />
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <link rel="canonical" href={canonicalURL} />
 
     <!-- Open Graph -->
+    <meta property="og:site_name" content="Visual Style Editor" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
@@ -82,14 +101,19 @@ const jsonLd = {
     <meta property="og:image" content={image} />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={image} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@amogamedia" />
+    <meta name="twitter:creator" content="@amogamedia" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
 
     <!-- JSON-LD -->
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- PostHog Analytics -->
+    <PostHog />
   </head>
   <body class="min-h-[100dvh] antialiased flex flex-col relative overflow-x-clip" style="background-color: var(--canvas); color: var(--ink-1);">
     <!-- Noise texture overlay: fixed, pointer-events-none (GPU-safe) -->

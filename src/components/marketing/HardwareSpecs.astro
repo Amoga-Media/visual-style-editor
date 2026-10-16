@@ -33,48 +33,48 @@ const browserCapabilities = [
 
 const hardwareMetrics = [
   {
-    name: "System Memory (RAM)",
-    iconName: "ram",
-    min: "2 GB free RAM",
-    minDetail: "Ultra smooth for HTML files up to 2,500 lines",
-    rec: "4 GB+ free RAM",
-    recDetail: "Flawlessly streams 15,000+ DOM nodes at solid 60 FPS",
-    tag: "Low Memory Footprint",
-    tagClass: "text-purple-700 dark:text-purple-300",
-    dotBg: "#7e22ce"
+    name: "Zero Installation",
+    iconName: "storage",
+    min: "0 MB Download",
+    minDetail: "Runs directly in your browser tab with zero npm install or node_modules",
+    rec: "Instant Launch",
+    recDetail: "No background services, no Docker containers, no background daemons",
+    tag: "Zero Setup",
+    tagClass: "text-amber-800 dark:text-amber-300",
+    dotBg: "#b45309"
   },
   {
-    name: "Processor (CPU)",
+    name: "Direct Disk Sync",
     iconName: "cpu",
-    min: "Any dual-core CPU",
-    minDetail: "Parse5 AST tokenization completes in under 6ms",
-    rec: "Quad-core / Apple Silicon",
-    recDetail: "Sub-millisecond instant style diffing across nested subtrees",
-    tag: "Instant AST Splicing",
+    min: "Native Chromium API",
+    minDetail: "Uses W3C File System Access API in Chrome, Edge, Brave, and Arc",
+    rec: "<2ms Local Save",
+    recDetail: "Edits write straight to your local file without download prompts",
+    tag: "Native File IO",
     tagClass: "text-sky-700 dark:text-sky-300",
     dotBg: "#0284c7"
   },
   {
-    name: "Graphics Acceleration (GPU)",
-    iconName: "gpu",
-    min: "Standard Integrated GPU",
-    minDetail: "WebGL Canvas zoom, pan, and transform rendering",
-    rec: "Dedicated / M-Series GPU",
-    recDetail: "Butter-smooth 120Hz ProMotion canvas panning",
-    tag: "60-120 FPS Viewport",
-    tagClass: "text-emerald-700 dark:text-emerald-400",
-    dotBg: "#15803d"
+    name: "Ultra-Lightweight",
+    iconName: "ram",
+    min: "Low Memory Use",
+    minDetail: "Parse5 AST tokenization runs in-memory with 0ms cloud latency",
+    rec: "Any Computer",
+    recDetail: "Runs smoothly on MacBooks, Windows PCs, Linux, or Chromebooks",
+    tag: "Client-Side",
+    tagClass: "text-purple-700 dark:text-purple-300",
+    dotBg: "#7e22ce"
   },
   {
-    name: "Disk Storage Footprint",
-    iconName: "storage",
-    min: "0 MB installation",
-    minDetail: "Runs entirely in browser memory; zero node_modules",
-    rec: "0 MB storage needed",
-    recDetail: "No Docker containers, no background daemons, no background services",
-    tag: "Zero Install Needed",
-    tagClass: "text-amber-800 dark:text-amber-300",
-    dotBg: "#b45309"
+    name: "Smooth Canvas",
+    iconName: "gpu",
+    min: "60 FPS Viewport",
+    minDetail: "Hardware-accelerated pan, zoom, and live style slider updates",
+    rec: "Fluid Scaling",
+    recDetail: "Instant responsive breakpoint previewing from mobile to 4K",
+    tag: "Real-Time Preview",
+    tagClass: "text-emerald-700 dark:text-emerald-400",
+    dotBg: "#15803d"
   }
 ];
 ---
@@ -86,13 +86,13 @@ const hardwareMetrics = [
         class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase border mb-3 select-none bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/40"
       >
         <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse"></span>
-        Accessible & Lightweight
+        Zero Setup · Runs In Your Browser
       </div>
       <h2 class="text-display text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-[1.08]" style="color: var(--ink-1);">
-        Hardware & System Requirements Guide
+        Browser Support & Architecture
       </h2>
       <p class="text-body text-base sm:text-lg max-w-3xl mx-auto mt-3" style="color: var(--ink-2);">
-        Runs directly in your browser. No Docker, no Python, no CLI daemons — works on everything from a MacBook Pro to a modest Chromebook.
+        No installation, no npm install, no Docker. Open your browser, drop an HTML file, and start editing with zero setup.
       </p>
     </div>
 

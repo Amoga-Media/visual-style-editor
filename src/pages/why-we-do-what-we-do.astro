@@ -4,11 +4,35 @@ import Navbar from "@/components/marketing/Navbar.astro";
 import Footer from "@/components/marketing/Footer.astro";
 import CtaBanner from "@/components/marketing/CtaBanner.astro";
 import Icon from "@/components/ui/Icon.astro";
+
+const manifestoSchema = {
+  "@type": "AboutPage",
+  "@id": "https://visualstyleeditor.com/why-we-do-what-we-do#about",
+  "name": "Why We Built Visual Style Editor — Developer Sovereignty Manifesto",
+  "description": "An architectural manifesto on developer sovereignty: why code should remain local, why tools shouldn't extract rent, and how non-destructive AST splicing replaces cloud lock-in.",
+  "mainEntity": {
+    "@type": "Article",
+    "headline": "Developer tools shouldn't extract rent: The Visual Style Editor Manifesto",
+    "author": {
+      "@id": "https://visualstyleeditor.com/#organization"
+    },
+    "publisher": {
+      "@id": "https://visualstyleeditor.com/#organization"
+    }
+  }
+};
+
+const breadcrumbs = [
+  { name: "Home", item: "https://visualstyleeditor.com/" },
+  { name: "Why We Built This", item: "https://visualstyleeditor.com/why-we-do-what-we-do" }
+];
 ---
 
 <BaseLayout
-  title="Why we built this — Visual Style Editor"
+  title="Why We Built This — Visual Style Editor Manifesto"
   description="An honest account of why Visual Style Editor exists: the frustration with losing work, paying for lock-in, and not owning your own code."
+  breadcrumbs={breadcrumbs}
+  customEntities={[manifestoSchema]}
 >
   <div class="flex flex-col min-h-[100dvh]">
     <Navbar activePage="why we do it" />
@@ -26,17 +50,43 @@ import Icon from "@/components/ui/Icon.astro";
         <div class="max-w-6xl mx-auto relative z-10">
           <div class="max-w-3xl space-y-4 reveal">
             <div
-              class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
+              class="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
             >
-              <span class="w-2 h-2 rounded-full bg-pink-600 dark:bg-pink-400 animate-pulse"></span>
-              <span>Engineering Ethics & Philosophy</span>
+              <span class="w-2 h-2 rounded-full bg-pink-600 dark:bg-pink-400 animate-pulse shrink-0"></span>
+              <span class="truncate">Engineering Ethics & Philosophy</span>
             </div>
-            <h1 class="text-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08]">
+            <h1 class="text-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.12] sm:leading-[1.08]">
               Why we built this.
             </h1>
-            <p class="text-body text-base sm:text-lg" style="color: var(--ink-2);">
+            <p class="text-body text-sm sm:text-base md:text-lg" style="color: var(--ink-2);">
               An honest account of why Visual Style Editor exists: the frustration with losing work, paying for lock-in, and not owning your own code.
             </p>
+          </div>
+
+          <!-- Hero Studio Workstation Window Frame -->
+          <div class="max-w-5xl mx-auto pt-6 reveal">
+            <div class="glass-window-frame p-1.5 sm:p-2.5 group overflow-hidden">
+              <div class="px-4 py-2 flex items-center justify-between border-b rounded-t-xl select-none text-xs font-mono text-zinc-400" style="background: rgba(18, 18, 21, 0.75); border-color: rgba(255, 255, 255, 0.08);">
+                <div class="flex items-center gap-2">
+                  <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+                  <span class="ml-2 hidden sm:inline">visual-style-editor • ethics-and-architecture</span>
+                </div>
+                <span class="text-pink-400 font-semibold text-[11px]">Local Sovereignty First</span>
+              </div>
+              <div class="relative rounded-lg overflow-hidden bg-black aspect-[16/9] max-sm:aspect-[9/13]">
+                <picture class="block w-full h-full">
+                  <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/01-editor-overview-mobile.png" />
+                  <img
+                    src="/images/editor-snapshots/desktop/01-editor-overview-desktop.png"
+                    alt="Visual Style Editor Local Studio Workspace"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.01]"
+                    loading="eager"
+                  />
+                </picture>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -75,18 +125,57 @@ import Icon from "@/components/ui/Icon.astro";
                 <p class="text-body">
                   Chrome DevTools was fine for quick experiments, but changes vanished on reload. Webflow was powerful, but it held the code in its own database, stripped comments, and exported markup that looked nothing like something a developer would write. Figma produced design files, not actual HTML. None of these solved the actual problem: <em>I have an HTML file on my disk, and I want to edit it visually without losing anything.</em>
                 </p>
+
+                <!-- Figure 1: Full Canvas & Utility Classes -->
+                <figure class="rounded-2xl overflow-hidden border my-6 group" style="background: var(--surface-1); border-color: var(--border);">
+                  <div class="relative overflow-hidden aspect-[16/10] max-sm:aspect-[9/13] bg-zinc-950">
+                    <picture class="block w-full h-full">
+                      <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/03-editor-classes-system-mobile.jpg" />
+                      <img
+                        src="/images/editor-snapshots/desktop/03-editor-classes-system-desktop.jpg"
+                        alt="Visual Style Editor Tailwind Classes & Canvas Viewport"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </picture>
+                  </div>
+                  <figcaption class="p-3 text-[11px] font-mono text-center border-t" style="color: var(--ink-3); border-color: var(--border); background: var(--surface-2);">
+                    Figure 1: Real-time Tailwind classes and canvas inspector operating 100% locally in browser RAM.
+                  </figcaption>
+                </figure>
               </div>
 
               <hr style="border: none; border-top: 1px solid var(--border);" />
 
               <div class="space-y-5">
                 <h2 class="text-headline" style="font-size: 1.5rem;">Developer tools shouldn't extract rent.</h2>
+                <div data-aeo-answer class="text-xs sm:text-sm p-4 rounded-xl my-3 text-left bg-purple-500/10 border border-purple-500/20 text-purple-900 dark:text-purple-200">
+                  <p><strong>Direct Answer:</strong> Visual Style Editor was created under the principle of developer sovereignty: tools that execute computations on a user's local machine should never charge recurring subscriptions or require cloud account lock-in. By leveraging open web standards (W3C File System Access API, Parse5 AST parser), Visual Style Editor remains 100% free, MIT licensed, and air-gapped.</p>
+                </div>
                 <p class="text-body">
                   There's a category of software that charges you to access tools that don't depend on any server infrastructure. Tools that are, at their core, just processing you're paying a subscription to run on your own machine via their interface.
                 </p>
                 <p class="text-body">
                   We don't want to build that kind of company. The AST splicer, the OKLCH color engine, the Tailwind class mapper — none of this requires a server. There's no reason it should cost money. There's no reason your code should leave your machine. So we made it free and we kept everything local.
                 </p>
+
+                <!-- Figure 2: Surgical Byte Splicer Diff -->
+                <figure class="rounded-2xl overflow-hidden border my-6 group" style="background: var(--surface-1); border-color: var(--border);">
+                  <div class="relative overflow-hidden aspect-[16/10] max-sm:aspect-[9/13] bg-zinc-950">
+                    <picture class="block w-full h-full">
+                      <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/08-editor-ast-splice-diff-mobile.jpg" />
+                      <img
+                        src="/images/editor-snapshots/desktop/08-editor-ast-splice-diff-desktop.jpg"
+                        alt="AST Surgical Character Splice Diff Review"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </picture>
+                  </div>
+                  <figcaption class="p-3 text-[11px] font-mono text-center border-t" style="color: var(--ink-3); border-color: var(--border); background: var(--surface-2);">
+                    Figure 2: Byte-accurate AST splicing modifies only the exact attribute bytes, preserving comments and server tags.
+                  </figcaption>
+                </figure>
               </div>
 
               <hr style="border: none; border-top: 1px solid var(--border);" />
@@ -99,6 +188,24 @@ import Icon from "@/components/ui/Icon.astro";
                 <p class="text-body">
                   The backlog exists because other developers sent bug reports that turned into feature requests. If something is broken or missing for you, open an issue. We read them.
                 </p>
+
+                <!-- Figure 3: Box Model & Spacing -->
+                <figure class="rounded-2xl overflow-hidden border my-6 group" style="background: var(--surface-1); border-color: var(--border);">
+                  <div class="relative overflow-hidden aspect-[16/10] max-sm:aspect-[9/13] bg-zinc-950">
+                    <picture class="block w-full h-full">
+                      <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/06-editor-padding-boxmodel-mobile.jpg" />
+                      <img
+                        src="/images/editor-snapshots/desktop/06-editor-padding-boxmodel-desktop.jpg"
+                        alt="Tactile Concentric Box Model & Spacing Sliders"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </picture>
+                  </div>
+                  <figcaption class="p-3 text-[11px] font-mono text-center border-t" style="color: var(--ink-3); border-color: var(--border); background: var(--surface-2);">
+                    Figure 3: Tactile 4-tier Concentric Box Model translates directly into standard Tailwind spacing utilities.
+                  </figcaption>
+                </figure>
               </div>
 
               <hr style="border: none; border-top: 1px solid var(--border);" />
@@ -111,6 +218,24 @@ import Icon from "@/components/ui/Icon.astro";
                 <p class="text-body">
                   If that's the job you need done, it's the right tool. If you need something else, we'd rather be honest about that than oversell scope.
                 </p>
+
+                <!-- Figure 4: Export Studio & Direct Disk Save -->
+                <figure class="rounded-2xl overflow-hidden border my-6 group" style="background: var(--surface-1); border-color: var(--border);">
+                  <div class="relative overflow-hidden aspect-[16/10] max-sm:aspect-[9/13] bg-zinc-950">
+                    <picture class="block w-full h-full">
+                      <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/07-editor-export-studio-mobile.jpg" />
+                      <img
+                        src="/images/editor-snapshots/desktop/07-editor-export-studio-desktop.jpg"
+                        alt="Export Studio & Direct Disk Commit"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </picture>
+                  </div>
+                  <figcaption class="p-3 text-[11px] font-mono text-center border-t" style="color: var(--ink-3); border-color: var(--border); background: var(--surface-2);">
+                    Figure 4: Direct disk write streams and multi-framework export suite (HTML, JSX, Astro) with zero cloud sync.
+                  </figcaption>
+                </figure>
               </div>
 
               <!-- CTA within editorial — inline, not a full banner -->

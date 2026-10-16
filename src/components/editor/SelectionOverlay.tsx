@@ -752,7 +752,7 @@ export default function SelectionOverlay({
             boxShadow: isAbsolute ? "0 0 10px rgba(99, 102, 241, 0.35)" : undefined,
             pointerEvents: "none",
             boxSizing: "border-box",
-            zIndex: 15,
+            zIndex: 25,
             transform: "translateZ(0)",
             willChange: "transform",
           }}
@@ -766,7 +766,7 @@ export default function SelectionOverlay({
                 top: selectedRect.top < 100 ? selectedRect.height + 6 : -34,
                 left: -2,
                 pointerEvents: "auto",
-                zIndex: 20,
+                zIndex: 35,
               }}
               className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-slate-900/95 dark:bg-[#18181b]/95 backdrop-blur-md text-white border border-slate-700/80 dark:border-[#333]/90 shadow-xl select-none"
             >
@@ -926,6 +926,7 @@ export default function SelectionOverlay({
               {/* Visual Resize Mode Toggle Button */}
               <button
                 type="button"
+                data-testid="resize-mode-toggle"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsResizeMode((prev) => {
@@ -1025,6 +1026,7 @@ export default function SelectionOverlay({
           {isResizeMode && !dropTargetInfo && RESIZE_HANDLES.map((h) => (
             <div
               key={h.id}
+              data-testid={`resize-handle-${h.id}`}
               onPointerDown={(e) => handleStartResize(h.id, e)}
               style={{
                 position: "absolute",
@@ -1036,7 +1038,7 @@ export default function SelectionOverlay({
                 cursor: h.cursor,
                 pointerEvents: "auto",
                 boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
-                zIndex: 21,
+                zIndex: 36,
                 ...h.style,
               }}
               title={`Resize (${h.id.toUpperCase()})`}

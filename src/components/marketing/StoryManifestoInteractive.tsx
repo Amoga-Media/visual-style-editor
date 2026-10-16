@@ -31,47 +31,49 @@ const MILESTONES: Milestone[] = [
   {
     id: 'broken-loop',
     year: '2021',
-    title: 'The Broken Loop',
-    subtitle: 'DevTools ephemeral wipes & proprietary cloud lock-in',
+    title: 'The SaaS Trap & Broken Loop',
+    subtitle: 'Developers held hostage by monthly subscription taxes & lost DevTools edits',
     badgeColor: 'violet',
     icon: <Clock className="w-5 h-5 text-purple-400" />,
     narrative:
-      'We spent years building production web apps with Tailwind. Every day was an exercise in frustration: you would tune styles for 20 minutes in Chrome DevTools, accidentally trigger an automatic page reload, and lose all your work. Or you would import markup into proprietary cloud visual builders, only to watch them strip comments, mangle indentation, and hostage your code behind recurring monthly subscriptions.',
-    takeaway: 'Why does editing a local HTML file require a remote server at all?',
-    codeSnippet: `// 2021 DevTools Tragedy:
-// Tweak 40 CSS classes...
+      'We watched the software industry turn against developers. Silicon Valley took basic visual styling and wrapped it in predatory $39–$99/month subscription traps. If you didn’t pay, you couldn’t export clean code. And if you used Chrome DevTools, one accidental reload wiped out 30 minutes of careful spacing and color adjustments. Developers were treated like cash cows trapped in closed SaaS silos. We refused to accept this as the way frontend development should be.',
+    takeaway: 'Why should you pay a monthly rent to edit a file that already lives on your own hard drive?',
+    codeSnippet: `// 2021: The SaaS Extortion Era
+// You tune 40 CSS classes in DevTools...
 window.location.reload(); 
-// -> ALL EDITS LOST TO THE VOID.`,
+// -> ALL EDITS ERASED TO THE VOID.
+// Or pay $49/mo to export scrambled, locked HTML.`,
   },
   {
     id: 'parse5-epiphany',
     year: '2023',
-    title: 'The Parse5 Epiphany',
-    subtitle: 'Byte-offset location indexing for surgical AST edits',
+    title: 'The Surgical Engineering Breakthrough',
+    subtitle: 'Byte-offset location indexing with Parse5 guarantees zero broken code',
     badgeColor: 'cyan',
     icon: <Cpu className="w-5 h-5 text-sky-400" />,
     narrative:
-      'The turning point came when we discovered Parse5\'s source-code location tracking. Parse5 doesn\'t merely construct an abstract tree — it documents the exact start and end character offsets of every attribute and tag. Instead of serializing the entire DOM document, we could slice the original HTML string at exact coordinates, substitute the modified class, and rejoin the parts.',
-    takeaway: 'Adjacent template logic, PHP tags, and comments remain 100% untouched.',
+      'Every existing site builder had a dirty secret: they parsed your DOM and serialized it back out, destroying your PHP tags, stripping your developer comments, and turning your clean git history into unreadable chaos. We spent months hunting for a mathematical guarantee. We cracked it using Parse5 source-code location tracking—pinpointing the exact byte start/end offsets of only the changed class attribute and splicing it surgically. Not a single adjacent character is ever disturbed.',
+    takeaway: 'Your comments, Blade tags, and indentation stay 100% sacred and untouched.',
     codeSnippet: `const ast = parse5.parse(html, { sourceCodeLocationInfo: true });
 const loc = node.sourceCodeLocation.attrs.class;
-// Slice at exact byte coordinates:
+// Surgical byte splice: Only the class changes. 
+// Comments, Blade & PHP tags stay 100% untouched:
 const clean = html.slice(0, loc.startOffset) + newClass + html.slice(loc.endOffset);`,
   },
   {
     id: 'local-first',
     year: 'Today',
-    title: 'The Local-First Revolution',
-    subtitle: 'Direct File System Access API with 0 server dependencies',
+    title: 'The Great Developer Liberation',
+    subtitle: 'Direct File System Access API: Free forever, 0ms latency, zero cloud tracking',
     badgeColor: 'lime',
     icon: <Zap className="w-5 h-5 text-emerald-400" />,
     narrative:
-      'The final piece arrived with the browser\'s File System Access API. With one click, users grant permission to edit their actual local project folder. Visual Style Editor writes straight to disk via native writable streams in <2ms. No backend. No logins. No telemetry. Free, open source, and sovereign.',
-    takeaway: 'Your code lives on your disk. Where it belongs.',
+      'We did something almost unheard of in modern tech: we built an enterprise-grade visual studio, paired it with the native W3C File System Access API, and gave it to every developer on earth for free under MIT. No recurring subscriptions, no forced user accounts, no telemetry snooping on your client code. It saves directly to your local files in <2ms with 0ms network latency. We gave developers back their dignity, speed, and absolute ownership.',
+    takeaway: 'We did the heavy engineering so you never have to pay a subscription tax again.',
     codeSnippet: `const writable = await fileHandle.createWritable();
 await writable.write(surgicallySplicedHtml);
 await writable.close();
-// Stream commits directly to your local Git branch in 1.4ms.`,
+// Direct disk save in <2ms. 100% local, air-gapped, zero cloud dependencies.`,
   },
 ];
 
@@ -125,10 +127,10 @@ export default function StoryManifestoInteractive() {
             Interactive Code Comparison Slider
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-ink-1">
-            Stripped Cloud Builders vs. Surgically Preserved VSE Markup
+            SaaS Subscription Builders vs. Visual Style Editor
           </h2>
           <p className="text-sm text-zinc-400">
-            Drag the center divider to inspect how Visual Style Editor protects your real codebase.
+            Drag the divider to see how closed cloud builders destroy your files—and how our open-source studio keeps every comment, tag, and line 100% sacred.
           </p>
         </div>
 
@@ -152,7 +154,7 @@ export default function StoryManifestoInteractive() {
               <div className="flex items-center justify-between pb-3 border-b border-emerald-500/20 text-[11px]">
                 <div className="flex items-center gap-2 text-emerald-400 font-bold">
                   <ShieldCheck className="w-4 h-4" />
-                  <span>VSE SURGICAL AST OUTPUT (LOCAL SOVEREIGNTY)</span>
+                  <span>OUR GIFT TO DEVELOPERS: 100% PRESERVED MARKUP</span>
                 </div>
                 <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
                   100% Comments & Blade Intact
@@ -174,7 +176,7 @@ export default function StoryManifestoInteractive() {
             </div>
             <div className="text-[10px] text-emerald-400/80 flex items-center justify-between">
               <span>✓ Byte offset [142, 198] updated</span>
-              <span>✓ Zero server telemetry</span>
+              <span>✓ Zero server uploads</span>
             </div>
           </div>
 
@@ -190,7 +192,7 @@ export default function StoryManifestoInteractive() {
               <div className="flex items-center justify-between pb-3 border-b border-red-500/20 text-[11px]">
                 <div className="flex items-center gap-2 text-red-400 font-bold">
                   <ShieldAlert className="w-4 h-4" />
-                  <span>PROPRIETARY CLOUD BUILDER EXPORT</span>
+                  <span>WHAT CLOSED SAAS BUILDERS DO TO YOUR CODE</span>
                 </div>
                 <span className="text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/30">
                   Comments & Logic Stripped
@@ -211,7 +213,7 @@ export default function StoryManifestoInteractive() {
             </div>
             <div className="text-[10px] text-red-400/80 flex items-center justify-between">
               <span>✕ Mangled CSS selectors</span>
-              <span>✕ Locked in proprietary cloud</span>
+              <span>✕ Locked behind $39/mo paywall</span>
             </div>
           </div>
 
@@ -410,19 +412,19 @@ export default function StoryManifestoInteractive() {
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-ink-1 mb-2">Cloud Builder Paradigm</h3>
+              <h3 className="text-xl font-bold text-ink-1 mb-2">The SaaS Subscription Trap</h3>
               <p className="text-sm leading-relaxed" style={{ color: 'var(--ink-2)' }}>
-                Your templates reside in remote database silos. Every adjustment is uploaded, processed, and tracked by third-party telemetry. You pay monthly rents to access your own work.
+                You are treated as perpetual monthly revenue. Your templates reside in remote database silos. Every adjustment is tracked by telemetry, and you pay recurring rents just to access your own work.
               </p>
             </div>
 
             <ul className="space-y-3 pt-2 text-xs font-mono">
               {[
-                'Monthly recurring subscription paywalls',
-                'Proprietary CSS classes & lock-in exports',
-                'Strips developer comments & template directives',
-                'Files hosted on external cloud databases',
-                'Requires constant high-speed internet',
+                'Expensive monthly subscription paywalls ($39–$99/month)',
+                'Proprietary CSS classes & locked export formats',
+                'Strips developer comments, PHP & framework directives',
+                'Uploads your proprietary client code to third-party databases',
+                'Crashes or locks you out when you go offline',
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2.5 text-red-700 dark:text-red-400 font-medium">
                   <X className="w-4 h-4 shrink-0 text-red-500" />
@@ -445,24 +447,24 @@ export default function StoryManifestoInteractive() {
                 <Unlock className="w-5 h-5" />
               </div>
               <span className="neon-callout-tag lime text-xs font-bold">
-                Local Sovereignty
+                Developer Liberation
               </span>
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-ink-1 mb-2">Visual Style Editor</h3>
+              <h3 className="text-xl font-bold text-ink-1 mb-2">Visual Style Editor (Our Gift)</h3>
               <p className="text-sm leading-relaxed" style={{ color: 'var(--ink-2)' }}>
-                Runs 100% inside your browser RAM. Edits stream directly into your local Git working tree with zero server hops. MIT licensed, permanently free, and private.
+                A permanent gift to the developer community. Runs 100% inside your browser RAM. Edits stream directly into your local Git working tree with zero server hops. MIT licensed, permanently free, and private.
               </p>
             </div>
 
             <ul className="space-y-3 pt-2 text-xs font-mono">
               {[
-                'MIT Licensed — genuinely free forever',
-                'Idiomatic Tailwind CSS v3 & v4 tokens',
-                'Preserves comments, DOCTYPE, and Blade tags bit-for-bit',
-                'Writes directly to your local Git disk in <2ms',
-                'Air-gapped by design: works 100% offline',
+                '100% Free & MIT Licensed — zero monthly subscriptions forever',
+                'Clean, idiomatic Tailwind CSS v3 & v4 utility classes',
+                'Preserves comments, DOCTYPE, and server templates bit-for-bit',
+                'Writes directly to your local project disk in <2ms',
+                'Air-gapped by design: works 100% offline with zero cloud tracking',
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2.5 text-emerald-700 dark:text-emerald-400 font-semibold">
                   <Check className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />

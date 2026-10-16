@@ -1,11 +1,41 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import EditorStudio from "@/components/editor/EditorStudio";
+
+const editorAppSchema = {
+  "@type": "WebApplication",
+  "@id": "https://visualstyleeditor.com/editor#webapp",
+  "name": "Visual Style Editor Studio Workspace",
+  "url": "https://visualstyleeditor.com/editor",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires Chromium-based browser for direct disk sync (Chrome, Edge, Brave, Arc) or modern browser for manual export",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Direct local disk save via File System Access API",
+    "Surgical character-level Parse5 AST splicing",
+    "Tailwind CSS v3 and v4 design token mapping",
+    "OKLCH color lab with automated WCAG contrast validation",
+    "Real-time responsive viewport switcher (sm, md, lg, xl)",
+    "Non-destructive HTML comment and script preservation"
+  ]
+};
+
+const breadcrumbs = [
+  { name: "Home", item: "https://visualstyleeditor.com/" },
+  { name: "Studio Workspace", item: "https://visualstyleeditor.com/editor" }
+];
 ---
 
 <BaseLayout
-  title="Studio Workspace — Visual Style Editor"
-  description="100% in-browser, no login. Drop your HTML file and edit typography, layout, colors, and responsive styles visually. Export clean Tailwind code."
+  title="Studio Workspace — In-Browser Tailwind CSS & HTML Editor"
+  description="100% in-browser visual HTML and Tailwind CSS studio. Direct disk save via File System Access API, AST splicing, OKLCH colors, and zero cloud backend."
+  breadcrumbs={breadcrumbs}
+  customEntities={[editorAppSchema]}
 >
   <EditorStudio client:only="react" />
 </BaseLayout>

@@ -32,28 +32,28 @@ interface UseCase {
 const USE_CASES: UseCase[] = [
   {
     id: 'landing',
-    tabLabel: 'Landing Page Tuning',
-    badge: '0s Build Step',
+    tabLabel: 'Fix AI Code (Claude / Cursor)',
+    badge: '0 Prompt Cycles',
     badgeColor: '#a855f7',
-    title: 'Instant Landing Page Tuning Without Rebuilding',
+    title: 'Stop Prompting for 4px of Padding',
     description:
-      'Open client HTML in seconds. Tweak padding, typography scales, letter spacing, and elevation shadows live on the canvas. No Vite bundle restarts, no Webpack watching, no DevTools refresh loss.',
+      'Drop HTML output from Claude, Cursor, v0, or Bolt into the editor. Adjust spacing, typography, and responsive alignment visually in 2 seconds instead of writing 10 prompts back and forth to an AI.',
     icon: <SlidersHorizontal className="w-4 h-4" />,
-    tags: ['Spacing Scale', 'Fluid Typography', 'Drop Shadows', 'Direct Disk Save'],
+    tags: ['AI Prompt Relief', 'Visual Spacing', 'No Token Waste', 'Direct Disk Save'],
     interactiveDemo: {
       type: 'landing',
-      sampleCode: '<section class="p-8 md:p-12 bg-zinc-900 rounded-3xl shadow-2xl">\n  <h1 class="text-3xl font-extrabold tracking-tight text-white">\n    Ship faster with VSE\n  </h1>\n</section>',
+      sampleCode: '<section class="p-8 md:p-12 bg-zinc-900 rounded-3xl shadow-2xl">\n  <h1 class="text-3xl font-extrabold tracking-tight text-white">\n    Zero Prompt Fatigue\n  </h1>\n</section>',
       classResult: 'p-8 md:p-12 rounded-3xl shadow-2xl tracking-tight',
     },
   },
   {
     id: 'tokens',
-    tabLabel: 'Token Sync',
-    badge: 'Tailwind v3 & v4',
+    tabLabel: 'Tailwind v3 & v4 Colors',
+    badge: 'Native @theme',
     badgeColor: '#38bdf8',
-    title: 'Design System Token Sync & @theme Bridge',
+    title: 'Live Color & Palette Tuning Without Server Restarts',
     description:
-      'Map custom corporate palettes, OKLCH scales, and radius variables directly to Tailwind classes or v4 @theme declarations. When you pick a color or radius, the editor resolves it into your project\'s established token names.',
+      'Visual OKLCH color pickers and automatic Tailwind token mapping. Tweak shades, test dark mode, and verify WCAG contrast ratios in real time with 0ms server latency.',
     icon: <Palette className="w-4 h-4" />,
     tags: ['Tailwind v4 @theme', 'OKLCH Spectrum', 'Custom Spacing', 'Semantic Tokens'],
     interactiveDemo: {
@@ -64,12 +64,12 @@ const USE_CASES: UseCase[] = [
   },
   {
     id: 'handoff',
-    tabLabel: 'Client Handoff',
-    badge: 'Real-time Review',
+    tabLabel: 'Live Client Reviews',
+    badge: 'Live Feedback',
     badgeColor: '#4ade80',
-    title: 'Client Screen-Share & Live Polish Sessions',
+    title: 'Make Client Tweaks Live on Screen-Share',
     description:
-      'No more tedious "make the logo 2px bigger" review tickets. Share your screen on Zoom or Google Meet, adjust spacing and colors with live visual handles, and hit Save to write straight into your local Git repo.',
+      'No more tedious "make the button 4px bigger" review tickets. Share your screen on Zoom or Google Meet, adjust spacing and colors with live visual handles, and hit Save to write straight into your local Git repo.',
     icon: <Users2 className="w-4 h-4" />,
     tags: ['Zero Back-and-Forth', 'Live Approvals', 'Direct Git Write', 'Instant Feedback'],
     interactiveDemo: {
@@ -80,14 +80,14 @@ const USE_CASES: UseCase[] = [
   },
   {
     id: 'offline',
-    tabLabel: 'Offline Capable',
-    badge: '100% Air-Gapped',
+    tabLabel: 'Offline & Air-Gapped',
+    badge: '100% Private',
     badgeColor: '#fbbf24',
-    title: 'Offline Emergency Tweaks with Zero Dependencies',
+    title: 'Work Anywhere with Zero Cloud Dependency',
     description:
-      'Working on a flight, at a remote retreat, or during an ISP outage? Visual Style Editor is 100% client-side with zero cloud endpoints, zero database locks, and zero external CDNs needed. It runs completely offline.',
+      'Working on a flight, at a remote retreat, or on an air-gapped corporate intranet? Visual Style Editor is 100% client-side with zero cloud endpoints, zero database locks, and zero external tracking.',
     icon: <WifiOff className="w-4 h-4" />,
-    tags: ['Air-Gapped Privacy', 'No Cloud Lock-in', 'Local Parse5 Engine', 'Offline PWA'],
+    tags: ['100% Offline', 'Air-Gapped Privacy', 'Zero Cloud Lock-in', 'Local Parse5 Engine'],
     interactiveDemo: {
       type: 'offline',
       sampleCode: '// AST parse & character-offset splice in memory\nconst ast = parse5.parse(rawLocalHtml);\nconst patched = spliceByteRange(ast, startOffset, endOffset, newTokens);\nawait localFileHandle.write(patched);',
@@ -168,15 +168,15 @@ export default function PossibilitiesShowcase() {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider border select-none bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/30"
           >
             <Sparkles className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400 animate-spin" style={{ animationDuration: '6s' }} />
-            Unlimited Creative Workflows
+            Solves Real Developer Pain
           </div>
 
           <h2 className="text-display text-3xl sm:text-4xl md:text-5xl font-black tracking-tight" style={{ color: 'var(--ink-1)' }}>
-            What you can build in minutes
+            What you can style & fix in seconds
           </h2>
 
           <p className="text-body text-base sm:text-lg max-w-2xl mx-auto" style={{ color: 'var(--ink-2)' }}>
-            From split-second client landing page tweaks to enterprise token synchronization — see how creators supercharge their design loops.
+            From fixing AI-generated layouts to live client review sessions — see how Visual Style Editor eliminates hours of tedious back-and-forth.
           </p>
         </div>
 

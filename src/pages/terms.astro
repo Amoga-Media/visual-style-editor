@@ -6,53 +6,185 @@ import CtaBanner from "@/components/marketing/CtaBanner.astro";
 
 const terms = [
   {
-    id: "acceptance",
+    id: "acceptance-of-terms",
     num: "01",
+    tag: "Binding Agreement",
     title: "Acceptance of Terms",
-    content: "By accessing, loading, or using Visual Style Editor (the 'Application'), you agree to be bound by these Terms of Service ('Terms'). Visual Style Editor is an open-source, client-side web application distributed under the terms of the MIT License. If you do not agree to these terms, do not use the application."
+    paragraphs: [
+      "By accessing, browsing, loading, or using Visual Style Editor (the 'Application', 'Service', or 'Platform'), accessible via visualstyleeditor.com and associated domains, you expressly acknowledge that you have read, understood, and agree to be bound by these Terms of Service ('Terms'), our Privacy Policy, and all applicable laws and regulations.",
+      "If you do not agree with any of these terms, you are prohibited from accessing or using this Application. Your continued use of the Application signifies your irrevocable acceptance of these Terms. If you are entering into these Terms on behalf of a company, organization, or other legal entity, you represent and warrant that you possess the legal authority to bind such entity to these Terms."
+    ],
+    callout: {
+      type: "neutral",
+      badge: "Core Requirement",
+      title: "Legally Binding Contract",
+      text: "These Terms constitute a legally binding agreement between you and Visual Style Editor / Amoga Media governing your access to and use of our web application."
+    }
   },
   {
-    id: "ip-ownership",
+    id: "user-accounts-responsibilities",
     num: "02",
-    title: "100% User Code & IP Ownership",
-    content: "You retain exclusive, absolute intellectual property ownership of all files, HTML documents, Tailwind CSS configurations, styles, graphics, copy, and code that you create, import, edit, or export using Visual Style Editor. We assert zero claim, license, or copyright over your work. What you build is entirely yours, whether for personal, educational, or commercial production."
+    tag: "Account Governance",
+    title: "User Accounts, Sessions & Security Responsibilities",
+    paragraphs: [
+      "While core features of Visual Style Editor can be used without an account, certain capabilities, saved profiles, cloud integrations, or future subscription features may require the creation of an account or session authentication:",
+      "• Credential Safeguarding: If you create an account or generate session credentials, you are strictly responsible for maintaining the confidentiality and security of your login credentials, API keys, passwords, and two-factor authentication tokens.",
+      "• Responsibility for Activities: You agree that you are solely responsible for all activities, code modifications, file saves, and actions that occur under your account, workstation session, or device authentication token.",
+      "• Immediate Breach Notification: You must notify Visual Style Editor immediately via support channels if you discover or suspect any unauthorized access, breach of security, or credential compromise.",
+      "• Shared Workstation Precaution: If accessing the Application on a shared, public, or enterprise computer, you are solely responsible for clearing browser local storage, session state, and cached tokens upon completing your work."
+    ]
   },
   {
-    id: "local-saving",
+    id: "acceptable-use-policy",
     num: "03",
-    title: "Local File System & Data Integrity",
-    content: "Visual Style Editor interacts directly with your local files using the browser's File System Access API. Although we employ surgical AST splicing and automatic debounced local crash-recovery snapshots, software bugs, browser memory exhaustion, or unexpected operating system interruptions can occur. We strongly recommend keeping your project repositories under Git version control or maintaining regular backups before performing batch edits."
+    tag: "Prohibited Conduct",
+    title: "Acceptable Use Policy & Platform Restrictions",
+    paragraphs: [
+      "To safeguard our infrastructure, developer community, and advertising partners, you agree to comply strictly with this Acceptable Use Policy. You expressly agree that you will NOT:",
+      "1. Prohibited Malicious Behavior: Use the Application to probe, scan, or test the vulnerability of any system, network, or server hosting the Application, or breach any security or authentication measures.",
+      "2. Automated Scraping & Bot Harvesting: Scrape, crawl, spider, systematically download, or harvest content, documentation, UI assets, or user information via automated scripts, bots, or web scrapers without our express prior written consent.",
+      "3. Reverse Engineering & Platform Exploitation: Decompile, reverse engineer, disassemble, or attempt to derive the proprietary underlying algorithms, design architectures, or non-open-source server software of the Application, except strictly as permitted by applicable open-source licenses.",
+      "4. Harmful Code & Malware Injection: Upload, inject, execute, or transmit viruses, trojan horses, worms, logic bombs, corrupted files, or any other malicious software designed to damage, compromise, or disrupt software, hardware, or networks.",
+      "5. Advertising & Infrastructure Interference: Interfere with or manipulate advertising elements (including fraudulent click generation on Google Ads, automated ad impressions, or ad injection attacks), or overload our hosting servers with denial-of-service (DDoS) requests.",
+      "6. Unlawful Activities: Use the Application for any fraudulent, defamatory, harassing, abusive, obscene, or otherwise unlawful purpose, or in violation of intellectual property laws or export control regulations."
+    ],
+    callout: {
+      type: "warning",
+      badge: "Zero Tolerance",
+      title: "Enforcement of Acceptable Use",
+      text: "Any violation of this Acceptable Use Policy will result in immediate termination of access, blocking of IP addresses, and, where appropriate, referral to law enforcement authorities."
+    }
   },
   {
-    id: "mit-license",
+    id: "intellectual-property",
     num: "04",
-    title: "MIT Open Source License",
-    content: "The Visual Style Editor application itself is licensed under the MIT License. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files, to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software."
+    tag: "IP Rights & Protection",
+    title: "Intellectual Property: Platform Rights vs. User Code Ownership",
+    paragraphs: [
+      "Visual Style Editor maintains a strict distinction between platform property and your creative developer deliverables:",
+      "A. Exclusive Property of Visual Style Editor & Amoga Media: All right, title, and interest in and to the Application — including but not limited to the source code, user interface designs, visual layouts, animations, branding, trade dress, logos, documentation, graphics, text, icons, audio, and proprietary algorithms — are the exclusive intellectual property of Visual Style Editor, Amoga Media, or its licensors. All rights not expressly granted are strictly reserved.",
+      "B. 100% User Code & Content Ownership: You retain exclusive, absolute, and unencumbered intellectual property ownership of all HTML files, Tailwind CSS stylesheets, copy, graphics, configurations, and source code that you create, import, edit, or export using Visual Style Editor. We claim zero copyright, license, royalty, or ownership over your work.",
+      "C. Open Source Modules: Open-source modules of the client software are distributed under the terms of the MIT License, allowing freedom of inspection and local modification in compliance with the MIT License notice requirements."
+    ],
+    callout: {
+      type: "success",
+      badge: "Guaranteed Ownership",
+      title: "Your Work Belongs Entirely to You",
+      text: "Whether you build client websites, proprietary SaaS applications, or open-source templates in Visual Style Editor, your code is 100% yours. We do not place restrictive licensing or commercial claims on your output."
+    }
   },
   {
-    id: "disclaimer",
+    id: "third-party-services-ads",
     num: "05",
-    title: "Disclaimer of Warranties",
-    content: "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+    tag: "Google Ads & Third Parties",
+    title: "Third-Party Services, Google Ads & External Links",
+    paragraphs: [
+      "The Application incorporates third-party advertising, analytics tools, and external platform links:",
+      "• Google Ads Advertising: We display third-party advertisements served by Google Ads. Third-party vendors, including Google, use cookies to serve ads based on your prior visits to our site or other websites on the Internet. Please consult our Privacy Policy for details on advertising cookies and opt-out mechanisms.",
+      "• Analytics Tools: We utilize PostHog analytics on our marketing pages to monitor aggregate platform usage and diagnose interface errors.",
+      "• External Links & Platforms: The Application contains links to third-party services (such as GitHub for open-source repositories and Ko-fi for voluntary community contributions). We do not control, endorse, or assume responsibility for the content, privacy policies, or terms of any third-party websites or services.",
+      "• Dealings with Advertisers: Any correspondence, business dealings, or participation in promotions of advertisers found on or through the Application are solely between you and the respective advertiser."
+    ]
   },
   {
-    id: "browser-support",
+    id: "as-is-disclaimer",
     num: "06",
-    title: "Browser Compatibility & Web Standards",
-    content: "Certain capabilities — including direct in-place file saves and directory tree synchronization — depend on modern Web APIs (specifically the Chromium File System Access API) which are supported primarily in Chromium-based browsers (Google Chrome, Microsoft Edge, Brave, Opera, Arc). On non-supporting browsers such as Firefox and Safari, users can use the one-click HTML download mechanism to save their work without limitations."
+    tag: "Warranty Exclusion",
+    title: "Limitation of Liability & Disclaimers ('As-Is' Clause)",
+    paragraphs: [
+      "PLEASE READ THIS SECTION CAREFULLY. IT LIMITS OUR LIABILITY TO THE MAXIMUM EXTENT PERMITTED UNDER APPLICABLE LAW:",
+      "1. 'As-Is' & 'As-Available' Disclaimer: THE APPLICATION, INCLUDING ALL TOOLS, AST PARSERS, EXPORT ENGINES, PREVIEWS, AND DOCUMENTATION, IS PROVIDED STRICTLY ON AN 'AS IS' AND 'AS AVAILABLE' BASIS. TO THE MAXIMUM EXTENT PERMITTED BY LAW, VISUAL STYLE EDITOR AND AMOGA MEDIA EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.",
+      "2. No Guarantee of Continuous Operation: WE DO NOT WARRANT OR GUARANTEE THAT THE APPLICATION WILL BE UNINTERRUPTED, TIMELY, ERROR-FREE, SECURE, ACCURATE, OR FREE FROM VIRUSES, SYSTEM INTERRUPTIONS, OR CODE DEFECTS, OR THAT ANY IDENTIFIED ERRORS WILL BE CORRECTED.",
+      "3. Local File System & Data Integrity Disclaimer: Visual Style Editor interacts directly with your browser memory and local files. While the application implements debounced crash-recovery buffers, browser memory limits, OS crashes, tab closures, or power losses may cause data disruption. You acknowledge that it is your sole responsibility to maintain version control (such as Git) and independent off-site backups of your files.",
+      "4. Limitation of Damages: IN NO EVENT SHALL VISUAL STYLE EDITOR, AMOGA MEDIA, ITS DIRECTORS, EMPLOYEES, PARTNERS, OR AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION LOSS OF PROFITS, DATA CORRUPTION, WORK STOPPAGE, SYSTEM MALFUNCTION, OR LOSS OF BUSINESS, ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF OR INABILITY TO USE THE APPLICATION."
+    ],
+    callout: {
+      type: "warning",
+      badge: "Crucial Notice",
+      title: "Data Backup Recommendation",
+      text: "Always maintain regular Git commits and backups of your project files. Visual Style Editor is an in-browser utility and does not replace dedicated source-control workflows."
+    }
   },
   {
-    id: "governing",
+    id: "indemnification",
     num: "07",
-    title: "Open Source Governance & Inquiries",
-    content: "These Terms are governed by the principles of the open-source software community. All feedback, bug reports, and community contributions are conducted openly via our public GitHub repository. This agreement was last updated in October 2026."
+    tag: "Legal Defense",
+    title: "Indemnification",
+    paragraphs: [
+      "You agree to defend, indemnify, and hold harmless Visual Style Editor, Amoga Media, its officers, directors, employees, contractors, agents, licensors, and suppliers from and against any and all claims, damages, liabilities, losses, judgments, costs, and expenses (including reasonable attorneys' fees and legal disbursements) arising out of or resulting from:",
+      "• Your access to or use of the Application;",
+      "• Any violation by you of these Terms or our Acceptable Use Policy;",
+      "• Any infringement or misappropriation by you (or through your account/session) of any third-party intellectual property, privacy, or proprietary rights;",
+      "• Any dispute between you and any third party or advertiser."
+    ]
+  },
+  {
+    id: "termination-of-access",
+    num: "08",
+    tag: "Access Enforcement",
+    title: "Termination & Suspension of Access",
+    paragraphs: [
+      "We reserve the right, in our sole discretion and without prior notice or liability, to immediately suspend, restrict, or terminate your access to the Application, your user account, or specific IP ranges for any reason, including without limitation:",
+      "• Any breach or violation of these Terms of Service or our Acceptable Use Policy;",
+      "• Fraudulent, abusive, or illegal behavior;",
+      "• Requests by law enforcement or government agencies;",
+      "• Technical, operational, or security problems affecting platform stability.",
+      "Upon termination, your right to use the Application will cease immediately. All provisions of these Terms that by their nature should survive termination shall survive, including without limitation ownership provisions, warranty disclaimers, indemnity, limitations of liability, and governing law."
+    ]
+  },
+  {
+    id: "governing-law",
+    num: "09",
+    tag: "Jurisdiction & Disputes",
+    title: "Governing Law & Dispute Resolution",
+    paragraphs: [
+      "These Terms of Service and any dispute, claim, or controversy arising out of or relating to these Terms, our Privacy Policy, or your use of the Application shall be governed by, construed, and enforced in accordance with the laws of the jurisdiction of incorporation of Amoga Media, without regard to its conflict of law principles.",
+      "Any legal suit, action, or proceeding arising out of or related to these Terms or the Application shall be instituted exclusively in the competent courts located within the governing jurisdiction. You irrevocably consent to the personal jurisdiction and venue of such courts and waive any defense of inconvenient forum.",
+      "To the fullest extent permitted by applicable law, you agree that any dispute resolution proceedings will be conducted solely on an individual basis and not in a class, consolidated, or representative action."
+    ]
+  },
+  {
+    id: "modifications-severability",
+    num: "10",
+    tag: "General Provisions",
+    title: "Modifications to Terms, Severability & Contact",
+    paragraphs: [
+      "• Amendments & Updates: We reserve the right to revise or modify these Terms at any time. When modifications occur, we will update the 'Effective Date' at the top of this page. Your continued use of the Application following the posting of revised Terms constitutes your acceptance of the changes.",
+      "• Severability: If any provision of these Terms is determined by a court of competent jurisdiction to be invalid, illegal, or unenforceable, such provision shall be severed or limited to the minimum extent necessary, and the remaining provisions shall continue in full force and effect.",
+      "• Entire Agreement: These Terms, together with our Privacy Policy, constitute the complete and exclusive understanding between you and Visual Style Editor concerning your use of the Application.",
+      "• Contact & Legal Notices: For questions regarding these Terms or legal matters, please reach out to our legal department:"
+    ],
+    contactInfo: {
+      email: "legal@visualstyleeditor.com",
+      company: "Amoga Media",
+      supportUrl: "https://amogamedia.com",
+      generalEmail: "contact@amogamedia.com"
+    }
   }
+];
+
+const termsSchema = {
+  "@type": "WebPage",
+  "@id": "https://visualstyleeditor.com/terms#webpage",
+  "name": "Terms of Service — Visual Style Editor",
+  "description": "Terms of Service for Visual Style Editor. Legal guidelines covering acceptable use, MIT open-source license, code ownership, warranty disclaimers, and limitation of liability.",
+  "inLanguage": "en-US",
+  "publisher": {
+    "@id": "https://visualstyleeditor.com/#organization"
+  }
+};
+
+const breadcrumbs = [
+  { name: "Home", item: "https://visualstyleeditor.com/" },
+  { name: "Terms of Service", item: "https://visualstyleeditor.com/terms" }
 ];
 ---
 
 <BaseLayout
   title="Terms of Service — Visual Style Editor"
-  description="Read the open-source terms of service governing the use of Visual Style Editor under the MIT License."
+  description="Terms of Service for Visual Style Editor. Legal guidelines covering acceptable use, code ownership, Google Ads, 'as-is' warranty disclaimers, and limitation of liability."
+  breadcrumbs={breadcrumbs}
+  customEntities={[termsSchema]}
 >
   <div class="flex flex-col min-h-[100dvh]">
     <Navbar activePage="terms" />
@@ -69,34 +201,35 @@ const terms = [
 
         <div class="max-w-3xl mx-auto text-center space-y-4 relative z-10">
           <div
-            class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none mx-auto shadow-sm backdrop-blur-xl bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
+            class="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider border select-none mx-auto shadow-sm backdrop-blur-xl bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
           >
-            <span class="w-2 h-2 rounded-full bg-purple-600 dark:bg-purple-400 animate-pulse"></span>
-            <span>Open Source · MIT License</span>
+            <span class="w-2 h-2 rounded-full bg-purple-600 dark:bg-purple-400 animate-pulse shrink-0"></span>
+            <span class="truncate">Terms of Service · User Rights & Platform Ground Rules</span>
           </div>
-          <h1 class="text-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08]">
+          <h1 class="text-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.12] sm:leading-[1.08]">
             Terms of Service
           </h1>
-          <p class="text-body text-base sm:text-lg mx-auto text-balance" style="color: var(--ink-2);">
-            Simple, honest terms designed to protect developer freedom, guarantee complete code ownership, and ensure a collaborative web.
+          <p class="text-body text-sm sm:text-base md:text-lg mx-auto text-balance px-1 sm:px-0" style="color: var(--ink-2);">
+            Clear, balanced terms that protect developer freedom, guarantee 100% intellectual property ownership of your code, and establish robust legal protections for our web application.
           </p>
           <div class="text-mono font-medium" style="color: var(--ink-3); font-size: 0.75rem; padding-top: 0.5rem;">
-            Effective Date: October 2026 • Free Forever
+            Effective Date: October 2026 • Published by Amoga Media • Free Forever
           </div>
         </div>
       </section>
 
       <!-- Terms Content -->
       <section class="section" style="padding-top: 0; padding-bottom: 5rem;">
-        <div class="max-w-3xl mx-auto">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6">
+
           <!-- Table of contents pill list -->
           <div class="card p-4 sm:p-5 mb-8">
-            <div class="text-label mb-3" style="color: var(--ink-3);">Document Sections</div>
+            <div class="text-label mb-3" style="color: var(--ink-3);">Table of Contents</div>
             <div class="flex flex-wrap gap-2 text-xs">
               {terms.map((t) => (
                 <a
                   href={`#${t.id}`}
-                  class="px-2.5 py-1 rounded-md transition-colors"
+                  class="px-2.5 py-1 rounded-md transition-colors hover:border-purple-500/60"
                   style="background: var(--surface-2); border: 1px solid var(--border); color: var(--ink-2);"
                 >
                   <span class="font-mono text-[10px]" style="color: var(--ink-3);">{t.num}</span> {t.title}
@@ -106,21 +239,78 @@ const terms = [
           </div>
 
           <!-- Section Cards -->
-          <div class="space-y-6">
+          <div class="space-y-8">
             {terms.map((sec) => (
-              <article id={sec.id} class="card p-6 sm:p-8 scroll-mt-24">
-                <div class="flex items-baseline gap-3 mb-3">
-                  <span class="text-mono text-xs font-bold" style="color: var(--ink-3);">{sec.num}</span>
-                  <h2 class="text-title text-base sm:text-lg">
-                    {sec.title}
-                  </h2>
+              <article id={sec.id} class="card p-6 sm:p-8 scroll-mt-24 space-y-5">
+                <!-- Header with section number and badge -->
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style="border-color: var(--border);">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-mono text-xs font-bold px-2 py-0.5 rounded bg-black/5 dark:bg-white/10" style="color: var(--ink-1);">
+                      {sec.num}
+                    </span>
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-purple-600 dark:text-purple-400 font-semibold">
+                      {sec.tag}
+                    </span>
+                  </div>
                 </div>
-                <p class="text-body text-sm sm:text-base leading-relaxed" style="color: var(--ink-2);">
-                  {sec.content}
-                </p>
+
+                <h2 class="text-title text-lg sm:text-xl font-bold tracking-tight" style="color: var(--ink-1);">
+                  {sec.title}
+                </h2>
+
+                <!-- Paragraphs -->
+                <div class="space-y-3.5 text-sm sm:text-base leading-relaxed" style="color: var(--ink-2);">
+                  {sec.paragraphs.map((p) => (
+                    <p>{p}</p>
+                  ))}
+                </div>
+
+                <!-- Highlight Callout Box -->
+                {sec.callout && (
+                  <div
+                    class={`p-4 sm:p-5 rounded-xl border space-y-1.5 ${
+                      sec.callout.type === 'success'
+                        ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-900 dark:text-emerald-200'
+                        : sec.callout.type === 'warning'
+                        ? 'bg-amber-500/5 border-amber-500/20 text-amber-900 dark:text-amber-200'
+                        : 'bg-purple-500/5 border-purple-500/20 text-purple-900 dark:text-purple-200'
+                    }`}
+                  >
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-black/5 dark:bg-white/10">
+                        {sec.callout.badge}
+                      </span>
+                      <span class="text-xs sm:text-sm font-semibold">{sec.callout.title}</span>
+                    </div>
+                    <p class="text-xs sm:text-sm leading-relaxed opacity-90">
+                      {sec.callout.text}
+                    </p>
+                  </div>
+                )}
+
+                <!-- Contact Info block for Section 10 -->
+                {sec.contactInfo && (
+                  <div class="p-4 sm:p-5 rounded-xl border space-y-3" style="background: var(--surface-2); border-color: var(--border);">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                      <div>
+                        <div class="text-label" style="color: var(--ink-3);">Legal & Terms Inquiries</div>
+                        <a href={`mailto:${sec.contactInfo.email}`} class="font-mono text-purple-600 dark:text-purple-400 font-bold hover:underline">
+                          {sec.contactInfo.email}
+                        </a>
+                      </div>
+                      <div>
+                        <div class="text-label" style="color: var(--ink-3);">Publishing Organization</div>
+                        <a href={sec.contactInfo.supportUrl} target="_blank" rel="noopener noreferrer" class="font-semibold hover:underline" style="color: var(--ink-1);">
+                          {sec.contactInfo.company}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </article>
             ))}
           </div>
+
         </div>
       </section>
 

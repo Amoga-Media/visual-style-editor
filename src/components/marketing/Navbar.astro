@@ -8,27 +8,33 @@ interface Props {
 const { activePage = "" } = Astro.props;
 
 const navItems = [
-  { label: "Features", href: "/features" },
-  { label: "How it works", href: "/how-it-works" },
-  { label: "Templates", href: "/templates" },
-  { label: "Our story", href: "/our-story" },
+  { label: "Features", href: "/features", icon: "sparkles" },
+  { label: "How it works", href: "/how-it-works", icon: "workflow" },
+  { label: "Templates", href: "/templates", icon: "layout" },
+  { label: "Our story", href: "/our-story", icon: "book" },
+  { label: "Contact", href: "/contact", icon: "mail" },
+  { label: "Why we built this", href: "/why-we-do-what-we-do", icon: "heart" },
+  { label: "Support", href: "/support", icon: "help" },
 ];
 ---
 
-<header class="sticky top-0 z-50 w-full border-b backdrop-blur-xl transition-colors duration-200" style="background: color-mix(in srgb, var(--canvas) 85%, transparent); border-color: var(--border);">
+<header
+  class="sticky top-0 z-50 w-full border-b backdrop-blur-xl transition-colors duration-200"
+  style="background: color-mix(in srgb, var(--canvas) 85%, transparent); border-color: var(--border);"
+>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-    <!-- Brand -->
+    <!-- Brand Logo -->
     <a
       href="/"
-      class="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 rounded-xl pr-2"
+      class="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 rounded-xl pr-2 shrink-0 select-none"
       aria-label="Visual Style Editor — home"
     >
       <Logo size="md" showStatusPill={false} />
     </a>
 
-    <!-- Desktop Nav Links -->
-    <nav class="hidden md:flex items-center gap-1 sm:gap-1.5" role="navigation" aria-label="Main navigation">
-      {navItems.map((item) => {
+    <!-- Desktop Nav Links (Hidden on Mobile & Tablet, visible on lg: >= 1024px) -->
+    <nav class="hidden lg:flex items-center gap-1.5" role="navigation" aria-label="Main navigation">
+      {navItems.slice(0, 5).map((item) => {
         const slug = item.href.replace("/", "").replace(/-/g, " ");
         const isActive = activePage === slug || activePage === item.label.toLowerCase();
         return (
@@ -47,8 +53,8 @@ const navItems = [
       })}
     </nav>
 
-    <!-- Right: Theme toggle + CTA + Mobile hamburger -->
-    <div class="flex items-center gap-2.5">
+    <!-- Desktop Right Utilities: Theme toggle + CTA (Hidden on Mobile & Tablet) -->
+    <div class="hidden lg:flex items-center gap-2.5">
       <!-- Theme toggle -->
       <button
         id="theme-toggle"
@@ -67,10 +73,10 @@ const navItems = [
         </svg>
       </button>
 
-      <!-- CTA -->
+      <!-- Primary CTA -->
       <a
         href="/editor"
-        class="btn btn-primary text-xs px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition-all"
+        class="btn btn-primary text-xs px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 font-bold"
         id="nav-cta"
       >
         <span>Open editor</span>
@@ -78,105 +84,305 @@ const navItems = [
           <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
         </svg>
       </a>
+    </div>
 
-      <!-- Mobile hamburger -->
+    <!-- Mobile & Tablet Only Hamburger (ONLY Logo and Hamburger appear in navbar on mobile/tablet) -->
+    <div class="flex lg:hidden items-center">
       <button
         id="mobile-menu-toggle"
         type="button"
-        class="md:hidden w-9 h-9 rounded-xl flex items-center justify-center border transition-colors duration-150 cursor-pointer"
-        style="background: var(--surface-2); border-color: var(--border); color: var(--ink-2);"
+        class="w-11 h-11 rounded-2xl flex items-center justify-center border transition-all duration-200 cursor-pointer shadow-sm active:scale-95 hover:border-purple-500/40"
+        style="background: var(--surface-2); border-color: var(--border); color: var(--ink-1);"
         aria-label="Open navigation menu"
         aria-expanded="false"
-        aria-controls="mobile-drawer"
+        aria-controls="mobile-nav-panel"
       >
-        <svg id="ham-open" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg class="w-5 h-5 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-        </svg>
-        <svg id="ham-close" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
   </div>
-
-  <!-- Mobile Drawer -->
-  <div
-    id="mobile-drawer"
-    class="hidden md:hidden border-t px-4 py-3"
-    style="background: var(--surface-1); border-color: var(--border); box-shadow: var(--shadow-lg);"
-    role="menu"
-  >
-    <div class="flex flex-col gap-1">
-      {navItems.map((item) => {
-        const slug = item.href.replace("/", "").replace(/-/g, " ");
-        const isActive = activePage === slug || activePage === item.label.toLowerCase();
-        return (
-          <a
-            href={item.href}
-            role="menuitem"
-            class={`px-3.5 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-150 ${
-              isActive
-                ? "bg-purple-100 text-purple-900 dark:bg-purple-950/60 dark:text-purple-300 font-bold"
-                : "text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"
-            }`}
-          >
-            {item.label}
-          </a>
-        );
-      })}
-      <div class="pt-3 mt-1 border-t" style="border-color: var(--border);">
-        <a
-          href="/editor"
-          class="btn btn-primary w-full justify-center text-sm rounded-xl py-3"
-        >
-          Open editor
-        </a>
-      </div>
-    </div>
-  </div>
 </header>
 
+<!-- =========================================================================
+     FULL-SCREEN LEFT-TO-RIGHT SLIDE-OVER DRAWER (MOBILE & TABLET)
+     Opens smoothly from left to right covering the screen.
+     ========================================================================= -->
+<div
+  id="mobile-drawer-wrapper"
+  class="fixed inset-0 z-[100] pointer-events-none transition-all duration-300"
+  aria-hidden="true"
+>
+  <!-- Backdrop Overlay (Tap to close) -->
+  <div
+    id="mobile-backdrop"
+    class="fixed inset-0 bg-black/75 backdrop-blur-md opacity-0 transition-opacity duration-300 cursor-pointer pointer-events-none"
+  ></div>
+
+  <!-- Left-to-Right Slide Drawer Panel (covers the full screen on mobile and tablet) -->
+  <aside
+    id="mobile-nav-panel"
+    class="fixed inset-y-0 left-0 w-full h-[100dvh] flex flex-col z-10 transition-transform duration-300 ease-out -translate-x-full shadow-2xl overflow-hidden select-none"
+    style="background: color-mix(in srgb, var(--canvas) 98%, transparent); border-color: var(--border);"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Mobile and Tablet Navigation"
+  >
+    <div class="w-full max-w-2xl mx-auto flex flex-col h-full">
+      <!-- Drawer Top Header: Logo + Close Button -->
+      <div class="h-16 px-5 sm:px-8 border-b flex items-center justify-between shrink-0" style="border-color: var(--border);">
+        <a href="/" class="flex items-center gap-2.5 focus:outline-none" aria-label="Visual Style Editor">
+          <Logo size="md" showStatusPill={false} />
+        </a>
+
+        <button
+          id="mobile-menu-close"
+          type="button"
+          class="w-11 h-11 rounded-2xl flex items-center justify-center border transition-all duration-150 cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 active:scale-95"
+          style="background: var(--surface-2); border-color: var(--border); color: var(--ink-1);"
+          aria-label="Close navigation menu"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Scrollable Drawer Body -->
+      <div class="flex-1 overflow-y-auto px-5 sm:px-8 py-6 space-y-6 overscroll-contain">
+        <!-- Section: Navigation Links -->
+        <div class="space-y-1.5">
+          <div class="text-[10px] font-mono font-bold uppercase tracking-wider px-2 mb-2" style="color: var(--ink-3);">
+            Navigation
+          </div>
+          <nav class="flex flex-col gap-1.5" role="menu">
+            {navItems.map((item) => {
+              const slug = item.href.replace("/", "").replace(/-/g, " ");
+              const isActive = activePage === slug || activePage === item.label.toLowerCase();
+              return (
+                <a
+                  href={item.href}
+                  role="menuitem"
+                  class={`px-4 py-3.5 rounded-2xl text-base font-semibold transition-all duration-150 flex items-center justify-between group active:scale-[0.99] ${
+                    isActive
+                      ? "bg-purple-100 text-purple-900 dark:bg-purple-950/70 dark:text-purple-300 font-bold shadow-xs border border-purple-300 dark:border-purple-800"
+                      : "text-zinc-800 dark:text-zinc-200 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 border border-transparent"
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  <svg
+                    class={`w-4 h-4 transition-transform duration-150 group-hover:translate-x-1 ${isActive ? "text-purple-600 dark:text-purple-400" : "text-zinc-400"}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </a>
+              );
+            })}
+          </nav>
+        </div>
+
+        <!-- Section: Theme & Mode Controls (Menu Item on Mobile & Tablet) -->
+        <div class="p-4 rounded-2xl border space-y-3" style="background: var(--surface-1); border-color: var(--border);">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-zinc-900 dark:text-zinc-100">Interface Theme</span>
+            </div>
+            <span id="mobile-theme-label" class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+              Dark
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-black/5 dark:bg-black/30 border" style="border-color: var(--border);">
+            <button
+              type="button"
+              id="mobile-theme-light"
+              class="py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 7a5 5 0 110 10A5 5 0 0112 7z"/>
+              </svg>
+              <span>Light</span>
+            </button>
+            <button
+              type="button"
+              id="mobile-theme-dark"
+              class="py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+              </svg>
+              <span>Dark</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drawer Footer: Full-Width Primary CTA Button -->
+      <div class="p-5 sm:p-8 border-t shrink-0 space-y-3" style="background: color-mix(in srgb, var(--canvas) 98%, transparent); border-color: var(--border);">
+        <a
+          href="/editor"
+          class="w-full py-4 px-5 rounded-2xl font-bold text-sm text-white shadow-xl flex items-center justify-center gap-2.5 transition-transform active:scale-95"
+          style="background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);"
+        >
+          <span>Launch Visual Studio</span>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </a>
+
+        <div class="flex items-center justify-between text-[11px] font-mono px-1" style="color: var(--ink-3);">
+          <span>100% Free · MIT License</span>
+          <span>Local-First AST</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
 <script is:inline>
-  // Theme toggle
+  // =========================================================================
+  // THEME MANAGEMENT (DESKTOP + MOBILE DRAWER)
+  // =========================================================================
   var toggleBtn = document.getElementById('theme-toggle');
   var iconSun = document.getElementById('icon-sun');
   var iconMoon = document.getElementById('icon-moon');
+  var mobileThemeLabel = document.getElementById('mobile-theme-label');
+  var mobileThemeLight = document.getElementById('mobile-theme-light');
+  var mobileThemeDark = document.getElementById('mobile-theme-dark');
 
-  function syncIcons() {
+  function syncThemeState() {
     var isDark = document.documentElement.classList.contains('dark');
     if (iconSun) iconSun.classList.toggle('hidden', !isDark);
     if (iconMoon) iconMoon.classList.toggle('hidden', isDark);
+
+    if (mobileThemeLabel) {
+      mobileThemeLabel.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+    }
+
+    if (mobileThemeLight && mobileThemeDark) {
+      if (isDark) {
+        mobileThemeDark.className = 'py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-purple-600 text-white shadow-sm cursor-pointer';
+        mobileThemeLight.className = 'py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white';
+      } else {
+        mobileThemeLight.className = 'py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-white text-zinc-900 shadow-sm cursor-pointer';
+        mobileThemeDark.className = 'py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white';
+      }
+    }
   }
 
-  syncIcons();
+  function setTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('vse_theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('vse_theme', 'light');
+      localStorage.setItem('theme', 'light');
+    }
+    syncThemeState();
+  }
+
+  syncThemeState();
 
   if (toggleBtn) {
     toggleBtn.addEventListener('click', function() {
       var isDark = document.documentElement.classList.contains('dark');
-      if (isDark) {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-      } else {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-      }
-      syncIcons();
+      setTheme(isDark ? 'light' : 'dark');
     });
   }
 
-  // Mobile menu
-  var mobileToggle = document.getElementById('mobile-menu-toggle');
-  var drawer = document.getElementById('mobile-drawer');
-  var hamOpen = document.getElementById('ham-open');
-  var hamClose = document.getElementById('ham-close');
-
-  if (mobileToggle && drawer) {
-    mobileToggle.addEventListener('click', function() {
-      var isOpen = !drawer.classList.contains('hidden');
-      drawer.classList.toggle('hidden', isOpen);
-      hamOpen && hamOpen.classList.toggle('hidden', !isOpen);
-      hamClose && hamClose.classList.toggle('hidden', isOpen);
-      mobileToggle.setAttribute('aria-expanded', String(!isOpen));
+  if (mobileThemeLight) {
+    mobileThemeLight.addEventListener('click', function() {
+      setTheme('light');
     });
+  }
+
+  if (mobileThemeDark) {
+    mobileThemeDark.addEventListener('click', function() {
+      setTheme('dark');
+    });
+  }
+
+  // =========================================================================
+  // LEFT-TO-RIGHT SLIDE-OVER DRAWER INTERACTION
+  // =========================================================================
+  var mobileToggle = document.getElementById('mobile-menu-toggle');
+  var mobileClose = document.getElementById('mobile-menu-close');
+  var mobileWrapper = document.getElementById('mobile-drawer-wrapper');
+  var mobileBackdrop = document.getElementById('mobile-backdrop');
+  var mobilePanel = document.getElementById('mobile-nav-panel');
+
+  function openMobileNav() {
+    if (!mobileWrapper || !mobilePanel || !mobileBackdrop) return;
+    mobileWrapper.classList.remove('pointer-events-none');
+    mobileBackdrop.classList.remove('pointer-events-none', 'opacity-0');
+    mobileBackdrop.classList.add('opacity-100');
+
+    // Slide in from left to right
+    mobilePanel.classList.remove('-translate-x-full');
+    mobilePanel.classList.add('translate-x-0');
+
+    if (mobileToggle) {
+      mobileToggle.setAttribute('aria-expanded', 'true');
+    }
+    mobileWrapper.setAttribute('aria-hidden', 'false');
+
+    // Prevent background scrolling while open
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileNav() {
+    if (!mobileWrapper || !mobilePanel || !mobileBackdrop) return;
+    mobileBackdrop.classList.remove('opacity-100');
+    mobileBackdrop.classList.add('opacity-0', 'pointer-events-none');
+
+    // Slide out to left
+    mobilePanel.classList.remove('translate-x-0');
+    mobilePanel.classList.add('-translate-x-full');
+
+    setTimeout(function() {
+      mobileWrapper.classList.add('pointer-events-none');
+    }, 300);
+
+    if (mobileToggle) {
+      mobileToggle.setAttribute('aria-expanded', 'false');
+    }
+    mobileWrapper.setAttribute('aria-hidden', 'true');
+
+    // Restore body scrolling
+    document.body.style.overflow = '';
+  }
+
+  if (mobileToggle) {
+    mobileToggle.addEventListener('click', openMobileNav);
+  }
+
+  if (mobileClose) {
+    mobileClose.addEventListener('click', closeMobileNav);
+  }
+
+  if (mobileBackdrop) {
+    mobileBackdrop.addEventListener('click', closeMobileNav);
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && mobileWrapper && mobileWrapper.getAttribute('aria-hidden') === 'false') {
+      closeMobileNav();
+    }
+  });
+
+  // Close when clicking any nav link
+  if (mobilePanel) {
+    var links = mobilePanel.querySelectorAll('a');
+    for (var i = 0; i < links.length; i++) {
+      links[i].addEventListener('click', closeMobileNav);
+    }
   }
 </script>

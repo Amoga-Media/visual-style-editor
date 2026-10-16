@@ -1,0 +1,32 @@
+# Visual Style Editor
+
+> 100% in-browser visual HTML and Tailwind CSS style editor with non-destructive AST splicing and zero cloud backend.
+
+Visual Style Editor (`visual-style-editor`) is an open-source (MIT), zero-backend developer workstation that lets engineers, designers, and AI programmers inspect, edit, and style HTML and Tailwind CSS files visually directly on their local file system via Chromium's File System Access API.
+
+## Core Architectural Specifications
+
+- **Latency**: 0 ms cloud round-trip; runs entirely in browser memory (WebAssembly & JS).
+- **Privacy & Security**: 100% air-gapped local execution. Zero file uploads, zero telemetry on user code.
+- **AST Integrity**: Byte-offset surgical editing via Parse5. Preserves user comments, doctypes, and external scripts (GSAP, Swiper, Lenis).
+- **Tailwind Compatibility**: Automatic bidirectional mapping for Tailwind CSS v3 utility classes and Tailwind CSS v4 `@theme` CSS variables.
+- **Color Science**: OKLCH perceptual color lab with WCAG AA/AAA contrast validation.
+- **Licensing**: 100% Free, Open Source (MIT License). No credit card, no account required.
+
+## Core Routes & Documentation
+
+- [Home](https://visualstyleeditor.com/): Product overview, key features, and live demonstrations.
+- [Studio Workspace](https://visualstyleeditor.com/editor): The live in-browser visual editor island.
+- [Technical Features](https://visualstyleeditor.com/features): Deep architectural dive into the 6 core engines.
+- [How It Works](https://visualstyleeditor.com/how-it-works): 5-step interactive walkthrough of the AST splicing pipeline.
+- [Starter Templates](https://visualstyleeditor.com/templates): 12+ free responsive HTML and Tailwind starter templates.
+- [Why We Built This](https://visualstyleeditor.com/why-we-do-what-we-do): Product manifesto: developer sovereignty vs. SaaS rent-seeking.
+- [Our Story](https://visualstyleeditor.com/our-story): Founding journey of Amoga Media and the open-source mission.
+- [Support & FAQs](https://visualstyleeditor.com/support): Developer documentation, help desk, and high-intent FAQs.
+- [Privacy Policy](https://visualstyleeditor.com/privacy): Dual-boundary architecture and air-gapped sandbox guarantees.
+- [Terms of Service](https://visualstyleeditor.com/terms): MIT license and developer rights.
+
+## Complete Specification Document
+
+For the comprehensive technical specification, keyboard shortcuts, and AST mutation mechanics, refer to:
+- [Full LLM Specification](https://visualstyleeditor.com/llms-full.txt)

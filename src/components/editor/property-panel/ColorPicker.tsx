@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { parse as parseColor, converter, formatHex, formatRgb, formatHsl } from "culori";
+import { parse as parseColor, converter, formatHex, formatHex8, formatRgb, formatHsl } from "culori";
 import { Pipette, ChevronDown, Check, Ban, Sparkles, ArrowLeftRight, Trash2, Plus, Sliders } from "lucide-react";
 import { DEFAULT_COLORS } from "@/lib/tailwind/default-theme";
 
@@ -244,7 +244,11 @@ export default function ColorPicker({
       setAlphaInput(`${Math.round(nextAlpha * 100)}%`);
 
       if (format === "hex") {
-        setTextInput(formatHex(parsed) || colorToParse);
+        if (nextAlpha < 0.999) {
+          setTextInput(formatHex8(parsed) || colorToParse);
+        } else {
+          setTextInput(formatHex(parsed) || colorToParse);
+        }
       } else if (format === "rgb") {
         setTextInput(formatRgb(parsed) || colorToParse);
       } else {

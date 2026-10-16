@@ -78,12 +78,12 @@ export default function AsymmetricBentoGrid() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400">
-                      Core Architecture
+                      Zero Broken Code
                     </span>
                     <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
                   </div>
                   <h3 className="text-xl sm:text-2xl font-black text-ink-1">
-                    AST Surgical Splicer
+                    Surgical Precision (Never Breaks Your Code)
                   </h3>
                 </div>
               </div>
@@ -99,7 +99,7 @@ export default function AsymmetricBentoGrid() {
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                   }`}
                 >
-                  VSE Surgical (Byte Offset)
+                  Visual Style Editor (Safe)
                 </button>
                 <button
                   type="button"
@@ -110,13 +110,13 @@ export default function AsymmetricBentoGrid() {
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                   }`}
                 >
-                  Legacy DOM Serializer
+                  Other Builders (Destructive)
                 </button>
               </div>
             </div>
 
             <p className="text-sm leading-relaxed max-w-xl" style={{ color: 'var(--ink-2)' }}>
-              Traditional site builders parse the entire DOM and serialize it back, stripping comments, destroying PHP/Blade tags, and altering whitespace. Visual Style Editor indexes exact byte start/end positions with Parse5 and slices only the modified attribute.
+              Most visual editors reformat your entire file—wiping out comments, breaking PHP/template tags, and scrambling your Git diffs. Visual Style Editor indexes exact byte positions with Parse5 and modifies <span className="text-purple-600 dark:text-purple-400 font-semibold">only the specific class name you touched</span>. Everything else stays 100% untouched.
             </p>
 
             {/* Live Interactive Code Diff Showcase */}
@@ -129,7 +129,7 @@ export default function AsymmetricBentoGrid() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-purple-700 dark:text-purple-400 font-bold">
-                    {diffMode === 'spliced' ? 'Offset: [142, 189] • 0 collateral delta' : 'Whole Document Overwritten'}
+                    {diffMode === 'spliced' ? 'Only 1 Class Changed • 0 Collateral Edits' : 'Entire File Overwritten & Ruined'}
                   </span>
                   <button
                     type="button"
@@ -203,7 +203,7 @@ export default function AsymmetricBentoGrid() {
           <div className="pt-4 flex flex-wrap items-center justify-between gap-3 text-xs font-mono border-t mt-4" style={{ borderColor: 'var(--border)' }}>
             <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-semibold">
               <Check className="w-4 h-4" />
-              <span>Preserves DOCTYPE, conditionals & custom tags</span>
+              <span>Preserves DOCTYPE, templates, comments & custom tags</span>
             </div>
             <span className="text-purple-700 dark:text-purple-400 font-bold">100% Deterministic Byte Splice</span>
           </div>
@@ -235,10 +235,10 @@ export default function AsymmetricBentoGrid() {
                 </div>
                 <div>
                   <span className="text-xs font-mono font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400">
-                    Perceptual Science
+                    Smart Color Science
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black text-ink-1">
-                    OKLCH Spectrum Lab
+                    Accurate Colors & Contrast (OKLCH)
                   </h3>
                 </div>
               </div>
@@ -249,7 +249,7 @@ export default function AsymmetricBentoGrid() {
             </div>
 
             <p className="text-sm leading-relaxed" style={{ color: 'var(--ink-2)' }}>
-              sRGB curves produce muddy middle grays and uneven lightness jumps. OKLCH guarantees consistent perceptual luminance across all 360° hues.
+              Standard sRGB makes dark blues hard to read and yellows harsh. Modern OKLCH color science gives every hue uniform brightness and automatic WCAG contrast.
             </p>
 
             {/* Interactive Hue Slider */}
@@ -353,7 +353,7 @@ export default function AsymmetricBentoGrid() {
               Server Roundtrips
             </p>
             <p className="text-xs mt-2 leading-relaxed" style={{ color: 'var(--ink-2)' }}>
-              Air-gapped in browser RAM. Edits, previews, and saves require zero network connectivity.
+              Runs 100% in your browser. Edits, live styling, and saves require zero network connection.
             </p>
           </div>
         </motion.div>
@@ -381,12 +381,12 @@ export default function AsymmetricBentoGrid() {
               Canvas Engine
             </p>
             <p className="text-xs mt-2 leading-relaxed" style={{ color: 'var(--ink-2)' }}>
-              GPU-accelerated overlay bounding boxes and tactile spring sliders with zero frame drop.
+              GPU-accelerated overlay boxes and silky-smooth sliders with zero stutter or frame drops.
             </p>
           </div>
         </motion.div>
 
-        {/* Stat 3: 0% Telemetry */}
+        {/* Stat 3: 0% Cloud Uploads */}
         <motion.div
           className="rounded-3xl p-6 border relative overflow-hidden flex flex-col justify-between"
           style={{ background: 'var(--surface-1)', borderColor: 'var(--border)' }}
@@ -398,18 +398,18 @@ export default function AsymmetricBentoGrid() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <span className="neon-callout-tag violet text-[10px]">
-              Privacy Sovereign
+              Code Sovereignty
             </span>
           </div>
           <div>
             <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-ink-1 mb-1">
-              0% <span className="text-purple-700 dark:text-purple-400 text-lg font-sans font-bold">Telemetry</span>
+              0% <span className="text-purple-700 dark:text-purple-400 text-lg font-sans font-bold">Cloud Uploads</span>
             </div>
             <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--ink-3)' }}>
-              Tracking / Analytics
+              Local Code Privacy
             </p>
             <p className="text-xs mt-2 leading-relaxed" style={{ color: 'var(--ink-2)' }}>
-              Zero tracking cookies, zero analytics beacons. MIT licensed with total source transparency.
+              Zero server storage of your source code. Runs 100% on your machine with complete developer privacy.
             </p>
           </div>
         </motion.div>
@@ -437,7 +437,7 @@ export default function AsymmetricBentoGrid() {
               Disk Write Latency
             </p>
             <p className="text-xs mt-2 leading-relaxed" style={{ color: 'var(--ink-2)' }}>
-              Native File System Access API streams updates directly into your local Git working tree.
+              Native File System Access API saves changes straight into your project files in real time.
             </p>
           </div>
         </motion.div>

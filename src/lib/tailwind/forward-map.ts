@@ -1,4 +1,4 @@
-import { formatHex, parse as parseColor, differenceEuclidean } from "culori";
+import { formatHex, formatHex8, parse as parseColor, differenceEuclidean } from "culori";
 import type { EditableProperty, ThemeMap } from "@/types";
 import { DEFAULT_COLORS, DEFAULT_SPACING, DEFAULT_FONT_SIZE } from "./default-theme";
 
@@ -14,6 +14,7 @@ const SNAP_COLOR_THRESHOLD = 0.001;
 function snapColor(value: string, theme: ThemeMap): string | null {
   const target = parseColor(value);
   if (!target) return null;
+  if (target.alpha !== undefined && target.alpha < 0.999) return null;
   const candidates = [
     ...theme.colors.map((c) => ({ name: c.name, hex: c.value })),
     ...DEFAULT_COLORS.map((c) => ({ name: c.name, hex: c.hex })),
@@ -30,8 +31,16 @@ function forwardColor(value: string, options: ForwardMapOptions, prefix: "text" 
     const match = snapColor(value, options.theme);
     if (match) return `${prefix}-${match}`;
   }
-  const hex = formatHex(parseColor(value)) ?? value;
-  return `${prefix}-[${hex}]`;
+  const parsed = parseColor(value);
+  if (parsed) {
+    if (parsed.alpha !== undefined && parsed.alpha < 1) {
+      const hex8 = formatHex8(parsed);
+      if (hex8) return `${prefix}-[${hex8}]`;
+    }
+    const hex = formatHex(parsed);
+    if (hex) return `${prefix}-[${hex}]`;
+  }
+  return `${prefix}-[${value}]`;
 }
 
 function forwardLength(

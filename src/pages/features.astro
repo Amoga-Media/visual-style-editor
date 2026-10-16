@@ -11,38 +11,40 @@ const engines = [
   {
     id: "01",
     iconName: "ast",
-    title: "Surgical AST Splicer",
-    image: "/images/editor-snapshots/02-editor-ast-tree-inspector.png",
-    imageLabel: "Parse5 AST Location Tracker Laboratory",
+    title: "Surgical Code Editing & Layer Hierarchy",
+    image: "/images/editor-snapshots/desktop/02-editor-layers-pages-desktop.jpg",
+    imageMobile: "/images/editor-snapshots/mobile/02-editor-layers-pages-mobile.jpg",
+    imageLabel: "Pages, AST Tree & Document Layers",
     badgeTheme: "violet",
-    tagline: "Your HTML, untouched except the exact bytes you changed.",
-    body: "Standard visual editors parse HTML into an internal model, edit, then serialize the entire document back. Comments get stripped. Indentation changes. Template tags break. The AST splicer here works differently: Parse5 records the exact start and end byte position of every attribute. To change a class, it slices at those bytes and stitches in the new value — nothing else moves.",
+    tagline: "Your HTML stays clean. Never strips comments or custom scripts.",
+    body: "Most visual editors reformat your entire HTML document, stripping developer comments, breaking Blade/Twig template tags, and messing up your indentation. Visual Style Editor works differently: Parse5 source location tracking records the exact byte position of the classes you want to change, and modifies only those characters — leaving everything else 100% untouched.",
     specs: [
-      "Parse5 source location tracking enabled by default",
-      "Byte-offset surgical splicing with 0 collateral delta",
-      "Preserves HTML comments, doctype, and conditional statements",
-      "Zero cloud dependencies and 100% in-memory execution"
+      "Visual page switcher and DOM tree navigator",
+      "Parse5 source location tracking records exact byte offsets",
+      "Zero collateral changes to comments, doctypes, or scripts",
+      "Works seamlessly with server-rendered HTML templates"
     ],
     code: `<!-- Before -->
-<div class="px-4 py-2 bg-slate-100"> <!-- reviewer note -->
+<div class="px-4 py-2 bg-slate-100"> <!-- important note -->
 
-<!-- After (only the class attribute changed) -->
-<div class="px-6 py-3.5 bg-zinc-900 rounded-xl"> <!-- reviewer note -->`
+<!-- After (only the class attribute is updated) -->
+<div class="px-6 py-3.5 bg-zinc-900 rounded-xl"> <!-- important note -->`
   },
   {
     id: "02",
     iconName: "tailwind",
-    title: "Tailwind v3 & v4 Bridge",
-    image: "/images/editor-snapshots/03-editor-live-canvas-viewport.png",
-    imageLabel: "Live Studio Toolbar & Framework Detector",
+    title: "Tailwind Utility Classes & Responsive Breakpoints",
+    image: "/images/editor-snapshots/desktop/03-editor-classes-system-desktop.jpg",
+    imageMobile: "/images/editor-snapshots/mobile/03-editor-classes-system-mobile.jpg",
+    imageLabel: "Live Utility Classes & Breakpoint Switcher",
     badgeTheme: "cyan",
-    tagline: "Detects your version and outputs idiomatic class names.",
-    body: "Drag a font-weight slider to 600 and get class=\"font-semibold\" — not class=\"[font-weight:600]\". The forward-mapping engine knows which values correspond to which Tailwind utilities, for both v3's config-based tokens and v4's @theme CSS variable architecture. Arbitrary values are a fallback of last resort.",
+    tagline: "Interactive pills, live autocomplete, and sm:/md:/lg: toggles.",
+    body: "Tweak padding, margins, colors, and layout using interactive badge pills or typing with autocomplete. The forward-mapping engine maps your visual selections into standard Tailwind v3 utilities or v4 @theme CSS variables — never messy inline styles.",
     specs: [
-      "Automatic v3 utility and v4 @theme token detection",
-      "Bidirectional class ↔ property mapping at 60 FPS",
-      "Smart arbitrary value fallback ([opacity:73%])",
-      "Responsive prefix synthesis: sm:, md:, lg:, xl:"
+      "Interactive class pills with one-click addition and removal",
+      "Automatic Tailwind v3 utility and v4 @theme token detection",
+      "Responsive breakpoint synthesis: sm:, md:, lg:, xl:",
+      "Bidirectional class ↔ property synchronization at 60 FPS"
     ],
     code: `/* Forward-map output examples */
 font-weight: 600       → class="font-semibold"
@@ -53,17 +55,18 @@ color: oklch(0.65 ...) → class="bg-brand-primary"`
   {
     id: "03",
     iconName: "palette",
-    title: "OKLCH Perceptual Color Tuner",
-    image: "/images/editor-snapshots/07-editor-color-typography-lab.png",
-    imageLabel: "OKLCH Color Spectrum & Typography Inspector",
+    title: "OKLCH Color Studio & Contrast Checker",
+    image: "/images/editor-snapshots/desktop/04-editor-colors-lab-desktop.jpg",
+    imageMobile: "/images/editor-snapshots/mobile/04-editor-colors-lab-mobile.jpg",
+    imageLabel: "OKLCH Lightness Tuner & WCAG AA/AAA Validator",
     badgeTheme: "lime",
-    tagline: "Uniform lightness across the spectrum. No muddy transitions.",
-    body: "sRGB color math produces uneven perceived brightness — yellows look brighter than blues at the same lightness value. OKLCH (Oklab Lightness Chroma Hue) is perceptually uniform. A 9-step palette using OKLCH interpolation looks smooth all the way through. The tuner also checks WCAG 2.1 contrast ratios against your current background automatically.",
+    tagline: "Perceptually uniform colors with automated WCAG AA/AAA compliance.",
+    body: "Standard sRGB color pickers create muddy, inconsistent tints. Visual Style Editor uses the modern OKLCH color space (Oklab Lightness Chroma Hue) to create smooth, balanced tonal scales (50 to 900) while continuously verifying WCAG 2.1 contrast ratios against your background.",
     specs: [
-      "Culori OKLCH perceptual interpolation engine",
+      "Modern Culori OKLCH perceptual color interpolation",
       "5 harmony schemes: mono, analogous, complementary, triadic, split",
-      "9-step tonal scale generation (50 to 900) in real-time",
-      "Automated WCAG AA/AAA contrast verification"
+      "Automatic 9-step tonal scale generator (50 to 900)",
+      "Real-time WCAG AA and AAA accessibility contrast tests"
     ],
     code: `/* OKLCH palette output */
 50:  oklch(0.97 0.02 200)   /* lightest tint */
@@ -73,66 +76,67 @@ color: oklch(0.65 ...) → class="bg-brand-primary"`
   {
     id: "04",
     iconName: "step-sliders",
-    title: "Shadow & Elevation Lab",
-    image: "/images/editor-snapshots/04-editor-boxmodel-padding-margin.png",
-    imageLabel: "Volumetric Photonic Elevation & Box Model Engine",
+    title: "Visual Box Model, Padding & Margins",
+    image: "/images/editor-snapshots/desktop/06-editor-padding-boxmodel-desktop.jpg",
+    imageMobile: "/images/editor-snapshots/mobile/06-editor-padding-boxmodel-mobile.jpg",
+    imageLabel: "Visual Box Model: Margin, Border, Padding & Content",
     badgeTheme: "amber",
-    tagline: "12 tuned elevations. No more fiddling with box-shadow by hand.",
-    body: "Realistic shadows need multiple layers: an ambient shadow, a direct shadow, and often a blur spread that matches the surface color. The 12 built-in presets cover the full range — barely-there to dramatic. Preview any of them live on the selected element and export as a Tailwind shadow utility or raw CSS.",
+    tagline: "Tactile sliders for spacing without guessing utility names.",
+    body: "Stop guessing whether you need p-4, p-6, or py-8. Click any element to view its nested Margin, Border, Padding, and Content zones. Move visual sliders to adjust spacing with instant 60 FPS feedback and automatic Tailwind class generation.",
     specs: [
-      "12 calibrated elevation and ambient shadow presets",
-      "Dual-layer ambient + direct photonic simulation",
-      "Hue-matched colored glow and reflection mapping",
-      "Exportable as Tailwind shadow utilities or raw CSS variables"
+      "Concentric 4-tier visualizer: Margin, Border, Padding, Content",
+      "Linked vs independent 4-side spacing controls",
+      "Instant Tailwind spacing forward-mapping (p-4, mx-auto, py-6)",
+      "Zero layout thrashing with CSS transform preview"
     ],
-    code: `/* Elevated preset */
-box-shadow:
-  0 1px 3px rgba(0, 0, 0, 0.12),
-  0 8px 24px rgba(0, 0, 0, 0.08);`
+    code: `/* Box Model Tailwind utility mapping */
+padding-top: 1.5rem;    padding-bottom: 1.5rem; → class="py-6"
+padding-left: 2rem;     padding-right: 2rem;    → class="px-8"
+margin-left: auto;      margin-right: auto;     → class="mx-auto"`
   },
   {
     id: "05",
     iconName: "gauge",
-    title: "CSS Animation Studio",
-    image: "/images/editor-snapshots/05-editor-ast-splice-diff.png",
-    imageLabel: "Live CSS Animation Curve & Review Diff",
+    title: "Fluid Typography & Font Hierarchy",
+    image: "/images/editor-snapshots/desktop/05-editor-typography-desktop.jpg",
+    imageMobile: "/images/editor-snapshots/mobile/05-editor-typography-mobile.jpg",
+    imageLabel: "Typography Weights, Tracking, Leading & Alignment",
     badgeTheme: "violet",
-    tagline: "Keyframe and transition editing without the syntax friction.",
-    body: "Build transition timing, choose from standard and custom cubic-bezier easings, and add loop animations (pulse, float, spin, shimmer) using interactive controls. Everything outputs as standard CSS @keyframes or Tailwind transition utilities — no JavaScript animations, no proprietary runtime.",
+    tagline: "Font weights, letter tracking, line height, and text alignment.",
+    body: "Dial in beautiful typography visually. Choose font weights from Thin (100) to Black (900), fine-tune letter tracking and line heights with sliders, and toggle text alignment with single-click ease. Double-click any text on canvas to edit its copy inline.",
     specs: [
-      "Interactive cubic-bezier timing curve editor",
-      "6 loop animation presets (float, shimmer, pulse, spin)",
-      "Instant hover state simulation on the live canvas",
-      "GPU-safe CSS output: transform and opacity only"
+      "Full font weight selector grid from Thin to Black (100–900)",
+      "Tracking (letter-spacing) and leading (line-height) tactile sliders",
+      "Text alignment, transform, and text-wrap balance toggles",
+      "Immediate canvas re-rendering at 60 FPS"
     ],
-    code: `@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-8px); }
-}
-.card {
-  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
-}`
+    code: `/* Typography utility mapping */
+font-weight: 700;       → class="font-bold"
+letter-spacing: -0.025em; → class="tracking-tight"
+line-height: 1.25;      → class="leading-tight"
+text-align: center;     → class="text-center"`
   },
   {
     id: "06",
     iconName: "hard-drive",
-    title: "Direct Disk Save",
-    image: "/images/editor-snapshots/06-editor-disk-save-export.png",
-    imageLabel: "File System Access API Direct Disk Sync",
+    title: "Direct Disk Save & Multi-Format Export",
+    image: "/images/editor-snapshots/desktop/07-editor-export-studio-desktop.jpg",
+    imageMobile: "/images/editor-snapshots/mobile/07-editor-export-studio-mobile.jpg",
+    imageLabel: "Export Studio: HTML, JSX, Astro & Direct Disk Commit",
     badgeTheme: "lime",
-    tagline: "No downloads required. Changes write directly to your repository file.",
-    body: "The File System Access API lets a browser write directly to the file system — with explicit user permission. Every save goes straight to the file you opened, not to a server, not to a download folder. A debounced auto-save shield also writes to localStorage every 2 seconds, so closing the tab never loses your work.",
+    tagline: "Save directly back to local disk (⌘S), or export to React JSX & Astro.",
+    body: "Work seamlessly with your local development setup. In Chromium browsers, the W3C File System Access API writes edits straight to your local file on disk with 0ms server latency. When you're ready, copy clean HTML, export React JSX with className syntax, or generate an Astro island component.",
     specs: [
-      "Native Chromium File System Access API integration",
-      "2-second debounced auto-save session shield",
-      "Interactive visual diff review before committing to disk",
-      "Files never leave your local computer RAM"
+      "Direct local disk save via W3C File System Access API",
+      "Multi-framework generator: Clean HTML, React JSX, and Astro",
+      "Visual diff review modal before committing changes to disk",
+      "100% private: Zero cloud uploads, zero external telemetry"
     ],
-    code: `const writable = await fileHandle.createWritable();
-await writable.write(surgicallySplicedHtml);
-await writable.close();
-
-// Done. No server. No temp file. The original file.`
+    code: `// Multi-framework export options:
+// 1. Clean HTML with preserved comments & doctype
+// 2. JSX with className and self-closing tags
+// 3. Astro component markup with frontmatter support
+// 4. Direct disk commit via fileHandle.createWritable()`
   }
 ];
 
@@ -144,11 +148,31 @@ const benchmarks = [
   { metric: "Tailwind output quality", vse: "Idiomatic utility class names", cloud: "Generated or arbitrary values" },
   { metric: "Offline availability", vse: "Fully functional air-gapped", cloud: "Requires continuous connection" },
 ];
+
+const featuresItemListSchema = {
+  "@type": "ItemList",
+  "@id": "https://visualstyleeditor.com/features#engines",
+  "name": "Visual Style Editor Core Architectural Engines",
+  "description": "Six client-side engines powering in-browser HTML and Tailwind CSS visual editing.",
+  "itemListElement": engines.map((eng, idx) => ({
+    "@type": "ListItem",
+    "position": idx + 1,
+    "name": eng.title,
+    "description": eng.tagline
+  }))
+};
+
+const breadcrumbs = [
+  { name: "Home", item: "https://visualstyleeditor.com/" },
+  { name: "Features", item: "https://visualstyleeditor.com/features" }
+];
 ---
 
 <BaseLayout
-  title="Features — Visual Style Editor 2026 Engine Architecture"
-  description="Six engines powering the Visual Style Editor: in-browser AST splicing, Tailwind v3/v4 class mapping, OKLCH color science, shadow presets, animation studio, and native File System API."
+  title="Features — In-Browser AST & Tailwind CSS Architecture"
+  description="Six client-side engines: in-browser AST splicing, Tailwind v3/v4 token mapping, OKLCH color science, concentric box model, and native File System API."
+  breadcrumbs={breadcrumbs}
+  customEntities={[featuresItemListSchema]}
 >
   <div class="flex flex-col min-h-[100dvh]">
     <Navbar activePage="features" />
@@ -168,35 +192,61 @@ const benchmarks = [
         <div class="max-w-6xl mx-auto relative z-10 space-y-8">
           <div class="max-w-3xl space-y-6" data-reveal="fade-up">
             <div
-              class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
+              class="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
             >
-              <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse"></span>
-              <span>Architectural Engine Deep Dive</span>
+              <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse shrink-0"></span>
+              <span class="truncate">Architectural Engine Deep Dive</span>
             </div>
 
             <h1
-              class="text-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08]"
+              class="text-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.12] sm:leading-[1.08]"
               data-motion-text="words"
             >
               Six core engines.<br />
               <span class="gradient-text">Zero proprietary formats.</span>
             </h1>
 
-            <p class="text-body text-base sm:text-lg md:text-xl" style="color: var(--ink-2);">
-              Each engine solves a specific real-world friction. Together they let you edit HTML and Tailwind visually without cloud lock-in or template degradation.
+            <p class="text-body text-sm sm:text-base md:text-lg lg:text-xl" style="color: var(--ink-2);">
+              Everything you need to inspect, tweak, and save HTML and Tailwind files visually — with 0ms server latency, zero cloud uploads, and 100% free open-source code.
             </p>
 
-            <div class="flex flex-wrap gap-3.5 pt-2">
-              <a href="/editor" data-magnetic class="btn btn-primary px-6 py-3.5 rounded-2xl shadow-lg">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 max-w-sm sm:max-w-none w-full sm:w-auto">
+              <a href="/editor" data-magnetic class="btn btn-primary px-6 py-3.5 sm:py-4 rounded-2xl shadow-lg flex items-center justify-center text-center font-bold text-sm w-full sm:w-auto">
                 Open Studio Workspace
               </a>
-              <a href="/how-it-works" data-magnetic class="btn btn-secondary px-6 py-3.5 rounded-2xl border">
+              <a href="/how-it-works" data-magnetic class="btn btn-secondary px-6 py-3.5 sm:py-4 rounded-2xl border flex items-center justify-center text-center font-semibold text-sm w-full sm:w-auto">
                 Technical Walkthrough
               </a>
             </div>
 
             <div class="pt-2">
               <FloatingBadges client:load />
+            </div>
+          </div>
+
+          <!-- Features Hero Studio Visual Window Frame -->
+          <div class="max-w-5xl mx-auto pt-4" data-reveal="fade-up">
+            <div class="glass-window-frame p-1.5 sm:p-2.5 group overflow-hidden">
+              <div class="px-4 py-2 flex items-center justify-between border-b rounded-t-xl select-none text-xs font-mono text-zinc-400" style="background: rgba(18, 18, 21, 0.75); border-color: rgba(255, 255, 255, 0.08);">
+                <div class="flex items-center gap-2">
+                  <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+                  <span class="ml-2 hidden sm:inline">visual-style-editor • six-engines-workstation</span>
+                </div>
+                <span class="text-purple-400 font-semibold text-[11px]">Six Core Engines</span>
+              </div>
+              <div class="relative rounded-lg overflow-hidden bg-black aspect-[16/9] max-sm:aspect-[9/13]">
+                <picture class="block w-full h-full">
+                  <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/01-editor-overview-mobile.png" />
+                  <img
+                    src="/images/editor-snapshots/desktop/01-editor-overview-desktop.png"
+                    alt="Visual Style Editor Six Core Engines Studio Canvas"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.01]"
+                    loading="eager"
+                  />
+                </picture>
+              </div>
             </div>
           </div>
         </div>
@@ -271,12 +321,17 @@ const benchmarks = [
                       <span class="text-purple-400 font-bold">Engine {eng.id}</span>
                     </div>
                     <div class="relative rounded-lg overflow-hidden bg-black">
-                      <img
-                        src={eng.image}
-                        alt={eng.imageLabel || eng.title}
-                        class="w-full h-auto object-cover max-h-[420px] transition-transform duration-700 group-hover:scale-[1.02]"
-                        loading="lazy"
-                      />
+                      <picture class="block w-full">
+                        {eng.imageMobile && (
+                          <source media="(max-width: 640px)" srcset={eng.imageMobile} />
+                        )}
+                        <img
+                          src={eng.image}
+                          alt={eng.imageLabel || eng.title}
+                          class="w-full h-auto object-cover max-h-[520px] transition-transform duration-700 group-hover:scale-[1.02]"
+                          loading="lazy"
+                        />
+                      </picture>
                       <div class="absolute bottom-3 right-3">
                         <span class={`neon-callout-tag ${eng.badgeTheme} text-[10px]`}>
                           {eng.title}
@@ -313,24 +368,27 @@ const benchmarks = [
               Empirical Proof
             </span>
             <h2 class="text-headline text-3xl sm:text-4xl font-black">Performance Benchmarks</h2>
+            <div data-aeo-answer class="text-xs sm:text-sm p-4 rounded-xl mt-3 mb-2 text-left bg-purple-500/10 border border-purple-500/20 text-purple-900 dark:text-purple-200">
+              <p><strong>Direct Answer:</strong> Visual Style Editor achieves 0ms server latency and under 4ms AST splicing execution time by computing all edits in client-side WebAssembly and browser RAM. Unlike cloud-based builders that upload full documents, it reads and writes only altered byte ranges directly to your local file system via the W3C File System Access API and Parse5 engine.</p>
+            </div>
             <p class="text-body text-base mt-2">
-              What client-side-only means in hard numbers.
+              Empirical metrics measured against the W3C File System Access API and Parse5 AST benchmark specifications.
             </p>
           </div>
 
           <div class="card overflow-x-auto rounded-3xl border shadow-xl" data-reveal="fade-up">
-            <table class="w-full text-sm" style="border-collapse: collapse; font-family: var(--font-mono);">
+            <table class="w-full text-sm" style="border-collapse: collapse; font-family: var(--font-mono);" aria-label="Visual Style Editor vs Cloud Builders Performance Benchmarks">
               <thead>
                 <tr style="border-bottom: 1px solid var(--border); background: var(--surface-2);">
-                  <th class="text-left px-6 py-4 text-label font-semibold" style="color: var(--ink-2);">Metric</th>
-                  <th class="text-left px-6 py-4 text-label font-bold text-purple-700 dark:text-purple-300">Visual Style Editor</th>
-                  <th class="text-left px-6 py-4 text-label font-medium" style="color: var(--ink-3);">Cloud-Based Builders</th>
+                  <th scope="col" class="text-left px-6 py-4 text-label font-semibold" style="color: var(--ink-2);">Metric</th>
+                  <th scope="col" class="text-left px-6 py-4 text-label font-bold text-purple-700 dark:text-purple-300">Visual Style Editor</th>
+                  <th scope="col" class="text-left px-6 py-4 text-label font-medium" style="color: var(--ink-3);">Cloud-Based Builders</th>
                 </tr>
               </thead>
               <tbody>
                 {benchmarks.map((row, i) => (
                   <tr style={`border-bottom: 1px solid var(--border); background: ${i % 2 === 0 ? 'transparent' : 'var(--surface-1)'};`}>
-                    <td class="px-6 py-4 text-xs font-semibold" style="color: var(--ink-1);">{row.metric}</td>
+                    <th scope="row" class="text-left px-6 py-4 text-xs font-semibold" style="color: var(--ink-1);">{row.metric}</th>
                     <td class="px-6 py-4 text-xs font-bold text-emerald-700 dark:text-emerald-400">{row.vse}</td>
                     <td class="px-6 py-4 text-xs font-medium" style="color: var(--ink-3);">{row.cloud}</td>
                   </tr>

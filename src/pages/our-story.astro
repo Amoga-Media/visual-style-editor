@@ -9,35 +9,52 @@ import Icon from "@/components/ui/Icon.astro";
 
 const coreValues = [
   {
-    icon: "violet",
-    iconName: "shield",
-    title: "Zero Telemetry & Tracking",
-    body: "We don't track what you build, what files you open, or how long you spend editing. No analytics beacons, no third-party scripts. Your code never leaves your computer.",
+    icon: "amber",
+    iconName: "open-source",
+    title: "100% Free Forever (No Subscriptions)",
+    body: "We built this as an unconditional gift to the developer community. No $39/mo subscription paywalls, no 'pro' feature gates, and no seat limits. The complete studio is MIT-licensed and yours forever.",
   },
   {
-    icon: "lime",
-    iconName: "hard-drive",
-    title: "Local-First Realtime Speed",
-    body: "Everything executes strictly in browser memory. No network round-trips to verify subscription seats or persist drafts. Sliders update at 60 FPS because there's nothing remote to wait on.",
+    icon: "violet",
+    iconName: "shield",
+    title: "Zero Cloud Uploads (Total Privacy)",
+    body: "We don't track what you build, what files you open, or store your edits on remote servers. Visual Style Editor is completely air-gapped in browser RAM. Your proprietary code never leaves your computer.",
   },
   {
     icon: "cyan",
     iconName: "ast",
     title: "Surgical Code Integrity",
-    body: "Your indentation, server template logic (Blade, PHP, Liquid), and developer comments stay exactly where you wrote them. The AST splicer operates at byte offset precision.",
+    body: "Your indentation, server template logic (Blade, PHP, Liquid), and developer comments stay exactly where you wrote them. The AST splicer operates at byte-offset precision with zero collateral diffs.",
   },
   {
-    icon: "amber",
-    iconName: "open-source",
-    title: "Honest Open Source",
-    body: "MIT licensed and unconditionally free. Not an 'open core' bait-and-switch with gated features. The complete, production-ready studio is yours forever.",
+    icon: "lime",
+    iconName: "hard-drive",
+    title: "Instant 60 FPS Local Speed",
+    body: "Everything executes strictly in local browser memory. Zero network round-trips to verify subscription seats or persist drafts. Sliders update at 60 FPS and save directly to disk in <2ms.",
   },
+];
+
+const ourStorySchema = {
+  "@type": "AboutPage",
+  "@id": "https://visualstyleeditor.com/our-story#about",
+  "name": "Our Story — The Visual Style Editor Developer Manifesto",
+  "description": "Why we built Visual Style Editor as a free, open-source gift to developers: liberating the frontend from predatory SaaS subscriptions and cloud lock-in.",
+  "publisher": {
+    "@id": "https://visualstyleeditor.com/#organization"
+  }
+};
+
+const breadcrumbs = [
+  { name: "Home", item: "https://visualstyleeditor.com/" },
+  { name: "Our Story", item: "https://visualstyleeditor.com/our-story" }
 ];
 ---
 
 <BaseLayout
-  title="Our Story — The Visual Style Editor Founder Manifesto"
-  description="Why we refused to let site builders hold our code hostage: how frustration with lost DevTools edits led to an in-browser surgical AST editor with zero cloud dependencies."
+  title="Our Story — The Developer Liberation Manifesto"
+  description="Why we built Visual Style Editor as a free, open-source gift to developers: liberating the frontend from predatory SaaS subscriptions, lost DevTools edits, and cloud lock-in."
+  breadcrumbs={breadcrumbs}
+  customEntities={[ourStorySchema]}
 >
   <div class="flex flex-col min-h-[100dvh]">
     <Navbar activePage="our story" />
@@ -45,7 +62,7 @@ const coreValues = [
     <main id="main-content" class="flex-1">
 
       <!-- ============================================================
-           HERO: Bold Founder Manifesto Statement
+           HERO: Bold Developer Liberation Manifesto
            ============================================================ -->
       <section class="relative overflow-hidden pt-8 sm:pt-12 md:pt-14 pb-16 lg:pb-20 px-4 sm:px-6 lg:px-8" data-parallax-section>
         {/* Vibrant Multi-Layered Ambient Studio Aura & Grid Texture */}
@@ -57,26 +74,52 @@ const coreValues = [
         <div class="max-w-4xl mx-auto relative z-10 space-y-8">
           <div class="max-w-4xl mx-auto text-center space-y-6" data-reveal="fade-up">
             <div
-              class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl mx-auto bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
+              class="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl mx-auto bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
             >
-              <span class="w-2 h-2 rounded-full bg-pink-600 dark:bg-pink-400 animate-pulse"></span>
-              <span>The Founder Manifesto · 2021 to 2026</span>
+              <span class="w-2 h-2 rounded-full bg-pink-600 dark:bg-pink-400 animate-pulse shrink-0"></span>
+              <span class="truncate">✦ An Open Gift To Every Developer · 2021 to 2026</span>
             </div>
 
             <h1
-              class="text-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08]"
+              class="text-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.12] sm:leading-[1.08]"
               data-motion-text="words"
             >
-              Why we refused to let site builders <br />
-              <span class="gradient-text">hold our code hostage.</span>
+              We built what Silicon Valley <br />
+              <span class="gradient-text">refused to give you.</span>
             </h1>
 
-            <p class="text-body text-base sm:text-lg md:text-xl max-w-2xl mx-auto" style="color: var(--ink-2);">
-              For years, visual styling meant surrendering your codebase to proprietary cloud databases and watching visual builders strip comments and template tags. We set out to change that forever.
+            <p class="text-body text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto px-1 sm:px-0" style="color: var(--ink-2);">
+              SaaS companies wanted to charge you $39/month forever, lock your code in remote databases, and strip your comments. We engineered Visual Style Editor as an unconditional gift to the developer community: 100% free, 100% offline, and engineered to never break your code.
             </p>
 
             <div class="pt-2">
               <FloatingBadges client:load />
+            </div>
+          </div>
+
+          <!-- Hero Studio Visual Window Frame -->
+          <div class="max-w-5xl mx-auto pt-4" data-reveal="fade-up">
+            <div class="glass-window-frame p-1.5 sm:p-2.5 group overflow-hidden">
+              <div class="px-4 py-2 flex items-center justify-between border-b rounded-t-xl select-none text-xs font-mono text-zinc-400" style="background: rgba(18, 18, 21, 0.75); border-color: rgba(255, 255, 255, 0.08);">
+                <div class="flex items-center gap-2">
+                  <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+                  <span class="ml-2 hidden sm:inline">visual-style-editor • founder-manifesto-studio</span>
+                </div>
+                <span class="text-pink-400 font-semibold text-[11px]">100% In-Memory Architecture</span>
+              </div>
+              <div class="relative rounded-lg overflow-hidden bg-black aspect-[16/9] max-sm:aspect-[9/13]">
+                <picture class="block w-full h-full">
+                  <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/01-editor-overview-mobile.png" />
+                  <img
+                    src="/images/editor-snapshots/desktop/01-editor-overview-desktop.png"
+                    alt="Visual Style Editor In-Memory Studio Canvas"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.01]"
+                    loading="eager"
+                  />
+                </picture>
+              </div>
             </div>
           </div>
         </div>
@@ -90,6 +133,132 @@ const coreValues = [
       <section class="section py-20 relative">
         <div class="section-inner" data-reveal="fade-up">
           <StoryManifestoInteractive client:load />
+        </div>
+      </section>
+
+      <!-- ============================================================
+           ARCHITECTURAL VISUAL SHOWCASE: 4 Pillars of Local Sovereignty
+           ============================================================ -->
+      <section class="section py-20 border-t relative" style="border-color: var(--border); background: var(--canvas);">
+        <div class="section-inner space-y-12">
+          <div class="section-header max-w-2xl mx-auto text-center" data-reveal="fade-up">
+            <span class="badge text-xs font-mono font-bold uppercase tracking-wider mb-2 px-3 py-1 bg-pink-50 text-pink-800 border-pink-200 dark:bg-pink-950/40 dark:text-pink-300 dark:border-pink-500/40">
+              Our Unbreakable Promises
+            </span>
+            <h2 class="text-headline text-3xl sm:text-4xl font-black">Four Promises We Made To Every Developer</h2>
+            <div data-aeo-answer class="text-xs sm:text-sm p-4 rounded-xl mt-3 mb-2 text-left bg-purple-500/10 border border-purple-500/20 text-purple-900 dark:text-purple-200">
+              <p><strong>Direct Answer:</strong> Visual Style Editor was developed by Amoga Media as a free, open-source gift to solve disappearing DevTools changes. By combining Parse5 character-offset AST tracking with the native Chromium File System Access API, developers can visually tweak Tailwind styles with 100% preservation of comments, formatting, and framework logic with 0ms server roundtrips.</p>
+            </div>
+            <p class="text-body text-base mt-2">
+              Every system is engineered to protect your code integrity, give you 60 FPS feedback, and keep you free from monthly software taxes.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8" data-reveal-group>
+            <!-- Pillar 1: AST Splicer -->
+            <div class="card rounded-3xl border overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col justify-between" data-reveal-item style="background: var(--surface-1); border-color: var(--border);">
+              <div class="relative overflow-hidden aspect-[16/10] max-sm:aspect-[9/13] bg-zinc-950">
+                <picture class="block w-full h-full">
+                  <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/02-editor-layers-pages-mobile.jpg" />
+                  <img
+                    src="/images/editor-snapshots/desktop/02-editor-layers-pages-desktop.jpg"
+                    alt="Pages & AST Layers Hierarchy"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </picture>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+                <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between pointer-events-none">
+                  <span class="neon-callout-tag violet text-[10px]">Parse5 AST Splicer</span>
+                  <span class="text-[10px] font-mono text-zinc-300">0 Collateral Delta</span>
+                </div>
+              </div>
+              <div class="p-6 space-y-2">
+                <h3 class="text-lg font-bold" style="color: var(--ink-1);">Surgical Code Integrity (Parse5)</h3>
+                <p class="text-xs leading-relaxed" style="color: var(--ink-2);">
+                  Parse5 records exact byte positions of every attribute. Your comments, PHP/Blade template tags, and formatting remain 100% untouched.
+                </p>
+              </div>
+            </div>
+
+            <!-- Pillar 2: Classes System -->
+            <div class="card rounded-3xl border overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col justify-between" data-reveal-item style="background: var(--surface-1); border-color: var(--border);">
+              <div class="relative overflow-hidden aspect-[16/10] max-sm:aspect-[9/13] bg-zinc-950">
+                <picture class="block w-full h-full">
+                  <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/03-editor-classes-system-mobile.jpg" />
+                  <img
+                    src="/images/editor-snapshots/desktop/03-editor-classes-system-desktop.jpg"
+                    alt="Tailwind Classes System"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </picture>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+                <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between pointer-events-none">
+                  <span class="neon-callout-tag cyan text-[10px]">Tailwind v3 & v4</span>
+                  <span class="text-[10px] font-mono text-zinc-300">Pure Utility Classes</span>
+                </div>
+              </div>
+              <div class="p-6 space-y-2">
+                <h3 class="text-lg font-bold" style="color: var(--ink-1);">Zero Proprietary CSS Bloat</h3>
+                <p class="text-xs leading-relaxed" style="color: var(--ink-2);">
+                  No custom runtimes or locked CSS classes. Generates clean, idiomatic Tailwind utility classes that match your existing code style.
+                </p>
+              </div>
+            </div>
+
+            <!-- Pillar 3: OKLCH Color Science -->
+            <div class="card rounded-3xl border overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col justify-between" data-reveal-item style="background: var(--surface-1); border-color: var(--border);">
+              <div class="relative overflow-hidden aspect-[16/10] max-sm:aspect-[9/13] bg-zinc-950">
+                <picture class="block w-full h-full">
+                  <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/04-editor-colors-lab-mobile.jpg" />
+                  <img
+                    src="/images/editor-snapshots/desktop/04-editor-colors-lab-desktop.jpg"
+                    alt="OKLCH Color Lab"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </picture>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+                <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between pointer-events-none">
+                  <span class="neon-callout-tag lime text-[10px]">OKLCH Science</span>
+                  <span class="text-[10px] font-mono text-zinc-300">WCAG AA/AAA</span>
+                </div>
+              </div>
+              <div class="p-6 space-y-2">
+                <h3 class="text-lg font-bold" style="color: var(--ink-1);">Perceptual Color Science (OKLCH)</h3>
+                <p class="text-xs leading-relaxed" style="color: var(--ink-2);">
+                  Uniform perceptual brightness across all hues. Build harmonic 9-step tonal scales and verify accessible contrast in real time.
+                </p>
+              </div>
+            </div>
+
+            <!-- Pillar 4: Direct Disk Save & Export -->
+            <div class="card rounded-3xl border overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col justify-between" data-reveal-item style="background: var(--surface-1); border-color: var(--border);">
+              <div class="relative overflow-hidden aspect-[16/10] max-sm:aspect-[9/13] bg-zinc-950">
+                <picture class="block w-full h-full">
+                  <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/07-editor-export-studio-mobile.jpg" />
+                  <img
+                    src="/images/editor-snapshots/desktop/07-editor-export-studio-desktop.jpg"
+                    alt="Direct Disk Save & Export Studio"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </picture>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+                <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between pointer-events-none">
+                  <span class="neon-callout-tag amber text-[10px]">File System Access</span>
+                  <span class="text-[10px] font-mono text-zinc-300">&lt;2ms Disk IO</span>
+                </div>
+              </div>
+              <div class="p-6 space-y-2">
+                <h3 class="text-lg font-bold" style="color: var(--ink-1);">Direct Disk Commit (&lt;2ms)</h3>
+                <p class="text-xs leading-relaxed" style="color: var(--ink-2);">
+                  Native Chromium W3C File System Access API writes directly to your local files with zero server uploads and 0ms network roundtrips.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -127,9 +296,9 @@ const coreValues = [
       </section>
 
       <CtaBanner
-        headline="Your HTML file. Your terms."
-        subheadline="No sign-up, no cloud sync, no monthly subscription. Open the editor and start styling."
-        ctaText="Launch Visual Studio"
+        headline="Take back your frontend freedom."
+        subheadline="No monthly subscription. No cloud account. No corporate telemetry. Just open your HTML and style at the speed of thought."
+        ctaText="Launch Free Studio"
       />
     </main>
 

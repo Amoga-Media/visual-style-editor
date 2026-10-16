@@ -186,6 +186,7 @@ export default function ValueInput({
       <input
         ref={inputRef}
         type="text"
+        aria-label={property ? `Value for ${property}` : "Value input"}
         value={isFocused ? numText : (currentUnit === "auto" ? "auto" : currentUnit === "none" ? "none" : `${numText}`)}
         onFocus={() => setIsFocused(true)}
         onChange={(e) => {

@@ -32,11 +32,37 @@ const categoryThemes: Record<string, { pillClass: string; iconClass: string }> =
     iconClass: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-500/40",
   },
 };
+
+const collectionPageSchema = {
+  "@type": "CollectionPage",
+  "@id": "https://visualstyleeditor.com/templates#collection",
+  "name": "Free HTML & Tailwind CSS Starter Templates",
+  "description": "Browse 12+ free responsive HTML and Tailwind CSS starter templates with live in-browser visual editing.",
+  "mainEntity": {
+    "@type": "ItemList",
+    "name": "Tailwind CSS Starter Templates Collection",
+    "numberOfItems": TEMPLATE_REGISTRY.length,
+    "itemListElement": TEMPLATE_REGISTRY.map((tmpl, idx) => ({
+      "@type": "ListItem",
+      "position": idx + 1,
+      "name": tmpl.name,
+      "description": tmpl.description,
+      "url": `https://visualstyleeditor.com/templates#${tmpl.id}`
+    }))
+  }
+};
+
+const breadcrumbs = [
+  { name: "Home", item: "https://visualstyleeditor.com/" },
+  { name: "Starter Templates", item: "https://visualstyleeditor.com/templates" }
+];
 ---
 
 <BaseLayout
-  title="Starter Templates — Visual Style Editor 2026 Collection"
-  description="Browse 12+ free responsive HTML and Tailwind CSS starter templates. Click any template to edit it visually in the browser with zero setup."
+  title="Tailwind UI Starter Templates — Visual Style Editor"
+  description="Browse 12+ free responsive HTML and Tailwind CSS starter templates. Click any template to edit it visually in the browser with zero setup or cloud fees."
+  breadcrumbs={breadcrumbs}
+  customEntities={[collectionPageSchema]}
 >
   <div class="flex flex-col min-h-[100dvh]">
     <Navbar activePage="templates" />
@@ -56,22 +82,26 @@ const categoryThemes: Record<string, { pillClass: string; iconClass: string }> =
         <div class="max-w-6xl mx-auto relative z-10 space-y-8">
           <div class="max-w-3xl space-y-6" data-reveal="fade-up">
             <div
-              class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
+              class="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider border select-none shadow-sm backdrop-blur-xl bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-500/40"
             >
-              <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse"></span>
-              <span>12 Production-Ready Templates • 100% Free</span>
+              <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse shrink-0"></span>
+              <span class="truncate">12 Production-Ready Templates • 100% Free</span>
             </div>
 
             <h1
-              class="text-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08]"
+              class="text-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.12] sm:leading-[1.08]"
               data-motion-text="words"
             >
               Starter templates.<br />
               <span class="gradient-text">Open and edit immediately.</span>
             </h1>
 
-            <p class="text-body text-base sm:text-lg" style="color: var(--ink-2);">
-              Clean, modern HTML layouts built for Tailwind CSS v3 and v4. Click any card to launch the live Visual Studio workspace with zero setup or sign-in.
+            <div data-aeo-answer class="text-xs sm:text-sm p-4 rounded-xl mt-4 mb-2 text-left bg-purple-500/10 border border-purple-500/20 text-purple-900 dark:text-purple-200">
+              <p><strong>Direct Answer:</strong> Visual Style Editor provides 12+ free, production-ready HTML and Tailwind CSS starter templates (SaaS dashboards, agency portfolios, marketing landing pages, and bento grids). Selecting any template immediately initializes the local in-browser studio with zero configuration, no sign-in, and zero cloud hosting fees.</p>
+            </div>
+
+            <p class="text-body text-sm sm:text-base md:text-lg" style="color: var(--ink-2);">
+              Don't have an HTML file ready? Pick a free, responsive starter template below and customize it in the visual studio right now — zero accounts, zero downloads.
             </p>
 
             <div class="pt-2">
@@ -79,14 +109,40 @@ const categoryThemes: Record<string, { pillClass: string; iconClass: string }> =
             </div>
           </div>
 
+          <!-- Hero Studio Workstation Graphic with Responsive Picture -->
+          <div class="max-w-5xl mx-auto pt-2" data-reveal="fade-up">
+            <div class="glass-window-frame p-1.5 sm:p-2.5 group overflow-hidden">
+              <div class="px-4 py-2 flex items-center justify-between border-b rounded-t-xl select-none text-xs font-mono text-zinc-400" style="background: rgba(18, 18, 21, 0.75); border-color: rgba(255, 255, 255, 0.08);">
+                <div class="flex items-center gap-2">
+                  <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+                  <span class="ml-2 hidden sm:inline">templates • instant-canvas-preview</span>
+                </div>
+                <span class="text-purple-400 font-semibold text-[11px]">12 Starter Blueprints</span>
+              </div>
+              <div class="relative rounded-lg overflow-hidden bg-black aspect-[16/9] max-sm:aspect-[9/13]">
+                <picture class="block w-full h-full">
+                  <source media="(max-width: 640px)" srcset="/images/editor-snapshots/mobile/01-editor-overview-mobile.png" />
+                  <img
+                    src="/images/editor-snapshots/desktop/01-editor-overview-desktop.png"
+                    alt="Visual Style Editor Template Studio Canvas"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.01]"
+                    loading="eager"
+                  />
+                </picture>
+              </div>
+            </div>
+          </div>
+
           <!-- Filter & Search Controls Bar -->
           <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 pt-4 border-t" style="border-color: var(--border);" data-reveal="fade-up">
-            <!-- Filter Tabs -->
-            <div class="flex flex-wrap items-center gap-2">
+            <!-- Filter Tabs with horizontal swipe on mobile -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-4 px-4 sm:mx-0 sm:px-0 touch-pan-x flex-nowrap sm:flex-wrap">
               {categories.map((cat) => (
                 <button
                   data-filter={cat}
-                  class={`filter-btn px-4 py-2 rounded-xl text-xs font-mono font-semibold uppercase tracking-wider cursor-pointer border transition-all duration-150 ${cat === 'all' ? 'filter-active' : ''}`}
+                  class={`filter-btn px-4 py-2 rounded-xl text-xs font-mono font-semibold uppercase tracking-wider cursor-pointer border transition-all duration-150 shrink-0 whitespace-nowrap active:scale-95 ${cat === 'all' ? 'filter-active' : ''}`}
                   style={cat === 'all' ? 'background: var(--ink-1); color: var(--canvas); border-color: var(--ink-1);' : 'background: var(--surface-1); color: var(--ink-2); border-color: var(--border);'}
                 >
                   {cat}
@@ -130,40 +186,55 @@ const categoryThemes: Record<string, { pillClass: string; iconClass: string }> =
                   data-tags={(tmpl.tags || []).join(' ')}
                   style="background: var(--surface-1); border-color: var(--border);"
                 >
-                  <!-- Preview Header Box (Click to preview) -->
+                  <!-- Preview Header Box with Real Responsive Screenshot (Click to preview) -->
                   <div
-                    class="relative overflow-hidden p-6 flex flex-col justify-between border-b cursor-pointer transition-colors hover:bg-purple-50/30 dark:hover:bg-purple-950/20"
+                    class="relative overflow-hidden border-b cursor-pointer group/preview aspect-[16/10] bg-zinc-950"
                     data-preview-template={tmpl.id}
                     title="Click to preview template"
-                    style="height: 180px; background: radial-gradient(100% 100% at 50% 0%, var(--surface-2) 0%, var(--canvas) 100%); border-color: var(--border);"
+                    style="border-color: var(--border);"
                   >
+                    <picture class="block w-full h-full">
+                      <source media="(max-width: 640px)" srcset={`/images/templates/mobile/${tmpl.id}-mobile.png`} />
+                      <img
+                        src={`/images/templates/desktop/${tmpl.id}-desktop.png`}
+                        alt={`${tmpl.name} template canvas preview`}
+                        class="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-105"
+                        loading="lazy"
+                        width="800"
+                        height="500"
+                      />
+                    </picture>
+
+                    <!-- Frosted Glass Gradient Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none"></div>
+
                     <!-- Top Category & ID Pill -->
-                    <div class="flex items-center justify-between">
+                    <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
                       <span
-                        class={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border ${theme.pillClass}`}
+                        class={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border backdrop-blur-md ${theme.pillClass}`}
                       >
                         {tmpl.category}
                       </span>
-                      <span class="text-[11px] font-mono font-medium" style="color: var(--ink-3);">
+                      <span class="text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-black/60 text-zinc-300 border border-white/10 backdrop-blur-md">
                         {tmpl.id}.html
                       </span>
                     </div>
 
-                    <!-- Center Icon & Open Prompt -->
-                    <div class="flex items-center gap-3">
-                      <div
-                        class={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-md transition-transform group-hover:scale-110 ${theme.iconClass}`}
-                      >
-                        <Icon name={`category-${tmpl.category}`} class="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p class="text-xs font-mono font-bold transition-colors group-hover:text-purple-600 dark:group-hover:text-purple-400" style="color: var(--ink-1);">
+                    <!-- Bottom Quick Info Bar -->
+                    <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+                      <div class="flex items-center gap-2">
+                        <div
+                          class={`w-7 h-7 rounded-lg flex items-center justify-center border shadow-md ${theme.iconClass}`}
+                        >
+                          <Icon name={`category-${tmpl.category}`} class="w-4 h-4" />
+                        </div>
+                        <span class="text-[11px] font-mono font-bold text-white drop-shadow">
                           Live Canvas Ready
-                        </p>
-                        <p class="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
-                          ✓ 100% AST Splicing
-                        </p>
+                        </span>
                       </div>
+                      <span class="text-[10px] font-mono text-emerald-400 font-semibold px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/30 backdrop-blur-md">
+                        ✓ AST Splicing
+                      </span>
                     </div>
                   </div>
 

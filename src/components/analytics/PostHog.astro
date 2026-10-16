@@ -1,0 +1,26 @@
+---
+// PostHog client analytics component for Astro
+const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY || '';
+const posthogHost = import.meta.env.PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
+---
+
+<script is:inline define:vars={{ posthogKey, posthogHost }}>
+  if (posthogKey) {
+    window.PUBLIC_POSTHOG_KEY = posthogKey;
+  }
+  if (posthogHost) {
+    window.PUBLIC_POSTHOG_HOST = posthogHost;
+  }
+</script>
+
+<script>
+  import { initPostHog } from '@/lib/analytics/posthog';
+
+  // Initialize PostHog on client
+  initPostHog();
+
+  // Support for dynamic navigation or view transitions
+  document.addEventListener('astro:page-load', () => {
+    initPostHog();
+  });
+</script>

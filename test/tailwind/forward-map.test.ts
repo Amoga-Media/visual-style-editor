@@ -158,6 +158,7 @@ describe("forwardMap — colors (default palette + theme snapping)", () => {
   it("accepts non-hex color inputs (e.g. rgb()) and still snaps or normalizes to hex", () => {
     expect(forwardMap("text-color", "rgb(239, 68, 68)", { snap: true, theme: emptyTheme })).toBe("text-red-500");
     expect(forwardMap("text-color", "rgb(18, 52, 86)", { snap: false, theme: emptyTheme })).toBe("text-[#123456]");
+    expect(forwardMap("text-color", "rgba(59, 130, 246, 0.7)", { snap: true, theme: emptyTheme })).toBe("text-[#3b82f6b3]");
   });
 });
 
